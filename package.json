@@ -1,0 +1,60 @@
+{
+  "name": "r2-streamer-js",
+  "version": "0.0.1-alpha1",
+  "description": "Readium 2 NodeJS 'streamer'",
+  "keywords": [
+    "readium",
+    "streamer"
+  ],
+  "engines": {
+    "node": ">=6",
+    "npm": ">=3",
+    "yarn": ">= 0.21"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/edrlab/r2-streamer-js.git"
+  },
+  "author": {
+    "name": "EDRLab developers",
+    "organization": "EDRLab",
+    "url": "http://github.com/edrlab/"
+  },
+  "license": "BSD-3-Clause",
+  "licenses": [
+    {
+      "type": "BSD-3-Clause",
+      "url": "http://opensource.org/licenses/BSD-3-Clause"
+    }
+  ],
+  "bugs": {
+    "url": "https://github.com/edrlab/r2-streamer-js/issues"
+  },
+  "homepage": "https://github.com/edrlab/r2-streamer-js",
+  "dependencies": {
+    "reflect-metadata": "latest",
+    "ta-json": "latest"
+  },
+  "devDependencies": {
+    "editorconfig-tools": "latest",
+    "tslint": "latest",
+    "typescript": "latest"
+  },
+  "main": "dist/index.js",
+  "bin": {
+    "r2-streamer-js-cli": "dist/cli.js"
+  },
+  "files": [
+    "LICENCE",
+    "README.md",
+    "dist/index.js",
+    "dist/cli.js"
+  ],
+  "scripts": {
+    "start": "yarn run editorcheck && yarn run lint && yarn run typescript",
+    "editorcheck": "editorconfig-tools check .* * src/* src/*/*",
+    "lint": "tslint './src/**/*.ts'",
+    "typescript": "tsc -p ./tsconfig.json",
+    "cli": "node ./dist/cli.js"
+  }
+}
