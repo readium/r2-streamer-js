@@ -1,0 +1,20 @@
+esudo: false
+branches:
+  only:
+  - develop
+language: node_js
+node_js:
+- '6'
+before_install:
+- 'pwd && ls -als'
+install:
+- 'pwd && ls -als'
+before_script:
+- 'pwd && ls -als'
+script:
+- 'yarn start'
+- 'yarn run cli'
+after_success:
+- 'pwd && ls -als'
+after_failure:
+- 'pwd && ls -als'
