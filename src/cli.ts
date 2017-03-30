@@ -5,7 +5,7 @@ import { IStringMap } from "./models/metadata-multilang";
 import { MediaOverlayNode } from "./models/media-overlay";
 import { Metadata } from "./models/metadata";
 
-let args = process.argv.slice(2);
+// let args = process.argv.slice(2);
 
 interface IStringKeyedObject { [key: string]: any; }
 
@@ -19,7 +19,7 @@ function sortObject(obj: any): any {
         return obj;
     }
 
-    let newObj: IStringKeyedObject = {};
+    const newObj: IStringKeyedObject = {};
 
     Object.keys(obj).sort().map((key) => {
         newObj[key] = sortObject(obj[key]);
@@ -30,30 +30,30 @@ function sortObject(obj: any): any {
 
 console.log("~~~~~~~~~~~~~~~");
 
-let meta1 = new Metadata();
+const meta1 = new Metadata();
 meta1.RDFType = "test single";
 meta1.Title = "title OK";
 
-let meta1JsonObj = JSON.serialize(meta1);
-let meta1JsonStr = JSON.stringify(sortObject(meta1JsonObj));
+const meta1JsonObj = JSON.serialize(meta1);
+const meta1JsonStr = JSON.stringify(sortObject(meta1JsonObj));
 console.log(meta1JsonStr);
 
-let meta1Reversed = JSON.deserialize<Metadata>(meta1JsonObj, Metadata);
+const meta1Reversed = JSON.deserialize<Metadata>(meta1JsonObj, Metadata);
 console.log(meta1Reversed);
 
 console.log("===============");
 
-let meta2 = new Metadata();
+const meta2 = new Metadata();
 meta2.RDFType = "test multiple";
 meta2.Title = {} as IStringMap;
 meta2.Title["fr-FR"] = "title FR";
 meta2.Title["en-US"] = "title EN";
 
-let meta2JsonObj = JSON.serialize(meta2);
-let meta2JsonStr = JSON.stringify(sortObject(meta2JsonObj));
+const meta2JsonObj = JSON.serialize(meta2);
+const meta2JsonStr = JSON.stringify(sortObject(meta2JsonObj));
 console.log(meta2JsonStr);
 
-let meta2Reversed = JSON.deserialize<Metadata>(meta2JsonObj, Metadata);
+const meta2Reversed = JSON.deserialize<Metadata>(meta2JsonObj, Metadata);
 console.log(meta2Reversed);
 
 console.log("===============");

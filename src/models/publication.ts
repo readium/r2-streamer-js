@@ -150,7 +150,7 @@ export class Publication {
     }
 
     public AddLink(typeLink: string, rel: string[], url: string, templated: boolean) {
-        let link = new Link();
+        const link = new Link();
         link.Rel = rel;
         link.Href = url;
         link.TypeLink = typeLink;
@@ -164,7 +164,7 @@ export class Publication {
     }
 
     public FindAllMediaOverlay(): MediaOverlayNode[] {
-        let mos = Array<MediaOverlayNode>();
+        const mos = Array<MediaOverlayNode>();
 
         if (this.Spine) {
             this.Spine.map((link) => {
@@ -180,7 +180,7 @@ export class Publication {
     }
 
     public FindMediaOverlayByHref(href: string): MediaOverlayNode[] {
-        let mos = Array<MediaOverlayNode>();
+        const mos = Array<MediaOverlayNode>();
 
         if (this.Spine) {
             this.Spine.map((link) => {
@@ -196,7 +196,7 @@ export class Publication {
     }
 
     public GetPreFetchResources(): Link[] {
-        let links = Array<Link>();
+        const links = Array<Link>();
 
         if (this.Resources) {
             const mediaTypes = ["text/css", "application/vnd.ms-opentype", "text/javascript"];
