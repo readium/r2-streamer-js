@@ -17,3 +17,7 @@ indent_size = 4
 [*.{yml,json}]
 indent_style = space
 indent_size = 2
+
+[*.{html,css,scss}]
+indent_style = space
+indent_size = 2
