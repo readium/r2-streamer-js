@@ -5,7 +5,13 @@ import { IStringMap } from "./models/metadata-multilang";
 import { MediaOverlayNode } from "./models/media-overlay";
 import { Metadata } from "./models/metadata";
 
-// let args = process.argv.slice(2);
+import { Publication } from "./models/publication";
+
+import { CbzParser } from "./parser/cbz";
+import { EpubParser } from "./parser/epub";
+
+import * as fs from "fs";
+import * as path from "path";
 
 interface IStringKeyedObject { [key: string]: any; }
 
@@ -28,36 +34,104 @@ function sortObject(obj: any): any {
     return newObj;
 }
 
-console.log("~~~~~~~~~~~~~~~");
+console.log("process.cwd():");
+console.log(process.cwd());
 
-const meta1 = new Metadata();
-meta1.RDFType = "test single";
-meta1.Title = "title OK";
+console.log("__dirname:");
+console.log(__dirname);
 
-const meta1JsonObj = JSON.serialize(meta1);
-const meta1JsonStr = JSON.stringify(sortObject(meta1JsonObj));
-console.log(meta1JsonStr);
+const args = process.argv.slice(2);
+console.log("args:");
+console.log(args);
 
-const meta1Reversed = JSON.deserialize<Metadata>(meta1JsonObj, Metadata);
-console.log(meta1Reversed);
+let filePath = args[0];
+if (filePath) {
+    filePath = filePath.trim();
+    console.log(filePath);
+    if (!fs.existsSync(filePath)) {
+        filePath = path.join(__dirname, filePath);
+        console.log(filePath);
+        if (!fs.existsSync(filePath)) {
+            filePath = path.join(process.cwd(), filePath);
+            console.log(filePath);
+            if (!fs.existsSync(filePath)) {
+                console.log("FILEPATH?");
+                process.exit(1);
+            }
+        }
+    }
 
-console.log("===============");
+    const fileName = path.basename(filePath);
+    const ext = path.extname(fileName).toLowerCase();
 
-const meta2 = new Metadata();
-meta2.RDFType = "test multiple";
-meta2.Title = {} as IStringMap;
-meta2.Title["fr-FR"] = "title FR";
-meta2.Title["en-US"] = "title EN";
+    if (ext === ".epub") {
 
-const meta2JsonObj = JSON.serialize(meta2);
-const meta2JsonStr = JSON.stringify(sortObject(meta2JsonObj));
-console.log(meta2JsonStr);
+        new EpubParser().Parse(filePath)
+            .then((publication) => {
+                console.log("== EpubParser: resolve");
 
-const meta2Reversed = JSON.deserialize<Metadata>(meta2JsonObj, Metadata);
-console.log(meta2Reversed);
+                console.log("#### RAW OBJECT:");
+                console.log(publication);
 
-console.log("===============");
-console.log("===============");
+                console.log("#### RAW JSON:");
+                const publicationJsonObj = JSON.serialize(publication);
+                console.log(publicationJsonObj);
+
+                console.log("#### PRETTY JSON:");
+                const publicationJsonStr = global.JSON.stringify(publicationJsonObj, null, "  ");
+                console.log(publicationJsonStr);
+
+                console.log("#### CANONICAL JSON:");
+                const publicationJsonStrCanonical = JSON.stringify(sortObject(publicationJsonObj));
+                console.log(publicationJsonStrCanonical);
+            }).catch((err) => {
+                console.log("== EpubParser: reject");
+                console.log(err);
+            });
+
+    } else if (ext === ".cbz") {
+
+        new CbzParser().Parse(filePath)
+            .then((publication) => {
+                console.log("== CbzParser: resolve");
+                console.log(publication);
+            }).catch((err) => {
+                console.log("== CbzParser: reject");
+                console.log(err);
+            });
+    }
+}
+
+// console.log("~~~~~~~~~~~~~~~");
+
+// const meta1 = new Metadata();
+// meta1.RDFType = "test single";
+// meta1.Title = "title OK";
+
+// const meta1JsonObj = JSON.serialize(meta1);
+// const meta1JsonStr = JSON.stringify(sortObject(meta1JsonObj));
+// console.log(meta1JsonStr);
+
+// const meta1Reversed = JSON.deserialize<Metadata>(meta1JsonObj, Metadata);
+// console.log(meta1Reversed);
+
+// console.log("===============");
+
+// const meta2 = new Metadata();
+// meta2.RDFType = "test multiple";
+// meta2.Title = {} as IStringMap;
+// meta2.Title["fr-FR"] = "title FR";
+// meta2.Title["en-US"] = "title EN";
+
+// const meta2JsonObj = JSON.serialize(meta2);
+// const meta2JsonStr = JSON.stringify(sortObject(meta2JsonObj));
+// console.log(meta2JsonStr);
+
+// const meta2Reversed = JSON.deserialize<Metadata>(meta2JsonObj, Metadata);
+// console.log(meta2Reversed);
+
+// console.log("===============");
+// console.log("===============");
 
 // let mo1 = new MediaOverlayNode();
 

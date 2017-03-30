@@ -9,7 +9,7 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "lib": [
-      "es2015"
+      "es2015", "es2015.promise"
     ],
     "types": []
   },
