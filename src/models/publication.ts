@@ -101,6 +101,17 @@ export class Publication {
         this.Internal.push(internal);
     }
 
+    public findLinKByHref(href: string): Link | undefined {
+        if (this.Spine) {
+            this.Spine.map((link) => {
+                if (link.Href && href.indexOf(link.Href) >= 0) {
+                    return link;
+                }
+            });
+        }
+        return undefined;
+    }
+
     public GetCover(): Link | undefined {
         return this.searchLinkByRel("cover");
     }

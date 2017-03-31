@@ -11,6 +11,7 @@
 import * as StreamZip from "node-stream-zip";
 
 import * as mime from "mime-types";
+import * as Moment from "moment";
 import * as path from "path";
 import * as slugify from "slugify";
 
@@ -116,4 +117,38 @@ export class EpubParser {
         const fileName = path.basename(filePath);
         return slugify(fileName, "_").replace(/[\.]/g, "_");
     }
+
+    // private fillPublicationDate(publication: Publication, book: Epub) {
+
+    //     if (!book.Opf || !book.Opf.Metadata || !book.Opf.Metadata.Date) {
+    //         return;
+    //     }
+
+    //     if (this.isEpub3OrMore(book) && book.Opf.Metadata.Date[0] && book.Opf.Metadata.Date[0].Data) {
+    //         publication.Metadata.PublicationDate = Moment(book.Opf.Metadata.Date[0].Data).toDate();
+    //     }
+
+    //     book.Opf.Metadata.Date.map((date) => {
+    //         if (date.Data && date.Event && date.Event.indexOf("publication") >= 0) {
+    //             publication.Metadata.PublicationDate = Moment(date.Data).toDate();
+    //         }
+    //     });
+    // }
+
+    // private getEpubVersion(book: Epub): string | undefined {
+
+    //     if (book.Container.Rootfile.Version) {
+    //         return book.Container.Rootfile.Version;
+    //     } else if (book.Opf.Version) {
+    //         return book.Opf.Version;
+    //     }
+
+    //     return undefined;
+    // }
+
+    // private isEpub3OrMore(book: Epub): boolean {
+
+    //     let version = this.getEpubVersion(book);
+    //     return (version === epub3 || version === epub31);
+    // }
 }

@@ -93,11 +93,11 @@ export class Metadata {
 
     @JsonProperty("modified")
     @JsonConverter(DateConverter)
-    public Modified: string;
+    public Modified: Date;
 
     @JsonProperty("published")
     @JsonConverter(DateConverter)
-    public PublicationDate: string;
+    public PublicationDate: Date;
 
     @JsonProperty("description")
     public Description: string;

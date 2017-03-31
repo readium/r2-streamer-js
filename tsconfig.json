@@ -2,19 +2,21 @@
   "compilerOptions": {
     "strictNullChecks": true,
     "outDir": "./dist/",
+    "rootDir": "./",
+    "rootDirs": [
+      "./src/",
+      "./test/"
+    ],
     "sourceMap": true,
     "noImplicitAny": true,
     "module": "commonjs",
-    "target": "es5",
+    "target": "es2015",
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "lib": [
-      "es2015", "es2015.promise"
-    ],
-    "types": []
+    "emitDecoratorMetadata": true
   },
   "include": [
-    "./src/**/*"
+    "./src/**/*",
+    "./test/**/*"
   ],
   "exclude": [
     "node_modules"

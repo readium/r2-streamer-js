@@ -36,28 +36,33 @@
     "ta-json": "latest",
     "node-stream-zip": "latest",
     "slugify": "latest",
-    "mime-types": "latest"
+    "mime-types": "latest",
+    "moment": "latest"
   },
   "devDependencies": {
     "eclint": "latest",
     "tslint": "latest",
-    "typescript": "latest"
+    "typescript": "latest",
+    "ava": "latest"
   },
   "main": "dist/index.js",
   "bin": {
-    "r2-streamer-js-cli": "dist/cli.js"
+    "r2-streamer-js-cli": "dist/src/cli.js"
   },
   "files": [
     "LICENCE",
     "README.md",
     "dist/index.js",
-    "dist/cli.js"
+    "dist/src/cli.js"
   ],
   "scripts": {
-    "start": "yarn run lint:all && yarn run lint:typescript && yarn run transpile:typescript",
+    "start": "yarn run clean && yarn run lint:all && yarn run lint:typescript && yarn run dist && ls -R dist",
+    "clean": "rm -rf ./dist",
     "lint:all": "echo '\n===== LINT (all)\n' && eclint check '**/*' '[!].git/**/*' '[!]node_modules/**/*' '[!]dist/**/*' '[!]**/.DS_Store' '[!]**/*.epub' '[!]**/*.cbz'  '[!]**/*.jpg'  '[!]**/*.jpeg'  '[!]**/*.png'",
-    "lint:typescript": "echo '\n===== LINT (typescript)\n' && tslint -c './tslint.json' './src/**/*.ts'",
+    "lint:typescript": "echo '\n===== LINT (typescript)\n' && tslint -c './tslint.json' './src/**/*.ts' './test/**/*.ts'",
     "transpile:typescript": "echo '\n===== COMPILE (typescript)\n' && tsc -p './tsconfig.json'",
-    "cli": "node './dist/cli.js'"
+    "dist": "yarn run transpile:typescript",
+    "test": "ava './dist/test/test.js'",
+    "cli": "node './dist/src/cli.js'"
   }
 }
