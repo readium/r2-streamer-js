@@ -32,18 +32,20 @@
   },
   "homepage": "https://github.com/edrlab/r2-streamer-js",
   "dependencies": {
-    "reflect-metadata": "latest",
-    "ta-json": "latest",
-    "node-stream-zip": "latest",
-    "slugify": "latest",
     "mime-types": "latest",
-    "moment": "latest"
+    "moment": "latest",
+    "node-stream-zip": "latest",
+    "reflect-metadata": "latest",
+    "slugify": "latest",
+    "ta-json": "latest",
+    "xmldom": "latest",
+    "xpath": "latest"
   },
   "devDependencies": {
+    "ava": "latest",
     "eclint": "latest",
     "tslint": "latest",
-    "typescript": "latest",
-    "ava": "latest"
+    "typescript": "latest"
   },
   "main": "dist/index.js",
   "bin": {

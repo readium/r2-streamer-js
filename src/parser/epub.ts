@@ -14,6 +14,8 @@ import * as mime from "mime-types";
 import * as Moment from "moment";
 import * as path from "path";
 import * as slugify from "slugify";
+import * as xmldom from "xmldom";
+import * as xpath from "xpath";
 
 import { Link } from "../models/publication-link";
 
@@ -25,9 +27,7 @@ export class EpubParser {
 
     public Parse(filePath: string): Promise<Publication> {
 
-        const that = this;
-
-        return new Promise<Publication>((resolve, reject) => {
+        const zipPromise = new Promise<any>((resolve, reject) => {
 
             const zip = new StreamZip({
                 file: filePath,
@@ -59,57 +59,89 @@ export class EpubParser {
                 const entries = zip.entries();
                 console.log(entries);
 
-                const publication = new Publication();
-                publication.Metadata = new Metadata();
-                publication.Metadata.Identifier = path.basename(filePath);
-                publication.Metadata.Title = that.filePathToTitle(filePath);
+                resolve(zip);
+            });
+        });
 
-                publication.AddToInternal("type", "epub");
-                // publication.AddToInternal("epub", zip);
+        return zipPromise
+            .then((zip: any) => {
+                return this.createPublicationPromise(filePath, zip);
+            });
+    }
 
-                if (zip.entriesCount) {
-                    Object.keys(entries).map((entryName) => {
-                        console.log("++ZIP: entry");
+    private createPublicationPromise(filePath: string, zip: any): Promise<Publication> {
 
-                        const entry = entries[entryName];
-                        console.log(entry.name);
+        return new Promise<Publication>((resolve, reject) => {
 
-                        console.log(entryName);
+            if (!zip.entriesCount) {
+                reject();
+            }
 
-                        const link = new Link();
-                        link.Href = entryName;
+            const publication = new Publication();
+            publication.Metadata = new Metadata();
+            publication.Metadata.Identifier = path.basename(filePath);
+            publication.Metadata.Title = this.filePathToTitle(filePath);
 
-                        const mediaType = mime.lookup(entryName);
-                        if (mediaType) {
-                            console.log(mediaType);
+            publication.AddToInternal("type", "epub");
+            // publication.AddToInternal("epub", zip);
 
-                            link.TypeLink = mediaType;
-                        } else {
-                            console.log("!!!!!! NO MEDIA TYPE?!");
-                        }
+            const entries = zip.entries();
 
-                        if (!publication.Spine) {
-                            publication.Spine = Array<Link>();
-                        }
-                        publication.Spine.push(link);
+            Object.keys(entries).map((entryName) => {
+                console.log("++ZIP: entry");
 
-                        // if (entry.size < 2048
-                        //     && (entryName.toLowerCase().endsWith(".html")
-                        //         || entryName.toLowerCase().endsWith(".xhtml")
-                        //         || entryName.toLowerCase().endsWith(".css")
-                        //         || entryName.toLowerCase().endsWith(".xml")
-                        //         || entryName.toLowerCase().endsWith(".opf")
-                        //         || entryName.toLowerCase().endsWith(".ncx")
-                        //     )) {
+                const entry = entries[entryName];
+                console.log(entry.name);
 
-                        //     const entryData = zip.entryDataSync(entryName);
-                        //     console.log(entryData.toString("utf8"));
-                        // }
-                    });
+                console.log(entryName);
+
+                const link = new Link();
+                link.Href = entryName;
+
+                const mediaType = mime.lookup(entryName);
+                if (mediaType) {
+                    console.log(mediaType);
+
+                    link.TypeLink = mediaType as string;
+                } else {
+                    console.log("!!!!!! NO MEDIA TYPE?!");
                 }
 
-                resolve(publication);
+                if (!publication.Spine) {
+                    publication.Spine = Array<Link>();
+                }
+                publication.Spine.push(link);
+
+                if (entryName.toLowerCase().endsWith(".html")
+                    || entryName.toLowerCase().endsWith(".xhtml")
+                    || entryName.toLowerCase().endsWith(".xml")
+                    || entryName.toLowerCase().endsWith(".opf")
+                    || entryName.toLowerCase().endsWith(".ncx")
+                ) {
+                    const entryData = zip.entryDataSync(entryName);
+                    const entryStr = entryData.toString("utf8");
+                    const xml = new xmldom.DOMParser().parseFromString(entryStr);
+
+                    const topNode = xpath.select1("/", xml);
+                    console.log(topNode.toString());
+
+                    if (entryName === "META-INF/container.xml") {
+                        const select = xpath.useNamespaces({
+                            epub: "urn:oasis:names:tc:opendocument:xmlns:container",
+                            rendition: "http://www.idpf.org/2013/rendition",
+                        });
+
+                        const xp = "/epub:container/epub:rootfiles/epub:rootfile/@full-path";
+                        const fullPathAttrNode = select(xp, xml);
+                        if (fullPathAttrNode && fullPathAttrNode.length) {
+                            const attr = fullPathAttrNode[0] as Attr;
+                            console.log(attr.value);
+                        }
+                    }
+                }
             });
+
+            resolve(publication);
         });
     }
 
