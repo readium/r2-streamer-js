@@ -14,7 +14,7 @@ before_script:
 - 'yarn install'
 script:
 - 'yarn start'
-- 'yarn run cli'
+- 'yarn test'
 after_success:
 - 'pwd && ls -als'
 - 'ls dist'
