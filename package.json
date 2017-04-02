@@ -64,7 +64,7 @@
     "lint:typescript": "echo '\n===== LINT (typescript)\n' && tslint -c './tslint.json' './src/**/*.ts' './test/**/*.ts'",
     "transpile:typescript": "echo '\n===== COMPILE (typescript)\n' && tsc -p './tsconfig.json'",
     "dist": "yarn run transpile:typescript",
-    "test": "ava './dist/test/test.js'",
+    "test": "ava --verbose './dist/test/test.js'",
     "cli": "node './dist/src/cli.js'"
   }
 }

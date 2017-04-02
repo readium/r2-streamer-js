@@ -20,4 +20,6 @@ Command line steps:
 3) `yarn global upgrade` (sync Yarn global packages)
 4) `yarn install` (initialize local `node_modules` packages from dependencies declared in `package.json`)
 5) `yarn upgrade` (sync local packages)
-6) `yarn start` (invoke the CLI script)
+6) `yarn start` (invoke the main build script)
+7) `yarn test` (run the unit tests)
+8) `yarn run cli {PATH_TO_EPUB}` (relative or absolute path to a publication)
