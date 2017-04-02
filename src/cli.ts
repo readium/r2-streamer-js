@@ -45,61 +45,80 @@ console.log("args:");
 console.log(args);
 
 let filePath = args[0];
-if (filePath) {
-    filePath = filePath.trim();
+if (!filePath) {
+    console.log("FILEPATH ARGUMENT IS MISSING.");
+    process.exit(1);
+}
+
+filePath = filePath.trim();
+console.log(filePath);
+if (!fs.existsSync(filePath)) {
+    filePath = path.join(__dirname, filePath);
     console.log(filePath);
     if (!fs.existsSync(filePath)) {
-        filePath = path.join(__dirname, filePath);
+        filePath = path.join(process.cwd(), filePath);
         console.log(filePath);
         if (!fs.existsSync(filePath)) {
-            filePath = path.join(process.cwd(), filePath);
-            console.log(filePath);
-            if (!fs.existsSync(filePath)) {
-                console.log("FILEPATH?");
-                process.exit(1);
-            }
+            console.log("FILEPATH DOES NOT EXIST.");
+            process.exit(1);
         }
     }
+}
 
-    const fileName = path.basename(filePath);
-    const ext = path.extname(fileName).toLowerCase();
+const fileName = path.basename(filePath);
+const ext = path.extname(fileName).toLowerCase();
 
-    if (ext === ".epub") {
+if (ext === ".epub") {
 
-        new EpubParser().Parse(filePath)
-            .then((publication) => {
-                console.log("== EpubParser: resolve");
+    processEPUB(filePath)
+        .then((okay) => {
+            console.log(okay);
+        }).catch((notOkay) => {
+            console.log(notOkay);
+        });
 
-                console.log("#### RAW OBJECT:");
-                console.log(publication);
+} else if (ext === ".cbz") {
 
-                console.log("#### RAW JSON:");
-                const publicationJsonObj = JSON.serialize(publication);
-                console.log(publicationJsonObj);
+    new CbzParser().Parse(filePath)
+        .then((publication) => {
+            console.log("== CbzParser: resolve");
+            console.log(publication);
+        }).catch((err) => {
+            console.log("== CbzParser: reject");
+            console.log(err);
+        });
+}
 
-                console.log("#### PRETTY JSON:");
-                const publicationJsonStr = global.JSON.stringify(publicationJsonObj, null, "  ");
-                console.log(publicationJsonStr);
+async function processEPUB(path: string): Promise<boolean> {
+    const parser = new EpubParser();
+    try {
+        const publication = await parser.Parse(path);
 
-                console.log("#### CANONICAL JSON:");
-                const publicationJsonStrCanonical = JSON.stringify(sortObject(publicationJsonObj));
-                console.log(publicationJsonStrCanonical);
-            }).catch((err) => {
-                console.log("== EpubParser: reject");
-                console.log(err);
-            });
+        console.log("== EpubParser: resolve");
 
-    } else if (ext === ".cbz") {
+        console.log("#### RAW OBJECT:");
+        console.log(publication);
 
-        new CbzParser().Parse(filePath)
-            .then((publication) => {
-                console.log("== CbzParser: resolve");
-                console.log(publication);
-            }).catch((err) => {
-                console.log("== CbzParser: reject");
-                console.log(err);
-            });
+        console.log("#### RAW JSON:");
+        const publicationJsonObj = JSON.serialize(publication);
+        console.log(publicationJsonObj);
+
+        console.log("#### PRETTY JSON:");
+        const publicationJsonStr = global.JSON.stringify(publicationJsonObj, null, "  ");
+        console.log(publicationJsonStr);
+
+        console.log("#### CANONICAL JSON:");
+        const publicationJsonStrCanonical = JSON.stringify(sortObject(publicationJsonObj));
+        console.log(publicationJsonStrCanonical);
+
+    } catch (err) {
+        console.log("== EpubParser: reject");
+        console.log(err);
+
+        return false;
     }
+
+    return true;
 }
 
 // console.log("~~~~~~~~~~~~~~~");

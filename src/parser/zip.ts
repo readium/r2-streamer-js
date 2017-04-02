@@ -41,8 +41,8 @@ export function createZipPromise(filePath: string): Promise<any> {
             console.log("--ZIP: ready");
             console.log(zip.entriesCount);
 
-            const entries = zip.entries();
-            console.log(entries);
+            // const entries = zip.entries();
+            // console.log(entries);
 
             resolve(zip);
         });

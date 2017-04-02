@@ -79,7 +79,7 @@ export class EpubParser {
                     const xml = new xmldom.DOMParser().parseFromString(entryStr);
 
                     const topNode = xpath.select1("/", xml);
-                    console.log(topNode.toString());
+                    // console.log(topNode.toString());
 
                     if (entryName === "META-INF/container.xml") {
                         const select = xpath.useNamespaces({
