@@ -1,17 +1,8 @@
-// package.json
-// with dependencies:
-// "@types/node"
-// ==>
-// const StreamZip = require("node-stream-zip");
-
-// src/declarations.d.ts
-// with:
-// declare module '*';
-// ==>
-import * as StreamZip from "node-stream-zip";
-
+import * as mime from "mime-types";
 import * as path from "path";
 import * as slugify from "slugify";
+
+import { createZipPromise } from "./zip";
 
 import { Link } from "../models/publication-link";
 
@@ -23,106 +14,66 @@ export class CbzParser {
 
     public Parse(filePath: string): Promise<Publication> {
 
-        const that = this;
+        const zipPromise = createZipPromise(filePath);
+
+        return zipPromise
+            .then((zip: any) => {
+                return this.createPublicationPromise(filePath, zip);
+            });
+    }
+
+    private createPublicationPromise(filePath: string, zip: any): Promise<Publication> {
 
         return new Promise<Publication>((resolve, reject) => {
 
-            const zip = new StreamZip({
-                file: filePath,
-                storeEntries: true,
-            });
+            if (!zip.entriesCount) {
+                reject();
+            }
 
-            zip.on("error", (err: any) => {
-                console.log("--ZIP: error");
-                console.log(err);
+            const publication = new Publication();
+            publication.Metadata = new Metadata();
+            publication.Metadata.Identifier = path.basename(filePath);
+            publication.Metadata.Title = this.filePathToTitle(filePath);
 
-                reject(err);
-            });
+            publication.AddToInternal("type", "cbz");
+            // publication.AddToInternal("epub", zip);
 
-            zip.on("entry", (entry: any) => {
-                console.log("--ZIP: entry");
+            const entries = zip.entries();
+
+            Object.keys(entries).map((entryName) => {
+                console.log("++ZIP: entry");
+
+                const entry = entries[entryName];
                 console.log(entry.name);
-            });
 
-            zip.on("extract", (entry: any, file: any) => {
-                console.log("--ZIP: extract");
-                console.log(entry.name);
-                console.log(file);
-            });
+                console.log(entryName);
 
-            zip.on("ready", () => {
-                console.log("--ZIP: ready");
-                console.log(zip.entriesCount);
+                const link = new Link();
+                link.Href = entryName;
 
-                const entries = zip.entries();
-                console.log(entries);
+                const mediaType = mime.lookup(entryName);
+                if (mediaType) {
+                    console.log(mediaType);
 
-                const publication = new Publication();
-                publication.Metadata = new Metadata();
-                publication.Metadata.Identifier = path.basename(filePath);
-                publication.Metadata.Title = that.filePathToTitle(filePath);
-
-                publication.AddToInternal("type", "cbz");
-                // publication.AddToInternal("cbz", zip);
-
-                if (zip.entriesCount) {
-                    Object.keys(entries).map((entryName) => {
-                        console.log("++ZIP: entry");
-
-                        const entry = entries[entryName];
-                        console.log(entry.name);
-
-                        console.log(entryName);
-
-                        const mediaType = that.getMediaTypeByName(entryName);
-                        if (mediaType) {
-                            const link = new Link();
-                            link.Href = entryName;
-                            link.TypeLink = mediaType;
-                            if (!publication.Spine) {
-                                publication.Spine = Array<Link>();
-                            }
-                            publication.Spine.push(link);
-                        }
-
-                        if (entry.size < 2048
-                            && (entryName.toLowerCase().endsWith(".html")
-                                || entryName.toLowerCase().endsWith(".xhtml")
-                                || entryName.toLowerCase().endsWith(".css")
-                                || entryName.toLowerCase().endsWith(".xml")
-                                || entryName.toLowerCase().endsWith(".opf")
-                                || entryName.toLowerCase().endsWith(".ncx")
-                            )) {
-
-                            const entryData = zip.entryDataSync(entryName);
-                            console.log(entryData.toString("utf8"));
-                        }
-                    });
+                    link.TypeLink = mediaType as string;
+                } else {
+                    console.log("!!!!!! NO MEDIA TYPE?!");
                 }
 
-                resolve(publication);
+                if (link.TypeLink && link.TypeLink.startsWith("image/")) {
+                    if (!publication.Spine) {
+                        publication.Spine = Array<Link>();
+                    }
+                    publication.Spine.push(link);
+                }
             });
+
+            resolve(publication);
         });
     }
 
     private filePathToTitle(filePath: string): string {
         const fileName = path.basename(filePath);
         return slugify(fileName, "_").replace(/[\.]/g, "_");
-    }
-
-    private getMediaTypeByName(filePath: string): string | undefined {
-        const fileName = path.basename(filePath);
-        const ext = path.extname(fileName).toLowerCase();
-
-        switch (ext) {
-            case ".jpg":
-                return "image/jpeg";
-            case ".jpeg":
-                return "image/jpeg";
-            case ".png":
-                return "image/png";
-            default:
-                return undefined;
-        }
     }
 }
