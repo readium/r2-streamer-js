@@ -8,10 +8,13 @@ import * as xpath from "xpath";
 
 import { XML } from "../xml-js-mapper";
 
+import { JSON } from "ta-json";
+
 import { createZipPromise } from "./zip";
 
 import { Container } from "./epub/container";
 import { Encryption } from "./epub/encryption";
+import { LCP } from "./epub/lcp";
 import { NCX } from "./epub/ncx";
 import { OPF } from "./epub/opf";
 import { SMIL } from "./epub/smil";
@@ -49,6 +52,20 @@ export class EpubParser {
 
             publication.AddToInternal("type", "epub");
             // publication.AddToInternal("epub", zip);
+
+            if (Object.keys(zip.entries()).indexOf("META-INF/license.lcpl") >= 0) {
+
+                const lcplZipData = zip.entryDataSync("META-INF/license.lcpl");
+                if (lcplZipData) {
+                    const lcplStr = lcplZipData.toString("utf8");
+                    const lcplJson = global.JSON.parse(lcplStr);
+                    const lcpl = JSON.deserialize<LCP>(lcplJson, LCP);
+
+                    // breakLength: 100  maxArrayLength: undefined
+                    console.log(util.inspect(lcpl,
+                        { showHidden: false, depth: 1000, colors: true, customInspect: true }));
+                }
+            }
 
             if (Object.keys(zip.entries()).indexOf("META-INF/encryption.xml") >= 0) {
 
