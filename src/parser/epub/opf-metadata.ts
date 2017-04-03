@@ -1,5 +1,6 @@
 import { Identifier } from "./opf-identifier";
 import { Subject } from "./opf-subject";
+import { Title } from "./opf-title";
 
 import {
     XmlItemType,
@@ -13,7 +14,9 @@ import {
 })
 export class Metadata {
 
-    // Title       []Title      `xml:"title"`
+    @XmlXPathSelector("dc:title")
+    @XmlItemType(Title)
+    public Title: Title[];
 
     @XmlXPathSelector("dc:language/text()")
     @XmlItemType(String)
