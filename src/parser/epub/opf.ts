@@ -26,7 +26,12 @@ export class OPF {
     @XmlItemType(Reference)
     public Guide: Reference[];
 
-    // UniqueIdentifier string      `xml:"unique-identifier,attr"`
-    // Dir              string      `xml:"dir,attr"`
-    // Version          string      `xml:"version,attr"`
+    @XmlXPathSelector("/opf:package/@unique-identifier")
+    public UniqueIdentifier: string;
+
+    @XmlXPathSelector("/opf:package/@dir")
+    public Dir: string;
+
+    @XmlXPathSelector("/opf:package/@version")
+    public Version: string;
 }
