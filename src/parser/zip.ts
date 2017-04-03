@@ -6,7 +6,7 @@
 
 // src/declarations.d.ts
 // with:
-// declare module '*';
+// declare module "*";
 // ==>
 import * as StreamZip from "node-stream-zip";
 
