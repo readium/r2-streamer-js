@@ -2,6 +2,7 @@ import { Identifier } from "./opf-identifier";
 import { Subject } from "./opf-subject";
 import { Title } from "./opf-title";
 import { Author } from "./opf-author";
+import { Date } from "./opf-date";
 
 import {
     XmlItemType,
@@ -47,7 +48,9 @@ export class Metadata {
     @XmlItemType(Author)
     public Contributor: Author[];
 
-    // Date        []Date       `xml:"date"`
+    @XmlXPathSelector("dc:date")
+    @XmlItemType(Date)
+    public Date: Date[];
 
     @XmlXPathSelector("dc:type/text()")
     @XmlItemType(String)
