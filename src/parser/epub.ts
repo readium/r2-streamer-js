@@ -12,6 +12,7 @@ import { createZipPromise } from "./zip";
 
 import { Container } from "./epub/container";
 
+import { NCX } from "./epub/ncx";
 import { OPF } from "./epub/opf";
 
 import { Link } from "../models/publication-link";
@@ -68,8 +69,30 @@ export class EpubParser {
                     const opf = XML.deserialize<OPF>(opfDoc, OPF);
 
                     // breakLength: 100  maxArrayLength: undefined
-                    console.log(util.inspect(opf,
-                        { showHidden: false, depth: 1000, colors: true, customInspect: true }));
+                    // console.log(util.inspect(opf,
+                    //     { showHidden: false, depth: 1000, colors: true, customInspect: true }));
+
+                    if (opf.Spine.Toc) {
+                        opf.Manifest.map((manifestItem) => {
+                            if (manifestItem.ID === opf.Spine.Toc) {
+                                const ncxFilePath = path.join(path.dirname(rootfile.Path), manifestItem.Href);
+                                // console.log("########## NCX: "
+                                //     + rootfile.Path
+                                //     + " == "
+                                //     + manifestItem.Href
+                                //     + " -- "
+                                //     + ncxFilePath);
+                                const ncxZipData = zip.entryDataSync(ncxFilePath);
+                                const ncxStr = ncxZipData.toString("utf8");
+                                const ncxDoc = new xmldom.DOMParser().parseFromString(ncxStr);
+                                const ncx = XML.deserialize<NCX>(ncxDoc, NCX);
+
+                                // breakLength: 100  maxArrayLength: undefined
+                                // console.log(util.inspect(ncx,
+                                //     { showHidden: false, depth: 1000, colors: true, customInspect: true }));
+                            }
+                        });
+                    }
                 });
             }
 
