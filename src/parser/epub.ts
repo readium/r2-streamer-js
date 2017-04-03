@@ -58,22 +58,18 @@ export class EpubParser {
             // console.log(containerXmlRootElement.toString());
 
             const container = XML.deserialize<Container>(containerXmlDoc, Container);
-            console.log(util.inspect(container, { showHidden: false, depth: 1000, colors: true }));
+            // console.log(util.inspect(container, { showHidden: false, depth: 1000, colors: true }));
 
             if (container && container.Rootfile) {
-                // container.Rootfile.map((rootfile) => {
-                //     console.log(rootfile.Path);
-                //     console.log(rootfile.Type);
-                //     console.log(rootfile.Version);
-                // });
+                container.Rootfile.map((rootfile) => {
+                    const opfZipData = zip.entryDataSync(rootfile.Path);
+                    const opfStr = opfZipData.toString("utf8");
+                    const opfDoc = new xmldom.DOMParser().parseFromString(opfStr);
+                    const opf = XML.deserialize<OPF>(opfDoc, OPF);
 
-                const opfZipData = zip.entryDataSync(container.Rootfile[0].Path);
-                const opfStr = opfZipData.toString("utf8");
-                const opfDoc = new xmldom.DOMParser().parseFromString(opfStr);
-                const opf = XML.deserialize<OPF>(opfDoc, OPF);
-
-                // breakLength: 100  maxArrayLength: undefined
-                console.log(util.inspect(opf, { showHidden: false, depth: 1000, colors: true }));
+                    // breakLength: 100  maxArrayLength: undefined
+                    console.log(util.inspect(opf, { showHidden: false, depth: 1000, colors: true }));
+                });
             }
 
             // const entries = zip.entries();

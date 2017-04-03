@@ -73,22 +73,22 @@ function deserializeRootObject(
                     }
                 }
             }
-            console.log(namespaces);
+            // console.log(namespaces);
             const select = xpath.useNamespaces(namespaces);
 
             const xPathSelected = select(p.xpathSelector, objectInstance);
             if (xPathSelected && xPathSelected.length) {
                 const xpathMatched = Array<xmldom.Node>();
 
-                console.log("XPATH MATCH: " + p.xpathSelector
-                    + " == " + (xPathSelected instanceof Array)
-                    + " -- " + xPathSelected.length);
+                // console.log("XPATH MATCH: " + p.xpathSelector
+                //     + " == " + (xPathSelected instanceof Array)
+                //     + " -- " + xPathSelected.length);
 
                 if (!(xPathSelected instanceof Array)) {
                     xpathMatched.push(xPathSelected);
                 } else {
                     xPathSelected.map((item) => {
-                        console.log(item.nodeValue || item.localName);
+                        // console.log(item.nodeValue || item.localName);
                         xpathMatched.push(item);
                     });
                 }
@@ -107,7 +107,7 @@ function deserializeRootObject(
 
                 output[key] = deserializeObject(xpathMatched[0], p, options);
             } else {
-                console.log("XPATH NO MATCH: " + p.xpathSelector);
+                // console.log("XPATH NO MATCH: " + p.xpathSelector);
                 return;
             }
         });

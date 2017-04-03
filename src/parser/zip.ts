@@ -27,8 +27,8 @@ export function createZipPromise(filePath: string): Promise<any> {
         });
 
         zip.on("entry", (entry: any) => {
-            console.log("--ZIP: entry");
-            console.log(entry.name);
+            // console.log("--ZIP: entry");
+            // console.log(entry.name);
         });
 
         zip.on("extract", (entry: any, file: any) => {
@@ -38,8 +38,8 @@ export function createZipPromise(filePath: string): Promise<any> {
         });
 
         zip.on("ready", () => {
-            console.log("--ZIP: ready");
-            console.log(zip.entriesCount);
+            // console.log("--ZIP: ready");
+            // console.log(zip.entriesCount);
 
             // const entries = zip.entries();
             // console.log(entries);
