@@ -1,4 +1,5 @@
 import { Identifier } from "./opf-identifier";
+import { Subject } from "./opf-subject";
 
 import {
     XmlItemType,
@@ -23,7 +24,10 @@ export class Metadata {
     public Identifier: Identifier[];
 
     // Creator     []Author     `xml:"creator"`
-    // Subject     []Subject    `xml:"subject"`
+
+    @XmlXPathSelector("dc:subject")
+    @XmlItemType(Subject)
+    public Subject: Subject[];
 
     @XmlXPathSelector("dc:description/text()")
     @XmlItemType(String)
