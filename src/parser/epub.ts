@@ -2,10 +2,17 @@ import * as mime from "mime-types";
 import * as Moment from "moment";
 import * as path from "path";
 import * as slugify from "slugify";
+import * as util from "util";
 import * as xmldom from "xmldom";
 import * as xpath from "xpath";
 
+import { XML } from "../xml-js-mapper";
+
 import { createZipPromise } from "./zip";
+
+import { Container } from "./epub/container";
+
+import { OPF } from "./epub/opf";
 
 import { Link } from "../models/publication-link";
 
@@ -41,61 +48,141 @@ export class EpubParser {
             publication.AddToInternal("type", "epub");
             // publication.AddToInternal("epub", zip);
 
-            const entries = zip.entries();
+            const containerXmlZipData = zip.entryDataSync("META-INF/container.xml");
+            const containerXmlStr = containerXmlZipData.toString("utf8");
+            const containerXmlDoc = new xmldom.DOMParser().parseFromString(containerXmlStr);
 
-            Object.keys(entries).map((entryName) => {
-                console.log("++ZIP: entry");
+            // console.log(containerXmlDoc);
+            // console.log(containerXmlStr);
+            // const containerXmlRootElement = xpath.select1("/", containerXmlDoc);
+            // console.log(containerXmlRootElement.toString());
 
-                const entry = entries[entryName];
-                console.log(entry.name);
+            const container = XML.deserialize<Container>(containerXmlDoc, Container);
+            console.log(util.inspect(container, { showHidden: false, depth: 1000, colors: true }));
 
-                console.log(entryName);
+            if (container && container.Rootfile) {
+                // container.Rootfile.map((rootfile) => {
+                //     console.log(rootfile.Path);
+                //     console.log(rootfile.Type);
+                //     console.log(rootfile.Version);
+                // });
 
-                const link = new Link();
-                link.Href = entryName;
+                const opfZipData = zip.entryDataSync(container.Rootfile[0].Path);
+                const opfStr = opfZipData.toString("utf8");
+                const opfDoc = new xmldom.DOMParser().parseFromString(opfStr);
+                const opf = XML.deserialize<OPF>(opfDoc, OPF);
 
-                const mediaType = mime.lookup(entryName);
-                if (mediaType) {
-                    console.log(mediaType);
+                // breakLength: 100  maxArrayLength: undefined
+                console.log(util.inspect(opf, { showHidden: false, depth: 1000, colors: true }));
+            }
 
-                    link.TypeLink = mediaType as string;
-                } else {
-                    console.log("!!!!!! NO MEDIA TYPE?!");
-                }
+            // const entries = zip.entries();
+            // Object.keys(entries).map((entryName) => {
+            //     console.log("++ZIP: entry");
 
-                if (!publication.Spine) {
-                    publication.Spine = Array<Link>();
-                }
-                publication.Spine.push(link);
+            //     const entry = entries[entryName];
+            //     console.log(entry.name);
 
-                if (entryName.toLowerCase().endsWith(".html")
-                    || entryName.toLowerCase().endsWith(".xhtml")
-                    || entryName.toLowerCase().endsWith(".xml")
-                    || entryName.toLowerCase().endsWith(".opf")
-                    || entryName.toLowerCase().endsWith(".ncx")
-                ) {
-                    const entryData = zip.entryDataSync(entryName);
-                    const entryStr = entryData.toString("utf8");
-                    const xml = new xmldom.DOMParser().parseFromString(entryStr);
+            //     console.log(entryName);
 
-                    const topNode = xpath.select1("/", xml);
-                    // console.log(topNode.toString());
+            //     const link = new Link();
+            //     link.Href = entryName;
 
-                    if (entryName === "META-INF/container.xml") {
-                        const select = xpath.useNamespaces({
-                            epub: "urn:oasis:names:tc:opendocument:xmlns:container",
-                            rendition: "http://www.idpf.org/2013/rendition",
-                        });
+            //     const mediaType = mime.lookup(entryName);
+            //     if (mediaType) {
+            //         console.log(mediaType);
 
-                        const xp = "/epub:container/epub:rootfiles/epub:rootfile/@full-path";
-                        const fullPathAttrNode = select(xp, xml);
-                        if (fullPathAttrNode && fullPathAttrNode.length) {
-                            const attr = fullPathAttrNode[0] as Attr;
-                            console.log(attr.value);
-                        }
-                    }
-                }
-            });
+            //         link.TypeLink = mediaType as string;
+            //     } else {
+            //         console.log("!!!!!! NO MEDIA TYPE?!");
+            //     }
+
+            //     if (!publication.Spine) {
+            //         publication.Spine = Array<Link>();
+            //     }
+            //     publication.Spine.push(link);
+
+            //     if (entryName.toLowerCase().endsWith(".html")
+            //         || entryName.toLowerCase().endsWith(".xhtml")
+            //         || entryName.toLowerCase().endsWith(".xml")
+            //         || entryName.toLowerCase().endsWith(".opf")
+            //         || entryName.toLowerCase().endsWith(".ncx")
+            //     ) {
+            //         const entryData = zip.entryDataSync(entryName);
+            //         const entryStr = entryData.toString("utf8");
+            //         const xmlDoc = new xmldom.DOMParser().parseFromString(entryStr);
+
+            //         if (entryName === "META-INF/container.xml") {
+
+            //             console.log(xmlDoc);
+
+            //             console.log(entryStr);
+
+            //             const topNode = xpath.select1("/", xmlDoc);
+            //             console.log(topNode.toString());
+
+            //             const container = XML.deserialize<Container>(xmlDoc, Container);
+            //             console.log(container);
+            //             if (container && container.Rootfile) {
+            //                 container.Rootfile.map((rootfile) => {
+            //                     console.log(rootfile.Path);
+            //                     console.log(rootfile.Type);
+            //                     console.log(rootfile.Version);
+            //                 });
+            //             }
+            //             // process.exit(1);
+
+            //             // const select = xpath.useNamespaces({
+            //             //     epub: "urn:oasis:names:tc:opendocument:xmlns:container",
+            //             //     rendition: "http://www.idpf.org/2013/rendition",
+            //             // });
+
+            //             // let xp = "/epub:container/epub:rootfiles";
+            //             // let xPathSelected = select(xp, xmlDoc);
+
+            //             // if (xPathSelected) {
+            //             //     if (xPathSelected instanceof Array) {
+            //             //         console.log("XPATH multiple element MATCH: " + xp);
+
+            //             //         xPathSelected.map((item) => {
+            //             //             const elem = item as xmldom.Element;
+            //             //             console.log(elem.localName);
+            //             //         });
+
+            //             //         xp = "epub:rootfile/@full-path";
+            //             //         xPathSelected = select(xp, xPathSelected[0]);
+            //             //         if (xPathSelected) {
+            //             //             if (xPathSelected instanceof Array) {
+            //             //                 console.log("XPATH multiple attribute MATCH: " + xp);
+
+            //             //                 xPathSelected.map((item) => {
+            //             //                     const attr = item as xmldom.Attr;
+            //             //                     console.log(attr.value);
+            //             //                 });
+
+            //             //             } else {
+            //             //                 console.log("XPATH single attribute MATCH: " + xp);
+
+            //             //                 const attr = xPathSelected as xmldom.Attr;
+            //             //                 console.log(attr.value);
+            //             //             }
+            //             //         } else {
+            //             //             console.log("XPATH NO MATCH: " + xp);
+            //             //         }
+            //             //     } else {
+            //             //         console.log("XPATH single element MATCH: " + xp);
+
+            //             //         const elem = xPathSelected as xmldom.Element;
+            //             //         console.log(elem.localName);
+            //             //     }
+            //             // } else {
+            //             //     console.log("XPATH NO MATCH: " + xp);
+            //             // }
+
+            //             // process.exit(1);
+            //         }
+            //     }
+            // });
 
             resolve(publication);
         });
