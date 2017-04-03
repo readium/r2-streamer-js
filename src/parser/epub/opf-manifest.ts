@@ -27,4 +27,8 @@ export class Manifest {
 
     @XmlXPathSelector("@media-overlay")
     public MediaOverlay: string;
+
+    // public inspect(depth: number, opts: any): string | null | undefined {
+    //     return undefined;
+    // }
 }

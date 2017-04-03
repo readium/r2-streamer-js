@@ -68,7 +68,8 @@ export class EpubParser {
                     const opf = XML.deserialize<OPF>(opfDoc, OPF);
 
                     // breakLength: 100  maxArrayLength: undefined
-                    console.log(util.inspect(opf, { showHidden: false, depth: 1000, colors: true }));
+                    console.log(util.inspect(opf,
+                        { showHidden: false, depth: 1000, colors: true, customInspect: true }));
                 });
             }
 

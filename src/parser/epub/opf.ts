@@ -1,6 +1,7 @@
 import { Manifest } from "./opf-manifest";
 import { Metadata } from "./opf-metadata";
 import { Reference } from "./opf-reference";
+import { Spine } from "./opf-spine";
 
 import {
     XmlItemType,
@@ -20,7 +21,8 @@ export class OPF {
     @XmlItemType(Manifest)
     public Manifest: Manifest[];
 
-    // Spine            Spine       `xml:"spine"`
+    @XmlXPathSelector("/opf:package/opf:spine")
+    public Spine: Spine;
 
     @XmlXPathSelector("/opf:package/opf:guide/opf:reference")
     @XmlItemType(Reference)
