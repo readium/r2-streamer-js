@@ -11,7 +11,7 @@ import { XML } from "../xml-js-mapper";
 import { createZipPromise } from "./zip";
 
 import { Container } from "./epub/container";
-
+import { Encryption } from "./epub/encryption";
 import { NCX } from "./epub/ncx";
 import { OPF } from "./epub/opf";
 
@@ -49,6 +49,18 @@ export class EpubParser {
             publication.AddToInternal("type", "epub");
             // publication.AddToInternal("epub", zip);
 
+            const encryptionXmlZipData = zip.entryDataSync("META-INF/encryption.xml");
+            if (encryptionXmlZipData) {
+                const encryptionXmlStr = encryptionXmlZipData.toString("utf8");
+                const encryptionXmlDoc = new xmldom.DOMParser().parseFromString(encryptionXmlStr);
+
+                const encryption = XML.deserialize<Encryption>(encryptionXmlDoc, Encryption);
+
+                // breakLength: 100  maxArrayLength: undefined
+                // console.log(util.inspect(encryption,
+                //     { showHidden: false, depth: 1000, colors: true, customInspect: true }));
+            }
+
             const containerXmlZipData = zip.entryDataSync("META-INF/container.xml");
             const containerXmlStr = containerXmlZipData.toString("utf8");
             const containerXmlDoc = new xmldom.DOMParser().parseFromString(containerXmlStr);
@@ -59,7 +71,9 @@ export class EpubParser {
             // console.log(containerXmlRootElement.toString());
 
             const container = XML.deserialize<Container>(containerXmlDoc, Container);
-            // console.log(util.inspect(container, { showHidden: false, depth: 1000, colors: true }));
+            // breakLength: 100  maxArrayLength: undefined
+            // console.log(util.inspect(container,
+            //     { showHidden: false, depth: 1000, colors: true, customInspect: true }));
 
             if (container && container.Rootfile) {
                 container.Rootfile.map((rootfile) => {
