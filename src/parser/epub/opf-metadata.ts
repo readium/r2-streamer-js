@@ -1,8 +1,9 @@
-import { Identifier } from "./opf-identifier";
-import { Subject } from "./opf-subject";
-import { Title } from "./opf-title";
 import { Author } from "./opf-author";
 import { Date } from "./opf-date";
+import { Identifier } from "./opf-identifier";
+import { Metafield } from "./opf-metafield";
+import { Subject } from "./opf-subject";
+import { Title } from "./opf-title";
 
 import {
     XmlItemType,
@@ -76,5 +77,7 @@ export class Metadata {
     @XmlItemType(String)
     public Rights: string[];
 
-    // Meta        []Metafield  `xml:"meta"`
+    @XmlXPathSelector("opf:meta")
+    @XmlItemType(Metafield)
+    public Meta: Metafield[];
 }
