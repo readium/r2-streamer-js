@@ -14,6 +14,7 @@ import { Container } from "./epub/container";
 import { Encryption } from "./epub/encryption";
 import { NCX } from "./epub/ncx";
 import { OPF } from "./epub/opf";
+import { SMIL } from "./epub/smil";
 
 import { Link } from "../models/publication-link";
 
@@ -49,16 +50,19 @@ export class EpubParser {
             publication.AddToInternal("type", "epub");
             // publication.AddToInternal("epub", zip);
 
-            const encryptionXmlZipData = zip.entryDataSync("META-INF/encryption.xml");
-            if (encryptionXmlZipData) {
-                const encryptionXmlStr = encryptionXmlZipData.toString("utf8");
-                const encryptionXmlDoc = new xmldom.DOMParser().parseFromString(encryptionXmlStr);
+            if (Object.keys(zip.entries()).indexOf("META-INF/encryption.xml") >= 0) {
 
-                const encryption = XML.deserialize<Encryption>(encryptionXmlDoc, Encryption);
+                const encryptionXmlZipData = zip.entryDataSync("META-INF/encryption.xml");
+                if (encryptionXmlZipData) {
+                    const encryptionXmlStr = encryptionXmlZipData.toString("utf8");
+                    const encryptionXmlDoc = new xmldom.DOMParser().parseFromString(encryptionXmlStr);
 
-                // breakLength: 100  maxArrayLength: undefined
-                // console.log(util.inspect(encryption,
-                //     { showHidden: false, depth: 1000, colors: true, customInspect: true }));
+                    const encryption = XML.deserialize<Encryption>(encryptionXmlDoc, Encryption);
+
+                    // breakLength: 100  maxArrayLength: undefined
+                    // console.log(util.inspect(encryption,
+                    //     { showHidden: false, depth: 1000, colors: true, customInspect: true }));
+                }
             }
 
             const containerXmlZipData = zip.entryDataSync("META-INF/container.xml");
@@ -86,27 +90,43 @@ export class EpubParser {
                     // console.log(util.inspect(opf,
                     //     { showHidden: false, depth: 1000, colors: true, customInspect: true }));
 
-                    if (opf.Spine.Toc) {
-                        opf.Manifest.map((manifestItem) => {
-                            if (manifestItem.ID === opf.Spine.Toc) {
-                                const ncxFilePath = path.join(path.dirname(rootfile.Path), manifestItem.Href);
-                                // console.log("########## NCX: "
-                                //     + rootfile.Path
-                                //     + " == "
-                                //     + manifestItem.Href
-                                //     + " -- "
-                                //     + ncxFilePath);
-                                const ncxZipData = zip.entryDataSync(ncxFilePath);
-                                const ncxStr = ncxZipData.toString("utf8");
-                                const ncxDoc = new xmldom.DOMParser().parseFromString(ncxStr);
-                                const ncx = XML.deserialize<NCX>(ncxDoc, NCX);
+                    opf.Manifest.map((manifestItem) => {
+                        if (manifestItem.MediaType === "application/smil+xml") {
+                            const smilFilePath = path.join(path.dirname(rootfile.Path), manifestItem.Href);
+                            // console.log("########## SMIL: "
+                            //     + rootfile.Path
+                            //     + " == "
+                            //     + manifestItem.Href
+                            //     + " -- "
+                            //     + smilFilePath);
+                            const smilZipData = zip.entryDataSync(smilFilePath);
+                            const smilStr = smilZipData.toString("utf8");
+                            const smilDoc = new xmldom.DOMParser().parseFromString(smilStr);
+                            const smil = XML.deserialize<SMIL>(smilDoc, SMIL);
 
-                                // breakLength: 100  maxArrayLength: undefined
-                                // console.log(util.inspect(ncx,
-                                //     { showHidden: false, depth: 1000, colors: true, customInspect: true }));
-                            }
-                        });
-                    }
+                            // breakLength: 100  maxArrayLength: undefined
+                            // console.log(util.inspect(smil,
+                            //     { showHidden: false, depth: 1000, colors: true, customInspect: true }));
+                        }
+
+                        if (opf.Spine.Toc && manifestItem.ID === opf.Spine.Toc) {
+                            const ncxFilePath = path.join(path.dirname(rootfile.Path), manifestItem.Href);
+                            // console.log("########## NCX: "
+                            //     + rootfile.Path
+                            //     + " == "
+                            //     + manifestItem.Href
+                            //     + " -- "
+                            //     + ncxFilePath);
+                            const ncxZipData = zip.entryDataSync(ncxFilePath);
+                            const ncxStr = ncxZipData.toString("utf8");
+                            const ncxDoc = new xmldom.DOMParser().parseFromString(ncxStr);
+                            const ncx = XML.deserialize<NCX>(ncxDoc, NCX);
+
+                            // breakLength: 100  maxArrayLength: undefined
+                            // console.log(util.inspect(ncx,
+                            //     { showHidden: false, depth: 1000, colors: true, customInspect: true }));
+                        }
+                    });
                 });
             }
 
