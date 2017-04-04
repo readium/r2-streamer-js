@@ -81,11 +81,12 @@ export class Publication {
 
     public findFromInternal(key: string): IInternal | undefined {
         if (this.Internal) {
-            this.Internal.map((internal) => {
-                if (internal.Name === key) {
-                    return internal;
-                }
+            const found = this.Internal.find((internal) => {
+                return internal.Name === key;
             });
+            if (found) {
+                return found;
+            }
         }
         return undefined;
     }
@@ -103,11 +104,15 @@ export class Publication {
 
     public findLinKByHref(href: string): Link | undefined {
         if (this.Spine) {
-            this.Spine.map((link) => {
+            const ll = this.Spine.find((link) => {
                 if (link.Href && href.indexOf(link.Href) >= 0) {
-                    return link;
+                    return true;
                 }
+                return false;
             });
+            if (ll) {
+                return ll;
+            }
         }
         return undefined;
     }
@@ -122,39 +127,63 @@ export class Publication {
 
     public searchLinkByRel(rel: string): Link | undefined {
         if (this.Resources) {
-            this.Resources.map((link) => {
+            const ll = this.Resources.find((link) => {
                 if (link.Rel) {
-                    link.Rel.map((r) => {
+                    const rr = link.Rel.find((r) => {
                         if (r === rel) {
-                            return link;
+                            return true;
                         }
+                        return false;
                     });
+                    if (rr) {
+                        return true;
+                    }
                 }
+                return false;
             });
+            if (ll) {
+                return ll;
+            }
         }
 
         if (this.Spine) {
-            this.Spine.map((link) => {
+            const ll = this.Spine.find((link) => {
                 if (link.Rel) {
-                    link.Rel.map((r) => {
+                    const rr = link.Rel.find((r) => {
                         if (r === rel) {
-                            return link;
+                            return true;
                         }
+                        return false;
                     });
+                    if (rr) {
+                        return true;
+                    }
                 }
+                return false;
             });
+            if (ll) {
+                return ll;
+            }
         }
 
         if (this.Links) {
-            this.Links.map((link) => {
+            const ll = this.Links.find((link) => {
                 if (link.Rel) {
-                    link.Rel.map((r) => {
+                    const rr = link.Rel.find((r) => {
                         if (r === rel) {
-                            return link;
+                            return true;
                         }
+                        return false;
                     });
+                    if (rr) {
+                        return true;
+                    }
                 }
+                return false;
             });
+            if (ll) {
+                return ll;
+            }
         }
 
         return undefined;
@@ -178,9 +207,9 @@ export class Publication {
         const mos = Array<MediaOverlayNode>();
 
         if (this.Spine) {
-            this.Spine.map((link) => {
+            this.Spine.forEach((link) => {
                 if (link.MediaOverlays) {
-                    link.MediaOverlays.map((mo) => {
+                    link.MediaOverlays.forEach((mo) => {
                         mos.push(mo);
                     });
                 }
@@ -194,9 +223,9 @@ export class Publication {
         const mos = Array<MediaOverlayNode>();
 
         if (this.Spine) {
-            this.Spine.map((link) => {
+            this.Spine.forEach((link) => {
                 if (link.MediaOverlays && link.Href.indexOf(href) >= 0) {
-                    link.MediaOverlays.map((mo) => {
+                    link.MediaOverlays.forEach((mo) => {
                         mos.push(mo);
                     });
                 }
@@ -212,8 +241,8 @@ export class Publication {
         if (this.Resources) {
             const mediaTypes = ["text/css", "application/vnd.ms-opentype", "text/javascript"];
 
-            this.Resources.map((link) => {
-                mediaTypes.map((mediaType) => {
+            this.Resources.forEach((link) => {
+                mediaTypes.forEach((mediaType) => {
                     if (link.TypeLink === mediaType) {
                         links.push(link);
                     }

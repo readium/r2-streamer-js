@@ -12,6 +12,8 @@ import { JSON } from "ta-json";
 
 import { createZipPromise } from "./zip";
 
+import { timeStrToSeconds } from "../models/media-overlay";
+
 import { Container } from "./epub/container";
 import { Rootfile } from "./epub/container-rootfile";
 import { Encryption } from "./epub/encryption";
@@ -19,6 +21,7 @@ import { LCP } from "./epub/lcp";
 import { NCX } from "./epub/ncx";
 import { OPF } from "./epub/opf";
 import { Author } from "./epub/opf-author";
+import { Manifest } from "./epub/opf-manifest";
 import { Metafield } from "./epub/opf-metafield";
 import { Title } from "./epub/opf-title";
 import { SMIL } from "./epub/smil";
@@ -32,6 +35,7 @@ import { Metadata } from "../models/metadata";
 import { Publication } from "../models/publication";
 
 import { Contributor } from "../models/metadata-contributor";
+import { Properties } from "../models/metadata-properties";
 
 export class EpubParser {
 
@@ -119,7 +123,7 @@ export class EpubParser {
 
             if (container && container.Rootfile) {
                 [container.Rootfile[0]] // container.Rootfile for multiple renditions
-                    .map((rootfile) => {
+                    .forEach((rootfile) => {
                         publication.AddToInternal("rootfile", rootfile.Path);
 
                         const opfZipData = zip.entryDataSync(rootfile.Path);
@@ -134,7 +138,7 @@ export class EpubParser {
                         const epubVersion = this.getEpubVersion(rootfile, opf);
 
                         let ncx: NCX | undefined;
-                        opf.Manifest.map((manifestItem) => {
+                        opf.Manifest.forEach((manifestItem) => {
                             if (manifestItem.MediaType === "application/smil+xml") {
                                 const smilFilePath = path.join(path.dirname(rootfile.Path), manifestItem.Href);
                                 // console.log("########## SMIL: "
@@ -189,7 +193,7 @@ export class EpubParser {
                             if (opf.Metadata.Publisher && opf.Metadata.Publisher.length) {
                                 publication.Metadata.Publisher = [];
 
-                                opf.Metadata.Publisher.map((pub) => {
+                                opf.Metadata.Publisher.forEach((pub) => {
                                     const contrib = new Contributor();
                                     contrib.Name = pub;
                                     publication.Metadata.Publisher.push(contrib);
@@ -200,12 +204,12 @@ export class EpubParser {
                             }
 
                             if (opf.Metadata.Contributor && opf.Metadata.Contributor.length) {
-                                opf.Metadata.Contributor.map((cont) => {
+                                opf.Metadata.Contributor.forEach((cont) => {
                                     this.addContributor(publication, rootfile, opf, cont, undefined);
                                 });
                             }
                             if (opf.Metadata.Creator && opf.Metadata.Creator.length) {
-                                opf.Metadata.Creator.map((cont) => {
+                                opf.Metadata.Creator.forEach((cont) => {
                                     this.addContributor(publication, rootfile, opf, cont, "aut");
                                 });
                             }
@@ -221,9 +225,12 @@ export class EpubParser {
                             this.findContributorInMeta(publication, rootfile, opf);
                         }
 
-                        // fillSpineAndResource(&publication, book)
+                        // this.fillSpineAndResource(publication, rootfile, opf);
+
                         // addRendition(&publication, book)
-                        // addCoverRel(&publication, book)
+
+                        this.addCoverRel(publication, rootfile, opf);
+
                         // fillEncryptionInfo(&publication, book)
 
                         // fillTOCFromNavDoc(&publication, book)
@@ -235,13 +242,15 @@ export class EpubParser {
 
                         // fillCalibreSerieInfo(&publication, book)
                         // fillSubject(&publication, book)
-                        // fillPublicationDate(&publication, book)
+
+                        this.fillPublicationDate(publication, rootfile, opf);
+
                         // fillMediaOverlay(&publication, book)
                     });
             }
 
             // const entries = zip.entries();
-            // Object.keys(entries).map((entryName) => {
+            // Object.keys(entries).forEach((entryName) => {
             //     console.log("++ZIP: entry");
 
             //     const entry = entries[entryName];
@@ -288,7 +297,7 @@ export class EpubParser {
             //             const container = XML.deserialize<Container>(xmlDoc, Container);
             //             console.log(container);
             //             if (container && container.Rootfile) {
-            //                 container.Rootfile.map((rootfile) => {
+            //                 container.Rootfile.forEach((rootfile) => {
             //                     console.log(rootfile.Path);
             //                     console.log(rootfile.Type);
             //                     console.log(rootfile.Version);
@@ -308,7 +317,7 @@ export class EpubParser {
             //             //     if (xPathSelected instanceof Array) {
             //             //         console.log("XPATH multiple element MATCH: " + xp);
 
-            //             //         xPathSelected.map((item) => {
+            //             //         xPathSelected.forEach((item) => {
             //             //             const elem = item as xmldom.Element;
             //             //             console.log(elem.localName);
             //             //         });
@@ -319,7 +328,7 @@ export class EpubParser {
             //             //             if (xPathSelected instanceof Array) {
             //             //                 console.log("XPATH multiple attribute MATCH: " + xp);
 
-            //             //                 xPathSelected.map((item) => {
+            //             //                 xPathSelected.forEach((item) => {
             //             //                     const attr = item as xmldom.Attr;
             //             //                     console.log(attr.value);
             //             //                 });
@@ -357,27 +366,27 @@ export class EpubParser {
     //     return slugify(fileName, "_").replace(/[\.]/g, "_");
     // }
 
-    // private fillPublicationDate(publication: Publication, book: Epub) {
+    private fillPublicationDate(publication: Publication, rootfile: Rootfile, opf: OPF) {
 
-    //     if (!book.Opf || !book.Opf.Metadata || !book.Opf.Metadata.Date) {
-    //         return;
-    //     }
+        if (opf.Metadata && opf.Metadata.Date && opf.Metadata.Date.length) {
 
-    //     if (this.isEpub3OrMore(book) && book.Opf.Metadata.Date[0] && book.Opf.Metadata.Date[0].Data) {
-    //         publication.Metadata.PublicationDate = Moment(book.Opf.Metadata.Date[0].Data).toDate();
-    //     }
+            if (this.isEpub3OrMore(rootfile, opf) && opf.Metadata.Date[0] && opf.Metadata.Date[0].Data) {
+                publication.Metadata.PublicationDate = Moment(opf.Metadata.Date[0].Data).toDate();
+                return;
+            }
 
-    //     book.Opf.Metadata.Date.map((date) => {
-    //         if (date.Data && date.Event && date.Event.indexOf("publication") >= 0) {
-    //             publication.Metadata.PublicationDate = Moment(date.Data).toDate();
-    //         }
-    //     });
-    // }
+            opf.Metadata.Date.forEach((date) => {
+                if (date.Data && date.Event && date.Event.indexOf("publication") >= 0) {
+                    publication.Metadata.PublicationDate = Moment(date.Data).toDate();
+                }
+            });
+        }
+    }
 
     private findContributorInMeta(publication: Publication, rootfile: Rootfile, opf: OPF) {
 
         if (opf.Metadata && opf.Metadata.Meta) {
-            opf.Metadata.Meta.map((meta) => {
+            opf.Metadata.Meta.forEach((meta) => {
                 if (meta.Property === "dcterms:creator" || meta.Property === "dcterms:contributor") {
                     const cont = new Author();
                     cont.Data = meta.Data;
@@ -417,7 +426,7 @@ export class EpubParser {
                     contributor.Name[publication.Metadata.Language[0].toLowerCase()] = cont.Data;
                 }
 
-                metaAlt.map((m) => {
+                metaAlt.forEach((m) => {
                     if (m.Lang) {
                         (contributor.Name as IStringMap)[m.Lang] = m.Data;
                     }
@@ -527,7 +536,7 @@ export class EpubParser {
     private addIdentifier(publication: Publication, rootfile: Rootfile, opf: OPF) {
         if (opf.Metadata && opf.Metadata.Identifier) {
             if (opf.UniqueIdentifier && opf.Metadata.Identifier.length > 1) {
-                opf.Metadata.Identifier.map((iden) => {
+                opf.Metadata.Identifier.forEach((iden) => {
                     if (iden.ID === opf.UniqueIdentifier) {
                         publication.Metadata.Identifier = iden.Data;
                     }
@@ -548,15 +557,23 @@ export class EpubParser {
                 opf.Metadata.Title.length) {
 
                 if (opf.Metadata.Meta) {
-                    opf.Metadata.Title.map((title) => {
+                    const tt = opf.Metadata.Title.find((title) => {
                         const refineID = "#" + title.ID;
 
-                        opf.Metadata.Meta.map((meta) => {
+                        const m = opf.Metadata.Meta.find((meta) => {
                             if (meta.Data === "main" && meta.Refine === refineID) {
-                                mainTitle = title;
+                                return true;
                             }
+                            return false;
                         });
+                        if (m) {
+                            return true;
+                        }
+                        return false;
                     });
+                    if (tt) {
+                        mainTitle = tt;
+                    }
                 }
 
                 if (!mainTitle) {
@@ -573,7 +590,7 @@ export class EpubParser {
                         publication.Metadata.Title[mainTitle.Lang.toLowerCase()] = mainTitle.Data;
                     }
 
-                    metaAlt.map((m) => {
+                    metaAlt.forEach((m) => {
                         if (m.Lang) {
                             (publication.Metadata.Title as IStringMap)[m.Lang.toLowerCase()] = m.Data;
                         }
@@ -593,6 +610,252 @@ export class EpubParser {
         }
     }
 
+    private addRelAndPropertiesToLink(link: Link, linkEpub: Manifest, rootfile: Rootfile, opf: OPF) {
+
+        if (linkEpub.Properties) {
+            this.addToLinkFromProperties(link, linkEpub.Properties);
+        }
+        const spineProperties = this.findPropertiesInSpineForManifest(linkEpub, rootfile, opf);
+        if (spineProperties) {
+            this.addToLinkFromProperties(link, spineProperties);
+        }
+    }
+
+    private addToLinkFromProperties(link: Link, propertiesString: string) {
+
+        const properties = propertiesString.split(" ");
+
+        const propertiesStruct = new Properties();
+
+        // https://idpf.github.io/epub-vocabs/rendition/
+        properties.forEach((p) => {
+
+            switch (p) {
+                case "cover-image": {
+                    link.AddRel("cover");
+                    break;
+                }
+                case "nav": {
+                    link.AddRel("contents");
+                    break;
+                }
+                case "scripted": {
+                    if (!propertiesStruct.Contains) {
+                        propertiesStruct.Contains = [];
+                    }
+                    propertiesStruct.Contains.push("js");
+                    break;
+                }
+                case "mathml": {
+                    if (!propertiesStruct.Contains) {
+                        propertiesStruct.Contains = [];
+                    }
+                    propertiesStruct.Contains.push("mathml");
+                    break;
+                }
+                case "onix-record": {
+                    if (!propertiesStruct.Contains) {
+                        propertiesStruct.Contains = [];
+                    }
+                    propertiesStruct.Contains.push("onix");
+                    break;
+                }
+                case "svg": {
+                    if (!propertiesStruct.Contains) {
+                        propertiesStruct.Contains = [];
+                    }
+                    propertiesStruct.Contains.push("svg");
+                    break;
+                }
+                case "xmp-record": {
+                    if (!propertiesStruct.Contains) {
+                        propertiesStruct.Contains = [];
+                    }
+                    propertiesStruct.Contains.push("xmp");
+                    break;
+                }
+                case "remote-resources": {
+                    if (!propertiesStruct.Contains) {
+                        propertiesStruct.Contains = [];
+                    }
+                    propertiesStruct.Contains.push("remote-resources");
+                    break;
+                }
+                case "page-spread-left": {
+                    propertiesStruct.Page = "left";
+                    break;
+                }
+                case "page-spread-right": {
+                    propertiesStruct.Page = "right";
+                    break;
+                }
+                case "page-spread-center": {
+                    propertiesStruct.Page = "center";
+                    break;
+                }
+                case "rendition:spread-none": {
+                    propertiesStruct.Spread = this.noneMeta;
+                    break;
+                }
+                case "rendition:spread-auto": {
+                    propertiesStruct.Spread = this.autoMeta;
+                    break;
+                }
+                case "rendition:spread-landscape": {
+                    propertiesStruct.Spread = "landscape";
+                    break;
+                }
+                case "rendition:spread-portrait": {
+                    propertiesStruct.Spread = "portrait";
+                    break;
+                }
+                case "rendition:spread-both": {
+                    propertiesStruct.Spread = "both";
+                    break;
+                }
+                case "rendition:layout-reflowable": {
+                    propertiesStruct.Layout = this.reflowableMeta;
+                    break;
+                }
+                case "rendition:layout-pre-paginated": {
+                    propertiesStruct.Layout = "fixed";
+                    break;
+                }
+                case "rendition:orientation-auto": {
+                    propertiesStruct.Orientation = "auto";
+                    break;
+                }
+                case "rendition:orientation-landscape": {
+                    propertiesStruct.Orientation = "landscape";
+                    break;
+                }
+                case "rendition:orientation-portrait": {
+                    propertiesStruct.Orientation = "portrait";
+                    break;
+                }
+                case "rendition:flow-auto": {
+                    propertiesStruct.Overflow = this.autoMeta;
+                    break;
+                }
+                case "rendition:flow-paginated": {
+                    propertiesStruct.Overflow = "paginated";
+                    break;
+                }
+                case "rendition:flow-scrolled-continuous": {
+                    propertiesStruct.Overflow = "scrolled-continuous";
+                    break;
+                }
+                case "rendition:flow-scrolled-doc": {
+                    propertiesStruct.Overflow = "scrolled";
+                    break;
+                }
+            }
+
+            if (propertiesStruct.Layout ||
+                propertiesStruct.Orientation ||
+                propertiesStruct.Overflow ||
+                propertiesStruct.Page ||
+                propertiesStruct.Spread ||
+                (propertiesStruct.Contains && propertiesStruct.Contains.length)) {
+
+                link.Properties = propertiesStruct;
+            }
+        });
+    }
+
+    private addMediaOverlay(link: Link, linkEpub: Manifest, rootfile: Rootfile, opf: OPF) {
+        if (linkEpub.MediaOverlay) {
+            const meta = this.findMetaByRefineAndProperty(rootfile, opf, linkEpub.MediaOverlay, "media:duration");
+            if (meta) {
+                link.Duration = timeStrToSeconds(meta.Data);
+            }
+        }
+    }
+
+    private findInManifestByID(rootfile: Rootfile, opf: OPF, ID: string): Link | undefined {
+        let link: Link | undefined;
+
+        if (opf.Manifest && opf.Manifest.length) {
+            opf.Manifest.find((item) => {
+                if (item.ID === ID) {
+                    const linkItem = new Link();
+                    linkItem.TypeLink = item.MediaType;
+                    linkItem.Href = item.Href;
+                    this.addRelAndPropertiesToLink(linkItem, item, rootfile, opf);
+                    this.addMediaOverlay(linkItem, item, rootfile, opf);
+                    link = linkItem;
+                    return true;
+                }
+                return false;
+            });
+        }
+        return link;
+    }
+
+    private addCoverRel(publication: Publication, rootfile: Rootfile, opf: OPF) {
+
+        let coverID: string | undefined;
+
+        if (opf.Metadata && opf.Metadata.Meta && opf.Metadata.Meta.length) {
+            opf.Metadata.Meta.find((meta) => {
+                if (meta.Name === "cover") {
+                    coverID = meta.Content;
+                    return true;
+                }
+                return false;
+            });
+        }
+
+        if (coverID) {
+            const manifestInfo = this.findInManifestByID(rootfile, opf, coverID);
+            if (manifestInfo && manifestInfo.Href && publication.Resources && publication.Resources.length) {
+
+                publication.Resources.find((item, i, arr) => {
+
+                    if (item.Href === manifestInfo.Href) {
+                        publication.Resources[i].AddRel("cover");
+                        return true;
+                    }
+                    return false;
+                });
+            }
+        }
+    }
+
+    private findPropertiesInSpineForManifest(linkEpub: Manifest, rootfile: Rootfile, opf: OPF): string | undefined {
+
+        if (opf.Spine && opf.Spine.Items && opf.Spine.Items.length) {
+            const it = opf.Spine.Items.find((item) => {
+                if (item.IDref === linkEpub.ID) {
+                    return true;
+                }
+                return false;
+            });
+            if (it && it.Properties) {
+                return it.Properties;
+            }
+        }
+
+        return undefined;
+    }
+
+    private findInSpineByHref(publication: Publication, href: string): Link | undefined {
+
+        if (publication.Spine && publication.Spine.length) {
+            const ll = publication.Spine.find((l) => {
+                if (l.Href === href) {
+                    return true;
+                }
+                return false;
+            });
+            if (ll) {
+                return ll;
+            }
+        }
+
+        return undefined;
+    }
+
     private findMetaByRefineAndProperty(
         rootfile: Rootfile, opf: OPF, ID: string, property: string): Metafield | undefined {
 
@@ -609,7 +872,7 @@ export class EpubParser {
         const refineID = "#" + ID;
 
         if (opf.Metadata && opf.Metadata.Meta) {
-            opf.Metadata.Meta.map((metaTag) => {
+            opf.Metadata.Meta.forEach((metaTag) => {
                 if (metaTag.Refine === refineID && metaTag.Property === property) {
                     metas.push(metaTag);
                 }

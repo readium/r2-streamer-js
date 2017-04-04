@@ -40,7 +40,7 @@ export class CbzParser {
 
             const entries = zip.entries();
 
-            Object.keys(entries).map((entryName) => {
+            Object.keys(entries).forEach((entryName) => {
                 console.log("++ZIP: entry");
 
                 const entry = entries[entryName];

@@ -87,7 +87,7 @@ function deserializeRootObject(
                 if (!(xPathSelected instanceof Array)) {
                     xpathMatched.push(xPathSelected);
                 } else {
-                    xPathSelected.map((item) => {
+                    xPathSelected.forEach((item) => {
                         // console.log(item.nodeValue || item.localName);
                         xpathMatched.push(item);
                     });
@@ -95,7 +95,7 @@ function deserializeRootObject(
 
                 if (p.array || p.set) {
                     output[key] = Array<IDynamicObject>();
-                    xpathMatched.map((item) => {
+                    xpathMatched.forEach((item) => {
                         output[key].push(deserializeObject(item, p, options));
                     });
 

@@ -28,7 +28,7 @@ function sortObject(obj: any): any {
 
     const newObj: IStringKeyedObject = {};
 
-    Object.keys(obj).sort().map((key) => {
+    Object.keys(obj).sort().forEach((key) => {
         newObj[key] = sortObject(obj[key]);
     });
 

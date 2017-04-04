@@ -35,7 +35,7 @@ export class Link {
     public Properties: Properties;
 
     @JsonProperty("duration")
-    public Duration: string;
+    public Duration: number;
 
     @JsonProperty("templated")
     public Templated: boolean;
