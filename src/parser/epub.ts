@@ -12,7 +12,7 @@ import { JSON } from "ta-json";
 
 import { createZipPromise } from "./zip";
 
-import { timeStrToSeconds } from "../models/media-overlay";
+import { MediaOverlayNode, timeStrToSeconds } from "../models/media-overlay";
 
 import { Container } from "./epub/container";
 import { Rootfile } from "./epub/container-rootfile";
@@ -34,9 +34,14 @@ import { Metadata } from "../models/metadata";
 
 import { Publication } from "../models/publication";
 
+import { BelongsTo } from "../models/metadata-belongsto";
+import { Collection } from "../models/metadata-collection";
 import { Contributor } from "../models/metadata-contributor";
 import { Encrypted } from "../models/metadata-encrypted";
 import { Properties } from "../models/metadata-properties";
+import { Subject } from "../models/metadata-subject";
+import { NavPoint } from "./epub/ncx-navpoint";
+import { Seq } from "./epub/smil-seq";
 
 export class EpubParser {
 
@@ -136,23 +141,6 @@ export class EpubParser {
 
                         let ncx: NCX | undefined;
                         opf.Manifest.forEach((manifestItem) => {
-                            if (manifestItem.MediaType === "application/smil+xml") {
-                                const smilFilePath = path.join(path.dirname(rootfile.Path), manifestItem.Href);
-                                // console.log("########## SMIL: "
-                                //     + rootfile.Path
-                                //     + " == "
-                                //     + manifestItem.Href
-                                //     + " -- "
-                                //     + smilFilePath);
-                                const smilZipData = zip.entryDataSync(smilFilePath);
-                                const smilStr = smilZipData.toString("utf8");
-                                const smilDoc = new xmldom.DOMParser().parseFromString(smilStr);
-                                const smil = XML.deserialize<SMIL>(smilDoc, SMIL);
-
-                                // breakLength: 100  maxArrayLength: undefined
-                                // console.log(util.inspect(smil,
-                                //     { showHidden: false, depth: 1000, colors: true, customInspect: true }));
-                            }
 
                             if (opf.Spine.Toc && manifestItem.ID === opf.Spine.Toc) {
                                 const ncxFilePath = path.join(path.dirname(rootfile.Path), manifestItem.Href);
@@ -233,18 +221,20 @@ export class EpubParser {
                         }
 
                         this.fillTOCFromNavDoc(publication, rootfile, opf, zip);
-                        // if len(publication.TOC) == 0 {
-                        // 	fillTOCFromNCX(&publication, book)
-                        // 	fillPageListFromNCX(&publication, book)
-                        // 	fillLandmarksFromGuide(&publication, book)
-                        // }
+                        if (!publication.TOC || !publication.TOC.length) {
+                            if (ncx) {
+                                this.fillTOCFromNCX(publication, rootfile, opf, ncx);
+                                this.fillPageListFromNCX(publication, rootfile, opf, ncx);
+                            }
+                            this.fillLandmarksFromGuide(publication, rootfile, opf);
+                        }
 
-                        // fillCalibreSerieInfo(&publication, book)
-                        // fillSubject(&publication, book)
+                        this.fillCalibreSerieInfo(publication, rootfile, opf);
+                        this.fillSubject(publication, rootfile, opf);
 
                         this.fillPublicationDate(publication, rootfile, opf);
 
-                        // fillMediaOverlay(&publication, book)
+                        this.fillMediaOverlay(publication, rootfile, opf, zip);
                     });
             }
 
@@ -364,6 +354,147 @@ export class EpubParser {
     //     const fileName = path.basename(filePath);
     //     return slugify(fileName, "_").replace(/[\.]/g, "_");
     // }
+
+    private fillMediaOverlay(publication: Publication, rootfile: Rootfile, opf: OPF, zip: any) {
+
+        if (!publication.Resources) {
+            return;
+        }
+
+        publication.Resources.forEach((item) => {
+
+            if (item.TypeLink === "application/smil+xml") {
+
+                const smilFilePath = path.join(path.dirname(rootfile.Path), item.Href);
+                if (Object.keys(zip.entries()).indexOf(smilFilePath) < 0) {
+                    return;
+                }
+
+                const smilZipData = zip.entryDataSync(smilFilePath);
+                const smilStr = smilZipData.toString("utf8");
+                const smilXmlDoc = new xmldom.DOMParser().parseFromString(smilStr);
+                const smil = XML.deserialize<SMIL>(smilXmlDoc, SMIL);
+
+                const mo = new MediaOverlayNode();
+
+                mo.Role = [];
+                mo.Role.push("section");
+                if (smil.Body.TextRef) {
+                    mo.Text = smil.Body.TextRef;
+                }
+                if (smil.Body.Par && smil.Body.Par.length) {
+                    smil.Body.Par.forEach((par) => {
+                        const p = new MediaOverlayNode();
+                        if (par.Text) {
+                            p.Text = par.Text.Src;
+                        }
+                        if (par.Audio) {
+                            p.Audio = par.Audio.Src;
+                        }
+                        if (!mo.Children) {
+                            mo.Children = [];
+                        }
+                        mo.Children.push(p);
+                    });
+                }
+
+                if (smil.Body.Seq && smil.Body.Seq.length) {
+                    smil.Body.Seq.forEach((s) => {
+                        if (!mo.Children) {
+                            mo.Children = [];
+                        }
+                        this.addSeqToMediaOverlay(publication, rootfile, opf, mo.Children, s, mo.Text);
+                    });
+                }
+
+                if (mo.Text) {
+                    const baseHref = mo.Text.split("#")[0];
+                    const link = this.findLinKByHref(publication, baseHref);
+                    if (link) {
+                        if (!link.MediaOverlays) {
+                            link.MediaOverlays = [];
+                        }
+                        link.MediaOverlays.push(mo);
+
+                        if (!link.Properties) {
+                            link.Properties = new Properties();
+                        }
+                        link.Properties.MediaOverlay = this.mediaOverlayURL + link.Href;
+                    }
+                }
+
+                // breakLength: 100  maxArrayLength: undefined
+                console.log(util.inspect(mo,
+                    { showHidden: false, depth: 1000, colors: true, customInspect: true }));
+            }
+        });
+    }
+
+    private addSeqToMediaOverlay(
+        publication: Publication, rootfile: Rootfile, opf: OPF, mo: MediaOverlayNode[], seq: Seq, href: string) {
+
+        const moc = new MediaOverlayNode();
+        moc.Role = [];
+        moc.Role.push("section");
+        moc.Text = seq.TextRef;
+
+        if (seq.Par && seq.Par.length) {
+            seq.Par.forEach((par) => {
+
+                const p = new MediaOverlayNode();
+                if (par.Text && par.Text.Src) {
+                    p.Text = par.Text.Src;
+                }
+                if (par.Audio && par.Audio.Src) {
+                    p.Audio = par.Audio.Src;
+                    p.Audio += "#t=";
+                    p.Audio += timeStrToSeconds(par.Audio.ClipBegin);
+                    p.Audio += ",";
+                    p.Audio += timeStrToSeconds(par.Audio.ClipEnd);
+                }
+                if (!moc.Children) {
+                    moc.Children = [];
+                }
+                moc.Children.push(p);
+            });
+        }
+
+        if (seq.Seq && seq.Seq.length) {
+            seq.Seq.forEach((s) => {
+                if (!moc.Children) {
+                    moc.Children = [];
+                }
+                this.addSeqToMediaOverlay(publication, rootfile, opf, moc.Children, s, moc.Text);
+            });
+        }
+
+        if (moc.Text && href) {
+            const baseHref = moc.Text.split("#")[0];
+            const baseHrefParent = href.split("#")[0];
+
+            console.log("€€€€€€€€€€€€€€€€€€€€€€€€€€€€€");
+            console.log(baseHref);
+            console.log(baseHrefParent);
+            console.log("#############################");
+
+            if (baseHref === baseHrefParent) {
+                mo.push(moc);
+            } else {
+                const link = this.findLinKByHref(publication, baseHref);
+                if (link) {
+                    if (!link.MediaOverlays) {
+                        link.MediaOverlays = [];
+                    }
+                    link.MediaOverlays.push(moc);
+
+                    if (!link.Properties) {
+                        link.Properties = new Properties();
+                    }
+                    link.Properties.MediaOverlay = this.mediaOverlayURL + link.Href;
+                }
+            }
+        }
+    }
 
     private fillPublicationDate(publication: Publication, rootfile: Rootfile, opf: OPF) {
 
@@ -931,6 +1062,106 @@ export class EpubParser {
         }
     }
 
+    private fillPageListFromNCX(publication: Publication, rootfile: Rootfile, opf: OPF, ncx: NCX) {
+        if (ncx.PageList && ncx.PageList.PageTarget && ncx.PageList.PageTarget.length) {
+            ncx.PageList.PageTarget.forEach((pageTarget) => {
+                const link = new Link();
+                link.Href = pageTarget.Content.Src;
+                link.Title = pageTarget.Text;
+                if (!publication.PageList) {
+                    publication.PageList = [];
+                }
+                publication.PageList.push(link);
+            });
+        }
+    }
+
+    private fillTOCFromNCX(publication: Publication, rootfile: Rootfile, opf: OPF, ncx: NCX) {
+        if (ncx.Points && ncx.Points.length) {
+            ncx.Points.forEach((point) => {
+                this.fillTOCFromNavPoint(publication, rootfile, opf, ncx, point, publication.TOC);
+            });
+        }
+    }
+
+    private fillLandmarksFromGuide(publication: Publication, rootfile: Rootfile, opf: OPF) {
+        if (opf.Guide && opf.Guide.length) {
+            opf.Guide.forEach((ref) => {
+                if (ref.Href) {
+                    const link = new Link();
+                    link.Href = ref.Href;
+                    link.Title = ref.Title;
+                    if (!publication.Landmarks) {
+                        publication.Landmarks = [];
+                    }
+                    publication.Landmarks.push(link);
+                }
+            });
+        }
+    }
+
+    private fillTOCFromNavPoint(
+        publication: Publication, rootfile: Rootfile, opf: OPF, ncx: NCX, point: NavPoint, node: Link[]) {
+
+        const link = new Link();
+        link.Href = point.Content.Src;
+        link.Title = point.Text;
+
+        if (point.Points && point.Points.length) {
+            point.Points.forEach((p) => {
+                this.fillTOCFromNavPoint(publication, rootfile, opf, ncx, p, link.Children);
+            });
+        }
+
+        node.push(link);
+    }
+
+    private fillSubject(publication: Publication, rootfile: Rootfile, opf: OPF) {
+        if (opf.Metadata && opf.Metadata.Subject && opf.Metadata.Subject.length) {
+            opf.Metadata.Subject.forEach((s) => {
+                const sub = new Subject();
+                sub.Name = s.Data;
+                sub.Code = s.Term;
+                sub.Scheme = s.Authority;
+                if (!publication.Metadata.Subject) {
+                    publication.Metadata.Subject = [];
+                }
+                publication.Metadata.Subject.push(sub);
+            });
+        }
+    }
+
+    private fillCalibreSerieInfo(publication: Publication, rootfile: Rootfile, opf: OPF) {
+        let serie: string | undefined;
+        let seriePosition: number | undefined;
+
+        if (opf.Metadata && opf.Metadata.Meta && opf.Metadata.Meta.length) {
+            opf.Metadata.Meta.forEach((m) => {
+                if (m.Name === "calibre:series") {
+                    serie = m.Content;
+                }
+                if (m.Name === "calibre:series_index") {
+                    seriePosition = parseFloat(m.Content);
+                }
+            });
+        }
+
+        if (serie) {
+            const collection = new Collection();
+            collection.Name = serie;
+            if (seriePosition) {
+                collection.Position = seriePosition;
+            }
+            if (!publication.Metadata.BelongsTo) {
+                publication.Metadata.BelongsTo = new BelongsTo();
+            }
+            if (!publication.Metadata.BelongsTo.Series) {
+                publication.Metadata.BelongsTo.Series = [];
+            }
+            publication.Metadata.BelongsTo.Series.push(collection);
+        }
+    }
+
     private fillTOCFromNavDoc(publication: Publication, rootfile: Rootfile, opf: OPF, zip: any) {
 
         const navLink = publication.GetNavDoc();
@@ -1152,5 +1383,21 @@ export class EpubParser {
 
         const version = this.getEpubVersion(rootfile, opf);
         return (version === this.epub3 || version === this.epub301 || version === this.epub31);
+    }
+
+    private findLinKByHref(publication: Publication, href: string): Link | undefined {
+        if (publication.Spine && publication.Spine.length) {
+            const ll = publication.Spine.find((l) => {
+                if (href.indexOf(l.Href) >= 0) {
+                    return true;
+                }
+                return false;
+            });
+            if (ll) {
+                return ll;
+            }
+        }
+
+        return undefined;
     }
 }
