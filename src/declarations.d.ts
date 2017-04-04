@@ -24,7 +24,7 @@ declare module "xmldom" {
     }
 
     interface Element extends Node {
-        dummy: boolean;
+        textContent: string;
     }
 
     interface Attr extends Node {

@@ -35,6 +35,7 @@ import { Metadata } from "../models/metadata";
 import { Publication } from "../models/publication";
 
 import { Contributor } from "../models/metadata-contributor";
+import { Encrypted } from "../models/metadata-encrypted";
 import { Properties } from "../models/metadata-properties";
 
 export class EpubParser {
@@ -80,31 +81,27 @@ export class EpubParser {
             if (Object.keys(zip.entries()).indexOf("META-INF/license.lcpl") >= 0) {
 
                 const lcplZipData = zip.entryDataSync("META-INF/license.lcpl");
-                if (lcplZipData) {
-                    const lcplStr = lcplZipData.toString("utf8");
-                    const lcplJson = global.JSON.parse(lcplStr);
-                    lcpl = JSON.deserialize<LCP>(lcplJson, LCP);
+                const lcplStr = lcplZipData.toString("utf8");
+                const lcplJson = global.JSON.parse(lcplStr);
+                lcpl = JSON.deserialize<LCP>(lcplJson, LCP);
 
-                    // breakLength: 100  maxArrayLength: undefined
-                    // console.log(util.inspect(lcpl,
-                    //     { showHidden: false, depth: 1000, colors: true, customInspect: true }));
-                }
+                // breakLength: 100  maxArrayLength: undefined
+                // console.log(util.inspect(lcpl,
+                //     { showHidden: false, depth: 1000, colors: true, customInspect: true }));
             }
 
             let encryption: Encryption | undefined;
             if (Object.keys(zip.entries()).indexOf("META-INF/encryption.xml") >= 0) {
 
                 const encryptionXmlZipData = zip.entryDataSync("META-INF/encryption.xml");
-                if (encryptionXmlZipData) {
-                    const encryptionXmlStr = encryptionXmlZipData.toString("utf8");
-                    const encryptionXmlDoc = new xmldom.DOMParser().parseFromString(encryptionXmlStr);
+                const encryptionXmlStr = encryptionXmlZipData.toString("utf8");
+                const encryptionXmlDoc = new xmldom.DOMParser().parseFromString(encryptionXmlStr);
 
-                    encryption = XML.deserialize<Encryption>(encryptionXmlDoc, Encryption);
+                encryption = XML.deserialize<Encryption>(encryptionXmlDoc, Encryption);
 
-                    // breakLength: 100  maxArrayLength: undefined
-                    // console.log(util.inspect(encryption,
-                    //     { showHidden: false, depth: 1000, colors: true, customInspect: true }));
-                }
+                // breakLength: 100  maxArrayLength: undefined
+                // console.log(util.inspect(encryption,
+                //     { showHidden: false, depth: 1000, colors: true, customInspect: true }));
             }
 
             const containerXmlZipData = zip.entryDataSync("META-INF/container.xml");
@@ -227,13 +224,15 @@ export class EpubParser {
 
                         this.fillSpineAndResource(publication, rootfile, opf);
 
-                        // addRendition(&publication, book)
+                        this.addRendition(publication, rootfile, opf);
 
                         this.addCoverRel(publication, rootfile, opf);
 
-                        // fillEncryptionInfo(&publication, book)
+                        if (encryption) {
+                            this.fillEncryptionInfo(publication, rootfile, opf, encryption, lcpl);
+                        }
 
-                        // fillTOCFromNavDoc(&publication, book)
+                        this.fillTOCFromNavDoc(publication, rootfile, opf, zip);
                         // if len(publication.TOC) == 0 {
                         // 	fillTOCFromNCX(&publication, book)
                         // 	fillPageListFromNCX(&publication, book)
@@ -792,6 +791,42 @@ export class EpubParser {
         return link;
     }
 
+    private addRendition(publication: Publication, rootfile: Rootfile, opf: OPF) {
+
+        if (opf.Metadata && opf.Metadata.Meta && opf.Metadata.Meta.length) {
+            const rendition = new Properties();
+
+            opf.Metadata.Meta.forEach((meta) => {
+                switch (meta.Property) {
+                    case "rendition:layout": {
+                        if (meta.Data === "pre-paginated") {
+                            rendition.Layout = "fixed";
+                        } else if (meta.Data === "reflowable") {
+                            rendition.Layout = "reflowable";
+                        }
+                        break;
+                    }
+                    case "rendition:orientation": {
+                        rendition.Orientation = meta.Data;
+                        break;
+                    }
+                    case "rendition:spread": {
+                        rendition.Spread = meta.Data;
+                        break;
+                    }
+                    case "rendition:flow": {
+                        rendition.Overflow = meta.Data;
+                        break;
+                    }
+                }
+            });
+
+            if (rendition.Layout || rendition.Orientation || rendition.Overflow || rendition.Page || rendition.Spread) {
+                publication.Metadata.Rendition = rendition;
+            }
+        }
+    }
+
     private fillSpineAndResource(publication: Publication, rootfile: Rootfile, opf: OPF) {
 
         if (opf.Spine && opf.Spine.Items && opf.Spine.Items.length) {
@@ -829,6 +864,187 @@ export class EpubParser {
                 }
             });
         }
+    }
+
+    private fillEncryptionInfo(
+        publication: Publication, rootfile: Rootfile, opf: OPF, encryption: Encryption, lcp: LCP | undefined) {
+
+        encryption.EncryptedData.forEach((encInfo) => {
+            const encrypted = new Encrypted();
+            encrypted.Algorithm = encInfo.EncryptionMethod.Algorithm;
+            if (lcp) {
+                encrypted.Profile = lcp.Encryption.Profile;
+                encrypted.Scheme = "http://readium.org/2014/01/lcp";
+            }
+            if (encInfo.EncryptionProperties && encInfo.EncryptionProperties.length) {
+
+                encInfo.EncryptionProperties.forEach((prop) => {
+
+                    if (prop.Compression) {
+                        if (prop.Compression.OriginalLength) {
+                            encrypted.OriginalLength = parseFloat(prop.Compression.OriginalLength);
+                        }
+                        if (prop.Compression.Method === "8") {
+                            encrypted.Compression = "deflate";
+                        } else {
+                            encrypted.Compression = "none";
+                        }
+                    }
+                });
+
+            }
+
+            publication.Resources.forEach((l, i, arr) => {
+                const filePath = path.join(path.dirname(rootfile.Path), l.Href);
+                if (filePath === encInfo.CipherData.CipherReference.URI) {
+                    if (!l.Properties) {
+                        l.Properties = new Properties();
+                    }
+                    l.Properties.Encrypted = encrypted;
+                }
+            });
+
+            publication.Spine.forEach((l, i, arr) => {
+                const filePath = path.join(path.dirname(rootfile.Path), l.Href);
+                if (filePath === encInfo.CipherData.CipherReference.URI) {
+                    if (!l.Properties) {
+                        l.Properties = new Properties();
+                    }
+                    l.Properties.Encrypted = encrypted;
+                }
+            });
+        });
+
+        if (lcp) {
+
+            const decodedKeyCheck = new Buffer(lcp.Encryption.UserKey.KeyCheck, "base64").toString("utf8");
+            const decodedContentKey = new Buffer(lcp.Encryption.ContentKey.EncryptedValue, "base64").toString("utf8");
+            // publication.LCP = lcp;
+
+            publication.AddToInternal("lcp_id", lcp.ID);
+            publication.AddToInternal("lcp_content_key", decodedContentKey);
+            publication.AddToInternal("lcp_content_key_algorithm", lcp.Encryption.ContentKey.Algorithm);
+            publication.AddToInternal("lcp_user_hint", lcp.Encryption.UserKey.TextHint);
+            publication.AddToInternal("lcp_user_key_check", decodedKeyCheck);
+
+            publication.AddLink("application/vnd.readium.lcp.license-1.0+json", ["license"], "license.lcpl", false);
+        }
+    }
+
+    private fillTOCFromNavDoc(publication: Publication, rootfile: Rootfile, opf: OPF, zip: any) {
+
+        const navLink = publication.GetNavDoc();
+        if (!navLink) {
+            return;
+        }
+
+        const navDocFilePath = path.join(path.dirname(rootfile.Path), navLink.Href);
+        if (Object.keys(zip.entries()).indexOf(navDocFilePath) < 0) {
+            return;
+        }
+
+        const navDocZipData = zip.entryDataSync(navDocFilePath);
+        const navDocStr = navDocZipData.toString("utf8");
+        const navXmlDoc = new xmldom.DOMParser().parseFromString(navDocStr);
+
+        const select = xpath.useNamespaces({
+            epub: "http://www.idpf.org/2007/ops",
+            xhtml: "http://www.w3.org/1999/xhtml",
+        });
+
+        const navs = select("/xhtml:html/xhtml:body//xhtml:nav", navXmlDoc);
+        if (navs && navs.length) {
+
+            navs.forEach((navElement: xmldom.Element) => {
+
+                const typeNav = select("@epub:type", navElement);
+                if (typeNav && typeNav.length) {
+
+                    const olElem = select("xhtml:ol", navElement);
+
+                    switch (typeNav[0].value) {
+
+                        case "toc": {
+                            publication.TOC = [];
+                            this.fillTOCFromNavDocWithOL(select, olElem, publication.TOC, navLink.Href);
+                            break;
+                        }
+                        case "page-list": {
+                            publication.PageList = [];
+                            this.fillTOCFromNavDocWithOL(select, olElem, publication.PageList, navLink.Href);
+                            break;
+                        }
+                        case "landmarks": {
+                            publication.Landmarks = [];
+                            this.fillTOCFromNavDocWithOL(select, olElem, publication.Landmarks, navLink.Href);
+                            break;
+                        }
+                        case "lot": {
+                            publication.LOT = [];
+                            this.fillTOCFromNavDocWithOL(select, olElem, publication.LOT, navLink.Href);
+                            break;
+                        }
+                        case "loa": {
+                            publication.LOA = [];
+                            this.fillTOCFromNavDocWithOL(select, olElem, publication.LOA, navLink.Href);
+                            break;
+                        }
+                        case "loi": {
+                            publication.LOI = [];
+                            this.fillTOCFromNavDocWithOL(select, olElem, publication.LOI, navLink.Href);
+                            break;
+                        }
+                        case "lov": {
+                            publication.LOV = [];
+                            this.fillTOCFromNavDocWithOL(select, olElem, publication.LOV, navLink.Href);
+                            break;
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    private fillTOCFromNavDocWithOL(select: any, olElems: xmldom.Element[], node: Link[], navDocURL: string) {
+
+        olElems.forEach((olElem: xmldom.Element) => {
+
+            const liElems = select("xhtml:li", olElem);
+            if (liElems && liElems.length) {
+
+                liElems.forEach((liElem: xmldom.Element) => {
+
+                    const link = new Link();
+                    node.push(link);
+
+                    const aElems = select("xhtml:a", liElem);
+                    if (aElems && aElems.length > 0) {
+
+                        let aHref = select("@href", aElems[0]);
+                        if (aHref && aHref.length) {
+                            if (aHref[0][0] === "#") {
+                                aHref = navDocURL + aHref[0];
+                            }
+                            link.Href = aHref[0].value;
+                        }
+
+                        let aText = aElems[0].textContent; // select("text()", aElems[0])[0].data;
+                        if (aText && aText.length) {
+                            aText = aText.trim();
+                            aText = aText.replace(/\s\s+/g, " ");
+                            link.Title = aText;
+                        }
+                    }
+
+                    const olElemsNext = select("xhtml:ol", liElem);
+                    if (olElemsNext && olElemsNext.length) {
+                        link.Children = [];
+                        console.log("SNB OL");
+                        this.fillTOCFromNavDocWithOL(select, olElemsNext, link.Children, navDocURL);
+                    }
+                });
+            }
+        });
     }
 
     private addCoverRel(publication: Publication, rootfile: Rootfile, opf: OPF) {

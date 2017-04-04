@@ -103,17 +103,17 @@ async function processEPUB(path: string): Promise<boolean> {
         console.log(util.inspect(publication,
             { showHidden: false, depth: 1000, colors: true, customInspect: true }));
 
-        console.log("#### RAW JSON:");
-        const publicationJsonObj = JSON.serialize(publication);
-        console.log(publicationJsonObj);
+        // console.log("#### RAW JSON:");
+        // const publicationJsonObj = JSON.serialize(publication);
+        // console.log(publicationJsonObj);
 
-        console.log("#### PRETTY JSON:");
-        const publicationJsonStr = global.JSON.stringify(publicationJsonObj, null, "  ");
-        console.log(publicationJsonStr);
+        // console.log("#### PRETTY JSON:");
+        // const publicationJsonStr = global.JSON.stringify(publicationJsonObj, null, "  ");
+        // console.log(publicationJsonStr);
 
-        console.log("#### CANONICAL JSON:");
-        const publicationJsonStrCanonical = JSON.stringify(sortObject(publicationJsonObj));
-        console.log(publicationJsonStrCanonical);
+        // console.log("#### CANONICAL JSON:");
+        // const publicationJsonStrCanonical = JSON.stringify(sortObject(publicationJsonObj));
+        // console.log(publicationJsonStrCanonical);
 
     } catch (err) {
         console.log("== EpubParser: reject");
