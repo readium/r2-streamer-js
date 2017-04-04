@@ -225,7 +225,7 @@ export class EpubParser {
                             this.findContributorInMeta(publication, rootfile, opf);
                         }
 
-                        // this.fillSpineAndResource(publication, rootfile, opf);
+                        this.fillSpineAndResource(publication, rootfile, opf);
 
                         // addRendition(&publication, book)
 
@@ -790,6 +790,45 @@ export class EpubParser {
             });
         }
         return link;
+    }
+
+    private fillSpineAndResource(publication: Publication, rootfile: Rootfile, opf: OPF) {
+
+        if (opf.Spine && opf.Spine.Items && opf.Spine.Items.length) {
+            opf.Spine.Items.forEach((item) => {
+
+                if (!item.Linear || item.Linear === "yes") {
+
+                    const linkItem = this.findInManifestByID(rootfile, opf, item.IDref);
+
+                    if (linkItem && linkItem.Href) {
+                        if (!publication.Spine) {
+                            publication.Spine = [];
+                        }
+                        publication.Spine.push(linkItem);
+                    }
+                }
+            });
+        }
+
+        if (opf.Manifest && opf.Manifest.length) {
+            opf.Manifest.forEach((item) => {
+                const linkSpine = this.findInSpineByHref(publication, item.Href);
+                if (!linkSpine || !linkSpine.Href) {
+
+                    const linkItem = new Link();
+                    linkItem.TypeLink = item.MediaType;
+                    linkItem.Href = item.Href;
+                    this.addRelAndPropertiesToLink(linkItem, item, rootfile, opf);
+                    this.addMediaOverlay(linkItem, item, rootfile, opf);
+
+                    if (!publication.Resources) {
+                        publication.Resources = [];
+                    }
+                    publication.Resources.push(linkItem);
+                }
+            });
+        }
     }
 
     private addCoverRel(publication: Publication, rootfile: Rootfile, opf: OPF) {
