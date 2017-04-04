@@ -18,6 +18,7 @@ import { Encryption } from "./epub/encryption";
 import { LCP } from "./epub/lcp";
 import { NCX } from "./epub/ncx";
 import { OPF } from "./epub/opf";
+import { Author } from "./epub/opf-author";
 import { Metafield } from "./epub/opf-metafield";
 import { Title } from "./epub/opf-title";
 import { SMIL } from "./epub/smil";
@@ -29,6 +30,8 @@ import { Link } from "../models/publication-link";
 import { Metadata } from "../models/metadata";
 
 import { Publication } from "../models/publication";
+
+import { Contributor } from "../models/metadata-contributor";
 
 export class EpubParser {
 
@@ -171,10 +174,69 @@ export class EpubParser {
 
                         this.addTitle(publication, rootfile, opf);
 
-                        if (opf.Metadata && opf.Metadata.Language) {
-                            publication.Metadata.Language = opf.Metadata.Language;
+                        this.addIdentifier(publication, rootfile, opf);
+
+                        if (opf.Metadata) {
+                            if (opf.Metadata.Language) {
+                                publication.Metadata.Language = opf.Metadata.Language;
+                            }
+                            if (opf.Metadata.Rights && opf.Metadata.Rights.length) {
+                                publication.Metadata.Rights = opf.Metadata.Rights.join(" ");
+                            }
+                            if (opf.Metadata.Description && opf.Metadata.Description.length) {
+                                publication.Metadata.Description = opf.Metadata.Description[0];
+                            }
+                            if (opf.Metadata.Publisher && opf.Metadata.Publisher.length) {
+                                publication.Metadata.Publisher = [];
+
+                                opf.Metadata.Publisher.map((pub) => {
+                                    const contrib = new Contributor();
+                                    contrib.Name = pub;
+                                    publication.Metadata.Publisher.push(contrib);
+                                });
+                            }
+                            if (opf.Metadata.Source && opf.Metadata.Source.length) {
+                                publication.Metadata.Source = opf.Metadata.Source[0];
+                            }
+
+                            if (opf.Metadata.Contributor && opf.Metadata.Contributor.length) {
+                                opf.Metadata.Contributor.map((cont) => {
+                                    this.addContributor(publication, rootfile, opf, cont, undefined);
+                                });
+                            }
+                            if (opf.Metadata.Creator && opf.Metadata.Creator.length) {
+                                opf.Metadata.Creator.map((cont) => {
+                                    this.addContributor(publication, rootfile, opf, cont, "aut");
+                                });
+                            }
                         }
 
+                        if (opf.Spine && opf.Spine.PageProgression) {
+                            publication.Metadata.Direction = opf.Spine.PageProgression;
+                        } else {
+                            publication.Metadata.Direction = "default";
+                        }
+
+                        if (this.isEpub3OrMore(rootfile, opf)) {
+                            this.findContributorInMeta(publication, rootfile, opf);
+                        }
+
+                        // fillSpineAndResource(&publication, book)
+                        // addRendition(&publication, book)
+                        // addCoverRel(&publication, book)
+                        // fillEncryptionInfo(&publication, book)
+
+                        // fillTOCFromNavDoc(&publication, book)
+                        // if len(publication.TOC) == 0 {
+                        // 	fillTOCFromNCX(&publication, book)
+                        // 	fillPageListFromNCX(&publication, book)
+                        // 	fillLandmarksFromGuide(&publication, book)
+                        // }
+
+                        // fillCalibreSerieInfo(&publication, book)
+                        // fillSubject(&publication, book)
+                        // fillPublicationDate(&publication, book)
+                        // fillMediaOverlay(&publication, book)
                     });
             }
 
@@ -312,6 +374,170 @@ export class EpubParser {
     //     });
     // }
 
+    private findContributorInMeta(publication: Publication, rootfile: Rootfile, opf: OPF) {
+
+        if (opf.Metadata && opf.Metadata.Meta) {
+            opf.Metadata.Meta.map((meta) => {
+                if (meta.Property === "dcterms:creator" || meta.Property === "dcterms:contributor") {
+                    const cont = new Author();
+                    cont.Data = meta.Data;
+                    cont.ID = meta.ID;
+                    this.addContributor(publication, rootfile, opf, cont, undefined);
+                }
+            });
+        }
+    }
+
+    private addContributor(
+        publication: Publication, rootfile: Rootfile, opf: OPF, cont: Author, forcedRole: string | undefined) {
+
+        const contributor = new Contributor();
+        let role: string | undefined;
+
+        const epubVersion = this.getEpubVersion(rootfile, opf);
+
+        if (this.isEpub3OrMore(rootfile, opf)) {
+
+            const meta = this.findMetaByRefineAndProperty(rootfile, opf, cont.ID, "role");
+            if (meta && meta.Property === "role") {
+                role = meta.Data;
+            }
+            if (!role && forcedRole) {
+                role = forcedRole;
+            }
+
+            const metaAlt = this.findAllMetaByRefineAndProperty(rootfile, opf, cont.ID, "alternate-script");
+            if (metaAlt && metaAlt.length) {
+                contributor.Name = {} as IStringMap;
+
+                if (publication.Metadata &&
+                    publication.Metadata.Language &&
+                    publication.Metadata.Language.length) {
+
+                    contributor.Name[publication.Metadata.Language[0].toLowerCase()] = cont.Data;
+                }
+
+                metaAlt.map((m) => {
+                    if (m.Lang) {
+                        (contributor.Name as IStringMap)[m.Lang] = m.Data;
+                    }
+                });
+            } else {
+                contributor.Name = cont.Data;
+            }
+        } else {
+            contributor.Name = cont.Data;
+            role = cont.Role;
+            if (!role && forcedRole) {
+                role = forcedRole;
+            }
+        }
+
+        if (role) {
+            switch (role) {
+                case "aut": {
+                    if (!publication.Metadata.Author) {
+                        publication.Metadata.Author = [];
+                    }
+                    publication.Metadata.Author.push(contributor);
+                    break;
+                }
+                case "trl": {
+                    if (!publication.Metadata.Translator) {
+                        publication.Metadata.Translator = [];
+                    }
+                    publication.Metadata.Translator.push(contributor);
+                    break;
+                }
+                case "art": {
+                    if (!publication.Metadata.Artist) {
+                        publication.Metadata.Artist = [];
+                    }
+                    publication.Metadata.Artist.push(contributor);
+                    break;
+                }
+                case "edt": {
+                    if (!publication.Metadata.Editor) {
+                        publication.Metadata.Editor = [];
+                    }
+                    publication.Metadata.Editor.push(contributor);
+                    break;
+                }
+                case "ill": {
+                    if (!publication.Metadata.Illustrator) {
+                        publication.Metadata.Illustrator = [];
+                    }
+                    publication.Metadata.Illustrator.push(contributor);
+                    break;
+                }
+                case "ltr": {
+                    if (!publication.Metadata.Letterer) {
+                        publication.Metadata.Letterer = [];
+                    }
+                    publication.Metadata.Letterer.push(contributor);
+                    break;
+                }
+                case "pen": {
+                    if (!publication.Metadata.Penciler) {
+                        publication.Metadata.Penciler = [];
+                    }
+                    publication.Metadata.Penciler.push(contributor);
+                    break;
+                }
+                case "clr": {
+                    if (!publication.Metadata.Colorist) {
+                        publication.Metadata.Colorist = [];
+                    }
+                    publication.Metadata.Colorist.push(contributor);
+                    break;
+                }
+                case "ink": {
+                    if (!publication.Metadata.Inker) {
+                        publication.Metadata.Inker = [];
+                    }
+                    publication.Metadata.Inker.push(contributor);
+                    break;
+                }
+                case "nrt": {
+                    if (!publication.Metadata.Narrator) {
+                        publication.Metadata.Narrator = [];
+                    }
+                    publication.Metadata.Narrator.push(contributor);
+                    break;
+                }
+                case "pbl": {
+                    if (!publication.Metadata.Publisher) {
+                        publication.Metadata.Publisher = [];
+                    }
+                    publication.Metadata.Publisher.push(contributor);
+                    break;
+                }
+                default: {
+                    contributor.Role = role;
+
+                    if (!publication.Metadata.Contributor) {
+                        publication.Metadata.Contributor = [];
+                    }
+                    publication.Metadata.Contributor.push(contributor);
+                }
+            }
+        }
+    }
+
+    private addIdentifier(publication: Publication, rootfile: Rootfile, opf: OPF) {
+        if (opf.Metadata && opf.Metadata.Identifier) {
+            if (opf.UniqueIdentifier && opf.Metadata.Identifier.length > 1) {
+                opf.Metadata.Identifier.map((iden) => {
+                    if (iden.ID === opf.UniqueIdentifier) {
+                        publication.Metadata.Identifier = iden.Data;
+                    }
+                });
+            } else if (opf.Metadata.Identifier.length > 0) {
+                publication.Metadata.Identifier = opf.Metadata.Identifier[0].Data;
+            }
+        }
+    }
+
     private addTitle(publication: Publication, rootfile: Rootfile, opf: OPF) {
 
         if (this.isEpub3OrMore(rootfile, opf)) {
@@ -367,16 +593,28 @@ export class EpubParser {
         }
     }
 
+    private findMetaByRefineAndProperty(
+        rootfile: Rootfile, opf: OPF, ID: string, property: string): Metafield | undefined {
+
+        const ret = this.findAllMetaByRefineAndProperty(rootfile, opf, ID, property);
+        if (ret.length) {
+            return ret[0];
+        }
+        return undefined;
+    }
+
     private findAllMetaByRefineAndProperty(rootfile: Rootfile, opf: OPF, ID: string, property: string): Metafield[] {
         const metas: Metafield[] = [];
 
         const refineID = "#" + ID;
 
-        opf.Metadata.Meta.map((metaTag) => {
-            if (metaTag.Refine === refineID && metaTag.Property === property) {
-                metas.push(metaTag);
-            }
-        });
+        if (opf.Metadata && opf.Metadata.Meta) {
+            opf.Metadata.Meta.map((metaTag) => {
+                if (metaTag.Refine === refineID && metaTag.Property === property) {
+                    metas.push(metaTag);
+                }
+            });
+        }
 
         return metas;
     }
