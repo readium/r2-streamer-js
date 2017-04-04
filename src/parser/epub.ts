@@ -13,11 +13,16 @@ import { JSON } from "ta-json";
 import { createZipPromise } from "./zip";
 
 import { Container } from "./epub/container";
+import { Rootfile } from "./epub/container-rootfile";
 import { Encryption } from "./epub/encryption";
 import { LCP } from "./epub/lcp";
 import { NCX } from "./epub/ncx";
 import { OPF } from "./epub/opf";
+import { Metafield } from "./epub/opf-metafield";
+import { Title } from "./epub/opf-title";
 import { SMIL } from "./epub/smil";
+
+import { IStringMap } from "../models/metadata-multilang";
 
 import { Link } from "../models/publication-link";
 
@@ -26,6 +31,16 @@ import { Metadata } from "../models/metadata";
 import { Publication } from "../models/publication";
 
 export class EpubParser {
+
+    private epub3 = "3.0";
+    private epub301 = "3.0.1";
+    private epub31 = "3.1";
+    private epub2 = "2.0";
+    private epub201 = "2.0.1";
+    private autoMeta = "auto";
+    private noneMeta = "none";
+    private reflowableMeta = "reflowable";
+    private mediaOverlayURL = "media-overlay?resource=";
 
     public Parse(filePath: string): Promise<Publication> {
 
@@ -47,26 +62,29 @@ export class EpubParser {
 
             const publication = new Publication();
             publication.Metadata = new Metadata();
-            publication.Metadata.Identifier = path.basename(filePath);
-            publication.Metadata.Title = this.filePathToTitle(filePath);
+            publication.Metadata.Modified = Moment(Date.now()).toDate();
+
+            publication.AddToInternal("filename", path.basename(filePath));
 
             publication.AddToInternal("type", "epub");
             // publication.AddToInternal("epub", zip);
 
+            let lcpl: LCP | undefined;
             if (Object.keys(zip.entries()).indexOf("META-INF/license.lcpl") >= 0) {
 
                 const lcplZipData = zip.entryDataSync("META-INF/license.lcpl");
                 if (lcplZipData) {
                     const lcplStr = lcplZipData.toString("utf8");
                     const lcplJson = global.JSON.parse(lcplStr);
-                    const lcpl = JSON.deserialize<LCP>(lcplJson, LCP);
+                    lcpl = JSON.deserialize<LCP>(lcplJson, LCP);
 
                     // breakLength: 100  maxArrayLength: undefined
-                    console.log(util.inspect(lcpl,
-                        { showHidden: false, depth: 1000, colors: true, customInspect: true }));
+                    // console.log(util.inspect(lcpl,
+                    //     { showHidden: false, depth: 1000, colors: true, customInspect: true }));
                 }
             }
 
+            let encryption: Encryption | undefined;
             if (Object.keys(zip.entries()).indexOf("META-INF/encryption.xml") >= 0) {
 
                 const encryptionXmlZipData = zip.entryDataSync("META-INF/encryption.xml");
@@ -74,7 +92,7 @@ export class EpubParser {
                     const encryptionXmlStr = encryptionXmlZipData.toString("utf8");
                     const encryptionXmlDoc = new xmldom.DOMParser().parseFromString(encryptionXmlStr);
 
-                    const encryption = XML.deserialize<Encryption>(encryptionXmlDoc, Encryption);
+                    encryption = XML.deserialize<Encryption>(encryptionXmlDoc, Encryption);
 
                     // breakLength: 100  maxArrayLength: undefined
                     // console.log(util.inspect(encryption,
@@ -97,54 +115,67 @@ export class EpubParser {
             //     { showHidden: false, depth: 1000, colors: true, customInspect: true }));
 
             if (container && container.Rootfile) {
-                container.Rootfile.map((rootfile) => {
-                    const opfZipData = zip.entryDataSync(rootfile.Path);
-                    const opfStr = opfZipData.toString("utf8");
-                    const opfDoc = new xmldom.DOMParser().parseFromString(opfStr);
-                    const opf = XML.deserialize<OPF>(opfDoc, OPF);
+                [container.Rootfile[0]] // container.Rootfile for multiple renditions
+                    .map((rootfile) => {
+                        publication.AddToInternal("rootfile", rootfile.Path);
 
-                    // breakLength: 100  maxArrayLength: undefined
-                    // console.log(util.inspect(opf,
-                    //     { showHidden: false, depth: 1000, colors: true, customInspect: true }));
+                        const opfZipData = zip.entryDataSync(rootfile.Path);
+                        const opfStr = opfZipData.toString("utf8");
+                        const opfDoc = new xmldom.DOMParser().parseFromString(opfStr);
+                        const opf = XML.deserialize<OPF>(opfDoc, OPF);
 
-                    opf.Manifest.map((manifestItem) => {
-                        if (manifestItem.MediaType === "application/smil+xml") {
-                            const smilFilePath = path.join(path.dirname(rootfile.Path), manifestItem.Href);
-                            // console.log("########## SMIL: "
-                            //     + rootfile.Path
-                            //     + " == "
-                            //     + manifestItem.Href
-                            //     + " -- "
-                            //     + smilFilePath);
-                            const smilZipData = zip.entryDataSync(smilFilePath);
-                            const smilStr = smilZipData.toString("utf8");
-                            const smilDoc = new xmldom.DOMParser().parseFromString(smilStr);
-                            const smil = XML.deserialize<SMIL>(smilDoc, SMIL);
+                        // breakLength: 100  maxArrayLength: undefined
+                        // console.log(util.inspect(opf,
+                        //     { showHidden: false, depth: 1000, colors: true, customInspect: true }));
 
-                            // breakLength: 100  maxArrayLength: undefined
-                            // console.log(util.inspect(smil,
-                            //     { showHidden: false, depth: 1000, colors: true, customInspect: true }));
+                        const epubVersion = this.getEpubVersion(rootfile, opf);
+
+                        let ncx: NCX | undefined;
+                        opf.Manifest.map((manifestItem) => {
+                            if (manifestItem.MediaType === "application/smil+xml") {
+                                const smilFilePath = path.join(path.dirname(rootfile.Path), manifestItem.Href);
+                                // console.log("########## SMIL: "
+                                //     + rootfile.Path
+                                //     + " == "
+                                //     + manifestItem.Href
+                                //     + " -- "
+                                //     + smilFilePath);
+                                const smilZipData = zip.entryDataSync(smilFilePath);
+                                const smilStr = smilZipData.toString("utf8");
+                                const smilDoc = new xmldom.DOMParser().parseFromString(smilStr);
+                                const smil = XML.deserialize<SMIL>(smilDoc, SMIL);
+
+                                // breakLength: 100  maxArrayLength: undefined
+                                // console.log(util.inspect(smil,
+                                //     { showHidden: false, depth: 1000, colors: true, customInspect: true }));
+                            }
+
+                            if (opf.Spine.Toc && manifestItem.ID === opf.Spine.Toc) {
+                                const ncxFilePath = path.join(path.dirname(rootfile.Path), manifestItem.Href);
+                                // console.log("########## NCX: "
+                                //     + rootfile.Path
+                                //     + " == "
+                                //     + manifestItem.Href
+                                //     + " -- "
+                                //     + ncxFilePath);
+                                const ncxZipData = zip.entryDataSync(ncxFilePath);
+                                const ncxStr = ncxZipData.toString("utf8");
+                                const ncxDoc = new xmldom.DOMParser().parseFromString(ncxStr);
+                                ncx = XML.deserialize<NCX>(ncxDoc, NCX);
+
+                                // breakLength: 100  maxArrayLength: undefined
+                                // console.log(util.inspect(ncx,
+                                //     { showHidden: false, depth: 1000, colors: true, customInspect: true }));
+                            }
+                        });
+
+                        this.addTitle(publication, rootfile, opf);
+
+                        if (opf.Metadata && opf.Metadata.Language) {
+                            publication.Metadata.Language = opf.Metadata.Language;
                         }
 
-                        if (opf.Spine.Toc && manifestItem.ID === opf.Spine.Toc) {
-                            const ncxFilePath = path.join(path.dirname(rootfile.Path), manifestItem.Href);
-                            // console.log("########## NCX: "
-                            //     + rootfile.Path
-                            //     + " == "
-                            //     + manifestItem.Href
-                            //     + " -- "
-                            //     + ncxFilePath);
-                            const ncxZipData = zip.entryDataSync(ncxFilePath);
-                            const ncxStr = ncxZipData.toString("utf8");
-                            const ncxDoc = new xmldom.DOMParser().parseFromString(ncxStr);
-                            const ncx = XML.deserialize<NCX>(ncxDoc, NCX);
-
-                            // breakLength: 100  maxArrayLength: undefined
-                            // console.log(util.inspect(ncx,
-                            //     { showHidden: false, depth: 1000, colors: true, customInspect: true }));
-                        }
                     });
-                });
             }
 
             // const entries = zip.entries();
@@ -259,10 +290,10 @@ export class EpubParser {
         });
     }
 
-    private filePathToTitle(filePath: string): string {
-        const fileName = path.basename(filePath);
-        return slugify(fileName, "_").replace(/[\.]/g, "_");
-    }
+    // private filePathToTitle(filePath: string): string {
+    //     const fileName = path.basename(filePath);
+    //     return slugify(fileName, "_").replace(/[\.]/g, "_");
+    // }
 
     // private fillPublicationDate(publication: Publication, book: Epub) {
 
@@ -281,20 +312,89 @@ export class EpubParser {
     //     });
     // }
 
-    // private getEpubVersion(book: Epub): string | undefined {
+    private addTitle(publication: Publication, rootfile: Rootfile, opf: OPF) {
 
-    //     if (book.Container.Rootfile.Version) {
-    //         return book.Container.Rootfile.Version;
-    //     } else if (book.Opf.Version) {
-    //         return book.Opf.Version;
-    //     }
+        if (this.isEpub3OrMore(rootfile, opf)) {
+            let mainTitle: Title | undefined;
 
-    //     return undefined;
-    // }
+            if (opf.Metadata &&
+                opf.Metadata.Title &&
+                opf.Metadata.Title.length) {
 
-    // private isEpub3OrMore(book: Epub): boolean {
+                if (opf.Metadata.Meta) {
+                    opf.Metadata.Title.map((title) => {
+                        const refineID = "#" + title.ID;
 
-    //     let version = this.getEpubVersion(book);
-    //     return (version === epub3 || version === epub31);
-    // }
+                        opf.Metadata.Meta.map((meta) => {
+                            if (meta.Data === "main" && meta.Refine === refineID) {
+                                mainTitle = title;
+                            }
+                        });
+                    });
+                }
+
+                if (!mainTitle) {
+                    mainTitle = opf.Metadata.Title[0];
+                }
+            }
+
+            if (mainTitle) {
+                const metaAlt = this.findAllMetaByRefineAndProperty(rootfile, opf, mainTitle.ID, "alternate-script");
+                if (metaAlt && metaAlt.length) {
+                    publication.Metadata.Title = {} as IStringMap;
+
+                    if (mainTitle.Lang) {
+                        publication.Metadata.Title[mainTitle.Lang.toLowerCase()] = mainTitle.Data;
+                    }
+
+                    metaAlt.map((m) => {
+                        if (m.Lang) {
+                            (publication.Metadata.Title as IStringMap)[m.Lang.toLowerCase()] = m.Data;
+                        }
+                    });
+                } else {
+                    publication.Metadata.Title = mainTitle.Data;
+                }
+            }
+
+        } else {
+            if (opf.Metadata &&
+                opf.Metadata.Title &&
+                opf.Metadata.Title.length) {
+
+                publication.Metadata.Title = opf.Metadata.Title[0].Data;
+            }
+        }
+    }
+
+    private findAllMetaByRefineAndProperty(rootfile: Rootfile, opf: OPF, ID: string, property: string): Metafield[] {
+        const metas: Metafield[] = [];
+
+        const refineID = "#" + ID;
+
+        opf.Metadata.Meta.map((metaTag) => {
+            if (metaTag.Refine === refineID && metaTag.Property === property) {
+                metas.push(metaTag);
+            }
+        });
+
+        return metas;
+    }
+
+    private getEpubVersion(rootfile: Rootfile, opf: OPF): string | undefined {
+
+        if (rootfile.Version) {
+            return rootfile.Version;
+        } else if (opf.Version) {
+            return opf.Version;
+        }
+
+        return undefined;
+    }
+
+    private isEpub3OrMore(rootfile: Rootfile, opf: OPF): boolean {
+
+        const version = this.getEpubVersion(rootfile, opf);
+        return (version === this.epub3 || version === this.epub301 || version === this.epub31);
+    }
 }

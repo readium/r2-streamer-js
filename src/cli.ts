@@ -12,6 +12,7 @@ import { EpubParser } from "./parser/epub";
 
 import * as fs from "fs";
 import * as path from "path";
+import * as util from "util";
 
 interface IStringKeyedObject { [key: string]: any; }
 
@@ -97,7 +98,10 @@ async function processEPUB(path: string): Promise<boolean> {
         console.log("== EpubParser: resolve");
 
         console.log("#### RAW OBJECT:");
-        console.log(publication);
+
+        // breakLength: 100  maxArrayLength: undefined
+        console.log(util.inspect(publication,
+            { showHidden: false, depth: 1000, colors: true, customInspect: true }));
 
         console.log("#### RAW JSON:");
         const publicationJsonObj = JSON.serialize(publication);
