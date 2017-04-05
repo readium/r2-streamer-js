@@ -1079,6 +1079,9 @@ export class EpubParser {
     private fillTOCFromNCX(publication: Publication, rootfile: Rootfile, opf: OPF, ncx: NCX) {
         if (ncx.Points && ncx.Points.length) {
             ncx.Points.forEach((point) => {
+                if (!publication.TOC) {
+                    publication.TOC = [];
+                }
                 this.fillTOCFromNavPoint(publication, rootfile, opf, ncx, point, publication.TOC);
             });
         }
@@ -1109,6 +1112,9 @@ export class EpubParser {
 
         if (point.Points && point.Points.length) {
             point.Points.forEach((p) => {
+                if (!link.Children) {
+                    link.Children = [];
+                }
                 this.fillTOCFromNavPoint(publication, rootfile, opf, ncx, p, link.Children);
             });
         }
@@ -1269,7 +1275,9 @@ export class EpubParser {
 
                     const olElemsNext = select("xhtml:ol", liElem);
                     if (olElemsNext && olElemsNext.length) {
-                        link.Children = [];
+                        if (!link.Children) {
+                            link.Children = [];
+                        }
                         console.log("SNB OL");
                         this.fillTOCFromNavDocWithOL(select, olElemsNext, link.Children, navDocURL);
                     }
