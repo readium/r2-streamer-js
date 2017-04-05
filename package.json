@@ -60,7 +60,7 @@
   "scripts": {
     "start": "yarn run clean && yarn run lint:all && yarn run lint:typescript && yarn run dist && ls -R dist",
     "clean": "rm -rf ./dist",
-    "lint:all": "echo '\n===== LINT (all)\n' && eclint check '**/*' '[!].git/**/*' '[!]node_modules/**/*' '[!]dist/**/*' '[!]**/.DS_Store' '[!]**/*.epub' '[!]**/*.cbz'  '[!]**/*.jpg'  '[!]**/*.jpeg'  '[!]**/*.png'",
+    "lint:all": "echo '\n===== LINT (all)\n' && eclint check '**/*' '[!].git/**/*' '[!]node_modules/**/*' '[!]dist/**/*' '[!].vscode/**/*' '[!]**/.DS_Store' '[!]**/*.epub' '[!]**/*.cbz'  '[!]**/*.jpg'  '[!]**/*.jpeg'  '[!]**/*.png'",
     "lint:typescript": "echo '\n===== LINT (typescript)\n' && tslint -c './tslint.json' './src/**/*.ts' './test/**/*.ts'",
     "transpile:typescript": "echo '\n===== COMPILE (typescript)\n' && tsc -p './tsconfig.json'",
     "dist": "yarn run transpile:typescript",

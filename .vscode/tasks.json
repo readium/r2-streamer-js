@@ -1,0 +1,36 @@
+{
+    "version": "0.1.0",
+    "command": "yarn",
+    "args": [],
+    "isShellCommand": true,
+    "showOutput": "always",
+    "suppressTaskName": true,
+    "echoCommand": true,
+    "isBackground": false,
+    "tasks": [
+        {
+            "taskName": "build",
+            "args": [
+                "start"
+            ],
+            "isBuildCommand": true,
+            "problemMatcher": [
+                "$tsc",
+                "$jshint"
+            ]
+        },
+        {
+            "taskName": "tests",
+            "args": [
+                "test"
+            ]
+        },
+        {
+            "taskName": "cli",
+            "args": [
+                "run",
+                "cli"
+            ]
+        }
+    ]
+}
