@@ -102,20 +102,20 @@ export class Publication {
         this.Internal.push(internal);
     }
 
-    public findLinKByHref(href: string): Link | undefined {
-        if (this.Spine) {
-            const ll = this.Spine.find((link) => {
-                if (link.Href && href.indexOf(link.Href) >= 0) {
-                    return true;
-                }
-                return false;
-            });
-            if (ll) {
-                return ll;
-            }
-        }
-        return undefined;
-    }
+    // public findLinKByHref(href: string): Link | undefined {
+    //     if (this.Spine) {
+    //         const ll = this.Spine.find((link) => {
+    //             if (link.Href && href.indexOf(link.Href) >= 0) {
+    //                 return true;
+    //             }
+    //             return false;
+    //         });
+    //         if (ll) {
+    //             return ll;
+    //         }
+    //     }
+    //     return undefined;
+    // }
 
     public GetCover(): Link | undefined {
         return this.searchLinkByRel("cover");

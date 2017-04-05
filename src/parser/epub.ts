@@ -1,6 +1,7 @@
 import * as mime from "mime-types";
 import * as Moment from "moment";
 import * as path from "path";
+import * as querystring from "querystring";
 import * as slugify from "slugify";
 import * as util from "util";
 import * as xmldom from "xmldom";
@@ -370,18 +371,67 @@ export class EpubParser {
                     return;
                 }
 
+                const mo = new MediaOverlayNode();
+                mo.SmilPathInOPF = item.Href;
+                mo.SmilPathInZip = smilFilePath;
+
+                const manItemsHtmlWithSmil = Array<Manifest>();
+                opf.Manifest.forEach((manItemHtmlWithSmil) => {
+                    if (manItemHtmlWithSmil.MediaOverlay) { // HTML
+                        const manItemSmil = opf.Manifest.find((mi) => {
+                            if (mi.ID === manItemHtmlWithSmil.MediaOverlay) {
+                                return true;
+                            }
+                            return false;
+                        });
+                        if (manItemSmil) {
+                            const smilFilePath2 = path.join(path.dirname(rootfile.Path), manItemSmil.Href);
+                            if (smilFilePath2 === smilFilePath) {
+                                manItemsHtmlWithSmil.push(manItemHtmlWithSmil);
+                            }
+                        }
+                    }
+                });
+
+                manItemsHtmlWithSmil.forEach((manItemHtmlWithSmil) => {
+
+                    const htmlPathInZip = path.join(path.dirname(rootfile.Path), manItemHtmlWithSmil.Href);
+
+                    const link = this.findLinKByHref(publication, rootfile, opf, htmlPathInZip);
+                    if (link) {
+                        if (!link.MediaOverlays) {
+                            link.MediaOverlays = [];
+                        }
+
+                        const alreadyExists = link.MediaOverlays.find((moo) => {
+                            if (mo.SmilPathInZip === moo.SmilPathInZip) {
+                                return true;
+                            }
+                            return false;
+                        });
+                        if (!alreadyExists) {
+                            link.MediaOverlays.push(mo);
+                        }
+
+                        if (!link.Properties) {
+                            link.Properties = new Properties();
+                        }
+                        link.Properties.MediaOverlay = this.mediaOverlayURL + querystring.escape(link.Href);
+                    }
+                });
+
                 const smilZipData = zip.entryDataSync(smilFilePath);
                 const smilStr = smilZipData.toString("utf8");
                 const smilXmlDoc = new xmldom.DOMParser().parseFromString(smilStr);
                 const smil = XML.deserialize<SMIL>(smilXmlDoc, SMIL);
 
-                const mo = new MediaOverlayNode();
-
                 mo.Role = [];
                 mo.Role.push("section");
+
                 if (smil.Body.TextRef) {
                     mo.Text = smil.Body.TextRef;
                 }
+
                 if (smil.Body.Par && smil.Body.Par.length) {
                     smil.Body.Par.forEach((par) => {
                         const p = new MediaOverlayNode();
@@ -403,24 +453,8 @@ export class EpubParser {
                         if (!mo.Children) {
                             mo.Children = [];
                         }
-                        this.addSeqToMediaOverlay(publication, rootfile, opf, mo.Children, s, mo.Text);
+                        this.addSeqToMediaOverlay(publication, rootfile, opf, mo, mo.Children, s);
                     });
-                }
-
-                if (mo.Text) {
-                    const baseHref = mo.Text.split("#")[0];
-                    const link = this.findLinKByHref(publication, baseHref);
-                    if (link) {
-                        if (!link.MediaOverlays) {
-                            link.MediaOverlays = [];
-                        }
-                        link.MediaOverlays.push(mo);
-
-                        if (!link.Properties) {
-                            link.Properties = new Properties();
-                        }
-                        link.Properties.MediaOverlay = this.mediaOverlayURL + link.Href;
-                    }
                 }
 
                 // breakLength: 100  maxArrayLength: undefined
@@ -431,12 +465,16 @@ export class EpubParser {
     }
 
     private addSeqToMediaOverlay(
-        publication: Publication, rootfile: Rootfile, opf: OPF, mo: MediaOverlayNode[], seq: Seq, href: string) {
+        publication: Publication, rootfile: Rootfile, opf: OPF,
+        rootMO: MediaOverlayNode, mo: MediaOverlayNode[], seq: Seq) {
 
         const moc = new MediaOverlayNode();
         moc.Role = [];
         moc.Role.push("section");
-        moc.Text = seq.TextRef;
+
+        if (seq.TextRef) {
+            moc.Text = seq.TextRef;
+        }
 
         if (seq.Par && seq.Par.length) {
             seq.Par.forEach((par) => {
@@ -464,35 +502,8 @@ export class EpubParser {
                 if (!moc.Children) {
                     moc.Children = [];
                 }
-                this.addSeqToMediaOverlay(publication, rootfile, opf, moc.Children, s, moc.Text);
+                this.addSeqToMediaOverlay(publication, rootfile, opf, rootMO, moc.Children, s);
             });
-        }
-
-        if (moc.Text && href) {
-            const baseHref = moc.Text.split("#")[0];
-            const baseHrefParent = href.split("#")[0];
-
-            console.log("€€€€€€€€€€€€€€€€€€€€€€€€€€€€€");
-            console.log(baseHref);
-            console.log(baseHrefParent);
-            console.log("#############################");
-
-            if (baseHref === baseHrefParent) {
-                mo.push(moc);
-            } else {
-                const link = this.findLinKByHref(publication, baseHref);
-                if (link) {
-                    if (!link.MediaOverlays) {
-                        link.MediaOverlays = [];
-                    }
-                    link.MediaOverlays.push(moc);
-
-                    if (!link.Properties) {
-                        link.Properties = new Properties();
-                    }
-                    link.Properties.MediaOverlay = this.mediaOverlayURL + link.Href;
-                }
-            }
         }
     }
 
@@ -1393,10 +1404,12 @@ export class EpubParser {
         return (version === this.epub3 || version === this.epub301 || version === this.epub31);
     }
 
-    private findLinKByHref(publication: Publication, href: string): Link | undefined {
+    private findLinKByHref(publication: Publication, rootfile: Rootfile, opf: OPF, href: string): Link | undefined {
         if (publication.Spine && publication.Spine.length) {
             const ll = publication.Spine.find((l) => {
-                if (href.indexOf(l.Href) >= 0) {
+                const pathInZip = path.join(path.dirname(rootfile.Path), l.Href);
+
+                if (href === pathInZip) {
                     return true;
                 }
                 return false;
