@@ -83,19 +83,14 @@ if (ext === ".epub") {
     new CbzParser().Parse(filePath)
         .then((publication) => {
             console.log("== CbzParser: resolve");
-            console.log(publication);
+            dumpPublication(publication);
         }).catch((err) => {
             console.log("== CbzParser: reject");
             console.log(err);
         });
 }
 
-async function processEPUB(path: string): Promise<boolean> {
-    const parser = new EpubParser();
-    try {
-        const publication = await parser.Parse(path);
-
-        console.log("== EpubParser: resolve");
+function dumpPublication(publication: Publication) {
 
         console.log("#### RAW OBJECT:");
 
@@ -114,6 +109,16 @@ async function processEPUB(path: string): Promise<boolean> {
         // console.log("#### CANONICAL JSON:");
         // const publicationJsonStrCanonical = JSON.stringify(sortObject(publicationJsonObj));
         // console.log(publicationJsonStrCanonical);
+}
+
+async function processEPUB(path: string): Promise<boolean> {
+    const parser = new EpubParser();
+    try {
+        const publication = await parser.Parse(path);
+
+        console.log("== EpubParser: resolve");
+
+        dumpPublication(publication);
 
     } catch (err) {
         console.log("== EpubParser: reject");
