@@ -10,6 +10,7 @@
             "cwd": "${workspaceRoot}",
             "internalConsoleOptions": "openOnSessionStart",
             "args": [
+                "${file}",
                 "${workspaceRoot}/wasteland-otf-obf.epub"
             ],
             "env": {
@@ -32,6 +33,7 @@
             "cwd": "${workspaceRoot}",
             "internalConsoleOptions": "openOnSessionStart",
             "args": [
+                "${file}",
                 "${workspaceRoot}/wasteland-otf-obf.epub"
             ],
             "env": {
