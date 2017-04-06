@@ -12,7 +12,7 @@ import { propertyConverters } from "../converters/converter";
 import { FunctionType, IXmlNamespaces } from "../types";
 
 export function deserialize(
-    objectInstance: xmldom.Node,
+    objectInstance: Node,
     objectType: FunctionType | undefined,
     options: IParseOptions = { runConstructor: false }): any {
 
@@ -24,7 +24,7 @@ export function deserialize(
 }
 
 function deserializeRootObject(
-    objectInstance: xmldom.Node,
+    objectInstance: Node,
     objectType: FunctionType = Object,
     options: IParseOptions): any {
 
@@ -78,7 +78,7 @@ function deserializeRootObject(
 
             const xPathSelected = select(p.xpathSelector, objectInstance);
             if (xPathSelected && xPathSelected.length) {
-                const xpathMatched = Array<xmldom.Node>();
+                const xpathMatched = Array<Node>();
 
                 // console.log("XPATH MATCH: " + p.xpathSelector
                 //     + " == " + (xPathSelected instanceof Array)
@@ -87,7 +87,7 @@ function deserializeRootObject(
                 if (!(xPathSelected instanceof Array)) {
                     xpathMatched.push(xPathSelected);
                 } else {
-                    xPathSelected.forEach((item) => {
+                    xPathSelected.forEach((item: Node) => {
                         // console.log(item.nodeValue || item.localName);
                         xpathMatched.push(item);
                     });
@@ -119,7 +119,7 @@ function deserializeRootObject(
 }
 
 function deserializeObject(
-    objectInstance: xmldom.Node,
+    objectInstance: Node,
     definition: PropertyDefinition,
     options: IParseOptions): IDynamicObject {
 
@@ -130,11 +130,11 @@ function deserializeObject(
     const value: any =
         // objectInstance.nodeValue;
         objectInstance.nodeType === 3 ? // TEXT_NODE
-            (objectInstance as xmldom.Text).data :
+            (objectInstance as Text).data :
             (objectInstance.nodeType === 2 ? // ATTRIBUTE_NODE
-                (objectInstance as xmldom.Attr).value :
+                (objectInstance as Attr).value :
                 (objectInstance.nodeType === 1 ? // ELEMENT_NODE
-                    (objectInstance as xmldom.Element).localName :
+                    (objectInstance as Element).localName :
                     objectInstance.nodeValue));
 
     const converter = definition.converter || propertyConverters.get(definition.objectType);

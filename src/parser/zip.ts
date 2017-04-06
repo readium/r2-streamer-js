@@ -1,13 +1,3 @@
-// package.json
-// with dependencies:
-// "@types/node"
-// ==>
-// const StreamZip = require("node-stream-zip");
-
-// src/declarations.d.ts
-// with:
-// declare module "*";
-// ==>
 import * as StreamZip from "node-stream-zip";
 
 export function createZipPromise(filePath: string): Promise<any> {

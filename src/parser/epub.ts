@@ -1,5 +1,5 @@
 import * as mime from "mime-types";
-import * as Moment from "moment";
+import * as moment from "moment";
 import * as path from "path";
 import * as querystring from "querystring";
 import * as slugify from "slugify";
@@ -76,7 +76,7 @@ export class EpubParser {
 
             const publication = new Publication();
             publication.Metadata = new Metadata();
-            publication.Metadata.Modified = Moment(Date.now()).toDate();
+            publication.Metadata.Modified = moment(Date.now()).toDate();
 
             publication.AddToInternal("filename", path.basename(filePath));
 
@@ -308,7 +308,7 @@ export class EpubParser {
             //             //         console.log("XPATH multiple element MATCH: " + xp);
 
             //             //         xPathSelected.forEach((item) => {
-            //             //             const elem = item as xmldom.Element;
+            //             //             const elem = item as Element;
             //             //             console.log(elem.localName);
             //             //         });
 
@@ -319,14 +319,14 @@ export class EpubParser {
             //             //                 console.log("XPATH multiple attribute MATCH: " + xp);
 
             //             //                 xPathSelected.forEach((item) => {
-            //             //                     const attr = item as xmldom.Attr;
+            //             //                     const attr = item as Attr;
             //             //                     console.log(attr.value);
             //             //                 });
 
             //             //             } else {
             //             //                 console.log("XPATH single attribute MATCH: " + xp);
 
-            //             //                 const attr = xPathSelected as xmldom.Attr;
+            //             //                 const attr = xPathSelected as Attr;
             //             //                 console.log(attr.value);
             //             //             }
             //             //         } else {
@@ -335,7 +335,7 @@ export class EpubParser {
             //             //     } else {
             //             //         console.log("XPATH single element MATCH: " + xp);
 
-            //             //         const elem = xPathSelected as xmldom.Element;
+            //             //         const elem = xPathSelected as Element;
             //             //         console.log(elem.localName);
             //             //     }
             //             // } else {
@@ -512,13 +512,13 @@ export class EpubParser {
         if (opf.Metadata && opf.Metadata.Date && opf.Metadata.Date.length) {
 
             if (this.isEpub3OrMore(rootfile, opf) && opf.Metadata.Date[0] && opf.Metadata.Date[0].Data) {
-                publication.Metadata.PublicationDate = Moment(opf.Metadata.Date[0].Data).toDate();
+                publication.Metadata.PublicationDate = moment(opf.Metadata.Date[0].Data).toDate();
                 return;
             }
 
             opf.Metadata.Date.forEach((date) => {
                 if (date.Data && date.Event && date.Event.indexOf("publication") >= 0) {
-                    publication.Metadata.PublicationDate = Moment(date.Data).toDate();
+                    publication.Metadata.PublicationDate = moment(date.Data).toDate();
                 }
             });
         }
@@ -1203,14 +1203,14 @@ export class EpubParser {
         const navs = select("/xhtml:html/xhtml:body//xhtml:nav", navXmlDoc);
         if (navs && navs.length) {
 
-            navs.forEach((navElement: xmldom.Element) => {
+            navs.forEach((navElement: Element) => {
 
                 const typeNav = select("@epub:type", navElement);
                 if (typeNav && typeNav.length) {
 
-                    const olElem = select("xhtml:ol", navElement);
+                    const olElem = select("xhtml:ol", navElement) as Element[];
 
-                    switch (typeNav[0].value) {
+                    switch ((typeNav[0] as Attr).value) {
 
                         case "toc": {
                             publication.TOC = [];
@@ -1253,14 +1253,14 @@ export class EpubParser {
         }
     }
 
-    private fillTOCFromNavDocWithOL(select: any, olElems: xmldom.Element[], node: Link[], navDocURL: string) {
+    private fillTOCFromNavDocWithOL(select: any, olElems: Element[], node: Link[], navDocURL: string) {
 
-        olElems.forEach((olElem: xmldom.Element) => {
+        olElems.forEach((olElem: Element) => {
 
             const liElems = select("xhtml:li", olElem);
             if (liElems && liElems.length) {
 
-                liElems.forEach((liElem: xmldom.Element) => {
+                liElems.forEach((liElem: Element) => {
 
                     const link = new Link();
                     node.push(link);

@@ -32,6 +32,9 @@
   },
   "homepage": "https://github.com/edrlab/r2-streamer-js",
   "dependencies": {
+    "@types/express": "latest",
+    "@types/xmldom": "latest",
+    "express": "latest",
     "mime-types": "latest",
     "moment": "latest",
     "node-stream-zip": "latest",
