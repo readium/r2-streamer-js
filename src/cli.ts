@@ -72,10 +72,12 @@ const ext = path.extname(fileName).toLowerCase();
 if (ext === ".epub") {
 
     processEPUB(filePath)
-        .then((okay) => {
-            console.log(okay);
-        }).catch((notOkay) => {
-            console.log(notOkay);
+        .then((publication) => {
+            console.log("== EpubParser: resolve");
+            dumpPublication(publication);
+        }).catch((err) => {
+            console.log("== EpubParser: reject");
+            console.log(err);
         });
 
 } else if (ext === ".cbz") {
@@ -90,44 +92,31 @@ if (ext === ".epub") {
         });
 }
 
-function dumpPublication(publication: Publication) {
+export function dumpPublication(publication: Publication) {
 
-        console.log("#### RAW OBJECT:");
+    console.log("#### RAW OBJECT:");
 
-        // breakLength: 100  maxArrayLength: undefined
-        console.log(util.inspect(publication,
-            { showHidden: false, depth: 1000, colors: true, customInspect: true }));
+    // breakLength: 100  maxArrayLength: undefined
+    console.log(util.inspect(publication,
+        { showHidden: false, depth: 1000, colors: true, customInspect: true }));
 
-        // console.log("#### RAW JSON:");
-        // const publicationJsonObj = JSON.serialize(publication);
-        // console.log(publicationJsonObj);
+    // console.log("#### RAW JSON:");
+    // const publicationJsonObj = JSON.serialize(publication);
+    // console.log(publicationJsonObj);
 
-        // console.log("#### PRETTY JSON:");
-        // const publicationJsonStr = global.JSON.stringify(publicationJsonObj, null, "  ");
-        // console.log(publicationJsonStr);
+    // console.log("#### PRETTY JSON:");
+    // const publicationJsonStr = global.JSON.stringify(publicationJsonObj, null, "  ");
+    // console.log(publicationJsonStr);
 
-        // console.log("#### CANONICAL JSON:");
-        // const publicationJsonStrCanonical = JSON.stringify(sortObject(publicationJsonObj));
-        // console.log(publicationJsonStrCanonical);
+    // console.log("#### CANONICAL JSON:");
+    // const publicationJsonStrCanonical = JSON.stringify(sortObject(publicationJsonObj));
+    // console.log(publicationJsonStrCanonical);
 }
 
-async function processEPUB(path: string): Promise<boolean> {
+export async function processEPUB(path: string): Promise<Publication> {
     const parser = new EpubParser();
-    try {
-        const publication = await parser.Parse(path);
-
-        console.log("== EpubParser: resolve");
-
-        dumpPublication(publication);
-
-    } catch (err) {
-        console.log("== EpubParser: reject");
-        console.log(err);
-
-        return false;
-    }
-
-    return true;
+    const publication = await parser.Parse(path);
+    return publication;
 }
 
 // console.log("~~~~~~~~~~~~~~~");

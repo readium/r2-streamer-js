@@ -2,7 +2,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "run-only",
+            "name": "cli",
             "type": "node",
             "request": "launch",
             "program": "${workspaceRoot}/src/cli.ts",
@@ -24,11 +24,10 @@
             ]
         },
         {
-            "name": "build-and-run",
-            "preLaunchTask": "build",
+            "name": "server",
             "type": "node",
             "request": "launch",
-            "program": "${workspaceRoot}/src/cli.ts",
+            "program": "${workspaceRoot}/src/server.ts",
             "stopOnEntry": false,
             "cwd": "${workspaceRoot}",
             "internalConsoleOptions": "openOnSessionStart",
@@ -55,9 +54,9 @@
     ],
     "compounds": [
         {
-            "name": "CLI+",
+            "name": "cli+server",
             "configurations": [
-                "CLI"
+                "cli", "server"
             ]
         }
     ]
