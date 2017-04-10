@@ -8,6 +8,12 @@ import * as fs from "fs";
 import * as path from "path";
 import * as util from "util";
 
+import * as url from "url";
+
+import { EpubParser } from "./parser/epub";
+
+import { Publication } from "./models/publication";
+
 import { dumpPublication, processEPUB, sortObject } from "./cli";
 
 console.log("process.cwd():");
@@ -58,21 +64,15 @@ server.get("/", (req: express.Request, res: express.Response) => {
         urlBookShowAll + "'>" + urlBookShowAll + "</a></p></body></html>");
 });
 
-const routerManifestJson = express.Router();
-// routerManifestJson.use(morgan("combined"));
+const routerMediaOverlays = express.Router();
+// routerMediaOverlays.use(morgan("combined"));
 
-routerManifestJson.get(["/", "/show/:jsonPath?"],
+routerMediaOverlays.get(["", "/show/:" + EpubParser.mediaOverlayURLParam + "?"],
     (req: express.Request, res: express.Response) => {
 
-        console.log("€€€€€€€€€€€€€€€€€€€€€€€€€€€€€");
-        console.log(req.url);
-
-        console.log(req.params);
         if (!req.params.pathBase64) {
             req.params.pathBase64 = (req as any).pathBase64;
         }
-        console.log(req.params);
-        console.log("€€€€€€€€€€€€€€€€€€€€€€€€€€€€€");
 
         const path = new Buffer(req.params.pathBase64, "base64").toString("utf8");
 
@@ -81,6 +81,90 @@ routerManifestJson.get(["/", "/show/:jsonPath?"],
                 console.log("== EpubParser: resolve");
                 // dumpPublication(publication);
 
+                const isShow = req.url.indexOf("/show") >= 0;
+
+                let objToSerialize: any = null;
+
+                const resource = isShow ? req.params[EpubParser.mediaOverlayURLParam] :
+                    req.query[EpubParser.mediaOverlayURLParam];
+                if (resource && resource !== "all") {
+                    objToSerialize = publication.FindMediaOverlayByHref(resource);
+                } else {
+                    objToSerialize = publication.FindAllMediaOverlay();
+                }
+
+                if (!objToSerialize) {
+                    objToSerialize = {};
+                }
+                const jsonObj = JSON.serialize(objToSerialize);
+
+                if (isShow) {
+                    const jsonStr = global.JSON.stringify(jsonObj, null, "    ");
+
+                    // breakLength: 100  maxArrayLength: undefined
+                    const dumpStr = util.inspect(objToSerialize,
+                        { showHidden: false, depth: 1000, colors: false, customInspect: true });
+
+                    res.status(200).send("<html><body>" +
+                        "<h2>" + path + "</h2>" +
+                        "<p><pre>" + jsonStr + "</pre></p>" +
+                        "<p><pre>" + dumpStr + "</pre></p>" +
+                        "</body></html>");
+                } else {
+                    const jsonStr = global.JSON.stringify(sortObject(jsonObj), null, "");
+                    res.type("json").send(jsonStr); // application/vnd.readium.mo+json
+                }
+            }).catch((err) => {
+                console.log("== EpubParser: reject");
+                console.log(err);
+                res.status(500).send("<html><body><p>Internal Server Error</p><p>" + err + "</p></body></html>");
+            });
+    });
+
+const routerManifestJson = express.Router();
+// routerManifestJson.use(morgan("combined"));
+
+routerManifestJson.get(["/", "/show/:jsonPath?"],
+    (req: express.Request, res: express.Response) => {
+
+        if (!req.params.pathBase64) {
+            req.params.pathBase64 = (req as any).pathBase64;
+        }
+
+        const path = new Buffer(req.params.pathBase64, "base64").toString("utf8");
+
+        processEPUB(filePath)
+            .then((publication) => {
+                console.log("== EpubParser: resolve");
+                // dumpPublication(publication);
+
+                // console.log(req.url); // path local to this router
+                // console.log(req.baseUrl); // path local to above this router
+                // console.log(req.originalUrl); // full path (req.baseUrl + req.url)
+                // url.parse(req.originalUrl, false).host
+                // req.headers.host has port, not req.hostname
+
+                const rootUrl = "http://" + req.headers.host + "/pub/" + req.params.pathBase64;
+                const manifestURL = rootUrl + "/manifest.json";
+                publication.AddLink("application/webpub+json", ["self"], manifestURL, false);
+
+                let hasMO = false;
+                if (publication.Spine) {
+                    const link = publication.Spine.find((l) => {
+                        if (l.Properties && l.Properties.MediaOverlay) {
+                            return true;
+                        }
+                        return false;
+                    });
+                    if (link) {
+                        hasMO = true;
+                    }
+                }
+                if (hasMO) {
+                    const moURL = rootUrl + "/" + EpubParser.mediaOverlayURLPath +
+                        "?" + EpubParser.mediaOverlayURLParam + "={path}";
+                    publication.AddLink("application/vnd.readium.mo+json", ["media-overlay"], moURL, true);
+                }
                 if (req.url.indexOf("/show") >= 0) {
                     let objToSerialize: any = null;
 
@@ -154,7 +238,7 @@ routerManifestJson.get(["/", "/show/:jsonPath?"],
                 } else {
                     const publicationJsonObj = JSON.serialize(publication);
                     const publicationJsonStr = global.JSON.stringify(sortObject(publicationJsonObj), null, "");
-                    res.type("json").send(publicationJsonStr);
+                    res.type("json").send(publicationJsonStr); // application/webpub+json
                 }
             }).catch((err) => {
                 console.log("== EpubParser: reject");
@@ -178,6 +262,7 @@ routerPathBase64.param("pathBase64", (req, res, next, value, name) => {
 });
 
 routerPathBase64.use("/:pathBase64/manifest.json", routerManifestJson);
+routerPathBase64.use("/:pathBase64/" + EpubParser.mediaOverlayURLPath, routerMediaOverlays);
 routerPathBase64.get("/:pathBase64", (req: express.Request, res: express.Response) => {
     res.status(200).send("<html><body><p>OK</p><p><a href='" +
         urlBookShowAll + "'>" + urlBookShowAll + "</a></p></body></html>");

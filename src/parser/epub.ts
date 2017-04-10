@@ -56,7 +56,12 @@ export class EpubParser {
     private autoMeta = "auto";
     private noneMeta = "none";
     private reflowableMeta = "reflowable";
-    private mediaOverlayURL = "media-overlay?resource=";
+
+    public static get mediaOverlayURLPath(): string {
+        return "media-overlay";
+    } public static get mediaOverlayURLParam(): string {
+        return "resource";
+    }
 
     public Parse(filePath: string): Promise<Publication> {
 
@@ -418,7 +423,8 @@ export class EpubParser {
                         if (!link.Properties) {
                             link.Properties = new Properties();
                         }
-                        link.Properties.MediaOverlay = this.mediaOverlayURL + querystring.escape(link.Href);
+                        link.Properties.MediaOverlay = EpubParser.mediaOverlayURLPath + "?" +
+                            EpubParser.mediaOverlayURLParam + "=" + querystring.escape(link.Href);
                     }
                 });
 
