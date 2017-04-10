@@ -10,6 +10,8 @@ import * as util from "util";
 
 import * as url from "url";
 
+import * as crypto from "crypto";
+
 import { EpubParser } from "./parser/epub";
 
 import { Publication } from "./models/publication";
@@ -94,9 +96,11 @@ routerMediaOverlays.get(["", "/show/:" + EpubParser.mediaOverlayURLParam + "?"],
                 }
 
                 if (!objToSerialize) {
-                    objToSerialize = {};
+                    objToSerialize = [];
                 }
-                const jsonObj = JSON.serialize(objToSerialize);
+
+                let jsonObj = JSON.serialize(objToSerialize);
+                jsonObj = { "media-overlay": jsonObj };
 
                 if (isShow) {
                     const jsonStr = global.JSON.stringify(jsonObj, null, "    ");
@@ -111,8 +115,23 @@ routerMediaOverlays.get(["", "/show/:" + EpubParser.mediaOverlayURLParam + "?"],
                         "<p><pre>" + dumpStr + "</pre></p>" +
                         "</body></html>");
                 } else {
+                    res.setHeader("Access-Control-Allow-Origin", "*");
+                    res.set("Content-Type", "application/vnd.readium.mo+json; charset=utf-8");
+
                     const jsonStr = global.JSON.stringify(sortObject(jsonObj), null, "");
-                    res.type("json").send(jsonStr); // application/vnd.readium.mo+json
+
+                    const checkSum = crypto.createHash("sha256");
+                    checkSum.update(jsonStr);
+                    const hash = checkSum.digest("hex");
+
+                    const match = req.header("If-None-Match");
+                    if (match === hash) {
+                        res.status(304); // StatusNotModified
+                        return;
+                    }
+
+                    res.setHeader("ETag", hash);
+                    res.send(jsonStr);
                 }
             }).catch((err) => {
                 console.log("== EpubParser: reject");
@@ -236,9 +255,37 @@ routerManifestJson.get(["/", "/show/:jsonPath?"],
                         "<p><pre>" + dumpStr + "</pre></p>" +
                         "</body></html>");
                 } else {
+                    res.setHeader("Access-Control-Allow-Origin", "*");
+                    res.set("Content-Type", "application/webpub+json; charset=utf-8");
+
                     const publicationJsonObj = JSON.serialize(publication);
                     const publicationJsonStr = global.JSON.stringify(sortObject(publicationJsonObj), null, "");
-                    res.type("json").send(publicationJsonStr); // application/webpub+json
+
+                    const checkSum = crypto.createHash("sha256");
+                    checkSum.update(publicationJsonStr);
+                    const hash = checkSum.digest("hex");
+
+                    const match = req.header("If-None-Match");
+                    if (match === hash) {
+                        res.status(304); // StatusNotModified
+                        return;
+                    }
+
+                    res.setHeader("ETag", hash);
+
+                    const links = publication.GetPreFetchResources();
+                    if (links && links.length) {
+                        let prefetch = "";
+                        links.forEach((l) => {
+                            prefetch += "<" + l.Href + ">;" + "rel=prefetch,";
+                        });
+
+                        res.setHeader("Link", prefetch);
+                    }
+
+                    // res.setHeader("Cache-Control", "public,max-age=86400");
+
+                    res.send(publicationJsonStr);
                 }
             }).catch((err) => {
                 console.log("== EpubParser: reject");
