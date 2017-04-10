@@ -42,7 +42,9 @@ import { Encrypted } from "../models/metadata-encrypted";
 import { Properties } from "../models/metadata-properties";
 import { Subject } from "../models/metadata-subject";
 import { NavPoint } from "./epub/ncx-navpoint";
+import { Par } from "./epub/smil-par";
 import { Seq } from "./epub/smil-seq";
+import { SeqOrPar } from "./epub/smil-seq-or-par";
 
 export class EpubParser {
 
@@ -432,82 +434,64 @@ export class EpubParser {
                 mo.Role = [];
                 mo.Role.push("section");
 
-                if (smil.Body.TextRef) {
-                    mo.Text = smil.Body.TextRef;
+                if (smil.Body) {
+                    if (smil.Body.TextRef) {
+                        mo.Text = smil.Body.TextRef;
+                    }
+                    if (smil.Body.Children && smil.Body.Children.length) {
+                        smil.Body.Children.forEach((seqChild) => {
+                            if (!mo.Children) {
+                                mo.Children = [];
+                            }
+                            this.addSeqToMediaOverlay(publication, rootfile, opf, mo, mo.Children, seqChild);
+                        });
+                    }
                 }
-
-                // if (smil.Body.Par && smil.Body.Par.length) {
-                //     smil.Body.Par.forEach((par) => {
-                //         const p = new MediaOverlayNode();
-                //         if (par.Text) {
-                //             p.Text = par.Text.Src;
-                //         }
-                //         if (par.Audio) {
-                //             p.Audio = par.Audio.Src;
-                //         }
-                //         if (!mo.Children) {
-                //             mo.Children = [];
-                //         }
-                //         mo.Children.push(p);
-                //     });
-                // }
-
-                // if (smil.Body.Seq && smil.Body.Seq.length) {
-                //     smil.Body.Seq.forEach((s) => {
-                //         if (!mo.Children) {
-                //             mo.Children = [];
-                //         }
-                //         this.addSeqToMediaOverlay(publication, rootfile, opf, mo, mo.Children, s);
-                //     });
-                // }
             }
         });
     }
 
     private addSeqToMediaOverlay(
         publication: Publication, rootfile: Rootfile, opf: OPF,
-        rootMO: MediaOverlayNode, mo: MediaOverlayNode[], seq: Seq) {
+        rootMO: MediaOverlayNode, mo: MediaOverlayNode[], seqChild: SeqOrPar) {
 
         const moc = new MediaOverlayNode();
-
         mo.push(moc);
 
-        moc.Role = [];
-        moc.Role.push("section");
+        if (seqChild instanceof Seq) {
+            moc.Role = [];
+            moc.Role.push("section");
 
-        if (seq.TextRef) {
-            moc.Text = seq.TextRef;
+            const seq = seqChild as Seq;
+
+            if (seq.TextRef) {
+                moc.Text = seq.TextRef;
+            }
+
+            if (seq.Children && seq.Children.length) {
+                seq.Children.forEach((child) => {
+                    if (!moc.Children) {
+                        moc.Children = [];
+                    }
+                    this.addSeqToMediaOverlay(publication, rootfile, opf, rootMO, moc.Children, child);
+                });
+            }
+        } else { // Par
+            const par = seqChild as Par;
+
+            if (par.Text && par.Text.Src) {
+                moc.Text = par.Text.Src;
+            }
+            if (par.Audio && par.Audio.Src) {
+                moc.Audio = par.Audio.Src;
+                moc.Audio += "#t=";
+                moc.Audio += par.Audio.ClipBegin ? timeStrToSeconds(par.Audio.ClipBegin) : "0";
+                if (par.Audio.ClipEnd) {
+                    moc.Audio += ",";
+                    moc.Audio += timeStrToSeconds(par.Audio.ClipEnd);
+                }
+            }
         }
-
-        // if (seq.Par && seq.Par.length) {
-        //     seq.Par.forEach((par) => {
-
-        //         const p = new MediaOverlayNode();
-        //         if (par.Text && par.Text.Src) {
-        //             p.Text = par.Text.Src;
-        //         }
-        //         if (par.Audio && par.Audio.Src) {
-        //             p.Audio = par.Audio.Src;
-        //             p.Audio += "#t=";
-        //             p.Audio += timeStrToSeconds(par.Audio.ClipBegin);
-        //             p.Audio += ",";
-        //             p.Audio += timeStrToSeconds(par.Audio.ClipEnd);
-        //         }
-        //         if (!moc.Children) {
-        //             moc.Children = [];
-        //         }
-        //         moc.Children.push(p);
-        //     });
-        // }
-
-        // if (seq.Seq && seq.Seq.length) {
-        //     seq.Seq.forEach((s) => {
-        //         if (!moc.Children) {
-        //             moc.Children = [];
-        //         }
-        //         this.addSeqToMediaOverlay(publication, rootfile, opf, rootMO, moc.Children, s);
-        //     });
-        // }
     }
 
     private fillPublicationDate(publication: Publication, rootfile: Rootfile, opf: OPF) {

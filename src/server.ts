@@ -142,9 +142,14 @@ routerManifestJson.get(["/", "/show/:jsonPath?"],
                     const jsonObj = JSON.serialize(objToSerialize);
                     const jsonStr = global.JSON.stringify(jsonObj, null, "    ");
 
+                    // breakLength: 100  maxArrayLength: undefined
+                    const dumpStr = util.inspect(objToSerialize,
+                        { showHidden: false, depth: 1000, colors: false, customInspect: true });
+
                     res.status(200).send("<html><body>" +
                         "<h2>" + path + "</h2>" +
                         "<p><pre>" + jsonStr + "</pre></p>" +
+                        "<p><pre>" + dumpStr + "</pre></p>" +
                         "</body></html>");
                 } else {
                     const publicationJsonObj = JSON.serialize(publication);
