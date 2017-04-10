@@ -43,7 +43,7 @@ export class CbzParser {
             publication.Metadata.Identifier = this.filePathToTitle(filePath);
 
             publication.AddToInternal("type", "cbz");
-            // publication.AddToInternal("epub", zip);
+            publication.AddToInternal("zip", zip);
 
             const entries = zip.entries();
 

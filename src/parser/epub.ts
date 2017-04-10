@@ -88,7 +88,7 @@ export class EpubParser {
             publication.AddToInternal("filename", path.basename(filePath));
 
             publication.AddToInternal("type", "epub");
-            // publication.AddToInternal("epub", zip);
+            publication.AddToInternal("zip", zip);
 
             let lcpl: LCP | undefined;
             if (Object.keys(zip.entries()).indexOf("META-INF/license.lcpl") >= 0) {

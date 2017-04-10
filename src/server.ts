@@ -2,6 +2,8 @@ import { JSON } from "ta-json";
 
 import * as express from "express";
 
+import * as mime from "mime-types";
+
 import * as morgan from "morgan";
 
 import * as fs from "fs";
@@ -76,7 +78,7 @@ routerMediaOverlays.get(["", "/show/:" + EpubParser.mediaOverlayURLParam + "?"],
             req.params.pathBase64 = (req as any).pathBase64;
         }
 
-        const path = new Buffer(req.params.pathBase64, "base64").toString("utf8");
+        const pathBase64Str = new Buffer(req.params.pathBase64, "base64").toString("utf8");
 
         processEPUB(filePath)
             .then((publication) => {
@@ -110,7 +112,7 @@ routerMediaOverlays.get(["", "/show/:" + EpubParser.mediaOverlayURLParam + "?"],
                         { showHidden: false, depth: 1000, colors: false, customInspect: true });
 
                     res.status(200).send("<html><body>" +
-                        "<h2>" + path + "</h2>" +
+                        "<h2>" + pathBase64Str + "</h2>" +
                         "<p><pre>" + jsonStr + "</pre></p>" +
                         "<p><pre>" + dumpStr + "</pre></p>" +
                         "</body></html>");
@@ -131,7 +133,7 @@ routerMediaOverlays.get(["", "/show/:" + EpubParser.mediaOverlayURLParam + "?"],
                     }
 
                     res.setHeader("ETag", hash);
-                    res.send(jsonStr);
+                    res.status(200).send(jsonStr);
                 }
             }).catch((err) => {
                 console.log("== EpubParser: reject");
@@ -150,7 +152,7 @@ routerManifestJson.get(["/", "/show/:jsonPath?"],
             req.params.pathBase64 = (req as any).pathBase64;
         }
 
-        const path = new Buffer(req.params.pathBase64, "base64").toString("utf8");
+        const pathBase64Str = new Buffer(req.params.pathBase64, "base64").toString("utf8");
 
         processEPUB(filePath)
             .then((publication) => {
@@ -250,7 +252,7 @@ routerManifestJson.get(["/", "/show/:jsonPath?"],
                         { showHidden: false, depth: 1000, colors: false, customInspect: true });
 
                     res.status(200).send("<html><body>" +
-                        "<h2>" + path + "</h2>" +
+                        "<h2>" + pathBase64Str + "</h2>" +
                         "<p><pre>" + jsonStr + "</pre></p>" +
                         "<p><pre>" + dumpStr + "</pre></p>" +
                         "</body></html>");
@@ -285,7 +287,142 @@ routerManifestJson.get(["/", "/show/:jsonPath?"],
 
                     // res.setHeader("Cache-Control", "public,max-age=86400");
 
-                    res.send(publicationJsonStr);
+                    res.status(200).send(publicationJsonStr);
+                }
+            }).catch((err) => {
+                console.log("== EpubParser: reject");
+                console.log(err);
+                res.status(500).send("<html><body><p>Internal Server Error</p><p>" + err + "</p></body></html>");
+            });
+    });
+
+const routerAssets = express.Router();
+// routerAssets.use(morgan("combined"));
+
+routerAssets.get("/",
+    (req: express.Request, res: express.Response) => {
+
+        if (!req.params.pathBase64) {
+            req.params.pathBase64 = (req as any).pathBase64;
+        }
+        if (!req.params.asset) {
+            req.params.asset = (req as any).asset;
+        }
+
+        const pathBase64Str = new Buffer(req.params.pathBase64, "base64").toString("utf8");
+
+        processEPUB(filePath)
+            .then((publication) => {
+                console.log("== EpubParser: resolve");
+                // dumpPublication(publication);
+
+                if (!publication.Internal) {
+                    const err = "No publication internals!";
+                    console.log(err);
+                    res.status(500).send("<html><body><p>Internal Server Error</p><p>" + err + "</p></body></html>");
+                    return;
+                }
+
+                const zipInternal = publication.Internal.find((i) => {
+                    if (i.Name === "zip") {
+                        return true;
+                    }
+                    return false;
+                });
+                if (!zipInternal) {
+                    const err = "No publication zip!";
+                    console.log(err);
+                    res.status(500).send("<html><body><p>Internal Server Error</p><p>" + err + "</p></body></html>");
+                    return;
+                }
+                const zip = zipInternal.Value;
+                if (Object.keys(zip.entries()).indexOf(req.params.asset) < 0) {
+                    const err = "Asset not in zip!";
+                    console.log(err);
+                    res.status(500).send("<html><body><p>Internal Server Error</p><p>" + err + "</p></body></html>");
+                    return;
+                }
+
+                if (req.params.asset.indexOf("META-INF/") !== 0
+                    && !req.params.asset.endsWith(".opf")
+                    && publication.Resources) {
+                    const opfInternal = publication.Internal.find((i) => {
+                        if (i.Name === "rootfile") {
+                            return true;
+                        }
+                        return false;
+                    });
+                    if (opfInternal) {
+                        const rootfilePath = opfInternal.Value as string;
+                        const relativePath = path.relative(path.dirname(rootfilePath), req.params.asset);
+
+                        let link = publication.Resources.find((l) => {
+                            if (l.Href === relativePath) {
+                                return true;
+                            }
+                            return false;
+                        });
+                        if (!link) {
+                            link = publication.Spine.find((l) => {
+                                if (l.Href === relativePath) {
+                                    return true;
+                                }
+                                return false;
+                            });
+                        }
+                        if (!link) {
+                            const err = "Asset not declared in publication spine/resources!";
+                            console.log(err);
+                            res.status(500).send("<html><body><p>Internal Server Error</p><p>"
+                                + err + "</p></body></html>");
+                            return;
+                        }
+                    }
+                }
+
+                const mediaType = mime.lookup(req.params.asset);
+                const isText = mediaType && (
+                    mediaType.indexOf("text/") === 0 ||
+                    mediaType.indexOf("application/xhtml") === 0 ||
+                    mediaType.indexOf("application/xml") === 0 ||
+                    mediaType.indexOf("application/json") === 0 ||
+                    mediaType.indexOf("application/svg") === 0 ||
+                    mediaType.indexOf("application/smil") === 0 ||
+                    mediaType.indexOf("+json") > 0 ||
+                    mediaType.indexOf("+smil") > 0 ||
+                    mediaType.indexOf("+svg") > 0 ||
+                    mediaType.indexOf("+xhtml") > 0 ||
+                    mediaType.indexOf("+xml") > 0);
+
+                const zipData = zip.entryDataSync(req.params.asset);
+
+                if (req.query.show) {
+                    res.status(200).send("<html><body>" +
+                        "<h2>" + pathBase64Str + "</h2>" +
+                        "<h3>" + mediaType + "</h3>" +
+                        (isText ?
+                            ("<p><pre>" +
+                                zipData.toString("utf8").replace(/&/g, "&amp;")
+                                    .replace(/</g, "&lt;")
+                                    .replace(/>/g, "&gt;")
+                                    .replace(/"/g, "&quot;")
+                                    .replace(/'/g, "&apos;") +
+                                "</pre></p>")
+                            : "<p>BINARY</p>"
+                        ) + "</body></html>");
+                } else {
+                    res.setHeader("Access-Control-Allow-Origin", "*");
+
+                    res.setHeader("Cache-Control", "public,max-age=86400");
+
+                    // res.set("Content-Type", mediaType);
+                    res.type(mediaType);
+
+                    if (isText) {
+                        res.status(200).send(zipData.toString("utf8"));
+                    } else {
+                        res.status(200).end(zipData, "binary");
+                    }
                 }
             }).catch((err) => {
                 console.log("== EpubParser: reject");
@@ -308,8 +445,14 @@ routerPathBase64.param("pathBase64", (req, res, next, value, name) => {
     }
 });
 
+routerPathBase64.param("asset", (req, res, next, value, name) => {
+    (req as any).asset = value;
+    next();
+});
+
 routerPathBase64.use("/:pathBase64/manifest.json", routerManifestJson);
 routerPathBase64.use("/:pathBase64/" + EpubParser.mediaOverlayURLPath, routerMediaOverlays);
+routerPathBase64.use("/:pathBase64/:asset(*)", routerAssets);
 routerPathBase64.get("/:pathBase64", (req: express.Request, res: express.Response) => {
     res.status(200).send("<html><body><p>OK</p><p><a href='" +
         urlBookShowAll + "'>" + urlBookShowAll + "</a></p></body></html>");
