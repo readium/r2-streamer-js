@@ -32,7 +32,7 @@ function deserializeRootObject(
         return undefined;
     }
 
-    const [objectType2, ...superTypes] = getTypedInheritanceChain(objectType, undefined);
+    const [objectType2, ...superTypes] = getTypedInheritanceChain(objectType, objectInstance);
 
     const output = Object.create(objectType2.prototype);
 

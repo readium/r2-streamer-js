@@ -33,10 +33,12 @@
   "homepage": "https://github.com/edrlab/r2-streamer-js",
   "dependencies": {
     "@types/express": "latest",
+    "@types/morgan": "latest",
     "@types/xmldom": "latest",
     "express": "latest",
     "mime-types": "latest",
     "moment": "latest",
+    "morgan": "latest",
     "node-stream-zip": "latest",
     "reflect-metadata": "latest",
     "slugify": "latest",

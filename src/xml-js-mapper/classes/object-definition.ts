@@ -31,6 +31,7 @@ export class ObjectDefinition {
 export const objectDefinitions: Map<FunctionType, ObjectDefinition> = new Map<FunctionType, ObjectDefinition>();
 
 export function getDefinition(objectType: FunctionType): ObjectDefinition {
+
     let definition = objectDefinitions.get(objectType);
     if (!definition) {
         definition = new ObjectDefinition();
@@ -52,6 +53,7 @@ function getChildObjectTypeDefinitions(parentObjectType: FunctionType): Array<[F
 
     objectDefinitions.forEach((def, objectType) => {
         const superObjectType = Object.getPrototypeOf(objectType.prototype).constructor;
+
         if (superObjectType === parentObjectType) {
             childDefs.push([objectType, def]);
         }
@@ -62,7 +64,7 @@ function getChildObjectTypeDefinitions(parentObjectType: FunctionType): Array<[F
 
 export function getTypedInheritanceChain(
     objectType: FunctionType,
-    objectInstance?: any, // IXmlValueObject
+    objectInstance?: Node, // IXmlValueObject
 ): FunctionType[] {
 
     const parentDef = objectDefinitions.get(objectType);
@@ -83,7 +85,7 @@ export function getTypedInheritanceChain(
         if (def && def.hasOwnProperty("discriminatorValue")) {
             if (objectInstance
                 && parentDef
-                && def.discriminatorValue === objectInstance[parentDef.discriminatorProperty]) {
+                && def.discriminatorValue === (objectInstance as any)[parentDef.discriminatorProperty]) {
                 if (def.hasOwnProperty("discriminatorProperty")) {
                     return getTypedInheritanceChain(objectType2, objectInstance);
                 }

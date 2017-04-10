@@ -16,7 +16,7 @@ import * as util from "util";
 
 interface IStringKeyedObject { [key: string]: any; }
 
-function sortObject(obj: any): any {
+export function sortObject(obj: any): any {
     if (obj instanceof Array) {
         for (let i = 0; i < obj.length; i++) {
             obj[i] = sortObject(obj[i]);
@@ -74,7 +74,7 @@ if (ext === ".epub") {
     processEPUB(filePath)
         .then((publication) => {
             console.log("== EpubParser: resolve");
-            dumpPublication(publication);
+            // dumpPublication(publication);
         }).catch((err) => {
             console.log("== EpubParser: reject");
             console.log(err);

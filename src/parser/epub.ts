@@ -425,6 +425,10 @@ export class EpubParser {
                 const smilXmlDoc = new xmldom.DOMParser().parseFromString(smilStr);
                 const smil = XML.deserialize<SMIL>(smilXmlDoc, SMIL);
 
+                // breakLength: 100  maxArrayLength: undefined
+                // console.log(util.inspect(smil,
+                //     { showHidden: false, depth: 1000, colors: true, customInspect: true }));
+
                 mo.Role = [];
                 mo.Role.push("section");
 
@@ -432,34 +436,30 @@ export class EpubParser {
                     mo.Text = smil.Body.TextRef;
                 }
 
-                if (smil.Body.Par && smil.Body.Par.length) {
-                    smil.Body.Par.forEach((par) => {
-                        const p = new MediaOverlayNode();
-                        if (par.Text) {
-                            p.Text = par.Text.Src;
-                        }
-                        if (par.Audio) {
-                            p.Audio = par.Audio.Src;
-                        }
-                        if (!mo.Children) {
-                            mo.Children = [];
-                        }
-                        mo.Children.push(p);
-                    });
-                }
+                // if (smil.Body.Par && smil.Body.Par.length) {
+                //     smil.Body.Par.forEach((par) => {
+                //         const p = new MediaOverlayNode();
+                //         if (par.Text) {
+                //             p.Text = par.Text.Src;
+                //         }
+                //         if (par.Audio) {
+                //             p.Audio = par.Audio.Src;
+                //         }
+                //         if (!mo.Children) {
+                //             mo.Children = [];
+                //         }
+                //         mo.Children.push(p);
+                //     });
+                // }
 
-                if (smil.Body.Seq && smil.Body.Seq.length) {
-                    smil.Body.Seq.forEach((s) => {
-                        if (!mo.Children) {
-                            mo.Children = [];
-                        }
-                        this.addSeqToMediaOverlay(publication, rootfile, opf, mo, mo.Children, s);
-                    });
-                }
-
-                // breakLength: 100  maxArrayLength: undefined
-                console.log(util.inspect(mo,
-                    { showHidden: false, depth: 1000, colors: true, customInspect: true }));
+                // if (smil.Body.Seq && smil.Body.Seq.length) {
+                //     smil.Body.Seq.forEach((s) => {
+                //         if (!mo.Children) {
+                //             mo.Children = [];
+                //         }
+                //         this.addSeqToMediaOverlay(publication, rootfile, opf, mo, mo.Children, s);
+                //     });
+                // }
             }
         });
     }
@@ -469,6 +469,9 @@ export class EpubParser {
         rootMO: MediaOverlayNode, mo: MediaOverlayNode[], seq: Seq) {
 
         const moc = new MediaOverlayNode();
+
+        mo.push(moc);
+
         moc.Role = [];
         moc.Role.push("section");
 
@@ -476,35 +479,35 @@ export class EpubParser {
             moc.Text = seq.TextRef;
         }
 
-        if (seq.Par && seq.Par.length) {
-            seq.Par.forEach((par) => {
+        // if (seq.Par && seq.Par.length) {
+        //     seq.Par.forEach((par) => {
 
-                const p = new MediaOverlayNode();
-                if (par.Text && par.Text.Src) {
-                    p.Text = par.Text.Src;
-                }
-                if (par.Audio && par.Audio.Src) {
-                    p.Audio = par.Audio.Src;
-                    p.Audio += "#t=";
-                    p.Audio += timeStrToSeconds(par.Audio.ClipBegin);
-                    p.Audio += ",";
-                    p.Audio += timeStrToSeconds(par.Audio.ClipEnd);
-                }
-                if (!moc.Children) {
-                    moc.Children = [];
-                }
-                moc.Children.push(p);
-            });
-        }
+        //         const p = new MediaOverlayNode();
+        //         if (par.Text && par.Text.Src) {
+        //             p.Text = par.Text.Src;
+        //         }
+        //         if (par.Audio && par.Audio.Src) {
+        //             p.Audio = par.Audio.Src;
+        //             p.Audio += "#t=";
+        //             p.Audio += timeStrToSeconds(par.Audio.ClipBegin);
+        //             p.Audio += ",";
+        //             p.Audio += timeStrToSeconds(par.Audio.ClipEnd);
+        //         }
+        //         if (!moc.Children) {
+        //             moc.Children = [];
+        //         }
+        //         moc.Children.push(p);
+        //     });
+        // }
 
-        if (seq.Seq && seq.Seq.length) {
-            seq.Seq.forEach((s) => {
-                if (!moc.Children) {
-                    moc.Children = [];
-                }
-                this.addSeqToMediaOverlay(publication, rootfile, opf, rootMO, moc.Children, s);
-            });
-        }
+        // if (seq.Seq && seq.Seq.length) {
+        //     seq.Seq.forEach((s) => {
+        //         if (!moc.Children) {
+        //             moc.Children = [];
+        //         }
+        //         this.addSeqToMediaOverlay(publication, rootfile, opf, rootMO, moc.Children, s);
+        //     });
+        // }
     }
 
     private fillPublicationDate(publication: Publication, rootfile: Rootfile, opf: OPF) {
@@ -1289,7 +1292,6 @@ export class EpubParser {
                         if (!link.Children) {
                             link.Children = [];
                         }
-                        console.log("SNB OL");
                         this.fillTOCFromNavDocWithOL(select, olElemsNext, link.Children, navDocURL);
                     }
                 });
