@@ -13,7 +13,7 @@ before_script:
 - 'pwd && ls -als'
 - 'yarn install'
 script:
-- 'yarn start'
+- 'yarn run build'
 - 'yarn test'
 after_success:
 - 'pwd && ls -als'
