@@ -55,7 +55,7 @@ const fileName = path.basename(filePath);
 const ext = path.extname(fileName).toLowerCase();
 
 const server = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 const filePathBase64 = new Buffer(filePath).toString("base64");
 
