@@ -19,6 +19,7 @@ import { EpubParser } from "./parser/epub";
 import { Publication } from "./models/publication";
 
 import { dumpPublication, processEPUB, sortObject } from "./cli";
+import { Link } from "./models/publication-link";
 
 console.log("process.cwd():");
 console.log(process.cwd());
@@ -360,13 +361,15 @@ routerAssets.get("/",
                     return;
                 }
 
+                let link: Link | undefined;
+
                 if (pathInZip.indexOf("META-INF/") !== 0
                     && !pathInZip.endsWith(".opf")
                     && publication.Resources) {
 
                     const relativePath = path.relative(path.dirname(rootfilePath), pathInZip);
 
-                    let link = publication.Resources.find((l) => {
+                    link = publication.Resources.find((l) => {
                         if (l.Href === relativePath) {
                             return true;
                         }
@@ -403,7 +406,60 @@ routerAssets.get("/",
                     mediaType.indexOf("+xhtml") > 0 ||
                     mediaType.indexOf("+xml") > 0);
 
-                const zipData = zip.entryDataSync(pathInZip);
+                let zipData = zip.entryDataSync(pathInZip) as Buffer;
+
+                if (link && link.Properties && link.Properties.Encrypted) {
+                    if (link.Properties.Encrypted.Algorithm === "http://www.idpf.org/2008/embedding") {
+
+                        let pubID = publication.Metadata.Identifier;
+                        pubID = pubID.replace(/\s/g, "");
+
+                        const checkSum = crypto.createHash("sha1");
+                        checkSum.update(pubID);
+                        // const hash = checkSum.digest("hex");
+                        // console.log(hash);
+                        const key = checkSum.digest();
+
+                        const prefixLength = 1040;
+                        const zipDataPrefix = zipData.slice(0, prefixLength);
+
+                        for (let i = 0; i < prefixLength; i++) {
+                            /* tslint:disable:no-bitwise */
+                            zipDataPrefix[i] = zipDataPrefix[i] ^ (key[i % key.length]);
+                        }
+
+                        const zipDataRemainder = zipData.slice(prefixLength);
+                        zipData = Buffer.concat([zipDataPrefix, zipDataRemainder]);
+
+                    } else if (link.Properties.Encrypted.Algorithm === "http://ns.adobe.com/pdf/enc#RC") {
+
+                        let pubID = publication.Metadata.Identifier;
+                        pubID = pubID.replace("urn:uuid:", "");
+                        pubID = pubID.replace(/-/g, "");
+                        pubID = pubID.replace(/\s/g, "");
+
+                        const key = [];
+                        for (let i = 0; i < 16; i++) {
+                            const byteHex = pubID.substr(i * 2, 2);
+                            const byteNumer = parseInt(byteHex, 16);
+                            key.push(byteNumer);
+                        }
+
+                        const prefixLength = 1024;
+                        const zipDataPrefix = zipData.slice(0, prefixLength);
+
+                        for (let i = 0; i < prefixLength; i++) {
+                            /* tslint:disable:no-bitwise */
+                            zipDataPrefix[i] = zipDataPrefix[i] ^ (key[i % key.length]);
+                        }
+
+                        const zipDataRemainder = zipData.slice(prefixLength);
+                        zipData = Buffer.concat([zipDataPrefix, zipDataRemainder]);
+
+                    } else if (link.Properties.Encrypted.Algorithm === "http://www.w3.org/2001/04/xmlenc#aes256-cbc") {
+                        // TODO LCP userKey --> contentKey
+                    }
+                }
 
                 if (req.query.show) {
                     res.status(200).send("<html><body>" +
