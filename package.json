@@ -71,7 +71,7 @@
     "clean": "rimraf ./dist && rimraf ./now && mkdirp ./dist",
     "lint:all": "echo '\n===== LINT (all)\n' && eclint check '**/*' '[!].git/**/*' '[!]node_modules/**/*' '[!]dist/**/*' '[!]now/**/*' '[!].vscode/**/*' '[!]**/.DS_Store' '[!]**/*.epub' '[!]**/*.cbz'  '[!]**/*.jpg'  '[!]**/*.jpeg'  '[!]**/*.png'",
     "lint:typescript": "echo '\n===== LINT (typescript)\n' && tslint -c './tslint.json' './src/**/*.ts' './test/**/*.ts'",
-    "transpile:typescript": "tsc -p './tsconfig.json'",
+    "transpile:typescript": "echo '\n===== COMPILE (typescript)\n' && tsc -p './tsconfig.json'",
     "test": "ava --verbose './dist/test/test.js'",
     "cli": "node './dist/src/cli.js'",
     "server": "node './dist/src/server.js'"
