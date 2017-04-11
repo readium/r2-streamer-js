@@ -1,0 +1,24 @@
+{
+  "name": "readium2",
+  "version": "0.0.1-alpha1",
+  "engines": {
+    "node": "6.x.x",
+    "npm": ">=3",
+    "yarn": ">= 0.21"
+  },
+  "dependencies": {
+    "express": "latest",
+    "mime-types": "latest",
+    "moment": "latest",
+    "morgan": "latest",
+    "node-stream-zip": "latest",
+    "reflect-metadata": "latest",
+    "slugify": "latest",
+    "ta-json": "latest",
+    "xmldom": "latest",
+    "xpath": "latest"
+  },
+  "scripts": {
+    "now-start": "node './src/server.js' *.epub"
+  }
+}

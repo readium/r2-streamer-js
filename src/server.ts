@@ -59,8 +59,7 @@ const port = 3000;
 
 const filePathBase64 = new Buffer(filePath).toString("base64");
 
-const urlRoot = "http://localhost:" + port + "/pub/";
-const urlBook = urlRoot + filePathBase64 + "/manifest.json";
+const urlBook = "./pub/" + filePathBase64 + "/manifest.json";
 const urlBookShowAll = urlBook + "/show/all";
 
 server.get("/", (req: express.Request, res: express.Response) => {
@@ -336,51 +335,61 @@ routerAssets.get("/",
                     return;
                 }
                 const zip = zipInternal.Value;
-                if (Object.keys(zip.entries()).indexOf(req.params.asset) < 0) {
+
+                const opfInternal = publication.Internal.find((i) => {
+                    if (i.Name === "rootfile") {
+                        return true;
+                    }
+                    return false;
+                });
+                const rootfilePath = opfInternal ? opfInternal.Value as string : "EPUB/package.opf";
+
+                let pathInZip = req.params.asset;
+
+                if (Object.keys(zip.entries()).indexOf(pathInZip) < 0) {
+                    // FIRST FAIL ...
+                    // let's try to adjust the path, make it relative to the OPF package
+                    // (support for legacy incorrect implementation)
+                    pathInZip = path.join(path.dirname(rootfilePath), pathInZip);
+                }
+
+                if (Object.keys(zip.entries()).indexOf(pathInZip) < 0) {
                     const err = "Asset not in zip!";
                     console.log(err);
                     res.status(500).send("<html><body><p>Internal Server Error</p><p>" + err + "</p></body></html>");
                     return;
                 }
 
-                if (req.params.asset.indexOf("META-INF/") !== 0
-                    && !req.params.asset.endsWith(".opf")
+                if (pathInZip.indexOf("META-INF/") !== 0
+                    && !pathInZip.endsWith(".opf")
                     && publication.Resources) {
-                    const opfInternal = publication.Internal.find((i) => {
-                        if (i.Name === "rootfile") {
+
+                    const relativePath = path.relative(path.dirname(rootfilePath), pathInZip);
+
+                    let link = publication.Resources.find((l) => {
+                        if (l.Href === relativePath) {
                             return true;
                         }
                         return false;
                     });
-                    if (opfInternal) {
-                        const rootfilePath = opfInternal.Value as string;
-                        const relativePath = path.relative(path.dirname(rootfilePath), req.params.asset);
-
-                        let link = publication.Resources.find((l) => {
+                    if (!link) {
+                        link = publication.Spine.find((l) => {
                             if (l.Href === relativePath) {
                                 return true;
                             }
                             return false;
                         });
-                        if (!link) {
-                            link = publication.Spine.find((l) => {
-                                if (l.Href === relativePath) {
-                                    return true;
-                                }
-                                return false;
-                            });
-                        }
-                        if (!link) {
-                            const err = "Asset not declared in publication spine/resources!";
-                            console.log(err);
-                            res.status(500).send("<html><body><p>Internal Server Error</p><p>"
-                                + err + "</p></body></html>");
-                            return;
-                        }
+                    }
+                    if (!link) {
+                        const err = "Asset not declared in publication spine/resources!";
+                        console.log(err);
+                        res.status(500).send("<html><body><p>Internal Server Error</p><p>"
+                            + err + "</p></body></html>");
+                        return;
                     }
                 }
 
-                const mediaType = mime.lookup(req.params.asset);
+                const mediaType = mime.lookup(pathInZip);
                 const isText = mediaType && (
                     mediaType.indexOf("text/") === 0 ||
                     mediaType.indexOf("application/xhtml") === 0 ||
@@ -394,7 +403,7 @@ routerAssets.get("/",
                     mediaType.indexOf("+xhtml") > 0 ||
                     mediaType.indexOf("+xml") > 0);
 
-                const zipData = zip.entryDataSync(req.params.asset);
+                const zipData = zip.entryDataSync(pathInZip);
 
                 if (req.query.show) {
                     res.status(200).send("<html><body>" +
@@ -461,6 +470,6 @@ routerPathBase64.get("/:pathBase64", (req: express.Request, res: express.Respons
 server.use("/pub", routerPathBase64);
 
 server.listen(port, () => {
-    console.log(urlRoot);
+    console.log("http://localhost:" + port);
     console.log(urlBook);
 });
