@@ -2,7 +2,6 @@ import * as mime from "mime-types";
 import * as path from "path";
 import * as slugify from "slugify";
 import * as xmldom from "xmldom";
-import * as xpath from "xpath";
 
 import { XML } from "../xml-js-mapper";
 

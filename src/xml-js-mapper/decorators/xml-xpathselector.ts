@@ -2,7 +2,7 @@ import "reflect-metadata";
 
 import { getDefinition } from "../classes/object-definition";
 
-import { FunctionType, IXmlNamespaces } from "../types";
+import { IXmlNamespaces } from "../types";
 
 export function XmlXPathSelector(selector: string, namespaces?: IXmlNamespaces) {
     return (target: any, key: string): void => {

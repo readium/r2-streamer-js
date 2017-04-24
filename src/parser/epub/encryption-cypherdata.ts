@@ -1,7 +1,6 @@
 import { CipherReference } from "./encryption-cypherreference";
 
 import {
-    XmlItemType,
     XmlObject,
     XmlXPathSelector,
 } from "../../xml-js-mapper";

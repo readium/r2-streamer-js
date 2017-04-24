@@ -1,7 +1,6 @@
 import { RetrievalMethod } from "./encryption-retrievalmethod";
 
 import {
-    XmlItemType,
     XmlObject,
     XmlXPathSelector,
 } from "../../xml-js-mapper";

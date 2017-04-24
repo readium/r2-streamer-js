@@ -1,7 +1,6 @@
 import { Content } from "./ncx-content";
 
 import {
-    XmlItemType,
     XmlObject,
     XmlXPathSelector,
 } from "../../xml-js-mapper";

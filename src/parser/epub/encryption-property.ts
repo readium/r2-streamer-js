@@ -1,7 +1,6 @@
 import { Compression } from "./encryption-compression";
 
 import {
-    XmlItemType,
     XmlObject,
     XmlXPathSelector,
 } from "../../xml-js-mapper";

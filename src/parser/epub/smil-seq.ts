@@ -1,4 +1,3 @@
-import { Par } from "./smil-par";
 import { SeqOrPar } from "./smil-seq-or-par";
 
 import {

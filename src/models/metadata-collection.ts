@@ -21,6 +21,7 @@ export class Collection {
     public Position: number;
 
     @OnDeserialized()
+    // tslint:disable-next-line:no-unused-variable
     private _OnDeserialized() {
         if (!this.Name) {
             console.log("Collection.Name is not set!");

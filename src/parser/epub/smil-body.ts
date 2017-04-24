@@ -1,10 +1,7 @@
-import { Par } from "./smil-par";
 import { Seq } from "./smil-seq";
 
 import {
-    XmlItemType,
     XmlObject,
-    XmlXPathSelector,
 } from "../../xml-js-mapper";
 
 @XmlObject({
@@ -12,5 +9,6 @@ import {
     smil: "http://www.w3.org/ns/SMIL",
 })
 export class Body extends Seq {
+    // tslint:disable-next-line:no-unused-variable
     private isBody: boolean = true;
 }

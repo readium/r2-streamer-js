@@ -1,12 +1,10 @@
 // https://github.com/edcarroll/ta-json
 import {
     DateConverter,
-    // IPropertyConverter,
     JsonConverter,
     JsonElementType,
     JsonObject,
     JsonProperty,
-    OnDeserialized,
 } from "ta-json";
 
 import { Encryption } from "./lcp-encryption";

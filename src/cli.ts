@@ -1,10 +1,3 @@
-import { JSON } from "ta-json";
-
-import { IStringMap } from "./models/metadata-multilang";
-
-import { MediaOverlayNode } from "./models/media-overlay";
-import { Metadata } from "./models/metadata";
-
 import { Publication } from "./models/publication";
 
 import { CbzParser } from "./parser/cbz";

@@ -8,7 +8,7 @@ import {
 
 import { Link } from "./publication-link";
 
-import { IMeta, Metadata } from "./metadata";
+import { Metadata } from "./metadata";
 
 import { MediaOverlayNode } from "./media-overlay";
 
@@ -246,6 +246,7 @@ export class Publication {
     }
 
     @OnDeserialized()
+    // tslint:disable-next-line:no-unused-variable
     private _OnDeserialized() {
         if (!this.Metadata) {
             console.log("Publication.Metadata is not set!");

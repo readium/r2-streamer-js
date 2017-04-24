@@ -128,6 +128,7 @@ export class Metadata {
     public OtherMetadata: IMeta[];
 
     @OnDeserialized()
+    // tslint:disable-next-line:no-unused-variable
     private _OnDeserialized() {
         if (!this.Title) {
             console.log("Metadata.Title is not set!");

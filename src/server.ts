@@ -10,15 +10,11 @@ import * as fs from "fs";
 import * as path from "path";
 import * as util from "util";
 
-import * as url from "url";
-
 import * as crypto from "crypto";
 
 import { EpubParser } from "./parser/epub";
 
-import { Publication } from "./models/publication";
-
-import { dumpPublication, processEPUB, sortObject } from "./cli";
+import { processEPUB, sortObject } from "./cli";
 import { Link } from "./models/publication-link";
 
 console.log("process.cwd():");
@@ -52,8 +48,8 @@ if (!fs.existsSync(filePath)) {
     }
 }
 
-const fileName = path.basename(filePath);
-const ext = path.extname(fileName).toLowerCase();
+// const fileName = path.basename(filePath);
+// const ext = path.extname(fileName).toLowerCase();
 
 const server = express();
 const port = process.env.PORT || 3000;

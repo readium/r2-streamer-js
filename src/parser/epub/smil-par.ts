@@ -5,7 +5,6 @@ import { SeqOrPar } from "./smil-seq-or-par";
 
 import {
     XmlDiscriminatorValue,
-    XmlItemType,
     XmlObject,
     XmlXPathSelector,
 } from "../../xml-js-mapper";

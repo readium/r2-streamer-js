@@ -2,7 +2,6 @@ import { Body } from "./smil-body";
 import { Par } from "./smil-par";
 
 import {
-    XmlItemType,
     XmlObject,
     XmlXPathSelector,
 } from "../../xml-js-mapper";

@@ -1,9 +1,6 @@
-import * as mime from "mime-types";
 import * as moment from "moment";
 import * as path from "path";
 import * as querystring from "querystring";
-import * as slugify from "slugify";
-import * as util from "util";
 import * as xmldom from "xmldom";
 import * as xpath from "xpath";
 
@@ -51,8 +48,8 @@ export class EpubParser {
     private epub3 = "3.0";
     private epub301 = "3.0.1";
     private epub31 = "3.1";
-    private epub2 = "2.0";
-    private epub201 = "2.0.1";
+    // private epub2 = "2.0";
+    // private epub201 = "2.0.1";
     private autoMeta = "auto";
     private noneMeta = "none";
     private reflowableMeta = "reflowable";
@@ -145,7 +142,7 @@ export class EpubParser {
                         // console.log(util.inspect(opf,
                         //     { showHidden: false, depth: 1000, colors: true, customInspect: true }));
 
-                        const epubVersion = this.getEpubVersion(rootfile, opf);
+                        // const epubVersion = this.getEpubVersion(rootfile, opf);
 
                         let ncx: NCX | undefined;
                         opf.Manifest.forEach((manifestItem) => {
@@ -537,7 +534,7 @@ export class EpubParser {
         const contributor = new Contributor();
         let role: string | undefined;
 
-        const epubVersion = this.getEpubVersion(rootfile, opf);
+        // const epubVersion = this.getEpubVersion(rootfile, opf);
 
         if (this.isEpub3OrMore(rootfile, opf)) {
 
@@ -883,6 +880,9 @@ export class EpubParser {
                     propertiesStruct.Overflow = "scrolled";
                     break;
                 }
+                default: {
+                    break;
+                }
             }
 
             if (propertiesStruct.Layout ||
@@ -951,6 +951,9 @@ export class EpubParser {
                     }
                     case "rendition:flow": {
                         rendition.Overflow = meta.Data;
+                        break;
+                    }
+                    default: {
                         break;
                     }
                 }
@@ -1238,6 +1241,9 @@ export class EpubParser {
                         case "lov": {
                             publication.LOV = [];
                             this.fillTOCFromNavDocWithOL(select, olElem, publication.LOV, navLink.Href);
+                            break;
+                        }
+                        default: {
                             break;
                         }
                     }

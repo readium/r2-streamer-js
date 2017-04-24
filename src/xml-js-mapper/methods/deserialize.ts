@@ -1,4 +1,3 @@
-import * as xmldom from "xmldom";
 import * as xpath from "xpath";
 
 import { IDynamicObject, IParseOptions } from "../types";

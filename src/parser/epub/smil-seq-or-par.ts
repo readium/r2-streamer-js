@@ -1,8 +1,6 @@
 import {
     XmlDiscriminatorProperty,
-    XmlItemType,
     XmlObject,
-    XmlXPathSelector,
 } from "../../xml-js-mapper";
 
 @XmlObject({

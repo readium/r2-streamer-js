@@ -1,5 +1,3 @@
-import * as xmldom from "xmldom";
-
 // import { serialize } from "./methods/serialize";
 
 import { deserialize } from "./methods/deserialize";

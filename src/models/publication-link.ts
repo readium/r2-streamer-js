@@ -56,6 +56,7 @@ export class Link {
     }
 
     @OnDeserialized()
+    // tslint:disable-next-line:no-unused-variable
     private _OnDeserialized() {
         if (!this.Href) {
             console.log("Link.Href is not set!");
