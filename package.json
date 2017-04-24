@@ -1,6 +1,6 @@
 {
   "name": "r2-streamer-js",
-  "version": "0.0.1-alpha3",
+  "version": "0.0.1-alpha4",
   "description": "Readium 2 NodeJS 'streamer'",
   "keywords": [
     "readium",
@@ -54,7 +54,7 @@
     "tslint": "latest",
     "typescript": "latest"
   },
-  "main": "dist/src/index.js",
+  "main": "dist/src/index",
   "bin": {
     "r2-streamer-js-cli": "dist/src/cli.js",
     "r2-streamer-js-server": "dist/src/server.js"
