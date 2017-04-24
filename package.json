@@ -54,7 +54,8 @@
     "tslint": "latest",
     "typescript": "latest"
   },
-  "main": "dist/src/index",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.js",
   "bin": {
     "r2-streamer-js-cli": "dist/src/cli.js",
     "r2-streamer-js-server": "dist/src/server.js"
