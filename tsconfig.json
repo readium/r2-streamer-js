@@ -12,7 +12,8 @@
     "module": "commonjs",
     "target": "es2015",
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
+    "emitDecoratorMetadata": true,
+    "declaration": true
   },
   "include": [
     "./src/**/*",

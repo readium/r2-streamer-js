@@ -12,17 +12,9 @@ import { IMeta, Metadata } from "./metadata";
 
 import { MediaOverlayNode } from "./media-overlay";
 
-interface IInternal {
-    Name: string;
-    Value: any;
-}
+import { IPublicationCollection } from "./publication-collection";
 
-interface IPublicationCollection {
-    Role: string;
-    Metadata: IMeta[];
-    Links: Link[];
-    Children: IPublicationCollection[];
-}
+import { IInternal } from "./internal";
 
 @JsonObject()
 export class Publication {
