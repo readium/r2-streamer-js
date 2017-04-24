@@ -12,6 +12,8 @@
     },
     "search.exclude": {},
     "git.enabled": false,
+    "tslint.enable": true,
+    "tslint.jsEnable": true,
     "telemetry.enableCrashReporter": false,
     "telemetry.enableTelemetry": false,
     "editor.roundedSelection": false,

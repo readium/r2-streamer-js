@@ -8,7 +8,9 @@
         "named-imports-order": "case-insensitive"
       }
     ],
-    "no-console": false
+    "no-console": [false],
+    "no-unused-variable": true,
+    "interface-name": [false]
   },
   "jsRules": {
     "ordered-imports": [
