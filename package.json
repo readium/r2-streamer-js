@@ -1,6 +1,6 @@
 {
   "name": "r2-streamer-js",
-  "version": "0.0.1-alpha8",
+  "version": "0.0.1-alpha9",
   "description": "Readium 2 'streamer' for NodeJS (TypeScript, ECMAScript 2015 / ES6)",
   "keywords": [
     "readium",
@@ -75,11 +75,11 @@
   ],
   "scripts": {
     "prepublish": "yarn run build && yarn test",
-    "now": "rm -rf ./now && mkdir now && cp -r dist/ now/ && cp *.epub now/ && cp package-now.json now/ && cd now/ && mv package-now.json package.json && now && cd ..",
+    "now": "rm -rf ./now && mkdir now && mkdir now/reader && cp -r dist/ now/ && cp -r reader/ now/reader/ && cp *.epub now/ && cp package-now.json now/ && cd now/ && mv package-now.json package.json && now && cd ..",
     "start": "yarn run build && yarn run server *.epub",
     "build": "yarn run clean && yarn run lint:all && yarn run lint:typescript && yarn run transpile:typescript",
     "clean": "rimraf ./dist && rimraf ./now && mkdirp ./dist",
-    "lint:all": "echo '\n===== LINT (all)\n' && eclint check '**/*' '[!].git/**/*' '[!]node_modules/**/*' '[!]dist/**/*' '[!]now/**/*' '[!].vscode/**/*' '[!]**/.DS_Store' '[!]**/*.epub' '[!]**/*.cbz'  '[!]**/*.jpg'  '[!]**/*.jpeg'  '[!]**/*.png'",
+    "lint:all": "echo '\n===== LINT (all)\n' && eclint check '**/*' '[!].git/**/*' '[!]node_modules/**/*' '[!]dist/**/*' '[!]reader/**/*' '[!]now/**/*' '[!].vscode/**/*' '[!]**/.DS_Store' '[!]**/*.epub' '[!]**/*.cbz'  '[!]**/*.jpg'  '[!]**/*.jpeg'  '[!]**/*.png'",
     "lint:typescript": "echo '\n===== LINT (typescript)\n' && tslint -c './tslint.json' './src/**/*.ts' './test/**/*.ts'",
     "transpile:typescript": "echo '\n===== COMPILE (typescript)\n' && tsc -p './tsconfig.json'",
     "test": "ava --verbose './dist/test/test.js'",

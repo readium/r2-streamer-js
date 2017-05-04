@@ -6,6 +6,8 @@ import * as mime from "mime-types";
 
 import * as morgan from "morgan";
 
+import * as querystring from "querystring";
+
 import * as fs from "fs";
 import * as path from "path";
 import * as util from "util";
@@ -56,13 +58,46 @@ const port = process.env.PORT || 3000;
 
 const filePathBase64 = new Buffer(filePath).toString("base64");
 
-const urlBook = "./pub/" + filePathBase64 + "/manifest.json";
-const urlBookShowAll = urlBook + "/show/all";
+const urlBook = "/pub/" + filePathBase64 + "/manifest.json";
+const urlBookShowAll = "." + urlBook + "/show/all";
+
+const urlReader = "./reader/?url=PREFIX" + querystring.escape(urlBook); // urlBook.replace(/=/g, "%3D")
+
+const urlReader2 =
+    "https://s3.amazonaws.com/epubjs-manifest/examples/manifest.html?href=PREFIZ"
+    + urlBook;
+
+const urlReader3 =
+    "https://hadriengardeur.github.io/webpub-manifest/examples/viewer/?manifest=true&href=PREFIX"
+    + querystring.escape(urlBook);
+
+const htmlLanding = "<html><body><p>OK</p><p>Manifest dump:<br><a href='" +
+    urlBookShowAll + "'>" + urlBookShowAll + "</a></p><p>Reader 1:<br><a href='" +
+    urlReader + "'>" + urlReader + "</a></p><p>Reader 2:<br><a href='" +
+    urlReader2 + "'>" + urlReader2 + "</a></p><p>Reader 3:<br><a href='" +
+    urlReader3 + "'>" + urlReader3 + "</a></p></body></html>";
 
 server.get("/", (_req: express.Request, res: express.Response) => {
-    res.status(200).send("<html><body><p>OK</p><p><a href='" +
-        urlBookShowAll + "'>" + urlBookShowAll + "</a></p></body></html>");
+
+    // // breakLength: 100  maxArrayLength: undefined
+    // console.log(util.inspect(_req,
+    //     { showHidden: false, depth: 1000, colors: true, customInspect: false }));
+
+    const isSecureHttp = _req.secure ||
+        _req.protocol === "https" ||
+        _req.get("X-Forwarded-Protocol") === "https" ||
+        true; // TODO: the other tests do not appear to work on now.sh :(
+
+    res.status(200).send(htmlLanding.replace(/PREFIX/g,
+        (isSecureHttp ?
+            querystring.escape("https://") : querystring.escape("http://"))
+        + _req.headers.host).replace(/PREFIZ/g,
+        (isSecureHttp ?
+            "https://" : "http://")
+        + _req.headers.host));
 });
+
+server.use("/reader", express.static("reader"));
 
 const routerMediaOverlays = express.Router();
 // routerMediaOverlays.use(morgan("combined"));
@@ -515,8 +550,19 @@ routerPathBase64.use("/:pathBase64/manifest.json", routerManifestJson);
 routerPathBase64.use("/:pathBase64/" + EpubParser.mediaOverlayURLPath, routerMediaOverlays);
 routerPathBase64.use("/:pathBase64/:asset(*)", routerAssets);
 routerPathBase64.get("/:pathBase64", (_req: express.Request, res: express.Response) => {
-    res.status(200).send("<html><body><p>OK</p><p><a href='" +
-        urlBookShowAll + "'>" + urlBookShowAll + "</a></p></body></html>");
+
+    const isSecureHttp = _req.secure ||
+        _req.protocol === "https" ||
+        _req.get("X-Forwarded-Protocol") === "https" ||
+        true; // TODO: the other tests do not appear to work on now.sh :(
+
+    res.status(200).send(htmlLanding.replace(/PREFIX/g,
+        (isSecureHttp ?
+            querystring.escape("https://") : querystring.escape("http://"))
+        + _req.headers.host).replace(/PREFIZ/g,
+        (isSecureHttp ?
+            "https://" : "http://")
+        + _req.headers.host));
 });
 
 server.use("/pub", routerPathBase64);

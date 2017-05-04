@@ -1,10 +1,10 @@
 {
   "name": "readium2",
-  "version": "0.0.1-alpha1",
+  "version": "0.0.1-alpha9",
   "engines": {
     "node": "6.x.x",
     "npm": ">=3",
-    "yarn": ">= 0.21"
+    "yarn": ">= 0.23"
   },
   "dependencies": {
     "express": "latest",
