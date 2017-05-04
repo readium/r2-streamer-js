@@ -52,6 +52,7 @@
     "mkdirp": "latest",
     "rimraf": "latest",
     "tslint": "latest",
+    "tslint-language-service": "latest",
     "typescript": "latest"
   },
   "main": "dist/src/index.js",
@@ -71,7 +72,7 @@
     "build": "yarn run clean && yarn run lint:all && yarn run lint:typescript && yarn run transpile:typescript",
     "clean": "rimraf ./dist && rimraf ./now && mkdirp ./dist",
     "lint:all": "echo '\n===== LINT (all)\n' && eclint check '**/*' '[!].git/**/*' '[!]node_modules/**/*' '[!]dist/**/*' '[!]now/**/*' '[!].vscode/**/*' '[!]**/.DS_Store' '[!]**/*.epub' '[!]**/*.cbz'  '[!]**/*.jpg'  '[!]**/*.jpeg'  '[!]**/*.png'",
-    "lint:typescript": "echo '\n===== LINT (typescript)\n' && tslint --project './tsconfig.json' --type-check -c './tslint.json' './src/**/*.ts' './test/**/*.ts'",
+    "lint:typescript": "echo '\n===== LINT (typescript)\n' && tslint -c './tslint.json' './src/**/*.ts' './test/**/*.ts'",
     "transpile:typescript": "echo '\n===== COMPILE (typescript)\n' && tsc -p './tsconfig.json'",
     "test": "ava --verbose './dist/test/test.js'",
     "cli": "node './dist/src/cli.js'",

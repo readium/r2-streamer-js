@@ -16,7 +16,7 @@ export function createZipPromise(filePath: string): Promise<any> {
             reject(err);
         });
 
-        zip.on("entry", (entry: any) => {
+        zip.on("entry", (_entry: any) => {
             // console.log("--ZIP: entry");
             // console.log(entry.name);
         });

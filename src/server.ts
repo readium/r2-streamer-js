@@ -59,7 +59,7 @@ const filePathBase64 = new Buffer(filePath).toString("base64");
 const urlBook = "./pub/" + filePathBase64 + "/manifest.json";
 const urlBookShowAll = urlBook + "/show/all";
 
-server.get("/", (req: express.Request, res: express.Response) => {
+server.get("/", (_req: express.Request, res: express.Response) => {
     res.status(200).send("<html><body><p>OK</p><p><a href='" +
         urlBookShowAll + "'>" + urlBookShowAll + "</a></p></body></html>");
 });
@@ -495,7 +495,7 @@ routerAssets.get("/",
 const routerPathBase64 = express.Router();
 routerPathBase64.use(morgan("combined"));
 
-routerPathBase64.param("pathBase64", (req, res, next, value, name) => {
+routerPathBase64.param("pathBase64", (req, res, next, value, _name) => {
     if (value === filePathBase64) {
         (req as any).pathBase64 = value;
         next();
@@ -506,7 +506,7 @@ routerPathBase64.param("pathBase64", (req, res, next, value, name) => {
     }
 });
 
-routerPathBase64.param("asset", (req, res, next, value, name) => {
+routerPathBase64.param("asset", (req, _res, next, value, _name) => {
     (req as any).asset = value;
     next();
 });
@@ -514,7 +514,7 @@ routerPathBase64.param("asset", (req, res, next, value, name) => {
 routerPathBase64.use("/:pathBase64/manifest.json", routerManifestJson);
 routerPathBase64.use("/:pathBase64/" + EpubParser.mediaOverlayURLPath, routerMediaOverlays);
 routerPathBase64.use("/:pathBase64/:asset(*)", routerAssets);
-routerPathBase64.get("/:pathBase64", (req: express.Request, res: express.Response) => {
+routerPathBase64.get("/:pathBase64", (_req: express.Request, res: express.Response) => {
     res.status(200).send("<html><body><p>OK</p><p><a href='" +
         urlBookShowAll + "'>" + urlBookShowAll + "</a></p></body></html>");
 });

@@ -664,7 +664,7 @@ export class EpubParser {
         }
     }
 
-    private addIdentifier(publication: Publication, rootfile: Rootfile, opf: OPF) {
+    private addIdentifier(publication: Publication, _rootfile: Rootfile, opf: OPF) {
         if (opf.Metadata && opf.Metadata.Identifier) {
             if (opf.UniqueIdentifier && opf.Metadata.Identifier.length > 1) {
                 opf.Metadata.Identifier.forEach((iden) => {
@@ -926,7 +926,7 @@ export class EpubParser {
         return link;
     }
 
-    private addRendition(publication: Publication, rootfile: Rootfile, opf: OPF) {
+    private addRendition(publication: Publication, _rootfile: Rootfile, opf: OPF) {
 
         if (opf.Metadata && opf.Metadata.Meta && opf.Metadata.Meta.length) {
             const rendition = new Properties();
@@ -1005,7 +1005,7 @@ export class EpubParser {
     }
 
     private fillEncryptionInfo(
-        publication: Publication, rootfile: Rootfile, opf: OPF, encryption: Encryption, lcp: LCP | undefined) {
+        publication: Publication, rootfile: Rootfile, _opf: OPF, encryption: Encryption, lcp: LCP | undefined) {
 
         encryption.EncryptedData.forEach((encInfo) => {
             const encrypted = new Encrypted();
@@ -1032,7 +1032,7 @@ export class EpubParser {
 
             }
 
-            publication.Resources.forEach((l, i, arr) => {
+            publication.Resources.forEach((l, _i, _arr) => {
                 const filePath = path.join(path.dirname(rootfile.Path), l.Href);
                 if (filePath === encInfo.CipherData.CipherReference.URI) {
                     if (!l.Properties) {
@@ -1042,7 +1042,7 @@ export class EpubParser {
                 }
             });
 
-            publication.Spine.forEach((l, i, arr) => {
+            publication.Spine.forEach((l, _i, _arr) => {
                 const filePath = path.join(path.dirname(rootfile.Path), l.Href);
                 if (filePath === encInfo.CipherData.CipherReference.URI) {
                     if (!l.Properties) {
@@ -1069,7 +1069,7 @@ export class EpubParser {
         }
     }
 
-    private fillPageListFromNCX(publication: Publication, rootfile: Rootfile, opf: OPF, ncx: NCX) {
+    private fillPageListFromNCX(publication: Publication, _rootfile: Rootfile, _opf: OPF, ncx: NCX) {
         if (ncx.PageList && ncx.PageList.PageTarget && ncx.PageList.PageTarget.length) {
             ncx.PageList.PageTarget.forEach((pageTarget) => {
                 const link = new Link();
@@ -1094,7 +1094,7 @@ export class EpubParser {
         }
     }
 
-    private fillLandmarksFromGuide(publication: Publication, rootfile: Rootfile, opf: OPF) {
+    private fillLandmarksFromGuide(publication: Publication, _rootfile: Rootfile, opf: OPF) {
         if (opf.Guide && opf.Guide.length) {
             opf.Guide.forEach((ref) => {
                 if (ref.Href) {
@@ -1129,7 +1129,7 @@ export class EpubParser {
         node.push(link);
     }
 
-    private fillSubject(publication: Publication, rootfile: Rootfile, opf: OPF) {
+    private fillSubject(publication: Publication, _rootfile: Rootfile, opf: OPF) {
         if (opf.Metadata && opf.Metadata.Subject && opf.Metadata.Subject.length) {
             opf.Metadata.Subject.forEach((s) => {
                 const sub = new Subject();
@@ -1144,7 +1144,7 @@ export class EpubParser {
         }
     }
 
-    private fillCalibreSerieInfo(publication: Publication, rootfile: Rootfile, opf: OPF) {
+    private fillCalibreSerieInfo(publication: Publication, _rootfile: Rootfile, opf: OPF) {
         let serie: string | undefined;
         let seriePosition: number | undefined;
 
@@ -1175,7 +1175,7 @@ export class EpubParser {
         }
     }
 
-    private fillTOCFromNavDoc(publication: Publication, rootfile: Rootfile, opf: OPF, zip: any) {
+    private fillTOCFromNavDoc(publication: Publication, rootfile: Rootfile, _opf: OPF, zip: any) {
 
         const navLink = publication.GetNavDoc();
         if (!navLink) {
@@ -1313,7 +1313,7 @@ export class EpubParser {
             const manifestInfo = this.findInManifestByID(rootfile, opf, coverID);
             if (manifestInfo && manifestInfo.Href && publication.Resources && publication.Resources.length) {
 
-                publication.Resources.find((item, i, arr) => {
+                publication.Resources.find((item, i, _arr) => {
 
                     if (item.Href === manifestInfo.Href) {
                         publication.Resources[i].AddRel("cover");
@@ -1325,7 +1325,7 @@ export class EpubParser {
         }
     }
 
-    private findPropertiesInSpineForManifest(linkEpub: Manifest, rootfile: Rootfile, opf: OPF): string | undefined {
+    private findPropertiesInSpineForManifest(linkEpub: Manifest, _rootfile: Rootfile, opf: OPF): string | undefined {
 
         if (opf.Spine && opf.Spine.Items && opf.Spine.Items.length) {
             const it = opf.Spine.Items.find((item) => {
@@ -1369,7 +1369,7 @@ export class EpubParser {
         return undefined;
     }
 
-    private findAllMetaByRefineAndProperty(rootfile: Rootfile, opf: OPF, ID: string, property: string): Metafield[] {
+    private findAllMetaByRefineAndProperty(_rootfile: Rootfile, opf: OPF, ID: string, property: string): Metafield[] {
         const metas: Metafield[] = [];
 
         const refineID = "#" + ID;
@@ -1402,7 +1402,7 @@ export class EpubParser {
         return (version === this.epub3 || version === this.epub301 || version === this.epub31);
     }
 
-    private findLinKByHref(publication: Publication, rootfile: Rootfile, opf: OPF, href: string): Link | undefined {
+    private findLinKByHref(publication: Publication, rootfile: Rootfile, _opf: OPF, href: string): Link | undefined {
         if (publication.Spine && publication.Spine.length) {
             const ll = publication.Spine.find((l) => {
                 const pathInZip = path.join(path.dirname(rootfile.Path), l.Href);

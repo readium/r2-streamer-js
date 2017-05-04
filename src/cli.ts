@@ -67,7 +67,7 @@ if (ext === ".epub") {
     processEPUB(filePath)
         .then((publication) => {
             console.log("== EpubParser: resolve");
-            // dumpPublication(publication);
+            dumpPublication(publication);
         }).catch((err) => {
             console.log("== EpubParser: reject");
             console.log(err);

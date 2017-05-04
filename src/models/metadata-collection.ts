@@ -22,7 +22,8 @@ export class Collection {
 
     @OnDeserialized()
     // tslint:disable-next-line:no-unused-variable
-    private _OnDeserialized() {
+    // tslint:disable-next-line
+    private _OnDeserialized() { // tslint:disable-line
         if (!this.Name) {
             console.log("Collection.Name is not set!");
         }

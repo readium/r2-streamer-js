@@ -120,7 +120,7 @@ function deserializeRootObject(
 function deserializeObject(
     objectInstance: Node,
     definition: PropertyDefinition,
-    options: IParseOptions): IDynamicObject {
+    _options: IParseOptions): IDynamicObject {
 
     const primitive = definition.objectType === String
         || definition.objectType === Boolean

@@ -1,6 +1,15 @@
 {
   "extends": "tslint:recommended",
   "rules": {
+    "no-unused-variable": true,
+    "variable-name": [
+      true,
+      "ban-keywords",
+      "check-format",
+      "allow-leading-underscore",
+      "allow-trailing-underscore",
+      "allow-pascal-case"
+    ],
     "ordered-imports": [
       true,
       {
@@ -8,9 +17,12 @@
         "named-imports-order": "case-insensitive"
       }
     ],
-    "no-console": [false],
-    "no-unused-variable": true,
-    "interface-name": [false]
+    "no-console": [
+      false
+    ],
+    "interface-name": [
+      false
+    ]
   },
   "jsRules": {
     "ordered-imports": [
@@ -21,6 +33,5 @@
       }
     ]
   },
-  "rulesDirectory": [
-  ]
+  "rulesDirectory": []
 }

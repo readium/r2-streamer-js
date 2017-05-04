@@ -13,7 +13,9 @@
     "target": "es2015",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "declaration": true
+    "declaration": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": true
   },
   "include": [
     "./src/**/*",
