@@ -1,11 +1,17 @@
 {
   "name": "r2-streamer-js",
-  "version": "0.0.1-alpha7",
-  "description": "Readium 2 NodeJS 'streamer'",
+  "version": "0.0.1-alpha8",
+  "description": "Readium 2 'streamer' for NodeJS (TypeScript, ECMAScript 2015 / ES6)",
   "keywords": [
     "readium",
+    "readium2",
     "streamer",
-    "typescript"
+    "EPUB",
+    "TypeScript",
+    "JavaScript",
+    "ES6",
+    "ECMAScript 2015",
+    "ECMAScript 6"
   ],
   "engines": {
     "node": ">=6",
