@@ -1,15 +1,16 @@
 {
   "name": "r2-streamer-js",
-  "version": "0.0.1-alpha6",
+  "version": "0.0.1-alpha7",
   "description": "Readium 2 NodeJS 'streamer'",
   "keywords": [
     "readium",
-    "streamer"
+    "streamer",
+    "typescript"
   ],
   "engines": {
     "node": ">=6",
     "npm": ">=3",
-    "yarn": ">= 0.21"
+    "yarn": ">= 0.23"
   },
   "repository": {
     "type": "git",
@@ -67,6 +68,7 @@
     "dist/**/*"
   ],
   "scripts": {
+    "prepublish": "yarn run build && yarn test",
     "now": "rm -rf ./now && mkdir now && cp -r dist/ now/ && cp *.epub now/ && cp package-now.json now/ && cd now/ && mv package-now.json package.json && now && cd ..",
     "start": "yarn run build && yarn run server *.epub",
     "build": "yarn run clean && yarn run lint:all && yarn run lint:typescript && yarn run transpile:typescript",
