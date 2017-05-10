@@ -1,0 +1,14 @@
+body {
+  margin: 2em;
+  overflow: paged-x;
+  overflow: -webkit-paged-x;
+  overflow: -o-paged-x;
+}
+
+/*nav.publication {
+  display: none;
+}*/
+
+::-webkit-scrollbar {
+    display: none;
+}
