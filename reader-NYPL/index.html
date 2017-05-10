@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Webpub manifest viewer (https://github.com/NYPL-Simplified/webpub-viewer)</title>
+  <title>Webpub manifest viewer</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -18,6 +18,9 @@
   <div id="viewer">
   </div>
   <script>
+    //https://github.com/NYPL-Simplified/webpub-viewer
+    //https://github.com/NYPL-Simplified/webpub-viewer/tree/master/examples
+    //https://github.com/NYPL-Simplified/web-reader-landing-page/blob/master/book_index.html.template
 var getURLQueryParams = function() {
     var params = {};
 
@@ -53,19 +56,60 @@ var urlParams = getURLQueryParams();
 
       var bookCacheUrl = new URL("appcache.html", window.location.href);
 
-      var store = new LocalStorageStore.default(webpubManifestUrl.href);
-      var cacher = new ServiceWorkerCacher.default(store, webpubManifestUrl, "sw.js", bookCacheUrl);
+      var store = new LocalStorageStore.default({ prefix: webpubManifestUrl.href });
+
+      var cacher = new ServiceWorkerCacher.default({
+        store: store,
+        manifestUrl: webpubManifestUrl,
+        serviceWorkerUrl: new URL("sw.js", window.location.href),
+        staticFileUrls: [
+
+          new URL(window.location.href),
+          new URL("index.html", window.location.href),
+          new URL("main.css", window.location.href),
+          new URL("require.js", window.location.href),
+          new URL("fetch.js", window.location.href),
+          new URL("url-polyfill.js", window.location.href),
+          new URL("promise.js", window.location.href),
+          new URL("webpub-viewer.js", window.location.href)
+
+        ],
+        fallbackBookCacheUrl: bookCacheUrl
+      }
+      );
 
       var paginator = new ColumnsPaginatedBookView.default();
       var scroller = new ScrollingBookView.default();
-      var annotator = new LocalAnnotator.default(store);
+      var annotator = new LocalAnnotator.default({ store: store });
+      //var eventHandler = new EventHandler.default();
 
-      var settingsStore = new LocalStorageStore.default("webpub-viewer-library");
-      var fontSizes = [ 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32 ];
+      var settingsStore = new LocalStorageStore.default({ prefix: "webpub-viewer-library" });
+
+var fontSizes = [ 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32 ];
       var defaultFontSize = 20;
-      BookSettings.default.create(settingsStore, [paginator, scroller], fontSizes, defaultFontSize).then(function (settings) {
-        IFrameNavigator.default.create(element, webpubManifestUrl, store, cacher, settings, annotator, paginator, scroller, null, new URL("index.html", window.location.href), "Details");
+      BookSettings.default.create({
+        store: settingsStore, // store?
+        bookViews: [paginator, scroller],
+        fontSizesInPixels: fontSizes,
+        defaultFontSizeInPixels: defaultFontSize
+      }).then(function (settings) {
+        IFrameNavigator.default.create({
+          element: element,
+          manifestUrl: webpubManifestUrl,
+          store: store,
+          cacher: cacher,
+          settings: settings,
+          annotator: annotator,
+          paginator: paginator,
+          scroller: scroller,
+          //eventHandler: eventHandler,
+          upLink: {
+            url: new URL("index.html", window.location.href),
+            label: "Details"
+          }
+        });
       });
+
     });
   </script>
 </body>

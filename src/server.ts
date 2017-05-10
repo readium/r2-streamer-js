@@ -61,21 +61,24 @@ const filePathBase64 = new Buffer(filePath).toString("base64");
 const urlBook = "/pub/" + filePathBase64 + "/manifest.json";
 const urlBookShowAll = "." + urlBook + "/show/all";
 
-const urlReader = "./reader/?url=PREFIX" + querystring.escape(urlBook); // urlBook.replace(/=/g, "%3D")
+const urlReaderNYPL = "./reader-nypl/?url=PREFIX" + querystring.escape(urlBook); // urlBook.replace(/=/g, "%3D")
+const urlReaderHADRIEN = "./reader-hadrien/?manifest=true&href=PREFIX"
+    + querystring.escape(urlBook); // urlBook.replace(/=/g, "%3D")
 
-const urlReader2 =
+const urlReaderEPUBJS =
     "https://s3.amazonaws.com/epubjs-manifest/examples/manifest.html?href=PREFIZ"
     + urlBook;
 
-const urlReader3 =
+const urlReaderHADRIENbasic =
     "https://hadriengardeur.github.io/webpub-manifest/examples/viewer/?manifest=true&href=PREFIX"
     + querystring.escape(urlBook);
 
 const htmlLanding = "<html><body><p>OK</p><p>Manifest dump:<br><a href='" +
-    urlBookShowAll + "'>" + urlBookShowAll + "</a></p><p>Reader 1:<br><a href='" +
-    urlReader + "'>" + urlReader + "</a></p><p>Reader 2:<br><a href='" +
-    urlReader2 + "'>" + urlReader2 + "</a></p><p>Reader 3:<br><a href='" +
-    urlReader3 + "'>" + urlReader3 + "</a></p></body></html>";
+    urlBookShowAll + "'>" + urlBookShowAll + "</a></p><p>Reader NYPL:<br><a href='" +
+    urlReaderNYPL + "'>" + urlReaderNYPL + "</a></p><p>Reader HADRIEN:<br><a href='" +
+    urlReaderHADRIEN + "'>" + urlReaderHADRIEN + "</a></p><p>Reader EPUB.js:<br><a href='" +
+    urlReaderEPUBJS + "'>" + urlReaderEPUBJS + "</a></p><p>Reader HADRIEN BASIC:<br><a href='" +
+    urlReaderHADRIENbasic + "'>" + urlReaderHADRIENbasic + "</a></p></body></html>";
 
 server.get("/", (_req: express.Request, res: express.Response) => {
 
@@ -97,7 +100,8 @@ server.get("/", (_req: express.Request, res: express.Response) => {
         + _req.headers.host));
 });
 
-server.use("/reader", express.static("reader"));
+server.use("/reader-nypl", express.static("reader-NYPL"));
+server.use("/reader-hadrien", express.static("reader-HADRIEN"));
 
 const routerMediaOverlays = express.Router();
 // routerMediaOverlays.use(morgan("combined"));
