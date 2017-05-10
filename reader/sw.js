@@ -1,18 +1,4 @@
 var CACHE_NAME = "webpub-viewer";
-var urlsToCache = [
-    "require.js",
-    "fetch.js",
-    "webpub-viewer.js",
-    "index.html",
-    "main.css"
-];
-self.addEventListener('install', function (event) {
-    var urlsCached = self.caches.open(CACHE_NAME).then(function (cache) {
-        return cache.addAll(urlsToCache);
-    });
-    event.waitUntil(urlsCached);
-    self.skipWaiting();
-});
 self.addEventListener('activate', function () {
     self.clients.claim();
 });
