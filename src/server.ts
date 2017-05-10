@@ -61,8 +61,8 @@ const filePathBase64 = new Buffer(filePath).toString("base64");
 const urlBook = "/pub/" + filePathBase64 + "/manifest.json";
 const urlBookShowAll = "." + urlBook + "/show/all";
 
-const urlReaderNYPL = "./reader-nypl/?url=PREFIX" + querystring.escape(urlBook); // urlBook.replace(/=/g, "%3D")
-const urlReaderHADRIEN = "./reader-hadrien/?manifest=true&href=PREFIX"
+const urlReaderNYPL = "./readerNYPL/?url=PREFIX" + querystring.escape(urlBook); // urlBook.replace(/=/g, "%3D")
+const urlReaderHADRIEN = "./readerHADRIEN/?manifest=true&href=PREFIX"
     + querystring.escape(urlBook); // urlBook.replace(/=/g, "%3D")
 
 const urlReaderEPUBJS =
@@ -100,8 +100,8 @@ server.get("/", (_req: express.Request, res: express.Response) => {
         + _req.headers.host));
 });
 
-server.use("/reader-nypl", express.static("reader-NYPL"));
-server.use("/reader-hadrien", express.static("reader-HADRIEN"));
+server.use("/readerNYPL", express.static("reader-NYPL"));
+server.use("/readerHADRIEN", express.static("reader-HADRIEN"));
 
 const routerMediaOverlays = express.Router();
 // routerMediaOverlays.use(morgan("combined"));
