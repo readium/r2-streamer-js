@@ -156,7 +156,8 @@ export class EpubParser {
                         opf.Manifest.forEach((manifestItem) => {
 
                             if (opf.Spine.Toc && manifestItem.ID === opf.Spine.Toc) {
-                                const ncxFilePath = path.join(path.dirname(rootfile.Path), manifestItem.Href);
+                                const ncxFilePath = path.join(path.dirname(rootfile.Path), manifestItem.Href)
+                                    .replace(/\\/g, "/");
                                 // console.log("########## NCX: "
                                 //     + rootfile.Path
                                 //     + " == "
@@ -378,7 +379,8 @@ export class EpubParser {
 
             if (item.TypeLink === "application/smil+xml") {
 
-                const smilFilePath = path.join(path.dirname(rootfile.Path), item.Href);
+                const smilFilePath = path.join(path.dirname(rootfile.Path), item.Href)
+                    .replace(/\\/g, "/");
                 if (Object.keys(zip.entries()).indexOf(smilFilePath) < 0) {
                     return;
                 }
@@ -397,7 +399,8 @@ export class EpubParser {
                             return false;
                         });
                         if (manItemSmil) {
-                            const smilFilePath2 = path.join(path.dirname(rootfile.Path), manItemSmil.Href);
+                            const smilFilePath2 = path.join(path.dirname(rootfile.Path), manItemSmil.Href)
+                                .replace(/\\/g, "/");
                             if (smilFilePath2 === smilFilePath) {
                                 manItemsHtmlWithSmil.push(manItemHtmlWithSmil);
                             }
@@ -407,7 +410,8 @@ export class EpubParser {
 
                 manItemsHtmlWithSmil.forEach((manItemHtmlWithSmil) => {
 
-                    const htmlPathInZip = path.join(path.dirname(rootfile.Path), manItemHtmlWithSmil.Href);
+                    const htmlPathInZip = path.join(path.dirname(rootfile.Path), manItemHtmlWithSmil.Href)
+                        .replace(/\\/g, "/");
 
                     const link = this.findLinKByHref(publication, rootfile, opf, htmlPathInZip);
                     if (link) {
@@ -1041,7 +1045,8 @@ export class EpubParser {
             }
 
             publication.Resources.forEach((l, _i, _arr) => {
-                const filePath = path.join(path.dirname(rootfile.Path), l.Href);
+                const filePath = path.join(path.dirname(rootfile.Path), l.Href)
+                    .replace(/\\/g, "/");
                 if (filePath === encInfo.CipherData.CipherReference.URI) {
                     if (!l.Properties) {
                         l.Properties = new Properties();
@@ -1051,7 +1056,8 @@ export class EpubParser {
             });
 
             publication.Spine.forEach((l, _i, _arr) => {
-                const filePath = path.join(path.dirname(rootfile.Path), l.Href);
+                const filePath = path.join(path.dirname(rootfile.Path), l.Href)
+                    .replace(/\\/g, "/");
                 if (filePath === encInfo.CipherData.CipherReference.URI) {
                     if (!l.Properties) {
                         l.Properties = new Properties();
@@ -1190,7 +1196,8 @@ export class EpubParser {
             return;
         }
 
-        const navDocFilePath = path.join(path.dirname(rootfile.Path), navLink.Href);
+        const navDocFilePath = path.join(path.dirname(rootfile.Path), navLink.Href)
+            .replace(/\\/g, "/");
         if (Object.keys(zip.entries()).indexOf(navDocFilePath) < 0) {
             return;
         }
@@ -1413,7 +1420,8 @@ export class EpubParser {
     private findLinKByHref(publication: Publication, rootfile: Rootfile, _opf: OPF, href: string): Link | undefined {
         if (publication.Spine && publication.Spine.length) {
             const ll = publication.Spine.find((l) => {
-                const pathInZip = path.join(path.dirname(rootfile.Path), l.Href);
+                const pathInZip = path.join(path.dirname(rootfile.Path), l.Href)
+                    .replace(/\\/g, "/");
 
                 if (href === pathInZip) {
                     return true;

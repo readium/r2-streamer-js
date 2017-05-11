@@ -360,7 +360,8 @@ export function launchServer(filePath: string) {
                         // FIRST FAIL ...
                         // let's try to adjust the path, make it relative to the OPF package
                         // (support for legacy incorrect implementation)
-                        pathInZip = path.join(path.dirname(rootfilePath), pathInZip);
+                        pathInZip = path.join(path.dirname(rootfilePath), pathInZip)
+                            .replace(/\\/g, "/");
                     }
 
                     if (Object.keys(zip.entries()).indexOf(pathInZip) < 0) {
@@ -377,7 +378,8 @@ export function launchServer(filePath: string) {
                         && !pathInZip.endsWith(".opf")
                         && publication.Resources) {
 
-                        const relativePath = path.relative(path.dirname(rootfilePath), pathInZip);
+                        const relativePath = path.relative(path.dirname(rootfilePath), pathInZip)
+                            .replace(/\\/g, "/");
 
                         link = publication.Resources.find((l) => {
                             if (l.Href === relativePath) {
