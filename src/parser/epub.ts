@@ -45,6 +45,12 @@ import { SeqOrPar } from "./epub/smil-seq-or-par";
 
 export class EpubParser {
 
+    public static async load(path: string): Promise<Publication> {
+        const parser = new EpubParser();
+        const publication = await parser.Parse(path);
+        return publication;
+    }
+
     private epub3 = "3.0";
     private epub301 = "3.0.1";
     private epub31 = "3.1";
@@ -56,7 +62,9 @@ export class EpubParser {
 
     public static get mediaOverlayURLPath(): string {
         return "media-overlay";
-    } public static get mediaOverlayURLParam(): string {
+    }
+
+    public static get mediaOverlayURLParam(): string {
         return "resource";
     }
 

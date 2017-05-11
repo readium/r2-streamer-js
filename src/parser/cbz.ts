@@ -19,6 +19,12 @@ import { Contributor } from "../models/metadata-contributor";
 
 export class CbzParser {
 
+    public static async load(path: string): Promise<Publication> {
+        const parser = new CbzParser();
+        const publication = await parser.Parse(path);
+        return publication;
+    }
+
     public Parse(filePath: string): Promise<Publication> {
 
         const zipPromise = createZipPromise(filePath);

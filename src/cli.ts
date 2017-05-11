@@ -7,26 +7,7 @@ import * as fs from "fs";
 import * as path from "path";
 import * as util from "util";
 
-interface IStringKeyedObject { [key: string]: any; }
-
-export function sortObject(obj: any): any {
-    if (obj instanceof Array) {
-        for (let i = 0; i < obj.length; i++) {
-            obj[i] = sortObject(obj[i]);
-        }
-        return obj;
-    } else if (typeof obj !== "object") {
-        return obj;
-    }
-
-    const newObj: IStringKeyedObject = {};
-
-    Object.keys(obj).sort().forEach((key) => {
-        newObj[key] = sortObject(obj[key]);
-    });
-
-    return newObj;
-}
+import { sortObject } from "./utils";
 
 console.log("process.cwd():");
 console.log(process.cwd());
@@ -64,7 +45,7 @@ const ext = path.extname(fileName).toLowerCase();
 
 if (ext === ".epub") {
 
-    processEPUB(filePath)
+    EpubParser.load(filePath)
         .then((publication) => {
             console.log("== EpubParser: resolve");
             dumpPublication(publication);
@@ -75,7 +56,7 @@ if (ext === ".epub") {
 
 } else if (ext === ".cbz") {
 
-    new CbzParser().Parse(filePath)
+    CbzParser.load(filePath)
         .then((publication) => {
             console.log("== CbzParser: resolve");
             dumpPublication(publication);
@@ -104,12 +85,6 @@ export function dumpPublication(publication: Publication) {
     // console.log("#### CANONICAL JSON:");
     // const publicationJsonStrCanonical = JSON.stringify(sortObject(publicationJsonObj));
     // console.log(publicationJsonStrCanonical);
-}
-
-export async function processEPUB(path: string): Promise<Publication> {
-    const parser = new EpubParser();
-    const publication = await parser.Parse(path);
-    return publication;
 }
 
 // console.log("~~~~~~~~~~~~~~~");

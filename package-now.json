@@ -1,6 +1,6 @@
 {
   "name": "readium2",
-  "version": "0.0.1-alpha9",
+  "version": "0.0.1-alpha10",
   "engines": {
     "node": "6.x.x",
     "npm": ">=3",
@@ -19,6 +19,6 @@
     "xpath": "latest"
   },
   "scripts": {
-    "now-start": "node './src/server.js' *.epub"
+    "now-start": "node './src/server-cli.js' *.epub"
   }
 }

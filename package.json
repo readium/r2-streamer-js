@@ -1,6 +1,6 @@
 {
   "name": "r2-streamer-js",
-  "version": "0.0.1-alpha9",
+  "version": "0.0.1-alpha10",
   "description": "Readium 2 'streamer' for NodeJS (TypeScript, ECMAScript 2015 / ES6)",
   "keywords": [
     "readium",
@@ -66,7 +66,7 @@
   "types": "dist/src/index.d.js",
   "bin": {
     "r2-streamer-js-cli": "dist/src/cli.js",
-    "r2-streamer-js-server": "dist/src/server.js"
+    "r2-streamer-js-server": "dist/src/server-cli.js"
   },
   "files": [
     "LICENCE",
@@ -84,6 +84,6 @@
     "transpile:typescript": "echo '\n===== COMPILE (typescript)\n' && tsc -p './tsconfig.json'",
     "test": "ava --verbose './dist/test/test.js'",
     "cli": "node './dist/src/cli.js'",
-    "server": "node './dist/src/server.js'"
+    "server": "node './dist/src/server-cli.js'"
   }
 }
