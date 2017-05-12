@@ -49,8 +49,9 @@ export function serverManifestJson(routerPathBase64: express.Router) {
 
             const isSecureHttp = req.secure ||
                 req.protocol === "https" ||
-                req.get("X-Forwarded-Protocol") === "https" ||
-                true; // FIXME: forcing to secure http because forward proxy to HTTP localhost
+                req.get("X-Forwarded-Protocol") === "https"
+                // || true  // FIXME: forcing to secure http because forward proxy to HTTP localhost
+                ;
 
             const pathBase64Str = new Buffer(req.params.pathBase64, "base64").toString("utf8");
 
@@ -58,6 +59,14 @@ export function serverManifestJson(routerPathBase64: express.Router) {
                 .then((publication) => {
                     console.log("== EpubParser: resolve");
                     // dumpPublication(publication);
+
+                    const opfInternal = publication.Internal.find((i) => {
+                        if (i.Name === "rootfile") {
+                            return true;
+                        }
+                        return false;
+                    });
+                    const rootfilePath = opfInternal ? opfInternal.Value as string : undefined;
 
                     // console.log(req.url); // path local to this router
                     // console.log(req.baseUrl); // path local to above this router
@@ -88,6 +97,23 @@ export function serverManifestJson(routerPathBase64: express.Router) {
                             "?" + EpubParser.mediaOverlayURLParam + "={path}";
                         publication.AddLink("application/vnd.readium.mo+json", ["media-overlay"], moURL, true);
                     }
+
+                    let coverImage: string | undefined;
+                    const coverLink = publication.GetCover();
+                    if (coverLink) {
+                        coverImage = coverLink.Href;
+                        if (coverImage && coverImage.indexOf("http") !== 0) {
+                            if (rootfilePath) {
+                                coverImage = rootUrl + "/"
+                                    + path.join(path.dirname(rootfilePath), coverImage)
+                                        .replace(/\\/g, "/");
+                            } else {
+                                coverImage = rootUrl + "/" + coverImage;
+                            }
+                        }
+                    }
+                    console.log("COVER: " + coverImage);
+
                     if (req.url.indexOf("/show") >= 0) {
                         let objToSerialize: any = null;
 
@@ -157,6 +183,7 @@ export function serverManifestJson(routerPathBase64: express.Router) {
 
                         res.status(200).send("<html><body>" +
                             "<h1>" + path.basename(pathBase64Str) + "</h1>" +
+                            (coverImage ? "<img src=\"" + coverImage + "\" alt=\"\"/>" : "") +
                             "<hr><p><pre>" + jsonPretty + "</pre></p>" +
                             // "<hr><p><pre>" + jsonStr + "</pre></p>" +
                             // "<p><pre>" + dumpStr + "</pre></p>" +

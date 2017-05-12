@@ -63,8 +63,9 @@ export function serverPub(server: express.Router, filePaths: string[]): express.
 
         const isSecureHttp = req.secure ||
             req.protocol === "https" ||
-            req.get("X-Forwarded-Protocol") === "https" ||
-            true; // FIXME: forcing to secure http because forward proxy to HTTP localhost
+            req.get("X-Forwarded-Protocol") === "https"
+            // || true  // FIXME: forcing to secure http because forward proxy to HTTP localhost
+            ;
 
         res.status(200).send(htmlLanding.replace(/PATH_STR/g, path.basename(pathBase64Str))
             .replace(/PATH_BASE64/g, encodeURIComponent_RFC3986(req.params.pathBase64))
