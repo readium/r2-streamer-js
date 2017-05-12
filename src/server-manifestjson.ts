@@ -1,8 +1,9 @@
 import * as crypto from "crypto";
 import * as path from "path";
-import * as util from "util";
 
+import * as css2json from "css2json";
 import * as express from "express";
+import * as jsonMarkup from "json-markup";
 import { JSON } from "ta-json";
 
 import { EpubParser } from "./parser/epub";
@@ -10,6 +11,31 @@ import { sortObject } from "./utils";
 import { encodeURIComponent_RFC3986 } from "./utils";
 
 export function serverManifestJson(routerPathBase64: express.Router) {
+
+    // https://github.com/mafintosh/json-markup/blob/master/style.css
+    const jsonStyle = `
+.json-markup {
+    line-height: 17px;
+    font-size: 13px;
+    font-family: monospace;
+    white-space: pre;
+}
+.json-markup-key {
+    font-weight: bold;
+}
+.json-markup-bool {
+    color: firebrick;
+}
+.json-markup-string {
+    color: green;
+}
+.json-markup-null {
+    color: gray;
+}
+.json-markup-number {
+    color: blue;
+}
+`;
 
     const routerManifestJson = express.Router({ strict: false });
     // routerManifestJson.use(morgan("combined"));
@@ -121,16 +147,19 @@ export function serverManifestJson(routerPathBase64: express.Router) {
                         }
 
                         const jsonObj = JSON.serialize(objToSerialize);
-                        const jsonStr = global.JSON.stringify(jsonObj, null, "    ");
+                        // const jsonStr = global.JSON.stringify(jsonObj, null, "    ");
 
-                        // breakLength: 100  maxArrayLength: undefined
-                        const dumpStr = util.inspect(objToSerialize,
-                            { showHidden: false, depth: 1000, colors: false, customInspect: true });
+                        // // breakLength: 100  maxArrayLength: undefined
+                        // const dumpStr = util.inspect(objToSerialize,
+                        //     { showHidden: false, depth: 1000, colors: false, customInspect: true });
+
+                        const jsonPretty = jsonMarkup(jsonObj, css2json(jsonStyle));
 
                         res.status(200).send("<html><body>" +
                             "<h1>" + path.basename(pathBase64Str) + "</h1>" +
-                            "<p><pre>" + jsonStr + "</pre></p>" +
-                            "<p><pre>" + dumpStr + "</pre></p>" +
+                            "<hr><p><pre>" + jsonPretty + "</pre></p>" +
+                            // "<hr><p><pre>" + jsonStr + "</pre></p>" +
+                            // "<p><pre>" + dumpStr + "</pre></p>" +
                             "</body></html>");
                     } else {
                         res.setHeader("Access-Control-Allow-Origin", "*");

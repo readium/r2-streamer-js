@@ -1,6 +1,6 @@
 {
   "name": "r2-streamer-js",
-  "version": "0.0.1-alpha10",
+  "version": "0.0.1-alpha11",
   "description": "Readium 2 'streamer' for NodeJS (TypeScript, ECMAScript 2015 / ES6)",
   "keywords": [
     "readium",
@@ -39,7 +39,9 @@
   },
   "homepage": "https://github.com/edrlab/r2-streamer-js",
   "dependencies": {
+    "css2json": "latest",
     "express": "latest",
+    "json-markup": "latest",
     "mime-types": "latest",
     "moment": "latest",
     "morgan": "latest",
