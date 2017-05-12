@@ -67,8 +67,9 @@ export function serverManifestJson(routerPathBase64: express.Router) {
 
             const isSecureHttp = req.secure ||
                 req.protocol === "https" ||
-                req.get("X-Forwarded-Protocol") === "https"
-                // || true  // FIXME: forcing to secure http because forward proxy to HTTP localhost
+                req.get("X-Forwarded-Proto") === "https"
+                // (req.headers.host && req.headers.host.indexOf("now.sh") >= 0) ||
+                // (req.hostname && req.hostname.indexOf("now.sh") >= 0)
                 ;
 
             const pathBase64Str = new Buffer(req.params.pathBase64, "base64").toString("utf8");
