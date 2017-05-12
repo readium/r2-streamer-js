@@ -1,13 +1,10 @@
-import { Publication } from "./models/publication";
-
-import { CbzParser } from "./parser/cbz";
-import { EpubParser } from "./parser/epub";
-
 import * as fs from "fs";
 import * as path from "path";
 import * as util from "util";
 
-import { sortObject } from "./utils";
+import { Publication } from "./models/publication";
+import { CbzParser } from "./parser/cbz";
+import { EpubParser } from "./parser/epub";
 
 console.log("process.cwd():");
 console.log(process.cwd());
