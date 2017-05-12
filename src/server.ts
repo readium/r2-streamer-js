@@ -1,24 +1,17 @@
-import { JSON } from "ta-json";
-
-import * as express from "express";
-
-import * as mime from "mime-types";
-
-import * as morgan from "morgan";
-
-import * as querystring from "querystring";
-
-import * as fs from "fs";
+import * as crypto from "crypto";
 import * as path from "path";
+import * as querystring from "querystring";
 import * as util from "util";
 
-import * as crypto from "crypto";
-
-import { EpubParser } from "./parser/epub";
-
-import { sortObject } from "./utils";
+import * as express from "express";
+import * as mime from "mime-types";
+import * as morgan from "morgan";
+import { JSON } from "ta-json";
 
 import { Link } from "./models/publication-link";
+import { EpubParser } from "./parser/epub";
+import { serverMediaOverlays } from "./server-mediaoverlays";
+import { sortObject } from "./utils";
 
 export function launchServer(filePath: string) {
 
@@ -74,80 +67,6 @@ export function launchServer(filePath: string) {
 
     server.use("/readerNYPL", express.static("reader-NYPL"));
     server.use("/readerHADRIEN", express.static("reader-HADRIEN"));
-
-    const routerMediaOverlays = express.Router();
-    // routerMediaOverlays.use(morgan("combined"));
-
-    routerMediaOverlays.get(["", "/show/:" + EpubParser.mediaOverlayURLParam + "?"],
-        (req: express.Request, res: express.Response) => {
-
-            if (!req.params.pathBase64) {
-                req.params.pathBase64 = (req as any).pathBase64;
-            }
-
-            const pathBase64Str = new Buffer(req.params.pathBase64, "base64").toString("utf8");
-
-            EpubParser.load(filePath)
-                .then((publication) => {
-                    console.log("== EpubParser: resolve");
-                    // dumpPublication(publication);
-
-                    const isShow = req.url.indexOf("/show") >= 0;
-
-                    let objToSerialize: any = null;
-
-                    const resource = isShow ? req.params[EpubParser.mediaOverlayURLParam] :
-                        req.query[EpubParser.mediaOverlayURLParam];
-                    if (resource && resource !== "all") {
-                        objToSerialize = publication.FindMediaOverlayByHref(resource);
-                    } else {
-                        objToSerialize = publication.FindAllMediaOverlay();
-                    }
-
-                    if (!objToSerialize) {
-                        objToSerialize = [];
-                    }
-
-                    let jsonObj = JSON.serialize(objToSerialize);
-                    jsonObj = { "media-overlay": jsonObj };
-
-                    if (isShow) {
-                        const jsonStr = global.JSON.stringify(jsonObj, null, "    ");
-
-                        // breakLength: 100  maxArrayLength: undefined
-                        const dumpStr = util.inspect(objToSerialize,
-                            { showHidden: false, depth: 1000, colors: false, customInspect: true });
-
-                        res.status(200).send("<html><body>" +
-                            "<h2>" + pathBase64Str + "</h2>" +
-                            "<p><pre>" + jsonStr + "</pre></p>" +
-                            "<p><pre>" + dumpStr + "</pre></p>" +
-                            "</body></html>");
-                    } else {
-                        res.setHeader("Access-Control-Allow-Origin", "*");
-                        res.set("Content-Type", "application/vnd.readium.mo+json; charset=utf-8");
-
-                        const jsonStr = global.JSON.stringify(sortObject(jsonObj), null, "");
-
-                        const checkSum = crypto.createHash("sha256");
-                        checkSum.update(jsonStr);
-                        const hash = checkSum.digest("hex");
-
-                        const match = req.header("If-None-Match");
-                        if (match === hash) {
-                            res.status(304); // StatusNotModified
-                            return;
-                        }
-
-                        res.setHeader("ETag", hash);
-                        res.status(200).send(jsonStr);
-                    }
-                }).catch((err) => {
-                    console.log("== EpubParser: reject");
-                    console.log(err);
-                    res.status(500).send("<html><body><p>Internal Server Error</p><p>" + err + "</p></body></html>");
-                });
-        });
 
     const routerManifestJson = express.Router();
     // routerManifestJson.use(morgan("combined"));
@@ -529,7 +448,7 @@ export function launchServer(filePath: string) {
     });
 
     routerPathBase64.use("/:pathBase64/manifest.json", routerManifestJson);
-    routerPathBase64.use("/:pathBase64/" + EpubParser.mediaOverlayURLPath, routerMediaOverlays);
+    serverMediaOverlays(routerPathBase64, filePath);
     routerPathBase64.use("/:pathBase64/:asset(*)", routerAssets);
     routerPathBase64.get("/:pathBase64", (_req: express.Request, res: express.Response) => {
 
