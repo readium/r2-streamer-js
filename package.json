@@ -80,10 +80,16 @@
     "build": "yarn run clean && yarn run lint:all && yarn run lint:typescript && yarn run transpile:typescript",
     "clean": "rimraf ./dist && rimraf ./now && mkdirp ./dist",
     "lint:all": "eclint check \"**/*\" \"[!].git/**/*\" \"[!]node_modules/**/*\" \"[!]dist/**/*\" \"[!]reader*/**/*\" \"[!]now/**/*\" \"[!].vscode/**/*\" \"[!]**/.DS_Store\" \"[!]**/*.epub\" \"[!]**/*.cbz\"  \"[!]**/*.jpg\"  \"[!]**/*.jpeg\"  \"[!]**/*.png\"",
-    "lint:typescript": "tslint -c \"./tslint.json\" \"./src/**/*.ts\" \"./test/**/*.ts\"",
+    "lint:typescript": "tslint --type-check --project \"./tsconfig.json\" -c \"./tslint.json\" \"./src/**/*.ts\" \"./test/**/*.ts\"",
     "transpile:typescript": "tsc -p \"./tsconfig.json\"",
     "test": "ava --verbose \"./dist/test/test.js\"",
     "cli": "node \"./dist/src/cli.js\"",
     "server": "node \"./dist/src/server-cli.js\""
+  },
+  "importSort": {
+    ".ts": {
+      "parser": "typescript",
+      "style": "module"
+    }
   }
 }
