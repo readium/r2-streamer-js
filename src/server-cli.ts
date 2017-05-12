@@ -34,4 +34,4 @@ if (!fs.existsSync(filePath)) {
     }
 }
 
-launchServer(filePath);
+launchServer([filePath]);

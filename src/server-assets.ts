@@ -7,9 +7,9 @@ import * as mime from "mime-types";
 import { Link } from "./models/publication-link";
 import { EpubParser } from "./parser/epub";
 
-export function serverAssets(routerPathBase64: express.Router, filePath: string) {
+export function serverAssets(routerPathBase64: express.Router) {
 
-    const routerAssets = express.Router();
+    const routerAssets = express.Router({ strict: false });
     // routerAssets.use(morgan("combined"));
 
     routerAssets.get("/",
@@ -24,7 +24,7 @@ export function serverAssets(routerPathBase64: express.Router, filePath: string)
 
             const pathBase64Str = new Buffer(req.params.pathBase64, "base64").toString("utf8");
 
-            EpubParser.load(filePath)
+            EpubParser.load(pathBase64Str)
                 .then((publication) => {
                     console.log("== EpubParser: resolve");
                     // dumpPublication(publication);

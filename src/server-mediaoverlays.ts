@@ -7,9 +7,9 @@ import { JSON } from "ta-json";
 import { EpubParser } from "./parser/epub";
 import { sortObject } from "./utils";
 
-export function serverMediaOverlays(routerPathBase64: express.Router, filePath: string) {
+export function serverMediaOverlays(routerPathBase64: express.Router) {
 
-    const routerMediaOverlays = express.Router();
+    const routerMediaOverlays = express.Router({ strict: false });
     // routerMediaOverlays.use(morgan("combined"));
 
     routerMediaOverlays.get(["", "/show/:" + EpubParser.mediaOverlayURLParam + "?"],
@@ -21,7 +21,7 @@ export function serverMediaOverlays(routerPathBase64: express.Router, filePath: 
 
             const pathBase64Str = new Buffer(req.params.pathBase64, "base64").toString("utf8");
 
-            EpubParser.load(filePath)
+            EpubParser.load(pathBase64Str)
                 .then((publication) => {
                     console.log("== EpubParser: resolve");
                     // dumpPublication(publication);

@@ -7,9 +7,9 @@ import { JSON } from "ta-json";
 import { EpubParser } from "./parser/epub";
 import { sortObject } from "./utils";
 
-export function serverManifestJson(routerPathBase64: express.Router, filePath: string) {
+export function serverManifestJson(routerPathBase64: express.Router) {
 
-    const routerManifestJson = express.Router();
+    const routerManifestJson = express.Router({ strict: false });
     // routerManifestJson.use(morgan("combined"));
 
     routerManifestJson.get(["/", "/show/:jsonPath?"],
@@ -21,7 +21,7 @@ export function serverManifestJson(routerPathBase64: express.Router, filePath: s
 
             const pathBase64Str = new Buffer(req.params.pathBase64, "base64").toString("utf8");
 
-            EpubParser.load(filePath)
+            EpubParser.load(pathBase64Str)
                 .then((publication) => {
                     console.log("== EpubParser: resolve");
                     // dumpPublication(publication);
