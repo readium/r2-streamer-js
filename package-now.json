@@ -7,7 +7,9 @@
     "yarn": ">= 0.23"
   },
   "dependencies": {
+    "css2json": "latest",
     "express": "latest",
+    "json-markup": "latest",
     "mime-types": "latest",
     "moment": "latest",
     "morgan": "latest",
