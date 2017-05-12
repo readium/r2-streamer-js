@@ -1,3 +1,4 @@
+import * as path from "path";
 import * as querystring from "querystring";
 
 import * as express from "express";
@@ -11,8 +12,8 @@ export function serverPub(server: express.Router, filePaths: string[]): express.
     const urlBook = "/pub/PATH_BASE64/manifest.json";
     const urlBookShowAll = "./manifest.json/show/all";
 
-    const urlReaderNYPL = "./readerNYPL/?url=PREFIX" + querystring.escape(urlBook);
-    const urlReaderHADRIEN = "./readerHADRIEN/?manifest=true&href=PREFIX"
+    const urlReaderNYPL = "/readerNYPL/?url=PREFIX" + querystring.escape(urlBook);
+    const urlReaderHADRIEN = "/readerHADRIEN/?manifest=true&href=PREFIX"
         + querystring.escape(urlBook);
 
     const urlReaderEPUBJS =
@@ -23,7 +24,7 @@ export function serverPub(server: express.Router, filePaths: string[]): express.
         "https://hadriengardeur.github.io/webpub-manifest/examples/viewer/?manifest=true&href=PREFIX"
         + querystring.escape(urlBook);
 
-    const htmlLanding = "<html><body><p>OK</p><p>Manifest dump:<br><a href='" +
+    const htmlLanding = "<html><body><h1>PATH_STR</h1><p>Manifest dump:<br><a href='" +
         urlBookShowAll + "'>" + urlBookShowAll + "</a></p><p>Reader NYPL:<br><a href='" +
         urlReaderNYPL + "'>" + urlReaderNYPL + "</a></p><p>Reader HADRIEN:<br><a href='" +
         urlReaderHADRIEN + "'>" + urlReaderHADRIEN + "</a></p><p>Reader EPUB.js:<br><a href='" +
@@ -58,15 +59,15 @@ export function serverPub(server: express.Router, filePaths: string[]): express.
             req.params.pathBase64 = (req as any).pathBase64;
         }
 
-        // const pathBase64Str = new Buffer(req.params.pathBase64, "base64").toString("utf8");
+        const pathBase64Str = new Buffer(req.params.pathBase64, "base64").toString("utf8");
 
         const isSecureHttp = req.secure ||
             req.protocol === "https" ||
             req.get("X-Forwarded-Protocol") === "https" ||
             true; // FIXME: forcing to secure http because forward proxy to HTTP localhost
 
-        res.status(200).send(htmlLanding.replace(/PATH_BASE64/g,
-            encodeURIComponent_RFC3986(req.params.pathBase64))
+        res.status(200).send(htmlLanding.replace(/PATH_STR/g, path.basename(pathBase64Str))
+            .replace(/PATH_BASE64/g, encodeURIComponent_RFC3986(req.params.pathBase64))
             .replace(/PREFIX/g,
             (isSecureHttp ?
                 querystring.escape("https://") : querystring.escape("http://"))

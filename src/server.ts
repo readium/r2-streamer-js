@@ -1,3 +1,5 @@
+import * as path from "path";
+
 import * as express from "express";
 
 import { serverAssets } from "./server-assets";
@@ -21,19 +23,17 @@ export function launchServer(filePaths: string[]) {
 
     server.get("/", (_req: express.Request, res: express.Response) => {
 
-        // const fileName = path.basename(filePath);
-        // const ext = path.extname(fileName).toLowerCase();
-
-        let html = "<html><body><p>OK</p><p>Publications:";
+        let html = "<html><body><h1>Publications</h1>";
 
         filePaths.forEach((filePath) => {
             const filePathBase64 = new Buffer(filePath).toString("base64");
 
-            html += "<br><a href='./pub/" + encodeURIComponent_RFC3986(filePathBase64)
-                + "'>" + "./pub/" + filePathBase64 + "</a>";
+            html += "<p><strong>" + path.basename(filePath)
+                + "</strong> => <a href='./pub/" + encodeURIComponent_RFC3986(filePathBase64)
+                + "'>" + "./pub/" + filePathBase64 + "</a></p>";
         });
 
-        html += "</p></body></html>";
+        html += "</body></html>";
 
         res.status(200).send(html);
     });

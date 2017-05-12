@@ -1,4 +1,5 @@
 import * as crypto from "crypto";
+import * as path from "path";
 import * as util from "util";
 
 import * as express from "express";
@@ -6,6 +7,7 @@ import { JSON } from "ta-json";
 
 import { EpubParser } from "./parser/epub";
 import { sortObject } from "./utils";
+import { encodeURIComponent_RFC3986 } from "./utils";
 
 export function serverManifestJson(routerPathBase64: express.Router) {
 
@@ -18,6 +20,11 @@ export function serverManifestJson(routerPathBase64: express.Router) {
             if (!req.params.pathBase64) {
                 req.params.pathBase64 = (req as any).pathBase64;
             }
+
+            const isSecureHttp = req.secure ||
+                req.protocol === "https" ||
+                req.get("X-Forwarded-Protocol") === "https" ||
+                true; // FIXME: forcing to secure http because forward proxy to HTTP localhost
 
             const pathBase64Str = new Buffer(req.params.pathBase64, "base64").toString("utf8");
 
@@ -32,7 +39,9 @@ export function serverManifestJson(routerPathBase64: express.Router) {
                     // url.parse(req.originalUrl, false).host
                     // req.headers.host has port, not req.hostname
 
-                    const rootUrl = "http://" + req.headers.host + "/pub/" + req.params.pathBase64;
+                    const rootUrl = (isSecureHttp ? "https://" : "http://")
+                        + req.headers.host + "/pub/"
+                        + encodeURIComponent_RFC3986(req.params.pathBase64);
                     const manifestURL = rootUrl + "/manifest.json";
                     publication.AddLink("application/webpub+json", ["self"], manifestURL, false);
 
@@ -119,7 +128,7 @@ export function serverManifestJson(routerPathBase64: express.Router) {
                             { showHidden: false, depth: 1000, colors: false, customInspect: true });
 
                         res.status(200).send("<html><body>" +
-                            "<h2>" + pathBase64Str + "</h2>" +
+                            "<h1>" + path.basename(pathBase64Str) + "</h1>" +
                             "<p><pre>" + jsonStr + "</pre></p>" +
                             "<p><pre>" + dumpStr + "</pre></p>" +
                             "</body></html>");

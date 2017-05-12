@@ -21,6 +21,7 @@ if (!filePath) {
 
 filePath = filePath.trim();
 console.log(filePath);
+
 if (!fs.existsSync(filePath)) {
     filePath = path.join(__dirname, filePath);
     console.log(filePath);
@@ -34,4 +35,35 @@ if (!fs.existsSync(filePath)) {
     }
 }
 
-launchServer([filePath]);
+filePath = fs.realpathSync(filePath);
+console.log(filePath);
+
+const stats = fs.lstatSync(filePath);
+
+if (!stats.isFile() && !stats.isDirectory()) {
+    console.log("FILEPATH MUST BE FILE OR DIRECTORY.");
+    process.exit(1);
+}
+
+let filePaths = [filePath];
+
+if (stats.isDirectory()) {
+    filePaths = fs.readdirSync(filePath);
+
+    filePaths = filePaths.filter((filep) => {
+        const fileName = path.basename(filep);
+        const ext = path.extname(fileName).toLowerCase();
+        return (ext === ".epub" || ext === ".cbz") &&
+            fs.lstatSync(path.join(filePath, filep)).isFile();
+    });
+
+    filePaths = filePaths.map((filep) => {
+        return path.join(filePath, filep);
+    });
+
+    filePaths.forEach((filep) => {
+        console.log(filep);
+    });
+}
+
+launchServer(filePaths);
