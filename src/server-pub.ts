@@ -24,8 +24,8 @@ export function serverPub(server: express.Router, filePaths: string[]): express.
         "https://hadriengardeur.github.io/webpub-manifest/examples/viewer/?manifest=true&href=PREFIX"
         + querystring.escape(urlBook);
 
-    const htmlLanding = "<html><body><h1>PATH_STR</h1><p>Manifest dump:<br><a href='" +
-        urlBookShowAll + "'>" + urlBookShowAll + "</a></p><p>Reader NYPL:<br><a href='" +
+    const htmlLanding = "<html><body><h1>PATH_STR</h1><h2><a href='" +
+        urlBookShowAll + "'>" + urlBookShowAll + "</a></h2><p>Reader NYPL:<br><a href='" +
         urlReaderNYPL + "'>" + urlReaderNYPL + "</a></p><p>Reader HADRIEN:<br><a href='" +
         urlReaderHADRIEN + "'>" + urlReaderHADRIEN + "</a></p><p>Reader EPUB.js:<br><a href='" +
         urlReaderEPUBJS + "'>" + urlReaderEPUBJS + "</a></p><p>Reader HADRIEN BASIC:<br><a href='" +

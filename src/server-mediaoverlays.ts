@@ -1,4 +1,5 @@
 import * as crypto from "crypto";
+import * as path from "path";
 import * as util from "util";
 
 import * as express from "express";
@@ -28,12 +29,27 @@ export function serverMediaOverlays(routerPathBase64: express.Router) {
 
                     const isShow = req.url.indexOf("/show") >= 0;
 
+                    const opfInternal = publication.Internal.find((i) => {
+                        if (i.Name === "rootfile") {
+                            return true;
+                        }
+                        return false;
+                    });
+                    const rootfilePath = opfInternal ? opfInternal.Value as string : undefined;
+
                     let objToSerialize: any = null;
 
-                    const resource = isShow ? req.params[EpubParser.mediaOverlayURLParam] :
+                    let resource = isShow ? req.params[EpubParser.mediaOverlayURLParam] :
                         req.query[EpubParser.mediaOverlayURLParam];
                     if (resource && resource !== "all") {
                         objToSerialize = publication.FindMediaOverlayByHref(resource);
+
+                        if (rootfilePath && !objToSerialize) {
+                            resource = path.relative(path.dirname(rootfilePath), resource)
+                                .replace(/\\/g, "/");
+
+                            objToSerialize = publication.FindMediaOverlayByHref(resource);
+                        }
                     } else {
                         objToSerialize = publication.FindAllMediaOverlay();
                     }
@@ -53,7 +69,7 @@ export function serverMediaOverlays(routerPathBase64: express.Router) {
                             { showHidden: false, depth: 1000, colors: false, customInspect: true });
 
                         res.status(200).send("<html><body>" +
-                            "<h2>" + pathBase64Str + "</h2>" +
+                            "<h1>" + path.basename(pathBase64Str) + "</h1>" +
                             "<p><pre>" + jsonStr + "</pre></p>" +
                             "<p><pre>" + dumpStr + "</pre></p>" +
                             "</body></html>");

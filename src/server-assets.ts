@@ -58,11 +58,11 @@ export function serverAssets(routerPathBase64: express.Router) {
                         }
                         return false;
                     });
-                    const rootfilePath = opfInternal ? opfInternal.Value as string : "EPUB/package.opf";
+                    const rootfilePath = opfInternal ? opfInternal.Value as string : undefined;
 
                     let pathInZip = req.params.asset;
 
-                    if (Object.keys(zip.entries()).indexOf(pathInZip) < 0) {
+                    if (rootfilePath && Object.keys(zip.entries()).indexOf(pathInZip) < 0) {
                         // FIRST FAIL ...
                         // let's try to adjust the path, make it relative to the OPF package
                         // (support for legacy incorrect implementation)
@@ -80,9 +80,9 @@ export function serverAssets(routerPathBase64: express.Router) {
 
                     let link: Link | undefined;
 
-                    if (pathInZip.indexOf("META-INF/") !== 0
-                        && !pathInZip.endsWith(".opf")
-                        && publication.Resources) {
+                    if (rootfilePath && publication.Resources
+                        && pathInZip.indexOf("META-INF/") !== 0
+                        && !pathInZip.endsWith(".opf")) {
 
                         const relativePath = path.relative(path.dirname(rootfilePath), pathInZip)
                             .replace(/\\/g, "/");
@@ -182,8 +182,8 @@ export function serverAssets(routerPathBase64: express.Router) {
 
                     if (req.query.show) {
                         res.status(200).send("<html><body>" +
-                            "<h2>" + pathBase64Str + "</h2>" +
-                            "<h3>" + mediaType + "</h3>" +
+                            "<h1>" + path.basename(pathBase64Str) + "</h1>" +
+                            "<h2>" + mediaType + "</h2>" +
                             (isText ?
                                 ("<p><pre>" +
                                     zipData.toString("utf8").replace(/&/g, "&amp;")

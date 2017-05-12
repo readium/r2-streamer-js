@@ -78,7 +78,7 @@
   "scripts": {
     "prepublish": "yarn run build && yarn test",
     "now": "rm -rf ./now && mkdir now && mkdir now/reader-NYPL && mkdir now/reader-HADRIEN && cp -r dist/ now/ && cp -r reader-NYPL/ now/reader-NYPL/ && cp -r reader-HADRIEN/ now/reader-HADRIEN/ && cp *.epub now/ && cp package-now.json now/ && cd now/ && mv package-now.json package.json && now && cd ..",
-    "start": "yarn run build && yarn run server *.epub",
+    "start": "yarn run build",
     "build": "yarn run clean && yarn run lint:all && yarn run lint:typescript && yarn run transpile:typescript",
     "clean": "rimraf ./dist && rimraf ./now && mkdirp ./dist",
     "lint:all": "eclint check \"**/*\" \"[!].git/**/*\" \"[!]node_modules/**/*\" \"[!]dist/**/*\" \"[!]reader*/**/*\" \"[!]now/**/*\" \"[!].vscode/**/*\" \"[!]**/.DS_Store\" \"[!]**/*.epub\" \"[!]**/*.cbz\"  \"[!]**/*.jpg\"  \"[!]**/*.jpeg\"  \"[!]**/*.png\"",

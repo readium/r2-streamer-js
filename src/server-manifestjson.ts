@@ -10,6 +10,24 @@ import { EpubParser } from "./parser/epub";
 import { sortObject } from "./utils";
 import { encodeURIComponent_RFC3986 } from "./utils";
 
+function traverseJsonObjects(obj: any, func: (item: any) => void) {
+    func(obj);
+
+    if (obj instanceof Array) {
+        obj.forEach((item) => {
+            if (item) {
+                traverseJsonObjects(item, func);
+            }
+        });
+    } else if (typeof obj === "object") {
+        Object.keys(obj).forEach((key) => {
+            if (obj.hasOwnProperty(key) && obj[key]) {
+                traverseJsonObjects(obj[key], func);
+            }
+        });
+    }
+}
+
 export function serverManifestJson(routerPathBase64: express.Router) {
 
     // https://github.com/mafintosh/json-markup/blob/master/style.css
@@ -80,6 +98,16 @@ export function serverManifestJson(routerPathBase64: express.Router) {
                     const manifestURL = rootUrl + "/manifest.json";
                     publication.AddLink("application/webpub+json", ["self"], manifestURL, false);
 
+                    function absoluteURL(href: string): string {
+                        if (rootfilePath) {
+                            return rootUrl + "/"
+                                + path.join(path.dirname(rootfilePath), href)
+                                    .replace(/\\/g, "/");
+                        } else {
+                            return rootUrl + "/" + href;
+                        }
+                    }
+
                     let hasMO = false;
                     if (publication.Spine) {
                         const link = publication.Spine.find((l) => {
@@ -103,16 +131,9 @@ export function serverManifestJson(routerPathBase64: express.Router) {
                     if (coverLink) {
                         coverImage = coverLink.Href;
                         if (coverImage && coverImage.indexOf("http") !== 0) {
-                            if (rootfilePath) {
-                                coverImage = rootUrl + "/"
-                                    + path.join(path.dirname(rootfilePath), coverImage)
-                                        .replace(/\\/g, "/");
-                            } else {
-                                coverImage = rootUrl + "/" + coverImage;
-                            }
+                            coverImage = absoluteURL(coverImage);
                         }
                     }
-                    console.log("COVER: " + coverImage);
 
                     if (req.url.indexOf("/show") >= 0) {
                         let objToSerialize: any = null;
@@ -173,6 +194,16 @@ export function serverManifestJson(routerPathBase64: express.Router) {
                         }
 
                         const jsonObj = JSON.serialize(objToSerialize);
+
+                        traverseJsonObjects(jsonObj,
+                            (obj) => {
+                                if (obj.href && typeof obj.href === "string"
+                                    && obj.href.indexOf("http") !== 0) {
+                                    obj.href_ = obj.href;
+                                    obj.href = absoluteURL(obj.href);
+                                }
+                            });
+
                         // const jsonStr = global.JSON.stringify(jsonObj, null, "    ");
 
                         // // breakLength: 100  maxArrayLength: undefined
@@ -193,6 +224,16 @@ export function serverManifestJson(routerPathBase64: express.Router) {
                         res.set("Content-Type", "application/webpub+json; charset=utf-8");
 
                         const publicationJsonObj = JSON.serialize(publication);
+
+                        traverseJsonObjects(publicationJsonObj,
+                            (obj) => {
+                                if (obj.href && typeof obj.href === "string"
+                                    && obj.href.indexOf("http") !== 0) {
+                                    obj.href_ = obj.href;
+                                    obj.href = absoluteURL(obj.href);
+                                }
+                            });
+
                         const publicationJsonStr = global.JSON.stringify(sortObject(publicationJsonObj), null, "");
 
                         const checkSum = crypto.createHash("sha256");
@@ -211,7 +252,8 @@ export function serverManifestJson(routerPathBase64: express.Router) {
                         if (links && links.length) {
                             let prefetch = "";
                             links.forEach((l) => {
-                                prefetch += "<" + l.Href + ">;" + "rel=prefetch,";
+                                const href = absoluteURL(l.Href);
+                                prefetch += "<" + href + ">;" + "rel=prefetch,";
                             });
 
                             res.setHeader("Link", prefetch);
