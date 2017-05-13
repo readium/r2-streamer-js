@@ -7,7 +7,7 @@ import { XML } from "../xml-js-mapper";
 
 import { ComicInfo } from "./comicrack/comicrack";
 
-import { createZipPromise } from "./zip";
+import { createZipPromise, IZip } from "./zip";
 
 import { Link } from "../models/publication-link";
 
@@ -23,24 +23,27 @@ export class CbzParser {
         const parser = new CbzParser();
         const publication = await parser.Parse(path);
         return publication;
+
+        // return new CbzParser().Parse(path);
     }
 
-    public Parse(filePath: string): Promise<Publication> {
+    private Parse(filePath: string): Promise<Publication> {
 
         const zipPromise = createZipPromise(filePath);
 
         return zipPromise
-            .then((zip: any) => {
+            .then((zip: IZip) => {
                 return this.createPublicationPromise(filePath, zip);
             });
     }
 
-    private createPublicationPromise(filePath: string, zip: any): Promise<Publication> {
+    private createPublicationPromise(filePath: string, zip: IZip): Promise<Publication> {
 
         return new Promise<Publication>((resolve, reject) => {
 
-            if (!zip.entriesCount) {
+            if (!zip.hasEntries()) {
                 reject();
+                return;
             }
 
             const publication = new Publication();
@@ -50,14 +53,10 @@ export class CbzParser {
             publication.AddToInternal("type", "cbz");
             publication.AddToInternal("zip", zip);
 
-            const entries = zip.entries();
-
-            Object.keys(entries).forEach((entryName) => {
+            zip.forEachEntry((entryName: string, entry: any) => {
                 console.log("++ZIP: entry");
 
-                const entry = entries[entryName];
                 console.log(entry.name);
-
                 console.log(entryName);
 
                 const link = new Link();
@@ -96,9 +95,13 @@ export class CbzParser {
         return slugify(fileName, "_").replace(/[\.]/g, "_");
     }
 
-    private comicRackMetadata(zip: any, entryName: string, publication: Publication) {
+    private comicRackMetadata(zip: IZip, entryName: string, publication: Publication) {
 
-        const comicZipData = zip.entryDataSync(entryName);
+        const comicZipData = zip.entryBuffer(entryName);
+        if (!comicZipData) {
+            return;
+        }
+
         const comicXmlStr = comicZipData.toString("utf8");
         const comicXmlDoc = new xmldom.DOMParser().parseFromString(comicXmlStr);
 

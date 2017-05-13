@@ -7,6 +7,7 @@ import * as mime from "mime-types";
 
 import { Link } from "./models/publication-link";
 import { EpubParser } from "./parser/epub";
+import { IZip } from "./parser/zip";
 
 const debug = debug_("r2:server:assets");
 
@@ -53,7 +54,7 @@ export function serverAssets(routerPathBase64: express.Router) {
                             + err + "</p></body></html>");
                         return;
                     }
-                    const zip = zipInternal.Value;
+                    const zip = zipInternal.Value as IZip;
 
                     const opfInternal = publication.Internal.find((i) => {
                         if (i.Name === "rootfile") {
@@ -65,7 +66,8 @@ export function serverAssets(routerPathBase64: express.Router) {
 
                     let pathInZip = req.params.asset;
 
-                    if (rootfilePath && Object.keys(zip.entries()).indexOf(pathInZip) < 0) {
+                    if (rootfilePath &&
+                        !zip.hasEntry(pathInZip)) {
                         // FIRST FAIL ...
                         // let's try to adjust the path, make it relative to the OPF package
                         // (support for legacy incorrect implementation)
@@ -73,7 +75,7 @@ export function serverAssets(routerPathBase64: express.Router) {
                             .replace(/\\/g, "/");
                     }
 
-                    if (Object.keys(zip.entries()).indexOf(pathInZip) < 0) {
+                    if (!zip.hasEntry(pathInZip)) {
                         const err = "Asset not in zip!";
                         debug(err);
                         res.status(500).send("<html><body><p>Internal Server Error</p><p>"
@@ -127,7 +129,15 @@ export function serverAssets(routerPathBase64: express.Router) {
                         mediaType.indexOf("+xhtml") > 0 ||
                         mediaType.indexOf("+xml") > 0);
 
-                    let zipData = zip.entryDataSync(pathInZip) as Buffer;
+                    let zipData = zip.entryBuffer(pathInZip);
+                    if (!zipData) {
+
+                        const err = "Asset buffer cannot be loaded!";
+                        debug(err);
+                        res.status(500).send("<html><body><p>Internal Server Error</p><p>"
+                            + err + "</p></body></html>");
+                        return;
+                    }
 
                     if (link && link.Properties && link.Properties.Encrypted) {
                         if (link.Properties.Encrypted.Algorithm === "http://www.idpf.org/2008/embedding") {

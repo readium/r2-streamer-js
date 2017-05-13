@@ -88,8 +88,7 @@ export class Publication {
             this.Internal = Array<IInternal>();
         }
 
-        let internal: IInternal;
-        internal = { Name: key, Value: value };
+        const internal: IInternal = { Name: key, Value: value };
 
         this.Internal.push(internal);
     }
