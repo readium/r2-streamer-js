@@ -1,53 +1,56 @@
+import * as debug_ from "debug";
 import * as fs from "fs";
 import * as path from "path";
 
-import { launchServer } from "./server";
+import { Server } from "./server";
 
-console.log("process.cwd():");
-console.log(process.cwd());
+const debug = debug_("r2:server:cli");
 
-console.log("__dirname:");
-console.log(__dirname);
+debug(`process.cwd(): ${process.cwd()}`);
+debug(`__dirname: ${__dirname}`);
 
 const args = process.argv.slice(2);
-console.log("args:");
-console.log(args);
+debug("process.argv.slice(2): %o", args);
 
 let filePath = args[0];
 if (!filePath) {
-    console.log("FILEPATH ARGUMENT IS MISSING.");
+    debug("FILEPATH ARGUMENT IS MISSING.");
     process.exit(1);
 }
 
 filePath = filePath.trim();
-console.log(filePath);
+debug(`path: ${filePath}`);
 
 if (!fs.existsSync(filePath)) {
     filePath = path.join(__dirname, filePath);
-    console.log(filePath);
+    debug(`path: ${filePath}`);
+
     if (!fs.existsSync(filePath)) {
         filePath = path.join(process.cwd(), filePath);
-        console.log(filePath);
+        debug(`path: ${filePath}`);
+
         if (!fs.existsSync(filePath)) {
-            console.log("FILEPATH DOES NOT EXIST.");
+            debug("FILEPATH DOES NOT EXIST.");
             process.exit(1);
         }
     }
 }
 
 filePath = fs.realpathSync(filePath);
-console.log(filePath);
+debug(`path (normalized): ${filePath}`);
 
 const stats = fs.lstatSync(filePath);
 
 if (!stats.isFile() && !stats.isDirectory()) {
-    console.log("FILEPATH MUST BE FILE OR DIRECTORY.");
+    debug("FILEPATH MUST BE FILE OR DIRECTORY.");
     process.exit(1);
 }
 
 let filePaths = [filePath];
 
 if (stats.isDirectory()) {
+    debug("Analysing directory...");
+
     filePaths = fs.readdirSync(filePath);
 
     filePaths = filePaths.filter((filep) => {
@@ -61,9 +64,11 @@ if (stats.isDirectory()) {
         return path.join(filePath, filep);
     });
 
+    debug("Publications:");
     filePaths.forEach((filep) => {
-        console.log(filep);
+        debug(filep);
     });
 }
 
-launchServer(filePaths);
+const server = new Server();
+server.addPublications(filePaths);

@@ -4,10 +4,11 @@ import * as querystring from "querystring";
 import * as express from "express";
 import * as morgan from "morgan";
 
+import { Server } from "./server";
 import { trailingSlashRedirect } from "./server-trailing-slash-redirect";
 import { encodeURIComponent_RFC3986 } from "./utils";
 
-export function serverPub(server: express.Router, filePaths: string[]): express.Router {
+export function serverPub(server: Server, topRouter: express.Router): express.Router {
 
     const urlBook = "/pub/PATH_BASE64/manifest.json";
     const urlBookShowAll = "./manifest.json/show/all";
@@ -38,7 +39,7 @@ export function serverPub(server: express.Router, filePaths: string[]): express.
 
     routerPathBase64.param("pathBase64", (req, res, next, value, _name) => {
 
-        const found = filePaths.find((filePath) => {
+        const found = server.getPublications().find((filePath) => {
             const filePathBase64 = new Buffer(filePath).toString("base64");
             return value === filePathBase64;
         });
@@ -87,7 +88,7 @@ export function serverPub(server: express.Router, filePaths: string[]): express.
             + req.headers.host));
     });
 
-    server.use("/pub", routerPathBase64);
+    topRouter.use("/pub", routerPathBase64);
 
     return routerPathBase64;
 }

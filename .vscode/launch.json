@@ -1,64 +1,67 @@
 {
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "cli",
-            "type": "node",
-            "request": "launch",
-            "program": "${workspaceRoot}/src/cli.ts",
-            "stopOnEntry": false,
-            "cwd": "${workspaceRoot}",
-            "internalConsoleOptions": "openOnSessionStart",
-            "args": [
-                "${file}",
-                "${workspaceRoot}/wasteland-otf-obf.epub"
-            ],
-            "env": {
-                "NODE_DEBUG": "1",
-                "NODE_ENV": "development"
-            },
-            "console": "internalConsole",
-            "sourceMaps": true,
-            "outFiles": [
-                "${workspaceRoot}/dist/**/*.js"
-            ]
-        },
-        {
-            "name": "server",
-            "type": "node",
-            "request": "launch",
-            "program": "${workspaceRoot}/src/server-cli.ts",
-            "stopOnEntry": false,
-            "cwd": "${workspaceRoot}",
-            "internalConsoleOptions": "openOnSessionStart",
-            "args": [
-                ".",
-                "${file}",
-                "${workspaceRoot}/wasteland-otf-obf.epub"
-            ],
-            "env": {
-                "NODE_DEBUG": "1",
-                "NODE_ENV": "development"
-            },
-            "console": "internalConsole",
-            "sourceMaps": true,
-            "outFiles": [
-                "${workspaceRoot}/dist/**/*.js"
-            ]
-        },
-        {
-            "name": "Attach (--remote-debugging-port=9222)",
-            "type": "node",
-            "request": "attach",
-            "port": 9222
-        }
-    ],
-    "compounds": [
-        {
-            "name": "cli+server",
-            "configurations": [
-                "cli", "server-cli"
-            ]
-        }
-    ]
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "cli",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceRoot}/src/cli.ts",
+      "stopOnEntry": false,
+      "cwd": "${workspaceRoot}",
+      "internalConsoleOptions": "openOnSessionStart",
+      "args": [
+        "${file}",
+        "${workspaceRoot}/wasteland-otf-obf.epub"
+      ],
+      "env": {
+        "DEBUG": "*",
+        "NODE_DEBUG": "1",
+        "NODE_ENV": "development"
+      },
+      "console": "internalConsole",
+      "sourceMaps": true,
+      "outFiles": [
+        "${workspaceRoot}/dist/**/*.js"
+      ]
+    },
+    {
+      "name": "server",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceRoot}/src/server-cli.ts",
+      "stopOnEntry": false,
+      "cwd": "${workspaceRoot}",
+      "internalConsoleOptions": "openOnSessionStart",
+      "args": [
+        ".",
+        "${file}",
+        "${workspaceRoot}/wasteland-otf-obf.epub"
+      ],
+      "env": {
+        "DEBUG": "*",
+        "NODE_DEBUG": "1",
+        "NODE_ENV": "development"
+      },
+      "console": "internalConsole",
+      "sourceMaps": true,
+      "outFiles": [
+        "${workspaceRoot}/dist/**/*.js"
+      ]
+    },
+    {
+      "name": "Attach (--remote-debugging-port=9222)",
+      "type": "node",
+      "request": "attach",
+      "port": 9222
+    }
+  ],
+  "compounds": [
+    {
+      "name": "cli+server",
+      "configurations": [
+        "cli",
+        "server-cli"
+      ]
+    }
+  ]
 }

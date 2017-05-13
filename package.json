@@ -40,6 +40,7 @@
   "homepage": "https://github.com/edrlab/r2-streamer-js",
   "dependencies": {
     "css2json": "latest",
+    "debug": "latest",
     "express": "latest",
     "json-markup": "latest",
     "mime-types": "latest",
@@ -57,6 +58,7 @@
     "@types/morgan": "latest",
     "@types/xmldom": "latest",
     "ava": "latest",
+    "cross-env": "latest",
     "eclint": "latest",
     "mkdirp": "latest",
     "rimraf": "latest",
@@ -86,7 +88,11 @@
     "transpile:typescript": "tsc -p \"./tsconfig.json\"",
     "test": "ava --verbose \"./dist/test/test.js\"",
     "cli": "node \"./dist/src/cli.js\"",
-    "server": "node \"./dist/src/server-cli.js\""
+    "cli-debug": "cross-env DEBUG=r2:* yarn run cli",
+    "cli-debug-x": "cross-env DEBUG=* yarn run cli",
+    "server": "node \"./dist/src/server-cli.js\"",
+    "server-debug": "cross-env DEBUG=r2:* yarn run server",
+    "server-debug-x": "cross-env DEBUG=* yarn run server"
   },
   "importSort": {
     ".ts": {

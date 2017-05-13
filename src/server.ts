@@ -1,3 +1,4 @@
+import * as debug_ from "debug";
 import * as path from "path";
 
 import * as express from "express";
@@ -8,43 +9,62 @@ import { serverMediaOverlays } from "./server-mediaoverlays";
 import { serverPub } from "./server-pub";
 import { encodeURIComponent_RFC3986 } from "./utils";
 
-export function launchServer(filePaths: string[]) {
+const debug = debug_("r2:server:main");
 
-    const server = express();
-    // server.enable('strict routing');
+export class Server {
+    private readonly publications: string[];
 
-    // https://expressjs.com/en/4x/api.html#express.static
-    const staticOptions = {
-        etag: false,
-    };
+    constructor() {
+        this.publications = [];
 
-    server.use("/readerNYPL", express.static("reader-NYPL", staticOptions));
-    server.use("/readerHADRIEN", express.static("reader-HADRIEN", staticOptions));
+        const server = express();
+        // server.enable('strict routing');
 
-    server.get("/", (_req: express.Request, res: express.Response) => {
+        // https://expressjs.com/en/4x/api.html#express.static
+        const staticOptions = {
+            etag: false,
+        };
 
-        let html = "<html><body><h1>Publications</h1>";
+        server.use("/readerNYPL", express.static("reader-NYPL", staticOptions));
+        server.use("/readerHADRIEN", express.static("reader-HADRIEN", staticOptions));
 
-        filePaths.forEach((filePath) => {
-            const filePathBase64 = new Buffer(filePath).toString("base64");
+        server.get("/", (_req: express.Request, res: express.Response) => {
 
-            html += "<p><strong>" + path.basename(filePath)
-                + "</strong> => <a href='./pub/" + encodeURIComponent_RFC3986(filePathBase64)
-                + "'>" + "./pub/" + filePathBase64 + "</a></p>";
+            let html = "<html><body><h1>Publications</h1>";
+
+            this.publications.forEach((pub) => {
+                const filePathBase64 = new Buffer(pub).toString("base64");
+
+                html += "<p><strong>" + path.basename(pub)
+                    + "</strong> => <a href='./pub/" + encodeURIComponent_RFC3986(filePathBase64)
+                    + "'>" + "./pub/" + filePathBase64 + "</a></p>";
+            });
+
+            html += "</body></html>";
+
+            res.status(200).send(html);
         });
 
-        html += "</body></html>";
+        const routerPathBase64: express.Router = serverPub(this, server);
+        serverManifestJson(routerPathBase64);
+        serverMediaOverlays(routerPathBase64);
+        serverAssets(routerPathBase64);
 
-        res.status(200).send(html);
-    });
+        const port = process.env.PORT || 3000;
+        server.listen(port, () => {
+            debug(`http://localhost: ${port}`);
+        });
+    }
 
-    const routerPathBase64: express.Router = serverPub(server, filePaths);
-    serverManifestJson(routerPathBase64);
-    serverMediaOverlays(routerPathBase64);
-    serverAssets(routerPathBase64);
+    public addPublications(pubs: string[]) {
+        pubs.forEach((pub) => {
+            if (this.publications.indexOf(pub) < 0) {
+                this.publications.push(pub);
+            }
+        });
+    }
 
-    const port = process.env.PORT || 3000;
-    server.listen(port, () => {
-        console.log("http://localhost:" + port);
-    });
+    public getPublications(): string[] {
+        return this.publications;
+    }
 }

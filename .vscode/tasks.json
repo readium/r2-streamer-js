@@ -1,43 +1,48 @@
 {
-    "version": "0.1.0",
-    "command": "yarn",
-    "args": [],
-    "isShellCommand": true,
-    "showOutput": "always",
-    "suppressTaskName": true,
-    "echoCommand": true,
-    "isBackground": false,
-    "tasks": [
-        {
-            "taskName": "build",
-            "args": [
-                "start"
-            ],
-            "isBuildCommand": true,
-            "problemMatcher": [
-                "$tsc",
-                "$jshint"
-            ]
-        },
-        {
-            "taskName": "tests",
-            "args": [
-                "test"
-            ]
-        },
-        {
-            "taskName": "cli",
-            "args": [
-                "run",
-                "cli"
-            ]
-        },
-        {
-            "taskName": "server",
-            "args": [
-                "run",
-                "server"
-            ]
-        }
-    ]
+  "version": "0.1.0",
+  "command": "yarn",
+  "args": [],
+  "isShellCommand": true,
+  "showOutput": "always",
+  "suppressTaskName": true,
+  "echoCommand": true,
+  "isBackground": false,
+  "env": {
+    "DEBUG": "*",
+    "NODE_DEBUG": "1",
+    "NODE_ENV": "development"
+  },
+  "tasks": [
+    {
+      "taskName": "build",
+      "args": [
+        "start"
+      ],
+      "isBuildCommand": true,
+      "problemMatcher": [
+        "$tsc",
+        "$jshint"
+      ]
+    },
+    {
+      "taskName": "tests",
+      "args": [
+        "test"
+      ]
+    },
+    {
+      "taskName": "cli",
+      "args": [
+        "run",
+        "cli"
+      ]
+    },
+    {
+      "taskName": "server",
+      "args": [
+        "run",
+        "server"
+      ]
+    }
+  ]
 }
