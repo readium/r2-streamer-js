@@ -1,3 +1,4 @@
+import * as debug_ from "debug";
 import * as path from "path";
 import * as querystring from "querystring";
 
@@ -7,6 +8,8 @@ import * as morgan from "morgan";
 import { Server } from "./server";
 import { trailingSlashRedirect } from "./server-trailing-slash-redirect";
 import { encodeURIComponent_RFC3986 } from "./utils";
+
+const debug = debug_("r2:server:pub");
 
 export function serverPub(server: Server, topRouter: express.Router): express.Router {
 
@@ -61,6 +64,7 @@ export function serverPub(server: Server, topRouter: express.Router): express.Ro
         }
 
         const pathBase64Str = new Buffer(req.params.pathBase64, "base64").toString("utf8");
+        debug(`Publication: ${pathBase64Str}`);
 
         const isSecureHttp = req.secure ||
             req.protocol === "https" ||

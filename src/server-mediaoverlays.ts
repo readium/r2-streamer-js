@@ -1,4 +1,5 @@
 import * as crypto from "crypto";
+import * as debug_ from "debug";
 import * as path from "path";
 import * as util from "util";
 
@@ -7,6 +8,8 @@ import { JSON } from "ta-json";
 
 import { EpubParser } from "./parser/epub";
 import { sortObject } from "./utils";
+
+const debug = debug_("r2:server:mediaoverlays");
 
 export function serverMediaOverlays(routerPathBase64: express.Router) {
 
@@ -24,7 +27,7 @@ export function serverMediaOverlays(routerPathBase64: express.Router) {
 
             EpubParser.load(pathBase64Str)
                 .then((publication) => {
-                    console.log("== EpubParser: resolve");
+                    debug("== EpubParser resolve");
                     // dumpPublication(publication);
 
                     const isShow = req.url.indexOf("/show") >= 0;
@@ -93,8 +96,8 @@ export function serverMediaOverlays(routerPathBase64: express.Router) {
                         res.status(200).send(jsonStr);
                     }
                 }).catch((err) => {
-                    console.log("== EpubParser: reject");
-                    console.log(err);
+                    debug("== EpubParser reject:");
+                    debug(err);
                     res.status(500).send("<html><body><p>Internal Server Error</p><p>" + err + "</p></body></html>");
                 });
         });

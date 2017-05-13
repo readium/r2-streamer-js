@@ -1,4 +1,5 @@
 import * as crypto from "crypto";
+import * as debug_ from "debug";
 import * as path from "path";
 
 import * as css2json from "css2json";
@@ -9,6 +10,8 @@ import { JSON } from "ta-json";
 import { EpubParser } from "./parser/epub";
 import { sortObject } from "./utils";
 import { encodeURIComponent_RFC3986 } from "./utils";
+
+const debug = debug_("r2:server:manifestjson");
 
 function traverseJsonObjects(obj: any, func: (item: any) => void) {
     func(obj);
@@ -76,7 +79,7 @@ export function serverManifestJson(routerPathBase64: express.Router) {
 
             EpubParser.load(pathBase64Str)
                 .then((publication) => {
-                    console.log("== EpubParser: resolve");
+                    debug("EpubParser: resolve");
                     // dumpPublication(publication);
 
                     const opfInternal = publication.Internal.find((i) => {
@@ -265,8 +268,8 @@ export function serverManifestJson(routerPathBase64: express.Router) {
                         res.status(200).send(publicationJsonStr);
                     }
                 }).catch((err) => {
-                    console.log("== EpubParser: reject");
-                    console.log(err);
+                    debug("== EpubParser reject:");
+                    debug(err);
                     res.status(500).send("<html><body><p>Internal Server Error</p><p>" + err + "</p></body></html>");
                 });
         });

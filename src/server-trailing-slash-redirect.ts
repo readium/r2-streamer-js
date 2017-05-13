@@ -1,4 +1,7 @@
+import * as debug_ from "debug";
 import * as express from "express";
+
+const debug = debug_("r2:server:main");
 
 // https://github.com/avinoamr/connect-slashes
 export function trailingSlashRedirect(req: express.Request, res: express.Response, next: express.NextFunction) {
@@ -19,6 +22,6 @@ export function trailingSlashRedirect(req: express.Request, res: express.Respons
         redirect += req.originalUrl.substr(i);
     }
 
-    console.log("REDIRECT: " + req.originalUrl + " ==> " + redirect);
+    debug(`REDIRECT: ${req.originalUrl} ==> ${redirect}`);
     res.redirect(301, redirect);
 }

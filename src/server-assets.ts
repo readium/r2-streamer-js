@@ -1,4 +1,5 @@
 import * as crypto from "crypto";
+import * as debug_ from "debug";
 import * as path from "path";
 
 import * as express from "express";
@@ -6,6 +7,8 @@ import * as mime from "mime-types";
 
 import { Link } from "./models/publication-link";
 import { EpubParser } from "./parser/epub";
+
+const debug = debug_("r2:server:assets");
 
 export function serverAssets(routerPathBase64: express.Router) {
 
@@ -26,12 +29,12 @@ export function serverAssets(routerPathBase64: express.Router) {
 
             EpubParser.load(pathBase64Str)
                 .then((publication) => {
-                    console.log("== EpubParser: resolve");
+                    debug("== EpubParser resolve");
                     // dumpPublication(publication);
 
                     if (!publication.Internal) {
                         const err = "No publication internals!";
-                        console.log(err);
+                        debug(err);
                         res.status(500).send("<html><body><p>Internal Server Error</p><p>"
                             + err + "</p></body></html>");
                         return;
@@ -45,7 +48,7 @@ export function serverAssets(routerPathBase64: express.Router) {
                     });
                     if (!zipInternal) {
                         const err = "No publication zip!";
-                        console.log(err);
+                        debug(err);
                         res.status(500).send("<html><body><p>Internal Server Error</p><p>"
                             + err + "</p></body></html>");
                         return;
@@ -72,7 +75,7 @@ export function serverAssets(routerPathBase64: express.Router) {
 
                     if (Object.keys(zip.entries()).indexOf(pathInZip) < 0) {
                         const err = "Asset not in zip!";
-                        console.log(err);
+                        debug(err);
                         res.status(500).send("<html><body><p>Internal Server Error</p><p>"
                             + err + "</p></body></html>");
                         return;
@@ -103,7 +106,7 @@ export function serverAssets(routerPathBase64: express.Router) {
                         }
                         if (!link) {
                             const err = "Asset not declared in publication spine/resources!";
-                            console.log(err);
+                            debug(err);
                             res.status(500).send("<html><body><p>Internal Server Error</p><p>"
                                 + err + "</p></body></html>");
                             return;
@@ -209,8 +212,8 @@ export function serverAssets(routerPathBase64: express.Router) {
                         }
                     }
                 }).catch((err) => {
-                    console.log("== EpubParser: reject");
-                    console.log(err);
+                    debug("== EpubParser reject:");
+                    debug(err);
                     res.status(500).send("<html><body><p>Internal Server Error</p><p>" + err + "</p></body></html>");
                 });
         });

@@ -1,5 +1,13 @@
+import * as debug_ from "debug";
 import * as StreamZip from "node-stream-zip";
 
+const debug = debug_("r2:zip");
+
+// https://github.com/thejoshwolfe/yauzl/blob/master/README.md#fromrandomaccessreaderreader-totalsize-options-callback
+// https://github.com/maxogden/punzip
+// https://github.com/maxogden/mount-url/blob/master/index.js#L144
+// https://github.com/gildas-lormeau/zip.js/blob/master/WebContent/zip-ext.js#L95
+// https://github.com/thejoshwolfe/yauzl/blob/master/test/range-test.js#L83
 export function createZipPromise(filePath: string): Promise<any> {
 
     return new Promise<any>((resolve, reject) => {
@@ -10,8 +18,8 @@ export function createZipPromise(filePath: string): Promise<any> {
         });
 
         zip.on("error", (err: any) => {
-            console.log("--ZIP: error");
-            console.log(err);
+            debug("--ZIP error:");
+            debug(err);
 
             reject(err);
         });
@@ -22,9 +30,9 @@ export function createZipPromise(filePath: string): Promise<any> {
         });
 
         zip.on("extract", (entry: any, file: any) => {
-            console.log("--ZIP: extract");
-            console.log(entry.name);
-            console.log(file);
+            debug("--ZIP extract:");
+            debug(entry.name);
+            debug(file);
         });
 
         zip.on("ready", () => {
