@@ -8,10 +8,11 @@ import * as mime from "mime-types";
 import { Link } from "./models/publication-link";
 import { EpubParsePromise } from "./parser/epub";
 import { IZip } from "./parser/zip";
+import { Server } from "./server";
 
 const debug = debug_("r2:server:assets");
 
-export function serverAssets(routerPathBase64: express.Router) {
+export function serverAssets(server: Server, routerPathBase64: express.Router) {
 
     const routerAssets = express.Router({ strict: false });
     // routerAssets.use(morgan("combined"));
@@ -28,7 +29,11 @@ export function serverAssets(routerPathBase64: express.Router) {
 
             const pathBase64Str = new Buffer(req.params.pathBase64, "base64").toString("utf8");
 
-            const publication = await EpubParsePromise(pathBase64Str);
+            let publication = server.cachedPublication(pathBase64Str);
+            if (!publication) {
+                publication = await EpubParsePromise(pathBase64Str);
+                server.cachePublication(pathBase64Str, publication);
+            }
             // dumpPublication(publication);
 
             if (!publication.Internal) {

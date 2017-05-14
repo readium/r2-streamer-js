@@ -3,6 +3,7 @@ import * as path from "path";
 
 import * as express from "express";
 
+import { Publication } from "./models/publication";
 import { serverAssets } from "./server-assets";
 import { serverManifestJson } from "./server-manifestjson";
 import { serverMediaOverlays } from "./server-mediaoverlays";
@@ -11,11 +12,15 @@ import { encodeURIComponent_RFC3986 } from "./utils";
 
 const debug = debug_("r2:server:main");
 
+interface IPathPublicationMap { [key: string]: any; }
+
 export class Server {
     private readonly publications: string[];
+    private readonly pathPublicationMap: IPathPublicationMap;
 
     constructor() {
         this.publications = [];
+        this.pathPublicationMap = {};
 
         const server = express();
         // server.enable('strict routing');
@@ -46,9 +51,9 @@ export class Server {
         });
 
         const routerPathBase64: express.Router = serverPub(this, server);
-        serverManifestJson(routerPathBase64);
-        serverMediaOverlays(routerPathBase64);
-        serverAssets(routerPathBase64);
+        serverManifestJson(this, routerPathBase64);
+        serverMediaOverlays(this, routerPathBase64);
+        serverAssets(this, routerPathBase64);
 
         const port = process.env.PORT || 3000;
         server.listen(port, () => {
@@ -66,5 +71,20 @@ export class Server {
 
     public getPublications(): string[] {
         return this.publications;
+    }
+
+    public isPublicationCached(filePath: string): boolean {
+        return typeof this.cachedPublication(filePath) !== "undefined";
+    }
+
+    public cachedPublication(filePath: string): Publication | undefined {
+        return this.pathPublicationMap[filePath];
+    }
+
+    public cachePublication(filePath: string, pub: Publication) {
+        // TODO: implement LRU caching algorithm? Anything smarter than this will do!
+        if (!this.isPublicationCached(filePath)) {
+            this.pathPublicationMap[filePath] = pub;
+        }
     }
 }

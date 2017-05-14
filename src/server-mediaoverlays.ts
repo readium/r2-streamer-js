@@ -7,11 +7,12 @@ import * as express from "express";
 import { JSON } from "ta-json";
 
 import { EpubParsePromise, mediaOverlayURLParam, mediaOverlayURLPath } from "./parser/epub";
+import { Server } from "./server";
 import { sortObject } from "./utils";
 
 const debug = debug_("r2:server:mediaoverlays");
 
-export function serverMediaOverlays(routerPathBase64: express.Router) {
+export function serverMediaOverlays(server: Server, routerPathBase64: express.Router) {
 
     const routerMediaOverlays = express.Router({ strict: false });
     // routerMediaOverlays.use(morgan("combined"));
@@ -25,7 +26,11 @@ export function serverMediaOverlays(routerPathBase64: express.Router) {
 
             const pathBase64Str = new Buffer(req.params.pathBase64, "base64").toString("utf8");
 
-            const publication = await EpubParsePromise(pathBase64Str);
+            let publication = server.cachedPublication(pathBase64Str);
+            if (!publication) {
+                publication = await EpubParsePromise(pathBase64Str);
+                server.cachePublication(pathBase64Str, publication);
+            }
             // dumpPublication(publication);
 
             const isShow = req.url.indexOf("/show") >= 0;

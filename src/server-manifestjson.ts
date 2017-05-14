@@ -8,30 +8,13 @@ import * as jsonMarkup from "json-markup";
 import { JSON } from "ta-json";
 
 import { EpubParsePromise, mediaOverlayURLParam, mediaOverlayURLPath } from "./parser/epub";
+import { Server } from "./server";
 import { sortObject } from "./utils";
 import { encodeURIComponent_RFC3986 } from "./utils";
 
 const debug = debug_("r2:server:manifestjson");
 
-function traverseJsonObjects(obj: any, func: (item: any) => void) {
-    func(obj);
-
-    if (obj instanceof Array) {
-        obj.forEach((item) => {
-            if (item) {
-                traverseJsonObjects(item, func);
-            }
-        });
-    } else if (typeof obj === "object") {
-        Object.keys(obj).forEach((key) => {
-            if (obj.hasOwnProperty(key) && obj[key]) {
-                traverseJsonObjects(obj[key], func);
-            }
-        });
-    }
-}
-
-export function serverManifestJson(routerPathBase64: express.Router) {
+export function serverManifestJson(server: Server, routerPathBase64: express.Router) {
 
     // https://github.com/mafintosh/json-markup/blob/master/style.css
     const jsonStyle = `
@@ -77,7 +60,11 @@ export function serverManifestJson(routerPathBase64: express.Router) {
 
             const pathBase64Str = new Buffer(req.params.pathBase64, "base64").toString("utf8");
 
-            const publication = await EpubParsePromise(pathBase64Str);
+            let publication = server.cachedPublication(pathBase64Str);
+            if (!publication) {
+                publication = await EpubParsePromise(pathBase64Str);
+                server.cachePublication(pathBase64Str, publication);
+            }
             // dumpPublication(publication);
 
             const opfInternal = publication.Internal.find((i) => {
@@ -98,7 +85,11 @@ export function serverManifestJson(routerPathBase64: express.Router) {
                 + req.headers.host + "/pub/"
                 + encodeURIComponent_RFC3986(req.params.pathBase64);
             const manifestURL = rootUrl + "/manifest.json";
-            publication.AddLink("application/webpub+json", ["self"], manifestURL, false);
+
+            const selfLink = publication.searchLinkByRel("self");
+            if (!selfLink) {
+                publication.AddLink("application/webpub+json", ["self"], manifestURL, false);
+            }
 
             function absoluteURL(href: string): string {
                 if (rootfilePath) {
@@ -123,9 +114,12 @@ export function serverManifestJson(routerPathBase64: express.Router) {
                 }
             }
             if (hasMO) {
-                const moURL = rootUrl + "/" + mediaOverlayURLPath +
-                    "?" + mediaOverlayURLParam + "={path}";
-                publication.AddLink("application/vnd.readium.mo+json", ["media-overlay"], moURL, true);
+                const moLink = publication.searchLinkByRel("media-overlay");
+                if (!moLink) {
+                    const moURL = rootUrl + "/" + mediaOverlayURLPath +
+                        "?" + mediaOverlayURLParam + "={path}";
+                    publication.AddLink("application/vnd.readium.mo+json", ["media-overlay"], moURL, true);
+                }
             }
 
             let coverImage: string | undefined;
@@ -269,4 +263,22 @@ export function serverManifestJson(routerPathBase64: express.Router) {
         });
 
     routerPathBase64.use("/:pathBase64/manifest.json", routerManifestJson);
+}
+
+function traverseJsonObjects(obj: any, func: (item: any) => void) {
+    func(obj);
+
+    if (obj instanceof Array) {
+        obj.forEach((item) => {
+            if (item) {
+                traverseJsonObjects(item, func);
+            }
+        });
+    } else if (typeof obj === "object") {
+        Object.keys(obj).forEach((key) => {
+            if (obj.hasOwnProperty(key) && obj[key]) {
+                traverseJsonObjects(obj[key], func);
+            }
+        });
+    }
 }
