@@ -9,7 +9,7 @@ import { XML } from "../xml-js-mapper";
 import { JSON } from "ta-json";
 
 import { IZip } from "./zip";
-import { Zip1 } from "./zip1";
+import { Zip2 } from "./zip2";
 
 import { MediaOverlayNode, timeStrToSeconds } from "../models/media-overlay";
 
@@ -58,7 +58,7 @@ export const mediaOverlayURLParam = "resource";
 
 export async function EpubParsePromise(filePath: string): Promise<Publication> {
 
-    const zip = await Zip1.loadPromise(filePath);
+    const zip = await Zip2.loadPromise(filePath);
 
     if (!zip.hasEntries()) {
         return Promise.reject("EPUB zip empty");
@@ -142,7 +142,6 @@ export async function EpubParsePromise(filePath: string): Promise<Publication> {
             //     + " -- "
             //     + ncxFilePath);
             const ncxZipData = await zip.entryBufferPromise(ncxFilePath);
-            console.log("===== opf.Manifest.forEach BUFFER: " + ncxManItem.ID);
             const ncxStr = ncxZipData.toString("utf8");
             const ncxDoc = new xmldom.DOMParser().parseFromString(ncxStr);
             ncx = XML.deserialize<NCX>(ncxDoc, NCX);

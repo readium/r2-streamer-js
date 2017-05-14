@@ -15,7 +15,7 @@ export class Zip2 implements IZip {
 
         return new Promise<IZip>((resolve, reject) => {
 
-            yauzl.open(filePath, { lazyEntries: true }, (err: any, zip: any) => {
+            yauzl.open(filePath, { lazyEntries: true, autoClose: false }, (err: any, zip: any) => {
                 if (err) {
                     debug("yauzl init ERROR");
                     debug(err);
@@ -64,8 +64,13 @@ export class Zip2 implements IZip {
     }
 
     public hasEntry(entryPath: string): boolean {
-        return this.hasEntries()
-            && this.entries.indexOf(entryPath) >= 0;
+        if (!this.hasEntries()) {
+            return false;
+        }
+        const ent = this.entries.find((entry) => {
+            return entryPath === entry.fileName;
+        });
+        return typeof ent !== "undefined";
     }
 
     public forEachEntry(callback: (entryName: string) => void) {
@@ -81,19 +86,18 @@ export class Zip2 implements IZip {
 
     public entryBufferPromise(entryPath: string): Promise<Buffer> {
 
-        if (!this.hasEntries() || !this.hasEntry(entryPath)) {
-            return Promise.reject("no such path in zip");
+        if (!this.hasEntries()) {
+            return Promise.reject("no zip entries");
+        }
+
+        const entry = this.entries.find((ent) => {
+            return ent.fileName === entryPath;
+        });
+        if (!entry) {
+            return Promise.reject("no such path in zip: " + entryPath);
         }
 
         return new Promise<Buffer>((resolve, reject) => {
-
-            const entry: any = this.entries.find((ent: any) => {
-                return ent.fileName === entryPath;
-            });
-            if (!entry) {
-                reject("no such path in zip");
-                return;
-            }
 
             this.zip.openReadStream(entry, (err: any, readStream: Stream) => {
                 if (err) {
