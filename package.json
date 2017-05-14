@@ -49,9 +49,11 @@
     "node-stream-zip": "latest",
     "reflect-metadata": "latest",
     "slugify": "latest",
+    "stream-to-array": "latest",
     "ta-json": "latest",
     "xmldom": "latest",
-    "xpath": "latest"
+    "xpath": "latest",
+    "yauzl": "latest"
   },
   "devDependencies": {
     "@types/express": "latest",

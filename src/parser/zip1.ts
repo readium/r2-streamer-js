@@ -7,7 +7,7 @@ const debug = debug_("r2:zip1");
 
 export class Zip1 implements IZip {
 
-    public static init(filePath: string): Promise<IZip> {
+    public static loadPromise(filePath: string): Promise<IZip> {
 
         return new Promise<IZip>((resolve, reject) => {
 
@@ -58,7 +58,7 @@ export class Zip1 implements IZip {
             && Object.keys(this.zip.entries()).indexOf(entryPath) >= 0;
     }
 
-    public forEachEntry(callback: (entryName: string, entry: any) => void) {
+    public forEachEntry(callback: (entryName: string) => void) {
 
         if (!this.hasEntries()) {
             return;
@@ -66,18 +66,18 @@ export class Zip1 implements IZip {
 
         const entries = this.zip.entries();
         Object.keys(entries).forEach((entryName) => {
-
-            const entry = entries[entryName];
-            callback(entryName, entry);
+            callback(entryName);
         });
     }
 
-    public entryBuffer(entryPath: string): Buffer | undefined {
+    public entryBufferPromise(entryPath: string): Promise<Buffer> {
 
-        if (!this.hasEntries()) {
-            return undefined;
+        if (!this.hasEntries() || !this.hasEntry(entryPath)) {
+            return Promise.reject("no such path in zip");
         }
 
-        return this.zip.entryDataSync(entryPath);
+        return new Promise<Buffer>((resolve, _reject) => {
+            resolve(this.zip.entryDataSync(entryPath));
+        });
     }
 }

@@ -7,7 +7,8 @@ import { XML } from "../xml-js-mapper";
 
 import { ComicInfo } from "./comicrack/comicrack";
 
-import { createZipPromise, IZip } from "./zip";
+import { IZip } from "./zip";
+import { Zip1 } from "./zip1";
 
 import { Link } from "../models/publication-link";
 
@@ -17,175 +18,152 @@ import { Publication } from "../models/publication";
 
 import { Contributor } from "../models/metadata-contributor";
 
-export class CbzParser {
+export async function CbzParsePromise(filePath: string): Promise<Publication> {
 
-    public static async load(path: string): Promise<Publication> {
-        const parser = new CbzParser();
-        const publication = await parser.Parse(path);
-        return publication;
+    const zip = await Zip1.loadPromise(filePath);
 
-        // return new CbzParser().Parse(path);
+    if (!zip.hasEntries()) {
+        return Promise.reject("CBZ zip empty");
     }
 
-    private Parse(filePath: string): Promise<Publication> {
+    const publication = new Publication();
+    publication.Metadata = new Metadata();
+    publication.Metadata.Identifier = filePathToTitle(filePath);
 
-        const zipPromise = createZipPromise(filePath);
+    publication.AddToInternal("type", "cbz");
+    publication.AddToInternal("zip", zip);
 
-        return zipPromise
-            .then((zip: IZip) => {
-                return this.createPublicationPromise(filePath, zip);
-            });
+    let comicInfoEntryName: string | undefined;
+    zip.forEachEntry((entryName: string) => {
+        console.log("++ZIP: entry");
+
+        console.log(entryName);
+
+        const link = new Link();
+        link.Href = entryName;
+
+        const mediaType = mime.lookup(entryName);
+        if (mediaType) {
+            console.log(mediaType);
+
+            link.TypeLink = mediaType as string;
+        } else {
+            console.log("!!!!!! NO MEDIA TYPE?!");
+        }
+
+        if (link.TypeLink && link.TypeLink.startsWith("image/")) {
+            if (!publication.Spine) {
+                publication.Spine = Array<Link>();
+            }
+            publication.Spine.push(link);
+
+        } else if (entryName.endsWith("ComicInfo.xml")) {
+            comicInfoEntryName = entryName;
+        }
+    });
+
+    if (!publication.Metadata.Title) {
+        publication.Metadata.Title = path.basename(filePath);
     }
 
-    private createPublicationPromise(filePath: string, zip: IZip): Promise<Publication> {
+    if (comicInfoEntryName) {
+        await comicRackMetadata(zip, comicInfoEntryName, publication);
+    }
 
-        return new Promise<Publication>((resolve, reject) => {
+    return publication;
+}
 
-            if (!zip.hasEntries()) {
-                reject();
-                return;
+const filePathToTitle = (filePath: string): string => {
+    const fileName = path.basename(filePath);
+    return slugify(fileName, "_").replace(/[\.]/g, "_");
+};
+
+const comicRackMetadata = async (zip: IZip, entryName: string, publication: Publication) => {
+    const comicZipData = await zip.entryBufferPromise(entryName);
+
+    const comicXmlStr = comicZipData.toString("utf8");
+    const comicXmlDoc = new xmldom.DOMParser().parseFromString(comicXmlStr);
+
+    const comicMeta = XML.deserialize<ComicInfo>(comicXmlDoc, ComicInfo);
+
+    if (!publication.Metadata) {
+        publication.Metadata = new Metadata();
+    }
+
+    if (comicMeta.Writer) {
+        const cont = new Contributor();
+        cont.Name = comicMeta.Writer;
+
+        if (!publication.Metadata.Author) {
+            publication.Metadata.Author = [];
+        }
+        publication.Metadata.Author.push(cont);
+    }
+
+    if (comicMeta.Penciller) {
+        const cont = new Contributor();
+        cont.Name = comicMeta.Writer;
+
+        if (!publication.Metadata.Penciler) {
+            publication.Metadata.Penciler = [];
+        }
+        publication.Metadata.Penciler.push(cont);
+    }
+
+    if (comicMeta.Colorist) {
+        const cont = new Contributor();
+        cont.Name = comicMeta.Writer;
+
+        if (!publication.Metadata.Colorist) {
+            publication.Metadata.Colorist = [];
+        }
+        publication.Metadata.Colorist.push(cont);
+    }
+
+    if (comicMeta.Inker) {
+        const cont = new Contributor();
+        cont.Name = comicMeta.Writer;
+
+        if (!publication.Metadata.Inker) {
+            publication.Metadata.Inker = [];
+        }
+        publication.Metadata.Inker.push(cont);
+    }
+
+    if (comicMeta.Title) {
+        publication.Metadata.Title = comicMeta.Title;
+    }
+
+    if (!publication.Metadata.Title) {
+        if (comicMeta.Series) {
+            let title = comicMeta.Series;
+            if (comicMeta.Number) {
+                title = title + " - " + comicMeta.Number;
             }
+            publication.Metadata.Title = title;
+        }
+    }
 
-            const publication = new Publication();
-            publication.Metadata = new Metadata();
-            publication.Metadata.Identifier = this.filePathToTitle(filePath);
-
-            publication.AddToInternal("type", "cbz");
-            publication.AddToInternal("zip", zip);
-
-            zip.forEachEntry((entryName: string, entry: any) => {
-                console.log("++ZIP: entry");
-
-                console.log(entry.name);
-                console.log(entryName);
-
-                const link = new Link();
-                link.Href = entryName;
-
-                const mediaType = mime.lookup(entryName);
-                if (mediaType) {
-                    console.log(mediaType);
-
-                    link.TypeLink = mediaType as string;
-                } else {
-                    console.log("!!!!!! NO MEDIA TYPE?!");
-                }
-
-                if (link.TypeLink && link.TypeLink.startsWith("image/")) {
-                    if (!publication.Spine) {
-                        publication.Spine = Array<Link>();
-                    }
-                    publication.Spine.push(link);
-
-                } else if (entryName.endsWith("ComicInfo.xml")) {
-                    this.comicRackMetadata(zip, entryName, publication);
-                }
-            });
-
-            if (!publication.Metadata.Title) {
-                publication.Metadata.Title = path.basename(filePath);
+    if (comicMeta.Pages) {
+        comicMeta.Pages.forEach((p) => {
+            const l = new Link();
+            if (p.Type === "FrontCover") {
+                l.AddRel("cover");
             }
-
-            resolve(publication);
+            l.Href = publication.Spine[p.Image].Href;
+            if (p.ImageHeight) {
+                l.Height = p.ImageHeight;
+            }
+            if (p.ImageWidth) {
+                l.Width = p.ImageWidth;
+            }
+            if (p.Bookmark) {
+                l.Title = p.Bookmark;
+            }
+            if (!publication.TOC) {
+                publication.TOC = [];
+            }
+            publication.TOC.push(l);
         });
     }
-
-    private filePathToTitle(filePath: string): string {
-        const fileName = path.basename(filePath);
-        return slugify(fileName, "_").replace(/[\.]/g, "_");
-    }
-
-    private comicRackMetadata(zip: IZip, entryName: string, publication: Publication) {
-
-        const comicZipData = zip.entryBuffer(entryName);
-        if (!comicZipData) {
-            return;
-        }
-
-        const comicXmlStr = comicZipData.toString("utf8");
-        const comicXmlDoc = new xmldom.DOMParser().parseFromString(comicXmlStr);
-
-        const comicMeta = XML.deserialize<ComicInfo>(comicXmlDoc, ComicInfo);
-
-        if (!publication.Metadata) {
-            publication.Metadata = new Metadata();
-        }
-
-        if (comicMeta.Writer) {
-            const cont = new Contributor();
-            cont.Name = comicMeta.Writer;
-
-            if (!publication.Metadata.Author) {
-                publication.Metadata.Author = [];
-            }
-            publication.Metadata.Author.push(cont);
-        }
-
-        if (comicMeta.Penciller) {
-            const cont = new Contributor();
-            cont.Name = comicMeta.Writer;
-
-            if (!publication.Metadata.Penciler) {
-                publication.Metadata.Penciler = [];
-            }
-            publication.Metadata.Penciler.push(cont);
-        }
-
-        if (comicMeta.Colorist) {
-            const cont = new Contributor();
-            cont.Name = comicMeta.Writer;
-
-            if (!publication.Metadata.Colorist) {
-                publication.Metadata.Colorist = [];
-            }
-            publication.Metadata.Colorist.push(cont);
-        }
-
-        if (comicMeta.Inker) {
-            const cont = new Contributor();
-            cont.Name = comicMeta.Writer;
-
-            if (!publication.Metadata.Inker) {
-                publication.Metadata.Inker = [];
-            }
-            publication.Metadata.Inker.push(cont);
-        }
-
-        if (comicMeta.Title) {
-            publication.Metadata.Title = comicMeta.Title;
-        }
-
-        if (!publication.Metadata.Title) {
-            if (comicMeta.Series) {
-                let title = comicMeta.Series;
-                if (comicMeta.Number) {
-                    title = title + " - " + comicMeta.Number;
-                }
-                publication.Metadata.Title = title;
-            }
-        }
-
-        if (comicMeta.Pages) {
-            comicMeta.Pages.forEach((p) => {
-                const l = new Link();
-                if (p.Type === "FrontCover") {
-                    l.AddRel("cover");
-                }
-                l.Href = publication.Spine[p.Image].Href;
-                if (p.ImageHeight) {
-                    l.Height = p.ImageHeight;
-                }
-                if (p.ImageWidth) {
-                    l.Width = p.ImageWidth;
-                }
-                if (p.Bookmark) {
-                    l.Title = p.Bookmark;
-                }
-                if (!publication.TOC) {
-                    publication.TOC = [];
-                }
-                publication.TOC.push(l);
-            });
-        }
-    }
-}
+};

@@ -3,8 +3,8 @@ import * as path from "path";
 import * as util from "util";
 
 import { Publication } from "./models/publication";
-import { CbzParser } from "./parser/cbz";
-import { EpubParser } from "./parser/epub";
+import { CbzParsePromise } from "./parser/cbz";
+import { EpubParsePromise } from "./parser/epub";
 
 console.log("process.cwd():");
 console.log(process.cwd());
@@ -42,7 +42,7 @@ const ext = path.extname(fileName).toLowerCase();
 
 if (ext === ".epub") {
 
-    EpubParser.load(filePath)
+    EpubParsePromise(filePath)
         .then((publication) => {
             console.log("== EpubParser: resolve");
             dumpPublication(publication);
@@ -53,14 +53,32 @@ if (ext === ".epub") {
 
 } else if (ext === ".cbz") {
 
-    CbzParser.load(filePath)
-        .then((publication) => {
-            console.log("== CbzParser: resolve");
-            dumpPublication(publication);
-        }).catch((err) => {
+    (async () => {
+        let publication: Publication | undefined;
+        try {
+            publication = await CbzParsePromise(filePath);
+        } catch (err) {
             console.log("== CbzParser: reject");
             console.log(err);
-        });
+            return;
+        }
+        if (!publication) {
+            console.log("== CbzParser: nil resolve");
+            return;
+        }
+
+        console.log("== CbzParser: resolve");
+        dumpPublication(publication);
+    })();
+
+    // CbzParse(filePath)
+    //     .then((publication) => {
+    //         console.log("== CbzParser: resolve");
+    //         dumpPublication(publication);
+    //     }).catch((err) => {
+    //         console.log("== CbzParser: reject");
+    //         console.log(err);
+    //     });
 }
 
 export function dumpPublication(publication: Publication) {
