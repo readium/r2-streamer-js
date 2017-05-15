@@ -50,15 +50,17 @@
     "reflect-metadata": "latest",
     "request": "latest",
     "slugify": "latest",
-    "stream-to-array": "latest",
     "ta-json": "latest",
     "xmldom": "latest",
     "xpath": "latest",
     "yauzl": "latest"
   },
   "devDependencies": {
+    "@types/debug": "latest",
     "@types/express": "latest",
+    "@types/mime-types": "latest",
     "@types/morgan": "latest",
+    "@types/request": "latest",
     "@types/xmldom": "latest",
     "ava": "latest",
     "cross-env": "latest",

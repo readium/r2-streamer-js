@@ -211,7 +211,9 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                 res.setHeader("Cache-Control", "public,max-age=86400");
 
                 // res.set("Content-Type", mediaType);
-                res.type(mediaType);
+                if (mediaType) {
+                    res.type(mediaType);
+                }
 
                 if (isText) {
                     res.status(200).send(zipData.toString("utf8"));

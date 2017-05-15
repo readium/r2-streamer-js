@@ -71,7 +71,7 @@ export class Zip1 implements IZip {
         });
     }
 
-    public entryStreamPromise(entryPath: string): Promise<Stream> {
+    public entryStreamPromise(entryPath: string): Promise<NodeJS.ReadableStream> {
 
         if (!this.hasEntries() || !this.hasEntry(entryPath)) {
             return Promise.reject("no such path in zip");

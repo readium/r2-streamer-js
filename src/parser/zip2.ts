@@ -21,7 +21,7 @@ export class Zip2 implements IZip {
                     method: "HEAD",
                     uri: filePath,
                 }).
-                    on("response", (res: any) => {
+                    on("response", (res: request.RequestResponse) => {
                         debug(filePath);
                         debug(res.headers);
 
@@ -52,6 +52,7 @@ export class Zip2 implements IZip {
                                     reject(err);
                                     return;
                                 }
+                                zip.httpZipReader = httpZipReader;
                                 const zip2 = new Zip2(filePath, zip);
 
                                 zip.on("error", (erro: any) => {
@@ -156,7 +157,7 @@ export class Zip2 implements IZip {
         });
     }
 
-    public entryStreamPromise(entryPath: string): Promise<Stream> {
+    public entryStreamPromise(entryPath: string): Promise<NodeJS.ReadableStream> {
 
         console.log(entryPath);
 
