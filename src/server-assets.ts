@@ -120,18 +120,6 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
             }
 
             const mediaType = mime.lookup(pathInZip);
-            const isText = mediaType && (
-                mediaType.indexOf("text/") === 0 ||
-                mediaType.indexOf("application/xhtml") === 0 ||
-                mediaType.indexOf("application/xml") === 0 ||
-                mediaType.indexOf("application/json") === 0 ||
-                mediaType.indexOf("application/svg") === 0 ||
-                mediaType.indexOf("application/smil") === 0 ||
-                mediaType.indexOf("+json") > 0 ||
-                mediaType.indexOf("+smil") > 0 ||
-                mediaType.indexOf("+svg") > 0 ||
-                mediaType.indexOf("+xhtml") > 0 ||
-                mediaType.indexOf("+xml") > 0);
 
             const zipStream = await zip.entryStreamPromise(pathInZip);
             // TODO: zipStream.pipe(res);
@@ -192,6 +180,19 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
             }
 
             if (req.query.show) {
+                const isText = mediaType && (
+                    mediaType.indexOf("text/") === 0 ||
+                    mediaType.indexOf("application/xhtml") === 0 ||
+                    mediaType.indexOf("application/xml") === 0 ||
+                    mediaType.indexOf("application/json") === 0 ||
+                    mediaType.indexOf("application/svg") === 0 ||
+                    mediaType.indexOf("application/smil") === 0 ||
+                    mediaType.indexOf("+json") > 0 ||
+                    mediaType.indexOf("+smil") > 0 ||
+                    mediaType.indexOf("+svg") > 0 ||
+                    mediaType.indexOf("+xhtml") > 0 ||
+                    mediaType.indexOf("+xml") > 0);
+
                 res.status(200).send("<html><body>" +
                     "<h1>" + path.basename(pathBase64Str) + "</h1>" +
                     "<h2>" + mediaType + "</h2>" +
@@ -215,11 +216,13 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                     res.type(mediaType);
                 }
 
-                if (isText) {
-                    res.status(200).send(zipData.toString("utf8"));
-                } else {
-                    res.status(200).end(zipData, "binary");
-                }
+                res.status(200).send(zipData);
+
+                // if (isText) {
+                //     res.status(200).send(zipData.toString("utf8"));
+                // } else {
+                //     res.status(200).end(zipData, "binary");
+                // }
             }
         });
 

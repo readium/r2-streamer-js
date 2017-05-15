@@ -66,7 +66,7 @@ export class Zip2 implements IZip {
                                     if (/\/$/.test(entry.fileName)) {
                                         // skip directories / folders
                                     } else {
-                                        debug(entry.fileName);
+                                        // debug(entry.fileName);
                                         zip2.addEntry(entry);
                                     }
                                     zip.readEntry(); // next (lazyEntries)
@@ -107,7 +107,7 @@ export class Zip2 implements IZip {
                         if (/\/$/.test(entry.fileName)) {
                             // skip directories / folders
                         } else {
-                            debug(entry.fileName);
+                            // debug(entry.fileName);
                             zip2.addEntry(entry);
                         }
                         zip.readEntry(); // next (lazyEntries)
@@ -159,7 +159,7 @@ export class Zip2 implements IZip {
 
     public entryStreamPromise(entryPath: string): Promise<NodeJS.ReadableStream> {
 
-        console.log(entryPath);
+        debug(entryPath);
 
         if (!this.hasEntries()) {
             return Promise.reject("no zip entries");

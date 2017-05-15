@@ -44,7 +44,7 @@ export function serverPub(server: Server, topRouter: express.Router): express.Ro
 
         const valueStr = new Buffer(value, "base64").toString("utf8");
         if (valueStr.indexOf("http") === 0) {
-            debug(`Publication URL: ${valueStr}`);
+            // debug(`Publication URL: ${valueStr}`);
 
             (req as any).pathBase64 = value;
             next();
