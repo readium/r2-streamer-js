@@ -1,6 +1,7 @@
 import * as debug_ from "debug";
 import * as StreamZip from "node-stream-zip";
 
+import { PassThrough, Stream } from "stream";
 import { IZip } from "./zip";
 
 const debug = debug_("r2:zip1");
@@ -41,12 +42,12 @@ export class Zip1 implements IZip {
                 // const entries = zip.entries();
                 // console.log(entries);
 
-                resolve(new Zip1(zip));
+                resolve(new Zip1(filePath, zip));
             });
         });
     }
 
-    private constructor(readonly zip: any) {
+    private constructor(readonly filePath: string, readonly zip: any) {
     }
 
     public hasEntries(): boolean {
@@ -70,14 +71,17 @@ export class Zip1 implements IZip {
         });
     }
 
-    public entryBufferPromise(entryPath: string): Promise<Buffer> {
+    public entryStreamPromise(entryPath: string): Promise<Stream> {
 
         if (!this.hasEntries() || !this.hasEntry(entryPath)) {
             return Promise.reject("no such path in zip");
         }
 
-        return new Promise<Buffer>((resolve, _reject) => {
-            resolve(this.zip.entryDataSync(entryPath));
+        return new Promise<Stream>((resolve, _reject) => {
+            const stream = new PassThrough();
+            stream.write(this.zip.entryDataSync(entryPath));
+            stream.end();
+            resolve(stream);
         });
     }
 }

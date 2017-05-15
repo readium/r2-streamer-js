@@ -18,4 +18,6 @@ export class NCX {
 
     @XmlXPathSelector("/ncx:ncx/ncx:pageList")
     public PageList: PageList;
+
+    public ZipPath: string;
 }

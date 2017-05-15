@@ -67,13 +67,14 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
             }
             // dumpPublication(publication);
 
-            const opfInternal = publication.Internal.find((i) => {
-                if (i.Name === "rootfile") {
-                    return true;
-                }
-                return false;
-            });
-            const rootfilePath = opfInternal ? opfInternal.Value as string : undefined;
+            // FIX_LINK_HREF_PATHS_RELATIVE_TO_ZIP_ROOT
+            // const opfInternal = publication.Internal.find((i) => {
+            //     if (i.Name === "rootfile") {
+            //         return true;
+            //     }
+            //     return false;
+            // });
+            // const rootfilePath = opfInternal ? opfInternal.Value as string : undefined;
 
             // console.log(req.url); // path local to this router
             // console.log(req.baseUrl); // path local to above this router
@@ -92,13 +93,15 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
             }
 
             function absoluteURL(href: string): string {
-                if (rootfilePath) {
-                    return rootUrl + "/"
-                        + path.join(path.dirname(rootfilePath), href)
-                            .replace(/\\/g, "/");
-                } else {
-                    return rootUrl + "/" + href;
-                }
+                return rootUrl + "/" + href;
+                // FIX_LINK_HREF_PATHS_RELATIVE_TO_ZIP_ROOT
+                // if (rootfilePath) {
+                //     return rootUrl + "/"
+                //         + path.join(path.dirname(rootfilePath), href)
+                //             .replace(/\\/g, "/");
+                // } else {
+                //     return rootUrl + "/" + href;
+                // }
             }
 
             let hasMO = false;

@@ -7,7 +7,7 @@ import { XML } from "../xml-js-mapper";
 
 import { ComicInfo } from "./comicrack/comicrack";
 
-import { IZip } from "./zip";
+import { IZip, streamToBufferPromise } from "./zip";
 import { Zip1 } from "./zip1";
 
 import { Link } from "../models/publication-link";
@@ -79,12 +79,14 @@ const filePathToTitle = (filePath: string): string => {
 };
 
 const comicRackMetadata = async (zip: IZip, entryName: string, publication: Publication) => {
-    const comicZipData = await zip.entryBufferPromise(entryName);
+    const comicZipStream = await zip.entryStreamPromise(entryName);
+    const comicZipData = await streamToBufferPromise(comicZipStream);
 
     const comicXmlStr = comicZipData.toString("utf8");
     const comicXmlDoc = new xmldom.DOMParser().parseFromString(comicXmlStr);
 
     const comicMeta = XML.deserialize<ComicInfo>(comicXmlDoc, ComicInfo);
+    comicMeta.ZipPath = entryName;
 
     if (!publication.Metadata) {
         publication.Metadata = new Metadata();

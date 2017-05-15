@@ -48,6 +48,7 @@
     "morgan": "latest",
     "node-stream-zip": "latest",
     "reflect-metadata": "latest",
+    "request": "latest",
     "slugify": "latest",
     "stream-to-array": "latest",
     "ta-json": "latest",

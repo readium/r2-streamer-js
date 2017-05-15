@@ -20,4 +20,6 @@ export class SMIL {
     // (see SeqOrPar)
     @XmlXPathSelector("dummy")
     public Par: Par;
+
+    public ZipPath: string;
 }

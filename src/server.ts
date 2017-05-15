@@ -8,6 +8,7 @@ import { serverAssets } from "./server-assets";
 import { serverManifestJson } from "./server-manifestjson";
 import { serverMediaOverlays } from "./server-mediaoverlays";
 import { serverPub } from "./server-pub";
+import { serverUrl } from "./server-url";
 import { encodeURIComponent_RFC3986 } from "./utils";
 
 const debug = debug_("r2:server:main");
@@ -40,15 +41,18 @@ export class Server {
             this.publications.forEach((pub) => {
                 const filePathBase64 = new Buffer(pub).toString("base64");
 
-                html += "<p><strong>" + path.basename(pub)
-                    + "</strong> => <a href='./pub/" + encodeURIComponent_RFC3986(filePathBase64)
+                html += "<p><strong>"
+                    + (pub.indexOf("http") === 0 ? pub : path.basename(pub))
+                    + "</strong><br> => <a href='./pub/" + encodeURIComponent_RFC3986(filePathBase64)
                     + "'>" + "./pub/" + filePathBase64 + "</a></p>";
             });
-
+            html += "<h1>Custom publication URL</h1><p><a href='./url'>CLICK HERE</a></p>";
             html += "</body></html>";
 
             res.status(200).send(html);
         });
+
+        serverUrl(this, server);
 
         const routerPathBase64: express.Router = serverPub(this, server);
         serverManifestJson(this, routerPathBase64);

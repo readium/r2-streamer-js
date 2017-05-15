@@ -7,8 +7,8 @@
     "yarn": ">= 0.23"
   },
   "dependencies": {
-    "debug": "latest",
     "css2json": "latest",
+    "debug": "latest",
     "express": "latest",
     "json-markup": "latest",
     "mime-types": "latest",
@@ -16,10 +16,13 @@
     "morgan": "latest",
     "node-stream-zip": "latest",
     "reflect-metadata": "latest",
+    "request": "latest",
     "slugify": "latest",
+    "stream-to-array": "latest",
     "ta-json": "latest",
     "xmldom": "latest",
-    "xpath": "latest"
+    "xpath": "latest",
+    "yauzl": "latest"
   },
   "scripts": {
     "now-start": "node './src/server-cli.js' ."

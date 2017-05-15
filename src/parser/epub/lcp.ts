@@ -44,4 +44,6 @@ export class LCP {
     @JsonProperty("links")
     @JsonElementType(Link)
     public Links: Link[];
+
+    public ZipPath: string;
 }

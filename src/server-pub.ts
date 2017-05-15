@@ -42,6 +42,15 @@ export function serverPub(server: Server, topRouter: express.Router): express.Ro
 
     routerPathBase64.param("pathBase64", (req, res, next, value, _name) => {
 
+        const valueStr = new Buffer(value, "base64").toString("utf8");
+        if (valueStr.indexOf("http") === 0) {
+            debug(`Publication URL: ${valueStr}`);
+
+            (req as any).pathBase64 = value;
+            next();
+            return;
+        }
+
         const found = server.getPublications().find((filePath) => {
             const filePathBase64 = new Buffer(filePath).toString("base64");
             return value === filePathBase64;

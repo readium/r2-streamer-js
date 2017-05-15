@@ -8,7 +8,7 @@ import { XML } from "../xml-js-mapper";
 
 import { JSON } from "ta-json";
 
-import { IZip } from "./zip";
+import { IZip, streamToBufferPromise } from "./zip";
 import { Zip2 } from "./zip2";
 
 import { MediaOverlayNode, timeStrToSeconds } from "../models/media-overlay";
@@ -74,11 +74,15 @@ export async function EpubParsePromise(filePath: string): Promise<Publication> {
     publication.AddToInternal("zip", zip);
 
     let lcpl: LCP | undefined;
-    if (zip.hasEntry("META-INF/license.lcpl")) {
-        const lcplZipData = await zip.entryBufferPromise("META-INF/license.lcpl");
+    const lcplZipPath = "META-INF/license.lcpl";
+    if (zip.hasEntry(lcplZipPath)) {
+        const lcplZipStream = await zip.entryStreamPromise(lcplZipPath);
+        const lcplZipData = await streamToBufferPromise(lcplZipStream);
+
         const lcplStr = lcplZipData.toString("utf8");
         const lcplJson = global.JSON.parse(lcplStr);
         lcpl = JSON.deserialize<LCP>(lcplJson, LCP);
+        lcpl.ZipPath = lcplZipPath;
 
         // breakLength: 100  maxArrayLength: undefined
         // console.log(util.inspect(lcpl,
@@ -86,19 +90,24 @@ export async function EpubParsePromise(filePath: string): Promise<Publication> {
     }
 
     let encryption: Encryption | undefined;
-    if (zip.hasEntry("META-INF/encryption.xml")) {
-        const encryptionXmlZipData = await zip.entryBufferPromise("META-INF/encryption.xml");
+    const encZipPath = "META-INF/encryption.xml";
+    if (zip.hasEntry(encZipPath)) {
+        const encryptionXmlZipStream = await zip.entryStreamPromise(encZipPath);
+        const encryptionXmlZipData = await streamToBufferPromise(encryptionXmlZipStream);
         const encryptionXmlStr = encryptionXmlZipData.toString("utf8");
         const encryptionXmlDoc = new xmldom.DOMParser().parseFromString(encryptionXmlStr);
 
         encryption = XML.deserialize<Encryption>(encryptionXmlDoc, Encryption);
+        encryption.ZipPath = encZipPath;
 
         // breakLength: 100  maxArrayLength: undefined
         // console.log(util.inspect(encryption,
         //     { showHidden: false, depth: 1000, colors: true, customInspect: true }));
     }
 
-    const containerXmlZipData = await zip.entryBufferPromise("META-INF/container.xml");
+    const containerZipPath = "META-INF/container.xml";
+    const containerXmlZipStream = await zip.entryStreamPromise(containerZipPath);
+    const containerXmlZipData = await streamToBufferPromise(containerXmlZipStream);
     const containerXmlStr = containerXmlZipData.toString("utf8");
     const containerXmlDoc = new xmldom.DOMParser().parseFromString(containerXmlStr);
 
@@ -108,18 +117,22 @@ export async function EpubParsePromise(filePath: string): Promise<Publication> {
     // console.log(containerXmlRootElement.toString());
 
     const container = XML.deserialize<Container>(containerXmlDoc, Container);
+    container.ZipPath = containerZipPath;
     // breakLength: 100  maxArrayLength: undefined
     // console.log(util.inspect(container,
     //     { showHidden: false, depth: 1000, colors: true, customInspect: true }));
 
     const rootfile = container.Rootfile[0];
 
-    const opfZipData = await zip.entryBufferPromise(rootfile.Path);
+    const opfZipStream = await zip.entryStreamPromise(rootfile.Path);
+    const opfZipData = await streamToBufferPromise(opfZipStream);
     const opfStr = opfZipData.toString("utf8");
     const opfDoc = new xmldom.DOMParser().parseFromString(opfStr);
     const opf = XML.deserialize<OPF>(opfDoc, OPF);
+    opf.ZipPath = rootfile.Path;
 
-    publication.AddToInternal("rootfile", rootfile.Path);
+    // FIX_LINK_HREF_PATHS_RELATIVE_TO_ZIP_ROOT
+    // publication.AddToInternal("rootfile", opf.ZipPath);
 
     // breakLength: 100  maxArrayLength: undefined
     // console.log(util.inspect(opf,
@@ -133,18 +146,20 @@ export async function EpubParsePromise(filePath: string): Promise<Publication> {
             return manifestItem.ID === opf.Spine.Toc;
         });
         if (ncxManItem) {
-            const ncxFilePath = path.join(path.dirname(rootfile.Path), ncxManItem.Href)
+            const ncxFilePath = path.join(path.dirname(opf.ZipPath), ncxManItem.Href)
                 .replace(/\\/g, "/");
             // console.log("########## NCX: "
-            //     + rootfile.Path
+            //     + opf.ZipPath
             //     + " == "
             //     + ncxManItem.Href
             //     + " -- "
             //     + ncxFilePath);
-            const ncxZipData = await zip.entryBufferPromise(ncxFilePath);
+            const ncxZipStream = await zip.entryStreamPromise(ncxFilePath);
+            const ncxZipData = await streamToBufferPromise(ncxZipStream);
             const ncxStr = ncxZipData.toString("utf8");
             const ncxDoc = new xmldom.DOMParser().parseFromString(ncxStr);
             ncx = XML.deserialize<NCX>(ncxDoc, NCX);
+            ncx.ZipPath = ncxFilePath;
 
             // breakLength: 100  maxArrayLength: undefined
             // console.log(util.inspect(ncx,
@@ -246,8 +261,10 @@ const fillMediaOverlay = async (publication: Publication, rootfile: Rootfile, op
             return;
         }
 
-        const smilFilePath = path.join(path.dirname(rootfile.Path), item.Href)
-            .replace(/\\/g, "/");
+        // FIX_LINK_HREF_PATHS_RELATIVE_TO_ZIP_ROOT
+        // const smilFilePath = path.join(path.dirname(opf.ZipPath), item.Href)
+        //     .replace(/\\/g, "/");
+        const smilFilePath = item.Href;
         if (!zip.hasEntry(smilFilePath)) {
             return;
         }
@@ -266,8 +283,10 @@ const fillMediaOverlay = async (publication: Publication, rootfile: Rootfile, op
                     return false;
                 });
                 if (manItemSmil) {
-                    const smilFilePath2 = path.join(path.dirname(rootfile.Path), manItemSmil.Href)
-                        .replace(/\\/g, "/");
+                    // FIX_LINK_HREF_PATHS_RELATIVE_TO_ZIP_ROOT
+                    // const smilFilePath2 = path.join(path.dirname(opf.ZipPath), manItemSmil.Href)
+                    //     .replace(/\\/g, "/");
+                    const smilFilePath2 = manItemSmil.Href;
                     if (smilFilePath2 === smilFilePath) {
                         manItemsHtmlWithSmil.push(manItemHtmlWithSmil);
                     }
@@ -277,8 +296,10 @@ const fillMediaOverlay = async (publication: Publication, rootfile: Rootfile, op
 
         manItemsHtmlWithSmil.forEach((manItemHtmlWithSmil) => {
 
-            const htmlPathInZip = path.join(path.dirname(rootfile.Path), manItemHtmlWithSmil.Href)
-                .replace(/\\/g, "/");
+            // FIX_LINK_HREF_PATHS_RELATIVE_TO_ZIP_ROOT
+            // const htmlPathInZip = path.join(path.dirname(opf.ZipPath), manItemHtmlWithSmil.Href)
+            //     .replace(/\\/g, "/");
+            const htmlPathInZip = manItemHtmlWithSmil.Href;
 
             const link = findLinKByHref(publication, rootfile, opf, htmlPathInZip);
             if (link) {
@@ -304,10 +325,12 @@ const fillMediaOverlay = async (publication: Publication, rootfile: Rootfile, op
             }
         });
 
-        const smilZipData = await zip.entryBufferPromise(smilFilePath);
+        const smilZipStream = await zip.entryStreamPromise(smilFilePath);
+        const smilZipData = await streamToBufferPromise(smilZipStream);
         const smilStr = smilZipData.toString("utf8");
         const smilXmlDoc = new xmldom.DOMParser().parseFromString(smilStr);
         const smil = XML.deserialize<SMIL>(smilXmlDoc, SMIL);
+        smil.ZipPath = smilFilePath;
 
         // breakLength: 100  maxArrayLength: undefined
         // console.log(util.inspect(smil,
@@ -787,23 +810,26 @@ const addMediaOverlay = (link: Link, linkEpub: Manifest, rootfile: Rootfile, opf
 };
 
 const findInManifestByID = (rootfile: Rootfile, opf: OPF, ID: string): Link | undefined => {
-    let link: Link | undefined;
 
     if (opf.Manifest && opf.Manifest.length) {
-        opf.Manifest.find((item) => {
-            if (item.ID === ID) {
-                const linkItem = new Link();
-                linkItem.TypeLink = item.MediaType;
-                linkItem.Href = item.Href;
-                addRelAndPropertiesToLink(linkItem, item, rootfile, opf);
-                addMediaOverlay(linkItem, item, rootfile, opf);
-                link = linkItem;
+        const item = opf.Manifest.find((manItem) => {
+            if (manItem.ID === ID) {
                 return true;
             }
             return false;
         });
+        if (item) {
+            const linkItem = new Link();
+            linkItem.TypeLink = item.MediaType;
+            const zipPath = path.join(path.dirname(opf.ZipPath), item.Href)
+                .replace(/\\/g, "/");
+            linkItem.Href = zipPath;
+            addRelAndPropertiesToLink(linkItem, item, rootfile, opf);
+            addMediaOverlay(linkItem, item, rootfile, opf);
+            return linkItem;
+        }
     }
-    return link;
+    return undefined;
 };
 
 const addRendition = (publication: Publication, _rootfile: Rootfile, opf: OPF) => {
@@ -871,7 +897,9 @@ const fillSpineAndResource = (publication: Publication, rootfile: Rootfile, opf:
 
                 const linkItem = new Link();
                 linkItem.TypeLink = item.MediaType;
-                linkItem.Href = item.Href;
+                const zipPath = path.join(path.dirname(opf.ZipPath), item.Href)
+                    .replace(/\\/g, "/");
+                linkItem.Href = zipPath;
                 addRelAndPropertiesToLink(linkItem, item, rootfile, opf);
                 addMediaOverlay(linkItem, item, rootfile, opf);
 
@@ -884,78 +912,85 @@ const fillSpineAndResource = (publication: Publication, rootfile: Rootfile, opf:
     }
 };
 
-const fillEncryptionInfo = (
-    publication: Publication, rootfile: Rootfile, _opf: OPF, encryption: Encryption, lcp: LCP | undefined) => {
+const fillEncryptionInfo =
+    (publication: Publication, _rootfile: Rootfile, _opf: OPF, encryption: Encryption, lcp: LCP | undefined) => {
 
-    encryption.EncryptedData.forEach((encInfo) => {
-        const encrypted = new Encrypted();
-        encrypted.Algorithm = encInfo.EncryptionMethod.Algorithm;
-        if (lcp) {
-            encrypted.Profile = lcp.Encryption.Profile;
-            encrypted.Scheme = "http://readium.org/2014/01/lcp";
-        }
-        if (encInfo.EncryptionProperties && encInfo.EncryptionProperties.length) {
+        encryption.EncryptedData.forEach((encInfo) => {
+            const encrypted = new Encrypted();
+            encrypted.Algorithm = encInfo.EncryptionMethod.Algorithm;
+            if (lcp) {
+                encrypted.Profile = lcp.Encryption.Profile;
+                encrypted.Scheme = "http://readium.org/2014/01/lcp";
+            }
+            if (encInfo.EncryptionProperties && encInfo.EncryptionProperties.length) {
 
-            encInfo.EncryptionProperties.forEach((prop) => {
+                encInfo.EncryptionProperties.forEach((prop) => {
 
-                if (prop.Compression) {
-                    if (prop.Compression.OriginalLength) {
-                        encrypted.OriginalLength = parseFloat(prop.Compression.OriginalLength);
+                    if (prop.Compression) {
+                        if (prop.Compression.OriginalLength) {
+                            encrypted.OriginalLength = parseFloat(prop.Compression.OriginalLength);
+                        }
+                        if (prop.Compression.Method === "8") {
+                            encrypted.Compression = "deflate";
+                        } else {
+                            encrypted.Compression = "none";
+                        }
                     }
-                    if (prop.Compression.Method === "8") {
-                        encrypted.Compression = "deflate";
-                    } else {
-                        encrypted.Compression = "none";
+                });
+
+            }
+
+            publication.Resources.forEach((l, _i, _arr) => {
+                // FIX_LINK_HREF_PATHS_RELATIVE_TO_ZIP_ROOT
+                // const filePath = path.join(path.dirname(opf.ZipPath), l.Href)
+                //     .replace(/\\/g, "/");
+                const filePath = l.Href;
+                if (filePath === encInfo.CipherData.CipherReference.URI) {
+                    if (!l.Properties) {
+                        l.Properties = new Properties();
                     }
+                    l.Properties.Encrypted = encrypted;
                 }
             });
 
+            publication.Spine.forEach((l, _i, _arr) => {
+                // FIX_LINK_HREF_PATHS_RELATIVE_TO_ZIP_ROOT
+                // const filePath = path.join(path.dirname(opf.ZipPath), l.Href)
+                //     .replace(/\\/g, "/");
+                const filePath = l.Href;
+                if (filePath === encInfo.CipherData.CipherReference.URI) {
+                    if (!l.Properties) {
+                        l.Properties = new Properties();
+                    }
+                    l.Properties.Encrypted = encrypted;
+                }
+            });
+        });
+
+        if (lcp) {
+
+            const decodedKeyCheck = new Buffer(lcp.Encryption.UserKey.KeyCheck, "base64").toString("utf8");
+            const decodedContentKey = new Buffer(lcp.Encryption.ContentKey.EncryptedValue, "base64").toString("utf8");
+            // publication.LCP = lcp;
+
+            publication.AddToInternal("lcp_id", lcp.ID);
+            publication.AddToInternal("lcp_content_key", decodedContentKey);
+            publication.AddToInternal("lcp_content_key_algorithm", lcp.Encryption.ContentKey.Algorithm);
+            publication.AddToInternal("lcp_user_hint", lcp.Encryption.UserKey.TextHint);
+            publication.AddToInternal("lcp_user_key_check", decodedKeyCheck);
+
+            publication.AddLink("application/vnd.readium.lcp.license-1.0+json", ["license"],
+                lcp.ZipPath, false);
         }
-
-        publication.Resources.forEach((l, _i, _arr) => {
-            const filePath = path.join(path.dirname(rootfile.Path), l.Href)
-                .replace(/\\/g, "/");
-            if (filePath === encInfo.CipherData.CipherReference.URI) {
-                if (!l.Properties) {
-                    l.Properties = new Properties();
-                }
-                l.Properties.Encrypted = encrypted;
-            }
-        });
-
-        publication.Spine.forEach((l, _i, _arr) => {
-            const filePath = path.join(path.dirname(rootfile.Path), l.Href)
-                .replace(/\\/g, "/");
-            if (filePath === encInfo.CipherData.CipherReference.URI) {
-                if (!l.Properties) {
-                    l.Properties = new Properties();
-                }
-                l.Properties.Encrypted = encrypted;
-            }
-        });
-    });
-
-    if (lcp) {
-
-        const decodedKeyCheck = new Buffer(lcp.Encryption.UserKey.KeyCheck, "base64").toString("utf8");
-        const decodedContentKey = new Buffer(lcp.Encryption.ContentKey.EncryptedValue, "base64").toString("utf8");
-        // publication.LCP = lcp;
-
-        publication.AddToInternal("lcp_id", lcp.ID);
-        publication.AddToInternal("lcp_content_key", decodedContentKey);
-        publication.AddToInternal("lcp_content_key_algorithm", lcp.Encryption.ContentKey.Algorithm);
-        publication.AddToInternal("lcp_user_hint", lcp.Encryption.UserKey.TextHint);
-        publication.AddToInternal("lcp_user_key_check", decodedKeyCheck);
-
-        publication.AddLink("application/vnd.readium.lcp.license-1.0+json", ["license"], "license.lcpl", false);
-    }
-};
+    };
 
 const fillPageListFromNCX = (publication: Publication, _rootfile: Rootfile, _opf: OPF, ncx: NCX) => {
     if (ncx.PageList && ncx.PageList.PageTarget && ncx.PageList.PageTarget.length) {
         ncx.PageList.PageTarget.forEach((pageTarget) => {
             const link = new Link();
-            link.Href = pageTarget.Content.Src;
+            const zipPath = path.join(path.dirname(ncx.ZipPath), pageTarget.Content.Src)
+                .replace(/\\/g, "/");
+            link.Href = zipPath;
             link.Title = pageTarget.Text;
             if (!publication.PageList) {
                 publication.PageList = [];
@@ -981,7 +1016,9 @@ const fillLandmarksFromGuide = (publication: Publication, _rootfile: Rootfile, o
         opf.Guide.forEach((ref) => {
             if (ref.Href) {
                 const link = new Link();
-                link.Href = ref.Href;
+                const zipPath = path.join(path.dirname(opf.ZipPath), ref.Href)
+                    .replace(/\\/g, "/");
+                link.Href = zipPath;
                 link.Title = ref.Title;
                 if (!publication.Landmarks) {
                     publication.Landmarks = [];
@@ -992,24 +1029,26 @@ const fillLandmarksFromGuide = (publication: Publication, _rootfile: Rootfile, o
     }
 };
 
-const fillTOCFromNavPoint = (
-    publication: Publication, rootfile: Rootfile, opf: OPF, ncx: NCX, point: NavPoint, node: Link[]) => {
+const fillTOCFromNavPoint =
+    (publication: Publication, rootfile: Rootfile, opf: OPF, ncx: NCX, point: NavPoint, node: Link[]) => {
 
-    const link = new Link();
-    link.Href = point.Content.Src;
-    link.Title = point.Text;
+        const link = new Link();
+        const zipPath = path.join(path.dirname(ncx.ZipPath), point.Content.Src)
+            .replace(/\\/g, "/");
+        link.Href = zipPath;
+        link.Title = point.Text;
 
-    if (point.Points && point.Points.length) {
-        point.Points.forEach((p) => {
-            if (!link.Children) {
-                link.Children = [];
-            }
-            fillTOCFromNavPoint(publication, rootfile, opf, ncx, p, link.Children);
-        });
-    }
+        if (point.Points && point.Points.length) {
+            point.Points.forEach((p) => {
+                if (!link.Children) {
+                    link.Children = [];
+                }
+                fillTOCFromNavPoint(publication, rootfile, opf, ncx, p, link.Children);
+            });
+        }
 
-    node.push(link);
-};
+        node.push(link);
+    };
 
 const fillSubject = (publication: Publication, _rootfile: Rootfile, opf: OPF) => {
     if (opf.Metadata && opf.Metadata.Subject && opf.Metadata.Subject.length) {
@@ -1057,19 +1096,22 @@ const fillCalibreSerieInfo = (publication: Publication, _rootfile: Rootfile, opf
     }
 };
 
-const fillTOCFromNavDoc = async (publication: Publication, rootfile: Rootfile, _opf: OPF, zip: IZip) => {
+const fillTOCFromNavDoc = async (publication: Publication, _rootfile: Rootfile, _opf: OPF, zip: IZip) => {
 
     const navLink = publication.GetNavDoc();
     if (!navLink) {
         return;
     }
 
-    const navDocFilePath = path.join(path.dirname(rootfile.Path), navLink.Href)
-        .replace(/\\/g, "/");
+    // FIX_LINK_HREF_PATHS_RELATIVE_TO_ZIP_ROOT
+    // const navDocFilePath = path.join(path.dirname(opf.ZipPath), navLink.Href)
+    //     .replace(/\\/g, "/");
+    const navDocFilePath = navLink.Href;
     if (!zip.hasEntry(navDocFilePath)) {
         return;
     }
-    const navDocZipData = await zip.entryBufferPromise(navDocFilePath);
+    const navDocZipStream = await zip.entryStreamPromise(navDocFilePath);
+    const navDocZipData = await streamToBufferPromise(navDocZipStream);
     const navDocStr = navDocZipData.toString("utf8");
     const navXmlDoc = new xmldom.DOMParser().parseFromString(navDocStr);
 
@@ -1154,7 +1196,10 @@ const fillTOCFromNavDocWithOL = (select: any, olElems: Element[], node: Link[], 
                         if (aHref[0][0] === "#") {
                             aHref = navDocURL + aHref[0];
                         }
-                        link.Href = aHref[0].value;
+
+                        const zipPath = path.join(path.dirname(navDocURL), aHref[0].value)
+                            .replace(/\\/g, "/");
+                        link.Href = zipPath;
                     }
 
                     let aText = aElems[0].textContent; // select("text()", aElems[0])[0].data;
@@ -1284,11 +1329,13 @@ const isEpub3OrMore = (rootfile: Rootfile, opf: OPF): boolean => {
     return (version === epub3 || version === epub301 || version === epub31);
 };
 
-const findLinKByHref = (publication: Publication, rootfile: Rootfile, _opf: OPF, href: string): Link | undefined => {
+const findLinKByHref = (publication: Publication, _rootfile: Rootfile, _opf: OPF, href: string): Link | undefined => {
     if (publication.Spine && publication.Spine.length) {
         const ll = publication.Spine.find((l) => {
-            const pathInZip = path.join(path.dirname(rootfile.Path), l.Href)
-                .replace(/\\/g, "/");
+            // FIX_LINK_HREF_PATHS_RELATIVE_TO_ZIP_ROOT
+            // const pathInZip = path.join(path.dirname(opf.ZipPath), l.Href)
+            //     .replace(/\\/g, "/");
+            const pathInZip = l.Href;
 
             if (href === pathInZip) {
                 return true;

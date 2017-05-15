@@ -51,4 +51,6 @@ export class ComicInfo {
     @XmlXPathSelector("ComicInfo/Pages/Page")
     @XmlItemType(Page)
     public Pages: Page[];
+
+    public ZipPath: string;
 }

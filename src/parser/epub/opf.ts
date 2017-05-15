@@ -36,4 +36,6 @@ export class OPF {
 
     @XmlXPathSelector("/opf:package/@version")
     public Version: string;
+
+    public ZipPath: string;
 }

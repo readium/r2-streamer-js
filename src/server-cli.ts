@@ -70,5 +70,20 @@ if (stats.isDirectory()) {
     });
 }
 
+// SmokeTestFXL.epub
+// EPUB:
+// https://rawgit.com/readium/readium-test-files/master/functional/smoke-tests/SmokeTestFXL/SmokeTestFXL.epub
+// SOURCE:
+// https://github.com/readium/readium-test-files/tree/master/functional/smoke-tests/SmokeTestFXL
+
+// SmokeTest-EPUB2.epub
+// EPUB:
+// https://rawgit.com/readium/readium-test-files/master/functional/smoke-tests/SmokeTest-EPUB2/SmokeTest-EPUB2.epub
+// SOURCE:
+// https://github.com/readium/readium-test-files/tree/master/functional/smoke-tests/SmokeTest-EPUB2
+
+filePaths.push("https://readium.firebaseapp.com/epub_content/epubReadingSystem.epub");
+filePaths.push("https://readium.firebaseapp.com/epub_content/internal_link.epub");
+
 const server = new Server();
 server.addPublications(filePaths);

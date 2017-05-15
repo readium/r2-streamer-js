@@ -20,4 +20,6 @@ export class Container {
         })
     @XmlItemType(Rootfile)
     public Rootfile: Rootfile[];
+
+    public ZipPath: string;
 }

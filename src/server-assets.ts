@@ -7,7 +7,7 @@ import * as mime from "mime-types";
 
 import { Link } from "./models/publication-link";
 import { EpubParsePromise } from "./parser/epub";
-import { IZip } from "./parser/zip";
+import { IZip, streamToBufferPromise } from "./parser/zip";
 import { Server } from "./server";
 
 const debug = debug_("r2:server:assets");
@@ -59,27 +59,26 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
             }
             const zip = zipInternal.Value as IZip;
 
-            const opfInternal = publication.Internal.find((i) => {
-                if (i.Name === "rootfile") {
-                    return true;
-                }
-                return false;
-            });
-            const rootfilePath = opfInternal ? opfInternal.Value as string : undefined;
-
-            let pathInZip = req.params.asset;
-
-            if (rootfilePath &&
-                !zip.hasEntry(pathInZip)) {
-                // FIRST FAIL ...
-                // let's try to adjust the path, make it relative to the OPF package
-                // (support for legacy incorrect implementation)
-                pathInZip = path.join(path.dirname(rootfilePath), pathInZip)
-                    .replace(/\\/g, "/");
-            }
+            const pathInZip = req.params.asset;
+            // FIX_LINK_HREF_PATHS_RELATIVE_TO_ZIP_ROOT
+            // const opfInternal = publication.Internal.find((i) => {
+            //     if (i.Name === "rootfile") {
+            //         return true;
+            //     }
+            //     return false;
+            // });
+            // const rootfilePath = opfInternal ? opfInternal.Value as string : undefined;
+            // if (rootfilePath &&
+            //     !zip.hasEntry(pathInZip)) {
+            //     // FIRST FAIL ...
+            //     // let's try to adjust the path, make it relative to the OPF package
+            //     // (support for legacy incorrect implementation)
+            //     pathInZip = path.join(path.dirname(rootfilePath), pathInZip)
+            //         .replace(/\\/g, "/");
+            // }
 
             if (!zip.hasEntry(pathInZip)) {
-                const err = "Asset not in zip!";
+                const err = "Asset not in zip! " + pathInZip;
                 debug(err);
                 res.status(500).send("<html><body><p>Internal Server Error</p><p>"
                     + err + "</p></body></html>");
@@ -88,12 +87,14 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
 
             let link: Link | undefined;
 
-            if (rootfilePath && publication.Resources
+            if (publication.Resources
                 && pathInZip.indexOf("META-INF/") !== 0
                 && !pathInZip.endsWith(".opf")) {
 
-                const relativePath = path.relative(path.dirname(rootfilePath), pathInZip)
-                    .replace(/\\/g, "/");
+                // FIX_LINK_HREF_PATHS_RELATIVE_TO_ZIP_ROOT
+                // const relativePath = path.relative(path.dirname(rootfilePath), pathInZip)
+                //     .replace(/\\/g, "/");
+                const relativePath = pathInZip;
 
                 link = publication.Resources.find((l) => {
                     if (l.Href === relativePath) {
@@ -132,7 +133,9 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                 mediaType.indexOf("+xhtml") > 0 ||
                 mediaType.indexOf("+xml") > 0);
 
-            let zipData = await zip.entryBufferPromise(pathInZip);
+            const zipStream = await zip.entryStreamPromise(pathInZip);
+            // TODO: zipStream.pipe(res);
+            let zipData = await streamToBufferPromise(zipStream);
 
             if (link && link.Properties && link.Properties.Encrypted) {
                 if (link.Properties.Encrypted.Algorithm === "http://www.idpf.org/2008/embedding") {

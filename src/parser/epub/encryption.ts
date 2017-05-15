@@ -17,4 +17,6 @@ export class Encryption {
     @XmlXPathSelector("/encryption:encryption/enc:EncryptedData")
     @XmlItemType(EncryptedData)
     public EncryptedData: EncryptedData[];
+
+    public ZipPath: string;
 }
