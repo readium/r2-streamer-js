@@ -10,7 +10,7 @@ import {
     XmlXPathSelector,
 } from "../../xml-js-mapper";
 
-@XmlObject({
+export const ns = {
     app: "http://www.w3.org/2007/app",
     atom: "http://www.w3.org/2005/Atom",
     bibframe: "http://bibframe.org/vocab/",
@@ -18,10 +18,13 @@ import {
     odl: "http://opds-spec.org/odl",
     opds: "http://opds-spec.org/2010/catalog",
     opensearch: "http://a9.com/-/spec/opensearch/1.1/",
+    relevance: "http://a9.com/-/opensearch/extensions/relevance/1.0/",
     schema: "http://schema.org",
     thr: "http://purl.org/syndication/thread/1.0",
     xsi: "http://www.w3.org/2001/XMLSchema-instance",
-})
+};
+
+@XmlObject(ns)
 export class OPDS {
 
     @XmlXPathSelector("/atom:feed/opensearch:totalResults/text()")
@@ -35,6 +38,9 @@ export class OPDS {
 
     @XmlXPathSelector("/atom:feed/atom:title/text()")
     public Title: string;
+
+    @XmlXPathSelector("/atom:feed/atom:subtitle/text()")
+    public SubTitle: string;
 
     @XmlXPathSelector("/atom:feed/atom:updated/text()")
     @XmlConverter(DateConverter)

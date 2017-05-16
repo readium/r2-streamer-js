@@ -20,9 +20,15 @@ const debug = debug_("r2:server:opds");
 
 function ensureAbsolute(rootUrl: string, linkHref: string) {
     let url = linkHref;
-    if (url.indexOf("http") !== 0) {
+    if (url.indexOf("http") !== 0 && url.indexOf("data:") !== 0) {
 
-        if (url[0] === "/") {
+        if (url.indexOf("//") === 0) {
+            if (rootUrl.indexOf("https://") === 0) {
+                url = "https:" + url;
+            } else {
+                url = "http:" + url;
+            }
+        } else if (url[0] === "/") {
             const j = rootUrl.replace(/:\/\//g, ":__").indexOf("/");
             const rootUrlOrigin = rootUrl.substr(0, j);
             url = path.join(rootUrlOrigin, url);
