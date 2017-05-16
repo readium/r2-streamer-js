@@ -10,7 +10,7 @@ import {
     XmlXPathSelector,
 } from "../../xml-js-mapper";
 
-export const ns = {
+@XmlObject({
     app: "http://www.w3.org/2007/app",
     atom: "http://www.w3.org/2005/Atom",
     bibframe: "http://bibframe.org/vocab/",
@@ -22,9 +22,7 @@ export const ns = {
     schema: "http://schema.org",
     thr: "http://purl.org/syndication/thread/1.0",
     xsi: "http://www.w3.org/2001/XMLSchema-instance",
-};
-
-@XmlObject(ns)
+})
 export class OPDS {
 
     @XmlXPathSelector("/atom:feed/opensearch:totalResults/text()")
