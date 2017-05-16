@@ -7,6 +7,7 @@ import { Publication } from "./models/publication";
 import { serverAssets } from "./server-assets";
 import { serverManifestJson } from "./server-manifestjson";
 import { serverMediaOverlays } from "./server-mediaoverlays";
+import { serverOPDS } from "./server-opds";
 import { serverPub } from "./server-pub";
 import { serverUrl } from "./server-url";
 import { encodeURIComponent_RFC3986 } from "./utils";
@@ -47,12 +48,14 @@ export class Server {
                     + "'>" + "./pub/" + filePathBase64 + "</a></p>";
             });
             html += "<h1>Custom publication URL</h1><p><a href='./url'>CLICK HERE</a></p>";
+            html += "<h1>OPDS feed</h1><p><a href='./opds'>CLICK HERE</a></p>";
             html += "</body></html>";
 
             res.status(200).send(html);
         });
 
         serverUrl(this, server);
+        serverOPDS(this, server);
 
         const routerPathBase64: express.Router = serverPub(this, server);
         serverManifestJson(this, routerPathBase64);

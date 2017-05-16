@@ -73,6 +73,7 @@ function deserializeRootObject(
                 }
             }
             // console.log(namespaces);
+            // console.log(p.xpathSelector);
             const select = xpath.useNamespaces(namespaces);
 
             const xPathSelected = select(p.xpathSelector, objectInstance);
