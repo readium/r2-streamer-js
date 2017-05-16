@@ -151,7 +151,8 @@ export function serverOPDS(_server: Server, topRouter: express.Router) {
                 if (links && links.length) {
                     html += "<p>";
                     links.forEach((link) => {
-                        if (link.Type && link.Type.indexOf("opds-catalog") >= 0) {
+                        if (link.Type &&
+                            (link.Type.indexOf("opds-catalog") >= 0 || link.Type === "application/atom+xml")) {
                             const linkUrl = ensureAbsolute(urlDecoded, link.Href);
                             const opdsUrl = req.originalUrl.substr(0, req.originalUrl.indexOf("/opds/"))
                                 + "/opds/" + encodeURIComponent_RFC3986(linkUrl);
@@ -195,15 +196,18 @@ export function serverOPDS(_server: Server, topRouter: express.Router) {
                             if (link.Type === "application/epub+zip") {
                                 epub = link.Href;
                             }
-                            if (link.Rel === "http://opds-spec.org/image") {
+                            if (link.Rel === "http://opds-spec.org/image"
+                                || link.Rel === "x-stanza-cover-image") {
                                 image = link.Href;
                             }
-                            if (link.Rel === "http://opds-spec.org/image/thumbnail") {
+                            if (link.Rel === "http://opds-spec.org/image/thumbnail"
+                                || link.Rel === "http://opds-spec.org/thumbnail"
+                                || link.Rel === "x-stanza-cover-image-thumbnail") {
                                 imageThumbnail = link.Href;
                             }
 
-                            if (opds && link.Type && link.Type.indexOf("opds-catalog") >= 0) {
-
+                            if (opds && link.Type &&
+                                (link.Type.indexOf("opds-catalog") >= 0 || link.Type === "application/atom+xml")) {
                                 const linkUrl = ensureAbsolute(urlDecoded, link.Href);
                                 const opdsUrl = req.originalUrl.substr(0, req.originalUrl.indexOf("/opds/"))
                                     + "/opds/" + encodeURIComponent_RFC3986(linkUrl);
