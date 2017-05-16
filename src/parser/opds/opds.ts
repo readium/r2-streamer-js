@@ -24,8 +24,6 @@ import {
 })
 export class OPDS {
 
-    public URL: string;
-
     @XmlXPathSelector("/atom:feed/opensearch:totalResults/text()")
     public OpensearchTotalResults: string;
 

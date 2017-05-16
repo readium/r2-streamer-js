@@ -1176,7 +1176,7 @@ const fillTOCFromNavDoc = async (publication: Publication, _rootfile: Rootfile, 
     }
 };
 
-const fillTOCFromNavDocWithOL = (select: any, olElems: Element[], node: Link[], navDocURL: string) => {
+const fillTOCFromNavDocWithOL = (select: any, olElems: Element[], node: Link[], navDocPath: string) => {
 
     olElems.forEach((olElem: Element) => {
 
@@ -1194,10 +1194,10 @@ const fillTOCFromNavDocWithOL = (select: any, olElems: Element[], node: Link[], 
                     let aHref = select("@href", aElems[0]);
                     if (aHref && aHref.length) {
                         if (aHref[0][0] === "#") {
-                            aHref = navDocURL + aHref[0];
+                            aHref = navDocPath + aHref[0];
                         }
 
-                        const zipPath = path.join(path.dirname(navDocURL), aHref[0].value)
+                        const zipPath = path.join(path.dirname(navDocPath), aHref[0].value)
                             .replace(/\\/g, "/");
                         link.Href = zipPath;
                     }
@@ -1215,7 +1215,7 @@ const fillTOCFromNavDocWithOL = (select: any, olElems: Element[], node: Link[], 
                     if (!link.Children) {
                         link.Children = [];
                     }
-                    fillTOCFromNavDocWithOL(select, olElemsNext, link.Children, navDocURL);
+                    fillTOCFromNavDocWithOL(select, olElemsNext, link.Children, navDocPath);
                 }
             });
         }

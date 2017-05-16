@@ -21,13 +21,16 @@ export function serverUrl(_server: Server, topRouter: express.Router) {
     routerUrl.get("", (_req: express.Request, res: express.Response) => {
 
         let html = "<html><head>";
-        html += `<script type="text/javascript">function go(evt) {` +
+        html += `<script type="text/javascript">function encodeURIComponent_RFC3986(str) { ` +
+            `return encodeURIComponent(str).replace(/[!'()*]/g, (c) => { ` +
+            `return "%" + c.charCodeAt(0).toString(16); }); }` +
+            `function go(evt) {` +
             `if (evt) { evt.preventDefault(); } var url = ` +
             `location.origin +` +
             // `location.protocol + '//' + location.hostname + ` +
             // `(location.port ? (':' + location.port) : '') + ` +
             ` '/url/' +` +
-            ` document.getElementById("url").value;` +
+            ` encodeURIComponent_RFC3986(document.getElementById("url").value);` +
             `location.href = url;}</script>`;
         html += "</head>";
 
@@ -53,10 +56,10 @@ export function serverUrl(_server: Server, topRouter: express.Router) {
             req.params.urlEncoded = (req as any).urlEncoded;
         }
 
-        let urlDecoded = req.params.urlEncoded;
-        if (urlDecoded.substr(-1) === "/") {
-            urlDecoded = urlDecoded.substr(0, urlDecoded.length - 1);
-        }
+        const urlDecoded = req.params.urlEncoded;
+        // if (urlDecoded.substr(-1) === "/") {
+        //     urlDecoded = urlDecoded.substr(0, urlDecoded.length - 1);
+        // }
         debug(urlDecoded);
 
         const urlDecodedBase64 = new Buffer(urlDecoded).toString("base64");
