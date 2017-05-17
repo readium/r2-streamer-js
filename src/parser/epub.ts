@@ -898,13 +898,13 @@ const fillSpineAndResource = (publication: Publication, rootfile: Rootfile, opf:
 
     if (opf.Manifest && opf.Manifest.length) {
         opf.Manifest.forEach((item) => {
-            const linkSpine = findInSpineByHref(publication, item.Href);
+            const zipPath = path.join(path.dirname(opf.ZipPath), item.Href)
+                .replace(/\\/g, "/");
+            const linkSpine = findInSpineByHref(publication, zipPath);
             if (!linkSpine || !linkSpine.Href) {
 
                 const linkItem = new Link();
                 linkItem.TypeLink = item.MediaType;
-                const zipPath = path.join(path.dirname(opf.ZipPath), item.Href)
-                    .replace(/\\/g, "/");
                 linkItem.Href = zipPath;
                 addRelAndPropertiesToLink(linkItem, item, rootfile, opf);
                 addMediaOverlay(linkItem, item, rootfile, opf);
