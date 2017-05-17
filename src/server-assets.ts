@@ -7,8 +7,9 @@ import * as mime from "mime-types";
 
 import { Link } from "./models/publication-link";
 import { EpubParsePromise } from "./parser/epub";
-import { IZip, streamToBufferPromise } from "./parser/zip";
+import { IZip } from "./parser/zip";
 import { Server } from "./server";
+import { parseRangeHeader, streamToBufferPromise } from "./utils";
 
 const debug = debug_("r2:server:assets");
 
@@ -25,6 +26,12 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
             }
             if (!req.params.asset) {
                 req.params.asset = (req as any).asset;
+            }
+
+            // debug(req.method);
+            const isHead = req.method.toLowerCase() === "head";
+            if (isHead) {
+                console.log("!!!!!!!!!!!!!!!!!!!");
             }
 
             const pathBase64Str = new Buffer(req.params.pathBase64, "base64").toString("utf8");
@@ -85,6 +92,28 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                 return;
             }
 
+            const mediaType = mime.lookup(pathInZip);
+
+            const isText = mediaType && (
+                mediaType.indexOf("text/") === 0 ||
+                mediaType.indexOf("application/xhtml") === 0 ||
+                mediaType.indexOf("application/xml") === 0 ||
+                mediaType.indexOf("application/json") === 0 ||
+                mediaType.indexOf("application/svg") === 0 ||
+                mediaType.indexOf("application/smil") === 0 ||
+                mediaType.indexOf("+json") > 0 ||
+                mediaType.indexOf("+smil") > 0 ||
+                mediaType.indexOf("+svg") > 0 ||
+                mediaType.indexOf("+xhtml") > 0 ||
+                mediaType.indexOf("+xml") > 0);
+
+            // const isVideoAudio = mediaType && (
+            //     mediaType.indexOf("audio/") === 0 ||
+            //     mediaType.indexOf("video/") === 0);
+            // if (isVideoAudio) {
+            //     debug(req.headers);
+            // }
+
             let link: Link | undefined;
 
             if (publication.Resources
@@ -119,13 +148,70 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                 }
             }
 
-            const mediaType = mime.lookup(pathInZip);
+            const isEncrypted = link && link.Properties && link.Properties.Encrypted;
 
-            const zipStream = await zip.entryStreamPromise(pathInZip);
-            // TODO: zipStream.pipe(res);
-            let zipData = await streamToBufferPromise(zipStream);
+            const isPartialByteRangeRequest = req.headers &&
+                req.headers.range; // && req.headers.range !== "bytes=0-";
 
-            if (link && link.Properties && link.Properties.Encrypted) {
+            if (isEncrypted && isPartialByteRangeRequest) {
+                const err = "Encrypted video/audio not supported (HTTP 206 partial request byte range)";
+                debug(err);
+                res.status(500).send("<html><body><p>Internal Server Error</p><p>"
+                    + err + "</p></body></html>");
+                return;
+            }
+
+            let partialByteBegin = -1; // inclusive boundaries
+            let partialByteEnd = -1;
+            if (isPartialByteRangeRequest) {
+                const ranges = parseRangeHeader(req.headers.range);
+
+                if (ranges && ranges.length) {
+                    if (ranges.length > 1) {
+                        const err = "Too many HTTP ranges: " + req.headers.range;
+                        debug(err);
+                        res.status(500).send("<html><body><p>Internal Server Error</p><p>"
+                            + err + "</p></body></html>");
+                        return;
+                    }
+                    partialByteBegin = ranges[0].begin;
+                    partialByteEnd = ranges[0].end;
+
+                    if (partialByteBegin < 0) {
+                        partialByteBegin = 0;
+                    }
+                }
+            }
+
+            if (partialByteBegin === 0 && partialByteEnd < 0) {
+                // TODO: build partial HTTP 206 for "0-" range?
+                // (instead of streaming the entire resource data into the response)
+            }
+
+            // debug(`${pathInZip} >> ${partialByteBegin}-${partialByteEnd}`);
+            const zipStream_ = isPartialByteRangeRequest ?
+                await zip.entryStreamRangePromise(pathInZip, partialByteBegin, partialByteEnd) :
+                await zip.entryStreamPromise(pathInZip);
+            const zipStream = zipStream_.stream;
+            const totalByteLength = zipStream_.length;
+            // debug(`${totalByteLength} total stream bytes`);
+
+            if (partialByteEnd < 0) {
+                partialByteEnd = totalByteLength - 1;
+            }
+
+            const partialByteLength = isPartialByteRangeRequest ?
+                partialByteEnd - partialByteBegin + 1 :
+                totalByteLength;
+
+            let zipData: Buffer | undefined;
+            if (!isHead && (isEncrypted || (req.query.show && isText))) {
+                zipData = await streamToBufferPromise(zipStream);
+                // debug(`${zipData.length} buffer bytes`);
+            }
+
+            // TODO: isHead for encrypted Content-Length
+            if (zipData && isEncrypted && link) {
                 if (link.Properties.Encrypted.Algorithm === "http://www.idpf.org/2008/embedding") {
 
                     let pubID = publication.Metadata.Identifier;
@@ -176,27 +262,20 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                 } else if (link.Properties.Encrypted.Algorithm
                     === "http://www.w3.org/2001/04/xmlenc#aes256-cbc") {
                     // TODO LCP userKey --> contentKey
+
+                    const err = "LCP encryption not supported.";
+                    debug(err);
+                    res.status(500).send("<html><body><p>Internal Server Error</p><p>"
+                        + err + "</p></body></html>");
+                    return;
                 }
             }
 
             if (req.query.show) {
-                const isText = mediaType && (
-                    mediaType.indexOf("text/") === 0 ||
-                    mediaType.indexOf("application/xhtml") === 0 ||
-                    mediaType.indexOf("application/xml") === 0 ||
-                    mediaType.indexOf("application/json") === 0 ||
-                    mediaType.indexOf("application/svg") === 0 ||
-                    mediaType.indexOf("application/smil") === 0 ||
-                    mediaType.indexOf("+json") > 0 ||
-                    mediaType.indexOf("+smil") > 0 ||
-                    mediaType.indexOf("+svg") > 0 ||
-                    mediaType.indexOf("+xhtml") > 0 ||
-                    mediaType.indexOf("+xml") > 0);
-
                 res.status(200).send("<html><body>" +
                     "<h1>" + path.basename(pathBase64Str) + "</h1>" +
                     "<h2>" + mediaType + "</h2>" +
-                    (isText ?
+                    ((isText && zipData) ?
                         ("<p><pre>" +
                             zipData.toString("utf8").replace(/&/g, "&amp;")
                                 .replace(/</g, "&lt;")
@@ -208,21 +287,43 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                     ) + "</body></html>");
             } else {
                 res.setHeader("Access-Control-Allow-Origin", "*");
-
                 res.setHeader("Cache-Control", "public,max-age=86400");
 
-                // res.set("Content-Type", mediaType);
                 if (mediaType) {
-                    res.type(mediaType);
+                    res.set("Content-Type", mediaType);
+                    // res.type(mediaType);
                 }
 
-                res.status(200).send(zipData);
+                res.setHeader("Accept-Ranges", "bytes");
 
-                // if (isText) {
-                //     res.status(200).send(zipData.toString("utf8"));
-                // } else {
-                //     res.status(200).end(zipData, "binary");
-                // }
+                if (isPartialByteRangeRequest) {
+                    // res.setHeader("Connection", "close");
+                    // res.setHeader("Transfer-Encoding", "chunked");
+                    res.setHeader("Content-Length", `${partialByteLength}`);
+                    const rangeHeader = `bytes ${partialByteBegin}-${partialByteEnd}/${totalByteLength}`;
+                    // debug("+++>" + rangeHeader);
+                    res.setHeader("Content-Range", rangeHeader);
+                    res.status(206);
+                } else {
+                    res.setHeader("Content-Length", `${totalByteLength}`);
+                    res.status(200);
+                }
+
+                if (isHead) {
+                    res.end();
+                } else {
+                    if (zipData) {
+                        res.send(zipData);
+
+                        // if (isText) {
+                        //     res.send(zipData.toString("utf8"));
+                        // } else {
+                        //     res.end(zipData, "binary");
+                        // }
+                    } else {
+                        zipStream.pipe(res);
+                    }
+                }
             }
         });
 

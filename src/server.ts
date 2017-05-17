@@ -64,7 +64,7 @@ export class Server {
 
         const port = process.env.PORT || 3000;
         server.listen(port, () => {
-            debug(`http://localhost: ${port}`);
+            debug(`http://localhost:${port}`);
         });
     }
 

@@ -1,8 +1,10 @@
 import * as debug_ from "debug";
 import * as StreamZip from "node-stream-zip";
 
-import { PassThrough, Stream } from "stream";
-import { IZip } from "./zip";
+import { RangeStream } from "./RangeStream";
+import { IStreamAndLength, IZip } from "./zip";
+
+// import { bufferToStream } from "../utils";
 
 const debug = debug_("r2:zip1");
 
@@ -24,9 +26,9 @@ export class Zip1 implements IZip {
                 reject(err);
             });
 
-            zip.on("entry", (entry: any) => {
+            zip.on("entry", (_entry: any) => {
                 // console.log("--ZIP: entry");
-                debug(entry.name);
+                // debug(entry.name);
             });
 
             zip.on("extract", (entry: any, file: any) => {
@@ -71,17 +73,66 @@ export class Zip1 implements IZip {
         });
     }
 
-    public entryStreamPromise(entryPath: string): Promise<NodeJS.ReadableStream> {
+    public entryStreamPromise(entryPath: string): Promise<IStreamAndLength> {
+
+        // debug(`entryStreamPromise: ${entryPath}`);
 
         if (!this.hasEntries() || !this.hasEntry(entryPath)) {
             return Promise.reject("no such path in zip");
         }
 
-        return new Promise<Stream>((resolve, _reject) => {
-            const stream = new PassThrough();
-            stream.write(this.zip.entryDataSync(entryPath));
-            stream.end();
-            resolve(stream);
+        // return new Promise<IStreamAndLength>((resolve, _reject) => {
+        //     const buffer: Buffer = this.zip.entryDataSync(entryPath);
+        //     const streamAndLength: IStreamAndLength = {
+        //         length: buffer.length,
+        //         stream: bufferToStream(buffer),
+        //     };
+        //     resolve(streamAndLength);
+        // });
+
+        return new Promise<IStreamAndLength>((resolve, reject) => {
+
+            this.zip.stream(entryPath, (err: any, stream: NodeJS.ReadableStream) => {
+                if (err) {
+                    reject(err);
+                    return;
+                }
+
+                const entry = this.zip.entries()[entryPath];
+
+                const streamAndLength: IStreamAndLength = {
+                    stream,
+                    length: entry.size,
+                };
+                resolve(streamAndLength);
+            });
+        });
+    }
+
+    public entryStreamRangePromise(entryPath: string, begin: number, end: number): Promise<IStreamAndLength> {
+
+        return new Promise<IStreamAndLength>((resolve, reject) => {
+            this.entryStreamPromise(entryPath)
+                .then((streamAndLength) => {
+
+                    const b = begin < 0 ? 0 : begin;
+                    const e = end < 0 ? (streamAndLength.length - 1) : end;
+                    // const length = e - b + 1;
+                    debug(`entryStreamRangePromise: ${b}-${e}/${streamAndLength.length}`);
+
+                    const stream = new RangeStream(b, e, streamAndLength.length);
+
+                    streamAndLength.stream.pipe(stream);
+
+                    const sal: IStreamAndLength = {
+                        stream,
+                        length: streamAndLength.length,
+                    };
+                    resolve(sal);
+                })
+                .catch((err) => {
+                    reject(err);
+                });
         });
     }
 }

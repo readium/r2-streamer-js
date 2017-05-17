@@ -7,8 +7,8 @@ import { XML } from "../xml-js-mapper";
 
 import { ComicInfo } from "./comicrack/comicrack";
 
-import { IZip, streamToBufferPromise } from "./zip";
-import { Zip1 } from "./zip1";
+import { streamToBufferPromise } from "../utils";
+import { IZip, zipLoadPromise } from "./zip";
 
 import { Link } from "../models/publication-link";
 
@@ -20,7 +20,7 @@ import { Contributor } from "../models/metadata-contributor";
 
 export async function CbzParsePromise(filePath: string): Promise<Publication> {
 
-    const zip = await Zip1.loadPromise(filePath);
+    const zip = await zipLoadPromise(filePath);
 
     if (!zip.hasEntries()) {
         return Promise.reject("CBZ zip empty");
@@ -79,7 +79,8 @@ const filePathToTitle = (filePath: string): string => {
 };
 
 const comicRackMetadata = async (zip: IZip, entryName: string, publication: Publication) => {
-    const comicZipStream = await zip.entryStreamPromise(entryName);
+    const comicZipStream_ = await zip.entryStreamPromise(entryName);
+    const comicZipStream = comicZipStream_.stream;
     const comicZipData = await streamToBufferPromise(comicZipStream);
 
     const comicXmlStr = comicZipData.toString("utf8");

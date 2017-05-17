@@ -1,11 +1,11 @@
-import { Stream } from "stream";
-
 import * as debug_ from "debug";
 import * as request from "request";
 import * as yauzl from "yauzl";
 
+import { streamToBufferPromise } from "../utils";
 import { HttpZipReader } from "./HttpZipReader";
-import { IZip, streamToBufferPromise } from "./zip";
+import { RangeStream } from "./RangeStream";
+import { IStreamAndLength, IZip } from "./zip";
 
 const debug = debug_("r2:zip2");
 
@@ -220,9 +220,9 @@ export class Zip2 implements IZip {
         });
     }
 
-    public entryStreamPromise(entryPath: string): Promise<NodeJS.ReadableStream> {
+    public entryStreamPromise(entryPath: string): Promise<IStreamAndLength> {
 
-        debug(entryPath);
+        // debug(`entryStreamPromise: ${entryPath}`);
 
         if (!this.hasEntries()) {
             return Promise.reject("no zip entries");
@@ -235,17 +235,47 @@ export class Zip2 implements IZip {
             return Promise.reject("no such path in zip: " + entryPath);
         }
 
-        return new Promise<Stream>((resolve, reject) => {
+        return new Promise<IStreamAndLength>((resolve, reject) => {
 
-            this.zip.openReadStream(entry, (err: any, readStream: Stream) => {
+            this.zip.openReadStream(entry, (err: any, stream: NodeJS.ReadableStream) => {
                 if (err) {
                     debug("yauzl openReadStream ERROR");
                     debug(err);
                     reject(err);
                     return;
                 }
-                resolve(readStream);
+                const streamAndLength: IStreamAndLength = {
+                    stream,
+                    length: entry.uncompressedSize as number,
+                };
+                resolve(streamAndLength);
             });
+        });
+    }
+
+    public entryStreamRangePromise(entryPath: string, begin: number, end: number): Promise<IStreamAndLength> {
+
+        return new Promise<IStreamAndLength>((resolve, reject) => {
+            this.entryStreamPromise(entryPath)
+                .then((streamAndLength) => {
+
+                    const b = begin < 0 ? 0 : begin;
+                    const e = end < 0 ? (streamAndLength.length - 1) : end;
+                    // const length = e - b + 1;
+
+                    const stream = new RangeStream(b, e, streamAndLength.length);
+
+                    streamAndLength.stream.pipe(stream);
+
+                    const sal: IStreamAndLength = {
+                        stream,
+                        length: streamAndLength.length,
+                    };
+                    resolve(sal);
+                })
+                .catch((err) => {
+                    reject(err);
+                });
         });
     }
 

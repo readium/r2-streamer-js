@@ -10,10 +10,9 @@ import * as xmldom from "xmldom";
 
 import { OPDS } from "./parser/opds/opds";
 import { Entry } from "./parser/opds/opds-entry";
-import { streamToBufferPromise } from "./parser/zip";
 import { Server } from "./server";
 import { trailingSlashRedirect } from "./server-trailing-slash-redirect";
-import { encodeURIComponent_RFC3986 } from "./utils";
+import { encodeURIComponent_RFC3986, streamToBufferPromise } from "./utils";
 import { XML } from "./xml-js-mapper";
 
 const debug = debug_("r2:server:opds");

@@ -5,7 +5,7 @@ import * as request from "request";
 import * as util from "util";
 import * as yauzl from "yauzl";
 
-import { streamToBufferPromise } from "./zip";
+import { bufferToStream, streamToBufferPromise } from "../utils";
 // import { HttpReadableStream } from "./HttpReadableStream";
 
 const debug = debug_("r2:httpStream");
@@ -31,14 +31,10 @@ export class HttpZipReader implements RandomAccessReader {
         // return new HttpReadableStream(this.url, this.byteLength, start, end);
         // =>
 
-        // const stream = new PassThrough();
-
         // const length = end - start;
         // debug(`_read: ${size} (${this.url}` +
         //     ` content-length=${this.byteLength} start=${this.start} end+1=${this.end} (length=${length}))`);
         // debug(`alreadyRead: ${this.alreadyRead} (byteLength: ${length})`);
-
-        const stream = new PassThrough();
 
         if (this.firstBuffer && start >= this.firstBufferStart && end <= this.firstBufferEnd) {
 
@@ -46,13 +42,13 @@ export class HttpZipReader implements RandomAccessReader {
 
             const begin = start - this.firstBufferStart;
             const stop = end - this.firstBufferStart;
-            stream.write(this.firstBuffer.slice(begin, stop)); // not a copy, points to existing Buffer!
-            stream.end();
 
-            return stream;
+            return bufferToStream(this.firstBuffer.slice(begin, stop));
         }
 
         // console.log(`HTTP GET ${this.url}: ${start}-${end} (${length}) [${this.byteLength}]`);
+
+        const stream = new PassThrough();
 
         const lastByteIndex = end - 1;
         const range = `${start}-${lastByteIndex}`;

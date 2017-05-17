@@ -8,8 +8,8 @@ import { XML } from "../xml-js-mapper";
 
 import { JSON } from "ta-json";
 
-import { IZip, streamToBufferPromise } from "./zip";
-import { Zip2 } from "./zip2";
+import { streamToBufferPromise } from "../utils";
+import { IZip, zipLoadPromise } from "./zip";
 
 import { MediaOverlayNode, timeStrToSeconds } from "../models/media-overlay";
 
@@ -58,7 +58,7 @@ export const mediaOverlayURLParam = "resource";
 
 export async function EpubParsePromise(filePath: string): Promise<Publication> {
 
-    const zip = await Zip2.loadPromise(filePath);
+    const zip = await zipLoadPromise(filePath);
 
     if (!zip.hasEntries()) {
         return Promise.reject("EPUB zip empty");
@@ -76,7 +76,8 @@ export async function EpubParsePromise(filePath: string): Promise<Publication> {
     let lcpl: LCP | undefined;
     const lcplZipPath = "META-INF/license.lcpl";
     if (zip.hasEntry(lcplZipPath)) {
-        const lcplZipStream = await zip.entryStreamPromise(lcplZipPath);
+        const lcplZipStream_ = await zip.entryStreamPromise(lcplZipPath);
+        const lcplZipStream = lcplZipStream_.stream;
         const lcplZipData = await streamToBufferPromise(lcplZipStream);
 
         const lcplStr = lcplZipData.toString("utf8");
@@ -92,7 +93,8 @@ export async function EpubParsePromise(filePath: string): Promise<Publication> {
     let encryption: Encryption | undefined;
     const encZipPath = "META-INF/encryption.xml";
     if (zip.hasEntry(encZipPath)) {
-        const encryptionXmlZipStream = await zip.entryStreamPromise(encZipPath);
+        const encryptionXmlZipStream_ = await zip.entryStreamPromise(encZipPath);
+        const encryptionXmlZipStream = encryptionXmlZipStream_.stream;
         const encryptionXmlZipData = await streamToBufferPromise(encryptionXmlZipStream);
         const encryptionXmlStr = encryptionXmlZipData.toString("utf8");
         const encryptionXmlDoc = new xmldom.DOMParser().parseFromString(encryptionXmlStr);
@@ -106,7 +108,8 @@ export async function EpubParsePromise(filePath: string): Promise<Publication> {
     }
 
     const containerZipPath = "META-INF/container.xml";
-    const containerXmlZipStream = await zip.entryStreamPromise(containerZipPath);
+    const containerXmlZipStream_ = await zip.entryStreamPromise(containerZipPath);
+    const containerXmlZipStream = containerXmlZipStream_.stream;
     const containerXmlZipData = await streamToBufferPromise(containerXmlZipStream);
     const containerXmlStr = containerXmlZipData.toString("utf8");
     const containerXmlDoc = new xmldom.DOMParser().parseFromString(containerXmlStr);
@@ -124,7 +127,8 @@ export async function EpubParsePromise(filePath: string): Promise<Publication> {
 
     const rootfile = container.Rootfile[0];
 
-    const opfZipStream = await zip.entryStreamPromise(rootfile.Path);
+    const opfZipStream_ = await zip.entryStreamPromise(rootfile.Path);
+    const opfZipStream = opfZipStream_.stream;
     const opfZipData = await streamToBufferPromise(opfZipStream);
     const opfStr = opfZipData.toString("utf8");
     const opfDoc = new xmldom.DOMParser().parseFromString(opfStr);
@@ -154,7 +158,8 @@ export async function EpubParsePromise(filePath: string): Promise<Publication> {
             //     + ncxManItem.Href
             //     + " -- "
             //     + ncxFilePath);
-            const ncxZipStream = await zip.entryStreamPromise(ncxFilePath);
+            const ncxZipStream_ = await zip.entryStreamPromise(ncxFilePath);
+            const ncxZipStream = ncxZipStream_.stream;
             const ncxZipData = await streamToBufferPromise(ncxZipStream);
             const ncxStr = ncxZipData.toString("utf8");
             const ncxDoc = new xmldom.DOMParser().parseFromString(ncxStr);
@@ -325,7 +330,8 @@ const fillMediaOverlay = async (publication: Publication, rootfile: Rootfile, op
             }
         });
 
-        const smilZipStream = await zip.entryStreamPromise(smilFilePath);
+        const smilZipStream_ = await zip.entryStreamPromise(smilFilePath);
+        const smilZipStream = smilZipStream_.stream;
         const smilZipData = await streamToBufferPromise(smilZipStream);
         const smilStr = smilZipData.toString("utf8");
         const smilXmlDoc = new xmldom.DOMParser().parseFromString(smilStr);
@@ -1110,7 +1116,8 @@ const fillTOCFromNavDoc = async (publication: Publication, _rootfile: Rootfile, 
     if (!zip.hasEntry(navDocFilePath)) {
         return;
     }
-    const navDocZipStream = await zip.entryStreamPromise(navDocFilePath);
+    const navDocZipStream_ = await zip.entryStreamPromise(navDocFilePath);
+    const navDocZipStream = navDocZipStream_.stream;
     const navDocZipData = await streamToBufferPromise(navDocZipStream);
     const navDocStr = navDocZipData.toString("utf8");
     const navXmlDoc = new xmldom.DOMParser().parseFromString(navDocStr);
