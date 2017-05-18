@@ -23,6 +23,11 @@ https://www.feedbooks.com/catalog.atom
 =>
 https://readium2.herokuapp.com/opds/https%3A%2F%2Fwww.feedbooks.com%2Fcatalog.atom
 
+UNGLUE.IT
+https://unglue.it/api/opds/
+=>
+https://readium2.herokuapp.com/opds/https%3A%2F%2Funglue.it%2Fapi%2Fopds%2F
+
 WEB ARCHIVE:
 http://bookserver.archive.org/catalog/
 =>
