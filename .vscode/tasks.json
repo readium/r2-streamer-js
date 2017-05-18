@@ -16,7 +16,8 @@
     {
       "taskName": "build",
       "args": [
-        "start"
+        "run",
+        "build"
       ],
       "isBuildCommand": true,
       "problemMatcher": [
