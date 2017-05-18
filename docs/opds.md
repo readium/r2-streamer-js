@@ -1,0 +1,145 @@
+
+# OPDS support
+
+This web micro-service is a basic OPDS feed navigator, which uses the `readium2-streamer-js` module to load remote EPUBs.
+
+Visit this link and enter a public OPDS feed's HTTP URL:
+
+https://readium2.herokuapp.com/opds/
+
+Suggested examples:
+
+NYPL INSTANT CLASSICS:
+https://instantclassics-beta.librarysimplified.org/index.xml
+=>
+https://readium2.herokuapp.com/opds/https%3A%2F%2Finstantclassics-beta.librarysimplified.org%2Findex.xml
+
+NYPL OPEN ACCESS:
+http://oacontent.librarysimplified.org/
+=>
+https://readium2.herokuapp.com/opds/http%3A%2F%2Foacontent.librarysimplified.org
+
+FEEDBOOKS:
+https://www.feedbooks.com/catalog.atom
+=>
+https://readium2.herokuapp.com/opds/https%3A%2F%2Fwww.feedbooks.com%2Fcatalog.atom
+
+WEB ARCHIVE:
+http://bookserver.archive.org/catalog/
+=>
+https://readium2.herokuapp.com/opds/http%3A%2F%2Fbookserver.archive.org%2Fcatalog%2F
+
+SMASHWORDS:
+http://www.smashwords.com/lexcycle/
+=>
+https://readium2.herokuapp.com/opds/http%3A%2F%2Fwww.smashwords.com%2Flexcycle%2F
+
+ATRAMENTA:
+http://www.atramenta.net/opds/catalog.atom
+=>
+https://readium2.herokuapp.com/opds/http%3A%2F%2Fwww.atramenta.net%2Fopds%2Fcatalog.atom
+
+PRAGPUB:
+https://pragprog.com/magazines.opds
+=>
+https://readium2.herokuapp.com/opds/https%3A%2F%2Fpragprog.com%2Fmagazines.opds
+
+STANDARD EBOOK:
+https://standardebooks.org/opds/all
+=>
+https://readium2.herokuapp.com/opds/https%3A%2F%2Fstandardebooks.org%2Fopds%2Fall
+
+OPEN EDITION:
+http://opds.openedition.org
+=>
+https://readium2.herokuapp.com/opds/http%3A%2F%2Fopds.openedition.org
+
+REVUES (OPEN EDITION):
+http://bookserver.revues.org
+=>
+https://readium2.herokuapp.com/opds/http%3A%2F%2Fbookserver.revues.org
+
+BOOKS ON BOARD:
+http://www.booksonboard.com/xml/catalog.atom
+=>
+https://readium2.herokuapp.com/opds/http%3A%2F%2Fwww.booksonboard.com%2Fxml%2Fcatalog.atom
+
+HISTORY STATE GOV:
+https://history.state.gov/api/v1/catalog
+=>
+https://readium2.herokuapp.com/opds/https%3A%2F%2Fhistory.state.gov%2Fapi%2Fv1%2Fcatalog
+
+TUEBL.CA:
+http://tuebl.ca/catalog/
+=>
+https://readium2.herokuapp.com/opds/http%3A%2F%2Ftuebl.ca%2Fcatalog%2F
+
+FBREADER ARMENIAN:
+http://armebooks.fbreader.org/books/index.xml
+=>
+https://readium2.herokuapp.com/opds/http%3A%2F%2Farmebooks.fbreader.org%2Fbooks%2Findex.xml
+
+EBOOKS GRATUITS:
+http://www.ebooksgratuits.com/opds/feed.php
+==>
+https://readium2.herokuapp.com/opds/http%3A%2F%2Fwww.ebooksgratuits.com%2Fopds%2Ffeed.php
+
+MANY BOOKS:
+http://manybooks.net/opds/
+=>
+https://readium2.herokuapp.com/opds/http%3A%2F%2Fmanybooks.net%2Fopds%2F
+
+eFORGE:
+http://eforge.eu/OPDS/_catalog/index.xml
+=>
+https://readium2.herokuapp.com/opds/http%3A%2F%2Feforge.eu%2FOPDS%2F_catalog%2Findex.xml
+
+EBOOK BIKE:
+https://ebook.bike/catalog
+=>
+https://readium2.herokuapp.com/opds/https%3A%2F%2Febook.bike%2Fcatalog
+
+WOLNELEKTURY:
+http://www.wolnelektury.pl/opds
+=>
+https://readium2.herokuapp.com/opds/http%3A%2F%2Fwww.wolnelektury.pl%2Fopds
+
+MEK.OSZK.HU:
+http://bookserver.mek.oszk.hu
+=>
+https://readium2.herokuapp.com/opds/http%3A%2F%2Fbookserver.mek.oszk.hu
+
+LITRES RU:
+http://opds.litres.ru/
+=>
+https://readium2.herokuapp.com/opds/http%3A%2F%2Fopds.litres.ru%2F
+
+CHITANKA:
+http://chitanka.info/catalog.opds
+=>
+https://readium2.herokuapp.com/opds/http%3A%2F%2Fchitanka.info%2Fcatalog.opds
+
+GITBOOK:
+https://www.gitbook.com/api/opds/catalog.atom
+=>
+https://readium2.herokuapp.com/opds/https%3A%2F%2Fwww.gitbook.com%2Fapi%2Fopds%2Fcatalog.atom%20
+
+LIB RUS EC:
+http://lib.rus.ec/opds
+=>
+https://readium2.herokuapp.com/opds/http%3A%2F%2Flib.rus.ec%2Fopds
+
+FLASCHENPOST:
+https://flaschenpost.piratenpartei.de/catalog/
+=>
+https://readium2.herokuapp.com/opds/https%3A%2F%2Fflaschenpost.piratenpartei.de%2Fcatalog%2F
+
+ANARCHIST LIB:
+https://theanarchistlibrary.org/opds
+=>
+https://readium2.herokuapp.com/opds/https%3A%2F%2Ftheanarchistlibrary.org%2Fopds
+
+BNF.FR (GALLICA):
+http://gallica.bnf.fr/opds
+=>
+https://readium2.herokuapp.com/opds/http%3A%2F%2Fgallica.bnf.fr%2Fopds
