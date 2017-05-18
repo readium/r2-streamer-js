@@ -48,3 +48,19 @@ Command line steps:
 7) `yarn test` (run the unit tests)
 8) `yarn run cli {PATH_TO_EPUB_OR_DIR}` (command line publication "dump") (path is relative or absolute)
 9) `yarn run server-debug {PATH_TO_EPUB_OR_DIR}` (HTTP micro-service to serve publication manifest and associated resources)
+
+## Server API, HTTP routes
+
+Two active deployments, at Heroku and Now.sh:
+
+https://readium2.herokuapp.com
+
+https://readium2-mlowondbfb.now.sh
+
+## Support for remote publications
+
+See: https://github.com/edrlab/r2-streamer-js/blob/develop/docs/remote-epubs.md
+
+## OPDS support
+
+See: https://github.com/edrlab/r2-streamer-js/blob/develop/docs/opds.md
