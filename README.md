@@ -1,10 +1,20 @@
-# Readium 2 "streamer" for NodeJS (TypeScript, ECMAScript 2015 / ES6)
+# NodeJS Readium-2 "streamer"
+
+NodeJS implementation (TypeScript transpiled to ECMAScript 2015 / ES6) of https://github.com/readium/readium-2/tree/master/streamer
 
 ## Build status
 
-TravisCI, `develop` branch:
+THIS IS ALPHA SOFTWARE! Do not use in production. APIs are not stable, the architecture / code organization is likely to change frequently.
+
+Continuous integration, TravisCI (on `develop` branch):
 
 [![Build Status](https://travis-ci.org/edrlab/r2-streamer-js.svg?branch=develop)](https://travis-ci.org/edrlab/r2-streamer-js)
+
+
+Deployed Heroku server instance (built from `develop` branch):
+
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://readium2.herokuapp.com)
+
 
 ## Prerequisites
 
@@ -44,5 +54,5 @@ Command line steps:
 5) `yarn upgrade` (sync local packages)
 6) `yarn run build` (invoke the main build script: clean, lint, compile)
 7) `yarn test` (run the unit tests)
-8) `yarn run cli {PATH_TO_EPUB}` (command line publication "dump") (path is relative or absolute)
-9) `yarn run server {PATH_TO_EPUB}` (HTTP service to serve publication manifest and associated resources)
+8) `yarn run cli {PATH_TO_EPUB_OR_DIR}` (command line publication "dump") (path is relative or absolute)
+9) `yarn run server-debug {PATH_TO_EPUB_OR_DIR}` (HTTP micro-service to serve publication manifest and associated resources)
