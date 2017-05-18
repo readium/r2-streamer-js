@@ -67,22 +67,6 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
             const zip = zipInternal.Value as IZip;
 
             const pathInZip = req.params.asset;
-            // FIX_LINK_HREF_PATHS_RELATIVE_TO_ZIP_ROOT
-            // const opfInternal = publication.Internal.find((i) => {
-            //     if (i.Name === "rootfile") {
-            //         return true;
-            //     }
-            //     return false;
-            // });
-            // const rootfilePath = opfInternal ? opfInternal.Value as string : undefined;
-            // if (rootfilePath &&
-            //     !zip.hasEntry(pathInZip)) {
-            //     // FIRST FAIL ...
-            //     // let's try to adjust the path, make it relative to the OPF package
-            //     // (support for legacy incorrect implementation)
-            //     pathInZip = path.join(path.dirname(rootfilePath), pathInZip)
-            //         .replace(/\\/g, "/");
-            // }
 
             if (!zip.hasEntry(pathInZip)) {
                 const err = "Asset not in zip! " + pathInZip;
@@ -120,9 +104,6 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                 && pathInZip.indexOf("META-INF/") !== 0
                 && !pathInZip.endsWith(".opf")) {
 
-                // FIX_LINK_HREF_PATHS_RELATIVE_TO_ZIP_ROOT
-                // const relativePath = path.relative(path.dirname(rootfilePath), pathInZip)
-                //     .replace(/\\/g, "/");
                 const relativePath = pathInZip;
 
                 link = publication.Resources.find((l) => {

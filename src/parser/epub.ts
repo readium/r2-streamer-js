@@ -135,9 +135,6 @@ export async function EpubParsePromise(filePath: string): Promise<Publication> {
     const opf = XML.deserialize<OPF>(opfDoc, OPF);
     opf.ZipPath = rootfile.Path;
 
-    // FIX_LINK_HREF_PATHS_RELATIVE_TO_ZIP_ROOT
-    // publication.AddToInternal("rootfile", opf.ZipPath);
-
     // breakLength: 100  maxArrayLength: undefined
     // console.log(util.inspect(opf,
     //     { showHidden: false, depth: 1000, colors: true, customInspect: true }));
@@ -267,9 +264,6 @@ const fillMediaOverlay = async (publication: Publication, rootfile: Rootfile, op
             continue;
         }
 
-        // FIX_LINK_HREF_PATHS_RELATIVE_TO_ZIP_ROOT
-        // const smilFilePath = path.join(path.dirname(opf.ZipPath), item.Href)
-        //     .replace(/\\/g, "/");
         const smilFilePath = item.Href;
         if (!zip.hasEntry(smilFilePath)) {
             continue;
@@ -943,9 +937,7 @@ const fillEncryptionInfo =
             }
 
             publication.Resources.forEach((l, _i, _arr) => {
-                // FIX_LINK_HREF_PATHS_RELATIVE_TO_ZIP_ROOT
-                // const filePath = path.join(path.dirname(opf.ZipPath), l.Href)
-                //     .replace(/\\/g, "/");
+
                 const filePath = l.Href;
                 if (filePath === encInfo.CipherData.CipherReference.URI) {
                     if (!l.Properties) {
@@ -956,9 +948,6 @@ const fillEncryptionInfo =
             });
 
             publication.Spine.forEach((l, _i, _arr) => {
-                // FIX_LINK_HREF_PATHS_RELATIVE_TO_ZIP_ROOT
-                // const filePath = path.join(path.dirname(opf.ZipPath), l.Href)
-                //     .replace(/\\/g, "/");
                 const filePath = l.Href;
                 if (filePath === encInfo.CipherData.CipherReference.URI) {
                     if (!l.Properties) {
@@ -1105,9 +1094,6 @@ const fillTOCFromNavDoc = async (publication: Publication, _rootfile: Rootfile, 
         return;
     }
 
-    // FIX_LINK_HREF_PATHS_RELATIVE_TO_ZIP_ROOT
-    // const navDocFilePath = path.join(path.dirname(opf.ZipPath), navLink.Href)
-    //     .replace(/\\/g, "/");
     const navDocFilePath = navLink.Href;
     if (!zip.hasEntry(navDocFilePath)) {
         return;
@@ -1335,9 +1321,6 @@ const isEpub3OrMore = (rootfile: Rootfile, opf: OPF): boolean => {
 const findLinKByHref = (publication: Publication, _rootfile: Rootfile, _opf: OPF, href: string): Link | undefined => {
     if (publication.Spine && publication.Spine.length) {
         const ll = publication.Spine.find((l) => {
-            // FIX_LINK_HREF_PATHS_RELATIVE_TO_ZIP_ROOT
-            // const pathInZip = path.join(path.dirname(opf.ZipPath), l.Href)
-            //     .replace(/\\/g, "/");
             const pathInZip = l.Href;
 
             if (href === pathInZip) {

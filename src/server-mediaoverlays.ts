@@ -35,29 +35,12 @@ export function serverMediaOverlays(server: Server, routerPathBase64: express.Ro
 
             const isShow = req.url.indexOf("/show") >= 0;
 
-            // FIX_LINK_HREF_PATHS_RELATIVE_TO_ZIP_ROOT
-            // const opfInternal = publication.Internal.find((i) => {
-            //     if (i.Name === "rootfile") {
-            //         return true;
-            //     }
-            //     return false;
-            // });
-            // const rootfilePath = opfInternal ? opfInternal.Value as string : undefined;
-
             let objToSerialize: any = null;
 
             const resource = isShow ? req.params[mediaOverlayURLParam] :
                 req.query[mediaOverlayURLParam];
             if (resource && resource !== "all") {
                 objToSerialize = publication.FindMediaOverlayByHref(resource);
-
-                // FIX_LINK_HREF_PATHS_RELATIVE_TO_ZIP_ROOT
-                // if (rootfilePath && !objToSerialize) {
-                //     resource = path.relative(path.dirname(rootfilePath), resource)
-                //         .replace(/\\/g, "/");
-
-                //     objToSerialize = publication.FindMediaOverlayByHref(resource);
-                // }
             } else {
                 objToSerialize = publication.FindAllMediaOverlay();
             }
