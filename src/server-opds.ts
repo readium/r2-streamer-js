@@ -47,7 +47,7 @@ function ensureAbsolute(rootUrl: string, linkHref: string) {
                 url = path.join(path.dirname(rootUrlWithoutQuery), url);
             }
         }
-        url = url.replace(/\\/g, "/").replace(/^http[s]?:\//g, "https:\/\/").replace(/^http:\//g, "http:\/\/");
+        url = url.replace(/\\/g, "/").replace(/^https:\//g, "https:\/\/").replace(/^http:\//g, "http:\/\/");
     }
     return url;
 }
