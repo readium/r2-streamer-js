@@ -39,4 +39,3 @@ https://readium2.herokuapp.com/pub/aHR0cHM6Ly9yYXdnaXQuY29tL3Btc3Rzcy9lcHViLWJvb
 
 Many more test EPUBs here: https://github.com/pmstss/epub-books
 ...and of course more EPUBs available from OPDS feeds: https://github.com/edrlab/r2-streamer-js/blob/develop/docs/opds.md
-

@@ -65,7 +65,6 @@ https://readium2-mlowondbfb.now.sh
 
 For demonstration purposes, the deployed server apps include `wasteland-otf-obf.epub` and `childrens-literature.epub`, obtained from https://idpf.github.io/epub3-samples/samples.html / https://github.com/IDPF/epub3-samples
 
-
 #### /pub/{PUB_ID}/manifest.json
 
 This route serves the "webpub manifest" JSON file using the `application/webpub+json` content type (canonical syntax, keys are recursively alphabetically sorted).
