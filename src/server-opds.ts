@@ -27,12 +27,13 @@ function ensureAbsolute(rootUrl: string, linkHref: string) {
             } else {
                 url = "http:" + url;
             }
-        } else if (url[0] === "/") {
+            return url;
+        }
+
+        if (url[0] === "/") {
             const j = rootUrl.replace(/:\/\//g, ":__").indexOf("/");
             const rootUrlOrigin = rootUrl.substr(0, j);
             url = path.join(rootUrlOrigin, url);
-
-            url = url.replace(/\\/g, "/").replace(/^http[s]?:\//g, "http:\/\/");
         } else {
             const i = rootUrl.indexOf("?");
             let rootUrlWithoutQuery = rootUrl;
@@ -45,9 +46,8 @@ function ensureAbsolute(rootUrl: string, linkHref: string) {
             } else {
                 url = path.join(path.dirname(rootUrlWithoutQuery), url);
             }
-
-            url = url.replace(/\\/g, "/").replace(/^http[s]?:\//g, "http:\/\/");
         }
+        url = url.replace(/\\/g, "/").replace(/^http[s]?:\//g, "https:\/\/").replace(/^http:\//g, "http:\/\/");
     }
     return url;
 }
