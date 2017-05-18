@@ -97,7 +97,9 @@
     "cli-debug-x": "cross-env DEBUG=* yarn run cli",
     "server": "node \"./dist/src/server-cli.js\"",
     "server-debug": "cross-env DEBUG=r2:* yarn run server",
-    "server-debug-x": "cross-env DEBUG=* yarn run server"
+    "server-debug-x": "cross-env DEBUG=* yarn run server",
+    "heroku-prebuild": "echo \"heroku-prebuild\"",
+    "heroku-postbuild": "echo \"heroku-postbuild\" && npm run build"
   },
   "importSort": {
     ".ts": {
