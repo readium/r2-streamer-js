@@ -73,6 +73,11 @@ http://tuebl.ca/catalog/
 =>
 https://readium2.herokuapp.com/opds/http%3A%2F%2Ftuebl.ca%2Fcatalog%2F
 
+SLUCAS.FR:
+http://cops-demo.slucas.fr/feed.php
+=>
+https://readium2.herokuapp.com/opds/http%3A%2F%2Fcops-demo.slucas.fr%2Ffeed.php
+
 FBREADER ARMENIAN:
 http://armebooks.fbreader.org/books/index.xml
 =>
