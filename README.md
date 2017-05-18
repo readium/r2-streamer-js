@@ -12,7 +12,7 @@ Continuous integration, TravisCI (on `develop` branch):
 
 NPM package (created from `develop` branch):
 
-[![npm](https://img.shields.io/npm/v/npm.svg)](https://www.npmjs.com/package/r2-streamer-js)
+[![npm](https://img.shields.io/npm/v/r2-streamer-js.svg)](https://www.npmjs.com/package/r2-streamer-js)
 
 Deployed Heroku server app (built from `develop` branch):
 
