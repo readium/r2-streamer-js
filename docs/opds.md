@@ -118,6 +118,11 @@ http://bookserver.mek.oszk.hu
 =>
 https://readium2.herokuapp.com/opds/http%3A%2F%2Fbookserver.mek.oszk.hu
 
+FLIBUSTA.NET
+http://proxy.flibusta.net/opds
+=>
+https://readium2.herokuapp.com/opds/http%3A%2F%2Fproxy.flibusta.net%2Fopds
+
 LITRES RU:
 http://opds.litres.ru/
 =>
