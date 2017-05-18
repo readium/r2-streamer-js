@@ -72,7 +72,7 @@ This route serves the "webpub manifest" JSON file using the `application/webpub+
 
 #### /pub/{PUB_ID}/manifest.json/show
 
-This route serves a pretty-printed representation of the "webpub manifest" JSON, with clickable links for easy navigation into individual publication assets (see new route below).
+This route serves a pretty-printed representation of the "webpub manifest" JSON, with clickable links for easy navigation into individual publication assets (see next route below).
 
 `/show` is equivalent to `/show/all`. Here is a list of available JSON "filters": Cover image: `/cover`, Table of Contents: `/toc`, Metadata: `/metadata`, Spine: `/spine`, Page List: `/pagelist`, Landmarks: `/landmarks`, Links: `/links`, Resources: `/resources`, Media Overlays: `/mediaoverlays`.
 
