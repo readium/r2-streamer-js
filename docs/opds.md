@@ -153,6 +153,11 @@ https://theanarchistlibrary.org/opds
 =>
 https://readium2.herokuapp.com/opds/https%3A%2F%2Ftheanarchistlibrary.org%2Fopds
 
+AOZORA
+http://aozora.textlive.net/catalog.opds
+=>
+https://readium2.herokuapp.com/opds/http%3A%2F%2Faozora.textlive.net%2Fcatalog.opds
+
 PRESTIGIO PLAZA
 http://ebooks.prestigioplaza.com/feed
 =>
