@@ -1,13 +1,14 @@
 
 # OPDS support
 
-This web micro-service is a basic OPDS feed navigator, which uses the `readium2-streamer-js` module to load remote EPUBs.
-
-Visit this link and enter a public OPDS feed's HTTP URL:
+`readium2-streamer-js` implements a basic OPDS feed parser / navigator. Visit this link and enter a public OPDS feed's HTTP URL (see examples below):
 
 https://readium2.herokuapp.com/opds/
 
-Suggested examples:
+
+The EPUB files referenced from the OPDS feeds are remotely accessed using HTTP partial byte range requests in order to support loading large publications (e.g. audio / video EPUB3 files). More information here: https://github.com/edrlab/r2-streamer-js/blob/develop/docs/remote-epub.md
+
+## A selection of public OPDS feeds:
 
 NYPL INSTANT CLASSICS:
 https://instantclassics-beta.librarysimplified.org/index.xml
