@@ -4,7 +4,7 @@ NodeJS implementation (TypeScript transpiled to ECMAScript 2015 / ES6) of https:
 
 ## Build status
 
-[![Travis](https://travis-ci.org/edrlab/r2-streamer-js.svg?branch=develop)](https://travis-ci.org/edrlab/r2-streamer-js)  [![NPM](https://img.shields.io/npm/v/r2-streamer-js.svg)](https://www.npmjs.com/package/r2-streamer-js) [![Heroku](https://img.shields.io/badge/app-Heroku-blue.svg)](https://readium2.herokuapp.com) [![Now.sh](https://img.shields.io/badge/app-Now.sh-lightgrey.svg)](https://readium2-mlowondbfb.now.sh)
+[![Travis](https://travis-ci.org/edrlab/r2-streamer-js.svg?branch=develop)](https://travis-ci.org/edrlab/r2-streamer-js)  [![NPM](https://img.shields.io/npm/v/r2-streamer-js.svg)](https://www.npmjs.com/package/r2-streamer-js) [![Heroku](https://img.shields.io/badge/app-Heroku-blue.svg)](https://readium2.herokuapp.com) [![Now.sh](https://img.shields.io/badge/app-Now.sh-lightgrey.svg)](https://readium2-istyujuiho.now.sh)
 
 THIS IS ALPHA SOFTWARE! Do not use in production. APIs are not stable, the architecture / code organization is likely to change frequently. All builds are from the `develop` branch. Continuous integration via TravisCI. NodeJS package published at the NPM registry. Test server apps deployed at Heroku and Now.sh.
 
@@ -55,7 +55,7 @@ Two active deployments, at Heroku and Now.sh:
 
 https://readium2.herokuapp.com
 
-https://readium2-mlowondbfb.now.sh
+https://readium2-istyujuiho.now.sh
 
 (all quoted HTTP routes below use the GET verb)
 
