@@ -57,10 +57,47 @@ https://readium2.herokuapp.com
 
 https://readium2-mlowondbfb.now.sh
 
+(all quoted HTTP routes below use the GET verb)
+
+### /pub/{PUB_ID}
+
+`{PUB_ID}` is the base64 encoding of a local publication file (server filesystem, therefore limited to app-approved files), or of any arbitrary HTTP URL (see the "Support for remote publications" section below).
+
+For demonstration purposes, the deployed server apps include `wasteland-otf-obf.epub` and `childrens-literature.epub`, obtained from https://idpf.github.io/epub3-samples/samples.html / https://github.com/IDPF/epub3-samples
+
+
+#### /pub/{PUB_ID}/manifest.json
+
+This route serves the "webpub manifest" JSON file using the `application/webpub+json` content type (canonical syntax, keys are recursively alphabetically sorted).
+
+#### /pub/{PUB_ID}/manifest.json/show
+
+This route serves a pretty-printed representation of the "webpub manifest" JSON, with clickable links for easy navigation into individual publication assets (see new route below).
+
+`/show` is equivalent to `/show/all`. Here is a list of available JSON "filters": Cover image: `/cover`, Table of Contents: `/toc`, Metadata: `/metadata`, Spine: `/spine`, Page List: `/pagelist`, Landmarks: `/landmarks`, Links: `/links`, Resources: `/resources`, Media Overlays: `/mediaoverlays`.
+
+#### /pub/{PUB_ID}/{ASSET_PATH}
+
+This route serves individual assets (file resources) from the publication archive. `{ASSET_PATH}` is relative to the root of the publication container (e.g. EPUB zip archive), so files like `/META-INF/container.xml` can be requested.
+
+Text files can be rendered in-page (for debugging) rather than processed by the web browser, by using the `?show=1` URL query string parameter.
+
+#### /pub/{PUB_ID}/media-overlay
+
+This route serves the full EPUB3 Media Overlay SMIL data (in its JSON form) using the `application/vnd.readium.mo+json` content type. Single spine item Media Overlays can be requested using the `/media-overlay?resource={ASSET_PATH}` URL query parameter (`{ASSET_PATH}` has the same definition as in the above section).
+
+### /url/ and /url/{ENCODED_URL}
+
+This conveninent micro-service automatically redirects to the base64 route described in the above section (`/pub/{PUB_ID}`). Also see the "Support for remote publications" section below.
+
+### /opds/ and /opds/{ENCODED_URL}
+
+This micro-service provides a basic OPDS reader. See the "Support for OPDS feeds" section below
+
 ## Support for remote publications
 
-See: https://github.com/edrlab/r2-streamer-js/blob/develop/docs/remote-epubs.md
+See: https://github.com/edrlab/r2-streamer-js/blob/develop/docs/remote-epub.md
 
-## OPDS support
+## Support for OPDS feeds
 
 See: https://github.com/edrlab/r2-streamer-js/blob/develop/docs/opds.md
