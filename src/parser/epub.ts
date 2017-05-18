@@ -261,9 +261,10 @@ const fillMediaOverlay = async (publication: Publication, rootfile: Rootfile, op
         return;
     }
 
+    // no forEach(), because of await/async within the iteration body
     for (const item of publication.Resources) {
         if (item.TypeLink !== "application/smil+xml") {
-            return;
+            continue;
         }
 
         // FIX_LINK_HREF_PATHS_RELATIVE_TO_ZIP_ROOT
@@ -271,11 +272,10 @@ const fillMediaOverlay = async (publication: Publication, rootfile: Rootfile, op
         //     .replace(/\\/g, "/");
         const smilFilePath = item.Href;
         if (!zip.hasEntry(smilFilePath)) {
-            return;
+            continue;
         }
 
         const mo = new MediaOverlayNode();
-        mo.SmilPathInOPF = item.Href;
         mo.SmilPathInZip = smilFilePath;
 
         const manItemsHtmlWithSmil = Array<Manifest>();
@@ -288,10 +288,8 @@ const fillMediaOverlay = async (publication: Publication, rootfile: Rootfile, op
                     return false;
                 });
                 if (manItemSmil) {
-                    // FIX_LINK_HREF_PATHS_RELATIVE_TO_ZIP_ROOT
-                    // const smilFilePath2 = path.join(path.dirname(opf.ZipPath), manItemSmil.Href)
-                    //     .replace(/\\/g, "/");
-                    const smilFilePath2 = manItemSmil.Href;
+                    const smilFilePath2 = path.join(path.dirname(opf.ZipPath), manItemSmil.Href)
+                        .replace(/\\/g, "/");
                     if (smilFilePath2 === smilFilePath) {
                         manItemsHtmlWithSmil.push(manItemHtmlWithSmil);
                     }
@@ -301,10 +299,8 @@ const fillMediaOverlay = async (publication: Publication, rootfile: Rootfile, op
 
         manItemsHtmlWithSmil.forEach((manItemHtmlWithSmil) => {
 
-            // FIX_LINK_HREF_PATHS_RELATIVE_TO_ZIP_ROOT
-            // const htmlPathInZip = path.join(path.dirname(opf.ZipPath), manItemHtmlWithSmil.Href)
-            //     .replace(/\\/g, "/");
-            const htmlPathInZip = manItemHtmlWithSmil.Href;
+            const htmlPathInZip = path.join(path.dirname(opf.ZipPath), manItemHtmlWithSmil.Href)
+                .replace(/\\/g, "/");
 
             const link = findLinKByHref(publication, rootfile, opf, htmlPathInZip);
             if (link) {

@@ -104,6 +104,23 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
                 // }
             }
 
+            function absolutizeURLs(jsonObj: any) {
+                traverseJsonObjects(jsonObj,
+                    (obj) => {
+                        if (obj.href && typeof obj.href === "string"
+                            && obj.href.indexOf("http") !== 0) {
+                            obj.href_ = obj.href;
+                            obj.href = absoluteURL(obj.href);
+                        }
+
+                        if (obj["media-overlay"] && typeof obj["media-overlay"] === "string"
+                            && obj["media-overlay"].indexOf("http") !== 0) {
+                            obj["media-overlay_"] = obj["media-overlay"];
+                            obj["media-overlay"] = absoluteURL(obj["media-overlay"]);
+                        }
+                    });
+            }
+
             let hasMO = false;
             if (publication.Spine) {
                 const link = publication.Spine.find((l) => {
@@ -194,14 +211,7 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
 
                 const jsonObj = JSON.serialize(objToSerialize);
 
-                traverseJsonObjects(jsonObj,
-                    (obj) => {
-                        if (obj.href && typeof obj.href === "string"
-                            && obj.href.indexOf("http") !== 0) {
-                            obj.href_ = obj.href;
-                            obj.href = absoluteURL(obj.href);
-                        }
-                    });
+                absolutizeURLs(jsonObj);
 
                 // const jsonStr = global.JSON.stringify(jsonObj, null, "    ");
 
@@ -224,14 +234,7 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
 
                 const publicationJsonObj = JSON.serialize(publication);
 
-                traverseJsonObjects(publicationJsonObj,
-                    (obj) => {
-                        if (obj.href && typeof obj.href === "string"
-                            && obj.href.indexOf("http") !== 0) {
-                            obj.href_ = obj.href;
-                            obj.href = absoluteURL(obj.href);
-                        }
-                    });
+                absolutizeURLs(publicationJsonObj);
 
                 const publicationJsonStr = global.JSON.stringify(sortObject(publicationJsonObj), null, "");
 

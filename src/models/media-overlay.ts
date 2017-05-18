@@ -95,7 +95,6 @@ export class MediaOverlayNode {
     @JsonElementType(MediaOverlayNode)
     public Children: MediaOverlayNode[];
 
-    public SmilPathInOPF: string;
     public SmilPathInZip: string;
 
     // public inspect(depth: number, opts: any): string | null | undefined {
