@@ -85,7 +85,7 @@
   "scripts": {
     "prepublish_": "npm run build && npm test",
     "now": "rm -rf ./now && mkdir now && mkdir now/reader-NYPL && mkdir now/reader-HADRIEN && cp -r dist/ now/ && cp -r reader-NYPL/ now/reader-NYPL/ && cp -r reader-HADRIEN/ now/reader-HADRIEN/ && cp *.epub now/ && cp package-now.json now/ && cd now/ && mv package-now.json package.json && now && cd ..",
-    "start": "npm run build",
+    "start": "npm run server-debug .",
     "build": "npm run clean && npm run lint:all && npm run lint:typescript && npm run transpile:typescript",
     "clean": "rimraf ./dist && rimraf ./now && mkdirp ./dist",
     "lint:all": "eclint check \"**/*\" \"[!].git/**/*\" \"[!]node_modules/**/*\" \"[!]dist/**/*\" \"[!]reader*/**/*\" \"[!]now/**/*\" \"[!].vscode/**/*\" \"[!]**/.DS_Store\" \"[!]**/*.epub\" \"[!]**/*.cbz\"  \"[!]**/*.jpg\"  \"[!]**/*.jpeg\"  \"[!]**/*.png\"",

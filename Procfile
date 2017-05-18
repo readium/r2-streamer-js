@@ -1,1 +1,1 @@
-web: node './dist/src/server.js' *.epub
+web: ls dist && node dist/src/server.js .
