@@ -143,6 +143,11 @@ http://lib.rus.ec/opds
 =>
 https://readium2.herokuapp.com/opds/http%3A%2F%2Flib.rus.ec%2Fopds
 
+ZONE 4 IPHONE:
+http://www.zone4iphone.ru/catalog.php
+=>
+https://readium2.herokuapp.com/opds/http%3A%2F%2Fwww.zone4iphone.ru%2Fcatalog.php
+
 FLASCHENPOST:
 https://flaschenpost.piratenpartei.de/catalog/
 =>
