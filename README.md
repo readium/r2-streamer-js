@@ -8,16 +8,17 @@ THIS IS ALPHA SOFTWARE! Do not use in production. APIs are not stable, the archi
 
 Continuous integration, TravisCI (on `develop` branch):
 
-[![Build Status](https://travis-ci.org/edrlab/r2-streamer-js.svg?branch=develop)](https://travis-ci.org/edrlab/r2-streamer-js)
+[![Travis](https://travis-ci.org/edrlab/r2-streamer-js.svg?branch=develop)](https://travis-ci.org/edrlab/r2-streamer-js)
 
 NPM package (created from `develop` branch):
 
-[![npm](https://img.shields.io/npm/v/r2-streamer-js.svg)](https://www.npmjs.com/package/r2-streamer-js)
+[![NPM](https://img.shields.io/npm/v/r2-streamer-js.svg)](https://www.npmjs.com/package/r2-streamer-js)
 
-Deployed Heroku server app (built from `develop` branch):
+Deployed server apps (built from `develop` branch):
 
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://readium2.herokuapp.com)
+[![Heroku](https://img.shields.io/badge/deploy-Heroku-blue.svg)](https://readium2.herokuapp.com)
 
+[![Now.sh](https://img.shields.io/badge/deploy-Now.sh-lightgrey.svg)](https://readium2-mlowondbfb.now.sh)
 
 ## Prerequisites
 
