@@ -10,8 +10,11 @@ Continuous integration, TravisCI (on `develop` branch):
 
 [![Build Status](https://travis-ci.org/edrlab/r2-streamer-js.svg?branch=develop)](https://travis-ci.org/edrlab/r2-streamer-js)
 
+NPM package (created from `develop` branch):
 
-Deployed Heroku server instance (built from `develop` branch):
+[![npm](https://img.shields.io/npm/v/npm.svg)](https://www.npmjs.com/package/r2-streamer-js)
+
+Deployed Heroku server app (built from `develop` branch):
 
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://readium2.herokuapp.com)
 
