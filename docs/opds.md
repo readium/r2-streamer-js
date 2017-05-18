@@ -153,6 +153,11 @@ https://theanarchistlibrary.org/opds
 =>
 https://readium2.herokuapp.com/opds/https%3A%2F%2Ftheanarchistlibrary.org%2Fopds
 
+PRESTIGIO PLAZA
+http://ebooks.prestigioplaza.com/feed
+=>
+https://readium2.herokuapp.com/opds/http%3A%2F%2Febooks.prestigioplaza.com%2Ffeed
+
 BNF.FR (GALLICA):
 http://gallica.bnf.fr/opds
 =>
