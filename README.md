@@ -16,9 +16,9 @@ NPM package (created from `develop` branch):
 
 Deployed server apps (built from `develop` branch):
 
-[![Heroku](https://img.shields.io/badge/deploy-Heroku-blue.svg)](https://readium2.herokuapp.com)
+[![Heroku](https://img.shields.io/badge/app-Heroku-blue.svg)](https://readium2.herokuapp.com)
 
-[![Now.sh](https://img.shields.io/badge/deploy-Now.sh-lightgrey.svg)](https://readium2-mlowondbfb.now.sh)
+[![Now.sh](https://img.shields.io/badge/app-Now.sh-lightgrey.svg)](https://readium2-mlowondbfb.now.sh)
 
 ## Prerequisites
 
