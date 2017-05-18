@@ -63,6 +63,7 @@ export class Server {
         serverAssets(this, routerPathBase64);
 
         const port = process.env.PORT || 3000;
+        debug(`PORT: ${process.env.PORT} => ${port}`);
         server.listen(port, () => {
             debug(`http://localhost:${port}`);
         });
