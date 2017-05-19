@@ -52,13 +52,17 @@ export class Zip1 implements IZip {
     private constructor(readonly filePath: string, readonly zip: any) {
     }
 
+    public entriesCount(): number {
+        return this.zip.entriesCount;
+    }
+
     public hasEntries(): boolean {
         return this.zip.entriesCount > 0;
     }
 
     public hasEntry(entryPath: string): boolean {
         return this.hasEntries()
-            && Object.keys(this.zip.entries()).indexOf(entryPath) >= 0;
+            && this.zip.entries()[entryPath];
     }
 
     public forEachEntry(callback: (entryName: string) => void) {
@@ -67,8 +71,7 @@ export class Zip1 implements IZip {
             return;
         }
 
-        const entries = this.zip.entries();
-        Object.keys(entries).forEach((entryName) => {
+        Object.keys(this.zip.entries()).forEach((entryName) => {
             callback(entryName);
         });
     }

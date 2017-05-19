@@ -2,6 +2,7 @@ import { Zip2 } from "./zip2";
 
 export interface IZip {
     hasEntries: () => boolean;
+    entriesCount: () => number;
     hasEntry: (entryPath: string) => boolean;
     forEachEntry: (callback: (entryName: string) => void) => void;
     entryStreamPromise: (entryPath: string) => Promise<IStreamAndLength>;

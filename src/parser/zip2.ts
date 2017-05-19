@@ -9,190 +9,206 @@ import { IStreamAndLength, IZip } from "./zip";
 
 const debug = debug_("r2:zip2");
 
+interface IStringKeyedObject { [key: string]: any; }
+
 export class Zip2 implements IZip {
 
     public static loadPromise(filePath: string): Promise<IZip> {
+        if (filePath.indexOf("http") === 0) {
+            return Zip2.loadPromiseHTTP(filePath);
+        }
 
         return new Promise<IZip>((resolve, reject) => {
 
-            if (filePath.indexOf("http") === 0) {
-                request.head({
-                    headers: {},
-                    method: "HEAD",
-                    uri: filePath,
-                }).
-                    on("response", (res: request.RequestResponse) => {
-                        debug(filePath);
-                        debug(res.headers);
+            yauzl.open(filePath, { lazyEntries: true, autoClose: false }, (err: any, zip: any) => {
+                if (err) {
+                    debug("yauzl init ERROR");
+                    debug(err);
+                    reject(err);
+                    return;
+                }
+                const zip2 = new Zip2(filePath, zip);
 
-                        // if (!res.headers["content-type"]
-                        //     || res.headers["content-type"] !== "application/epub+zip") {
-                        //     reject("content-type not supported!");
-                        //     return;
-                        // }
-
-                        if (!res.headers["content-length"]) {
-                            reject("content-length not supported!");
-                            return;
-                        }
-                        const httpZipByteLength = parseInt(res.headers["content-length"], 10);
-                        debug(`Content-Length: ${httpZipByteLength}`);
-
-                        if (!res.headers["accept-ranges"]
-                            || res.headers["accept-ranges"] !== "bytes") {
-                            if (httpZipByteLength > (2 * 1024 * 1024)) {
-                                reject("accept-ranges not supported, file too big to download: " + httpZipByteLength);
-                                return;
-                            }
-                            debug("Downloading: " + filePath);
-                            request.get({
-                                headers: {},
-                                method: "GET",
-                                uri: filePath,
-                            }).
-                                on("response", (ress: request.RequestResponse) => {
-                                    // debug(filePath);
-                                    // debug(res.headers);
-                                    streamToBufferPromise(ress).then((buffer) => {
-                                        // debug(`streamToBufferPromise: ${buffer.length}`);
-
-                                        yauzl.fromBuffer(buffer,
-                                            { lazyEntries: true },
-                                            (err: any, zip: any) => {
-                                                if (err) {
-                                                    debug("yauzl init ERROR");
-                                                    debug(err);
-                                                    reject(err);
-                                                    return;
-                                                }
-                                                const zip2 = new Zip2(filePath, zip);
-
-                                                zip.on("error", (erro: any) => {
-                                                    debug("yauzl ERROR");
-                                                    debug(erro);
-                                                    reject(erro);
-                                                });
-
-                                                zip.readEntry(); // next (lazyEntries)
-                                                zip.on("entry", (entry: any) => {
-                                                    if (/\/$/.test(entry.fileName)) {
-                                                        // skip directories / folders
-                                                    } else {
-                                                        // debug(entry.fileName);
-                                                        zip2.addEntry(entry);
-                                                    }
-                                                    zip.readEntry(); // next (lazyEntries)
-                                                });
-
-                                                zip.on("end", () => {
-                                                    debug("yauzl END");
-                                                    resolve(zip2);
-                                                });
-
-                                                zip.on("close", () => {
-                                                    debug("yauzl CLOSE");
-                                                });
-                                            });
-                                    }).catch((err) => {
-                                        debug(err);
-                                        reject(err);
-                                    });
-                                }).
-                                on("error", (err: any) => {
-                                    debug(err);
-                                    reject(err);
-                                });
-                            return;
-                        }
-
-                        const httpZipReader = new HttpZipReader(filePath, httpZipByteLength);
-                        yauzl.fromRandomAccessReader(httpZipReader, httpZipByteLength,
-                            { lazyEntries: true, autoClose: false },
-                            (err: any, zip: any) => {
-                                if (err) {
-                                    debug("yauzl init ERROR");
-                                    debug(err);
-                                    reject(err);
-                                    return;
-                                }
-                                zip.httpZipReader = httpZipReader;
-                                const zip2 = new Zip2(filePath, zip);
-
-                                zip.on("error", (erro: any) => {
-                                    debug("yauzl ERROR");
-                                    debug(erro);
-                                    reject(erro);
-                                });
-
-                                zip.readEntry(); // next (lazyEntries)
-                                zip.on("entry", (entry: any) => {
-                                    if (/\/$/.test(entry.fileName)) {
-                                        // skip directories / folders
-                                    } else {
-                                        // debug(entry.fileName);
-                                        zip2.addEntry(entry);
-                                    }
-                                    zip.readEntry(); // next (lazyEntries)
-                                });
-
-                                zip.on("end", () => {
-                                    debug("yauzl END");
-                                    resolve(zip2);
-                                });
-
-                                zip.on("close", () => {
-                                    debug("yauzl CLOSE");
-                                });
-                            });
-                    }).
-                    on("error", (err: any) => {
-                        debug(err);
-                        reject(err);
-                    });
-            } else {
-                yauzl.open(filePath, { lazyEntries: true, autoClose: false }, (err: any, zip: any) => {
-                    if (err) {
-                        debug("yauzl init ERROR");
-                        debug(err);
-                        reject(err);
-                        return;
-                    }
-                    const zip2 = new Zip2(filePath, zip);
-
-                    zip.on("error", (erro: any) => {
-                        debug("yauzl ERROR");
-                        debug(erro);
-                        reject(erro);
-                    });
-
-                    zip.readEntry(); // next (lazyEntries)
-                    zip.on("entry", (entry: any) => {
-                        if (/\/$/.test(entry.fileName)) {
-                            // skip directories / folders
-                        } else {
-                            // debug(entry.fileName);
-                            zip2.addEntry(entry);
-                        }
-                        zip.readEntry(); // next (lazyEntries)
-                    });
-
-                    zip.on("end", () => {
-                        debug("yauzl END");
-                        resolve(zip2);
-                    });
-
-                    zip.on("close", () => {
-                        debug("yauzl CLOSE");
-                    });
+                zip.on("error", (erro: any) => {
+                    debug("yauzl ERROR");
+                    debug(erro);
+                    reject(erro);
                 });
-            }
+
+                zip.readEntry(); // next (lazyEntries)
+                zip.on("entry", (entry: any) => {
+                    // if (/\/$/.test(entry.fileName)) {
+                    if (entry.fileName[entry.fileName.length - 1] === "/") {
+                        // skip directories / folders
+                    } else {
+                        // debug(entry.fileName);
+                        zip2.addEntry(entry);
+                    }
+                    zip.readEntry(); // next (lazyEntries)
+                });
+
+                zip.on("end", () => {
+                    debug("yauzl END");
+                    resolve(zip2);
+                });
+
+                zip.on("close", () => {
+                    debug("yauzl CLOSE");
+                });
+            });
         });
     }
 
-    private entries: any[];
+    private static loadPromiseHTTP(filePath: string): Promise<IZip> {
+
+        return new Promise<IZip>((resolve, reject) => {
+
+            request.head({
+                headers: {},
+                method: "HEAD",
+                uri: filePath,
+            }).
+                on("response", (res: request.RequestResponse) => {
+                    debug(filePath);
+                    debug(res.headers);
+
+                    // if (!res.headers["content-type"]
+                    //     || res.headers["content-type"] !== "application/epub+zip") {
+                    //     reject("content-type not supported!");
+                    //     return;
+                    // }
+
+                    if (!res.headers["content-length"]) {
+                        reject("content-length not supported!");
+                        return;
+                    }
+                    const httpZipByteLength = parseInt(res.headers["content-length"], 10);
+                    debug(`Content-Length: ${httpZipByteLength}`);
+
+                    if (!res.headers["accept-ranges"]
+                        || res.headers["accept-ranges"] !== "bytes") {
+                        if (httpZipByteLength > (2 * 1024 * 1024)) {
+                            reject("accept-ranges not supported, file too big to download: " + httpZipByteLength);
+                            return;
+                        }
+                        debug("Downloading: " + filePath);
+                        request.get({
+                            headers: {},
+                            method: "GET",
+                            uri: filePath,
+                        }).
+                            on("response", (ress: request.RequestResponse) => {
+                                // debug(filePath);
+                                // debug(res.headers);
+                                streamToBufferPromise(ress).then((buffer) => {
+                                    // debug(`streamToBufferPromise: ${buffer.length}`);
+
+                                    yauzl.fromBuffer(buffer,
+                                        { lazyEntries: true },
+                                        (err: any, zip: any) => {
+                                            if (err) {
+                                                debug("yauzl init ERROR");
+                                                debug(err);
+                                                reject(err);
+                                                return;
+                                            }
+                                            const zip2 = new Zip2(filePath, zip);
+
+                                            zip.on("error", (erro: any) => {
+                                                debug("yauzl ERROR");
+                                                debug(erro);
+                                                reject(erro);
+                                            });
+
+                                            zip.readEntry(); // next (lazyEntries)
+                                            zip.on("entry", (entry: any) => {
+                                                if (entry.fileName[entry.fileName.length - 1] === "/") {
+                                                    // skip directories / folders
+                                                } else {
+                                                    // debug(entry.fileName);
+                                                    zip2.addEntry(entry);
+                                                }
+                                                zip.readEntry(); // next (lazyEntries)
+                                            });
+
+                                            zip.on("end", () => {
+                                                debug("yauzl END");
+                                                resolve(zip2);
+                                            });
+
+                                            zip.on("close", () => {
+                                                debug("yauzl CLOSE");
+                                            });
+                                        });
+                                }).catch((err) => {
+                                    debug(err);
+                                    reject(err);
+                                });
+                            }).
+                            on("error", (err: any) => {
+                                debug(err);
+                                reject(err);
+                            });
+                        return;
+                    }
+
+                    const httpZipReader = new HttpZipReader(filePath, httpZipByteLength);
+                    yauzl.fromRandomAccessReader(httpZipReader, httpZipByteLength,
+                        { lazyEntries: true, autoClose: false },
+                        (err: any, zip: any) => {
+                            if (err) {
+                                debug("yauzl init ERROR");
+                                debug(err);
+                                reject(err);
+                                return;
+                            }
+                            zip.httpZipReader = httpZipReader;
+                            const zip2 = new Zip2(filePath, zip);
+
+                            zip.on("error", (erro: any) => {
+                                debug("yauzl ERROR");
+                                debug(erro);
+                                reject(erro);
+                            });
+
+                            zip.readEntry(); // next (lazyEntries)
+                            zip.on("entry", (entry: any) => {
+                                if (entry.fileName[entry.fileName.length - 1] === "/") {
+                                    // skip directories / folders
+                                } else {
+                                    // debug(entry.fileName);
+                                    zip2.addEntry(entry);
+                                }
+                                zip.readEntry(); // next (lazyEntries)
+                            });
+
+                            zip.on("end", () => {
+                                debug("yauzl END");
+                                resolve(zip2);
+                            });
+
+                            zip.on("close", () => {
+                                debug("yauzl CLOSE");
+                            });
+                        });
+                }).
+                on("error", (err: any) => {
+                    debug(err);
+                    reject(err);
+                });
+        });
+    }
+
+    private entries: IStringKeyedObject;
 
     private constructor(readonly filePath: string, readonly zip: any) {
-        this.entries = [];
+
+        // see addEntry()
+        this.entries = {};
+    }
+
+    public entriesCount(): number {
+        return this.zip.entryCount;
     }
 
     public hasEntries(): boolean {
@@ -203,10 +219,7 @@ export class Zip2 implements IZip {
         if (!this.hasEntries()) {
             return false;
         }
-        const ent = this.entries.find((entry) => {
-            return entryPath === entry.fileName;
-        });
-        return typeof ent !== "undefined";
+        return true && this.entries[entryPath];
     }
 
     public forEachEntry(callback: (entryName: string) => void) {
@@ -215,8 +228,8 @@ export class Zip2 implements IZip {
             return;
         }
 
-        this.entries.forEach((entry) => {
-            callback(entry.fileName);
+        Object.keys(this.entries).forEach((entryName) => {
+            callback(entryName);
         });
     }
 
@@ -224,16 +237,11 @@ export class Zip2 implements IZip {
 
         // debug(`entryStreamPromise: ${entryPath}`);
 
-        if (!this.hasEntries()) {
-            return Promise.reject("no zip entries");
+        if (!this.hasEntries() || !this.hasEntry(entryPath)) {
+            return Promise.reject("no such path in zip");
         }
 
-        const entry = this.entries.find((ent) => {
-            return ent.fileName === entryPath;
-        });
-        if (!entry) {
-            return Promise.reject("no such path in zip: " + entryPath);
-        }
+        const entry = this.entries[entryPath];
 
         return new Promise<IStreamAndLength>((resolve, reject) => {
 
@@ -280,6 +288,6 @@ export class Zip2 implements IZip {
     }
 
     private addEntry(entry: any) {
-        this.entries.push(entry);
+        this.entries[entry.fileName] = entry;
     }
 }
