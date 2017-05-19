@@ -62,6 +62,8 @@ export class Zip2 extends Zip {
 
         return new Promise<IZip>((resolve, reject) => {
 
+            // TODO: instead of a HEAD request, if not supported then
+            // GET with immediate req.abort() in the response callback
             request.head({
                 headers: {},
                 method: "HEAD",
@@ -77,6 +79,9 @@ export class Zip2 extends Zip {
                     //     return;
                     // }
 
+                    // TODO: if the HTTP server does not provide Content-Length,
+                    // then fallback on download, but interrupt (req.abort())
+                    // if response payload reaches the max limit
                     if (!res.headers["content-length"]) {
                         reject("content-length not supported!");
                         return;
