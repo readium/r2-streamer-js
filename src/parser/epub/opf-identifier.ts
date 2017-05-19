@@ -9,6 +9,8 @@ import {
 })
 export class Identifier {
 
+    // XPATH ROOT: /opf:package/opf:metadata/dc:identifier
+
     @XmlXPathSelector("text()")
     public Data: string;
 

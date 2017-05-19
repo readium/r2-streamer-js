@@ -11,6 +11,8 @@ import {
 })
 export class NavPoint {
 
+    // XPATH ROOT: /ncx:ncx/ncx:navMap/ncx:navPoint
+
     @XmlXPathSelector("ncx:navPoint")
     @XmlItemType(NavPoint)
     public Points: NavPoint[];

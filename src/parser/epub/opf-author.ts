@@ -9,6 +9,9 @@ import {
 })
 export class Author {
 
+    // XPATH ROOT: /opf:package/opf:metadata/dc:creator
+    // XPATH ROOT: /opf:package/opf:metadata/dc:contributor
+
     @XmlXPathSelector("text()")
     public Data: string;
 

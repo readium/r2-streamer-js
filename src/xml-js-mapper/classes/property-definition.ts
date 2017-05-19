@@ -1,6 +1,6 @@
 import { IPropertyConverter } from "../converters/converter";
 
-import { FunctionType, IXmlNamespaces } from "../types";
+import { FunctionType, IXmlNamespaces, IXPathSelectorItem } from "../types";
 
 export class PropertyDefinition {
     public objectType: FunctionType | undefined;
@@ -10,5 +10,6 @@ export class PropertyDefinition {
     public writeonly: boolean = false;
     public converter: IPropertyConverter | undefined;
     public xpathSelector: string;
+    public xpathSelectorParsed: IXPathSelectorItem[];
     public namespaces: IXmlNamespaces | undefined;
 }

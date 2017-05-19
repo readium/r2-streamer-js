@@ -9,6 +9,8 @@ import {
 })
 export class Reference {
 
+    // XPATH ROOT: /opf:package/opf:guide/opf:reference
+
     @XmlXPathSelector("@href")
     public Href: string;
 

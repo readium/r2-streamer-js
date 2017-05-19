@@ -17,6 +17,8 @@ import {
 })
 export class EncryptedData {
 
+    // XPATH ROOT: /encryption:encryption/enc:EncryptedData
+
     @XmlXPathSelector("enc:EncryptionMethod")
     public EncryptionMethod: EncryptionMethod;
 

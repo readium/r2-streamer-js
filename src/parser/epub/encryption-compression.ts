@@ -11,6 +11,9 @@ import {
 })
 export class Compression {
 
+    // XPATH ROOT: /encryption:encryption/enc:EncryptedData/enc:EncryptionProperties/
+    // enc:EncryptionProperty/ns:Compression
+
     @XmlXPathSelector("@Method")
     public Method: string;
 

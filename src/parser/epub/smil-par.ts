@@ -15,6 +15,9 @@ import {
 })
 @XmlDiscriminatorValue("par")
 export class Par extends SeqOrPar {
+
+    // XPATH ROOT: /smil:smil/smil:body/**/smil:par
+
     @XmlXPathSelector("smil:text")
     public Text: Text;
 

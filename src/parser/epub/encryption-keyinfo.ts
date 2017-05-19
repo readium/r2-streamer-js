@@ -13,6 +13,8 @@ import {
 })
 export class KeyInfo {
 
+    // XPATH ROOT: /encryption:encryption/enc:EncryptedData/ds:KeyInfo
+
     @XmlXPathSelector("ds:RetrievalMethod")
     public RetrievalMethod: RetrievalMethod;
 }

@@ -18,6 +18,9 @@ import {
 })
 export class Link {
 
+    // XPATH ROOT: /atom:feed/atom:link
+    // XPATH ROOT: /atom:feed/atom:entry/atom:link
+
     @XmlXPathSelector("opds:price/text()")
     public OpdsPrice: string;
 

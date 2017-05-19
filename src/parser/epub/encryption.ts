@@ -14,7 +14,9 @@ import {
 })
 export class Encryption {
 
-    @XmlXPathSelector("/encryption:encryption/enc:EncryptedData")
+    // XPATH ROOT: /encryption:encryption
+
+    @XmlXPathSelector("enc:EncryptedData")
     @XmlItemType(EncryptedData)
     public EncryptedData: EncryptedData[];
 

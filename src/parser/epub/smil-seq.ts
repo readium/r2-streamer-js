@@ -14,6 +14,9 @@ import {
 @XmlDiscriminatorValue("seq")
 export class Seq extends SeqOrPar {
 
+    // XPATH ROOT: /smil:smil/smil:body
+    // XPATH ROOT: /smil:smil/smil:body/**/smil:seq
+
     @XmlXPathSelector("smil:par|smil:seq")
     @XmlItemType(SeqOrPar)
     public Children: SeqOrPar[];

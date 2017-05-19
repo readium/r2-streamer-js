@@ -9,6 +9,8 @@ import {
 })
 export class Manifest {
 
+    // XPATH ROOT: /opf:package/opf:manifest/opf:item
+
     @XmlXPathSelector("@id")
     public ID: string;
 

@@ -27,6 +27,9 @@ function deserializeRootObject(
     objectType: FunctionType = Object,
     options: IParseOptions): any {
 
+    // tslint:disable-next-line:no-string-literal
+    const debug = process.env["OPF_PARSE"] === "true";
+
     if (!objectDefinitions.has(objectType)) {
         return undefined;
     }
@@ -48,6 +51,10 @@ function deserializeRootObject(
 
         d.beforeDeserialized.call(output);
 
+        if (debug) {
+            console.log("======== PROPS: " + objectInstance.localName);
+        }
+
         d.properties.forEach((p, key) => {
             if (!p.objectType) {
                 throw new Error(`Cannot deserialize property "${key}" without type!`);
@@ -57,27 +64,42 @@ function deserializeRootObject(
                 return;
             }
 
-            const namespaces: IXmlNamespaces = {};
-            if (d.namespaces) {
-                for (const prop in d.namespaces) {
-                    if (d.namespaces.hasOwnProperty(prop)) {
-                        namespaces[prop] = d.namespaces[prop];
-                    }
-                }
+            // const namespaces: IXmlNamespaces = {};
+            // if (d.namespaces) {
+            //     for (const prop in d.namespaces) {
+            //         if (d.namespaces.hasOwnProperty(prop)) {
+            //             namespaces[prop] = d.namespaces[prop];
+            //         }
+            //     }
+            // }
+            // if (p.namespaces) {
+            //     for (const prop in p.namespaces) {
+            //         if (p.namespaces.hasOwnProperty(prop)) {
+            //             namespaces[prop] = p.namespaces[prop];
+            //         }
+            //     }
+            // }
+
+            if (debug) {
+                console.log(`${p.xpathSelector}`);
             }
-            if (p.namespaces) {
-                for (const prop in p.namespaces) {
-                    if (p.namespaces.hasOwnProperty(prop)) {
-                        namespaces[prop] = p.namespaces[prop];
-                    }
-                }
-            }
+
+            const timeBegin = process.hrtime();
             // console.log(namespaces);
             // console.log(p.xpathSelector);
-            const select = xpath.useNamespaces(namespaces);
-
+            const select = xpath.useNamespaces(p.namespaces || {});
             const xPathSelected = select(p.xpathSelector, objectInstance);
+
             if (xPathSelected && xPathSelected.length) {
+
+                const timeElapsed = process.hrtime(timeBegin);
+                if (debug) {
+                    console.log(`=-------- ${timeElapsed[0]} seconds + ${timeElapsed[1]} nanoseconds`);
+                }
+                if (timeElapsed[0] > 1) {
+                    process.exit(1);
+                }
+
                 const xpathMatched = Array<Node>();
 
                 // console.log("XPATH MATCH: " + p.xpathSelector

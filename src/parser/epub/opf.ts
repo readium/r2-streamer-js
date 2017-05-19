@@ -14,27 +14,30 @@ import {
     opf: "http://www.idpf.org/2007/opf",
 })
 export class OPF {
-    @XmlXPathSelector("/opf:package/opf:metadata")
+
+    // XPATH ROOT: /opf:package
+
+    @XmlXPathSelector("opf:metadata")
     public Metadata: Metadata;
 
-    @XmlXPathSelector("/opf:package/opf:manifest/opf:item")
+    @XmlXPathSelector("opf:manifest/opf:item")
     @XmlItemType(Manifest)
     public Manifest: Manifest[];
 
-    @XmlXPathSelector("/opf:package/opf:spine")
+    @XmlXPathSelector("opf:spine")
     public Spine: Spine;
 
-    @XmlXPathSelector("/opf:package/opf:guide/opf:reference")
+    @XmlXPathSelector("opf:guide/opf:reference")
     @XmlItemType(Reference)
     public Guide: Reference[];
 
-    @XmlXPathSelector("/opf:package/@unique-identifier")
+    @XmlXPathSelector("@unique-identifier")
     public UniqueIdentifier: string;
 
-    @XmlXPathSelector("/opf:package/@dir")
+    @XmlXPathSelector("@dir")
     public Dir: string;
 
-    @XmlXPathSelector("/opf:package/@version")
+    @XmlXPathSelector("@version")
     public Version: string;
 
     public ZipPath: string;

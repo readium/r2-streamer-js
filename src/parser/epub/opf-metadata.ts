@@ -1,5 +1,5 @@
 import { Author } from "./opf-author";
-import { Date } from "./opf-date";
+import { MetaDate } from "./opf-date";
 import { Identifier } from "./opf-identifier";
 import { Metafield } from "./opf-metafield";
 import { Subject } from "./opf-subject";
@@ -16,6 +16,8 @@ import {
     opf: "http://www.idpf.org/2007/opf",
 })
 export class Metadata {
+
+    // XPATH ROOT: /opf:package/opf:metadata
 
     @XmlXPathSelector("dc:title")
     @XmlItemType(Title)
@@ -50,8 +52,8 @@ export class Metadata {
     public Contributor: Author[];
 
     @XmlXPathSelector("dc:date")
-    @XmlItemType(Date)
-    public Date: Date[];
+    @XmlItemType(MetaDate)
+    public Date: MetaDate[];
 
     @XmlXPathSelector("dc:type/text()")
     @XmlItemType(String)

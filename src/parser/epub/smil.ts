@@ -12,7 +12,9 @@ import {
 })
 export class SMIL {
 
-    @XmlXPathSelector("/smil:smil/smil:body")
+    // XPATH ROOT: /smil:smil
+
+    @XmlXPathSelector("smil:body")
     public Body: Body;
 
     // Bug with Javascript / Typescript @ANNOTATION() !

@@ -10,6 +10,14 @@
 
 // export type XmlValue = XmlValuePrimitive | IXmlValueObject | IXmlValueArray;
 
+export interface IXPathSelectorItem {
+    isAttribute: boolean;
+    isText: boolean;
+    localName: string;
+    namespacePrefix: string | undefined;
+    namespaceUri: string | undefined;
+}
+
 export interface IParameterlessConstructor<T> {
     name?: string;
     new (): T;

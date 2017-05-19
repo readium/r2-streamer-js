@@ -11,6 +11,8 @@ import {
 })
 export class RetrievalMethod {
 
+    // XPATH ROOT: /encryption:encryption/enc:EncryptedData/ds:KeyInfo/ds:RetrievalMethod
+
     @XmlXPathSelector("@URI")
     public URI: string;
 

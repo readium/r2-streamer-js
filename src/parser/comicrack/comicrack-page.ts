@@ -9,6 +9,8 @@ import {
 })
 export class Page {
 
+    // XPATH ROOT: /ComicInfo/Pages/Page
+
     @XmlXPathSelector("@Image")
     public Image: number;
 

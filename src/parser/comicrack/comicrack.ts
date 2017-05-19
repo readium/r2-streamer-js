@@ -12,43 +12,45 @@ import {
 })
 export class ComicInfo {
 
-    @XmlXPathSelector("ComicInfo/Title")
+    // XPATH ROOT: /ComicInfo
+
+    @XmlXPathSelector("Title")
     public Title: string;
 
-    @XmlXPathSelector("ComicInfo/Series")
+    @XmlXPathSelector("Series")
     public Series: string;
 
-    @XmlXPathSelector("ComicInfo/Volume")
+    @XmlXPathSelector("Volume")
     public Volume: number;
 
-    @XmlXPathSelector("ComicInfo/Number")
+    @XmlXPathSelector("Number")
     public Number: number;
 
-    @XmlXPathSelector("ComicInfo/Writer")
+    @XmlXPathSelector("Writer")
     public Writer: string;
 
-    @XmlXPathSelector("ComicInfo/Penciller")
+    @XmlXPathSelector("Penciller")
     public Penciller: string;
 
-    @XmlXPathSelector("ComicInfo/Inker")
+    @XmlXPathSelector("Inker")
     public Inker: string;
 
-    @XmlXPathSelector("ComicInfo/Colorist")
+    @XmlXPathSelector("Colorist")
     public Colorist: string;
 
-    @XmlXPathSelector("ComicInfo/ScanInformation")
+    @XmlXPathSelector("ScanInformation")
     public ScanInformation: string;
 
-    @XmlXPathSelector("ComicInfo/Summary")
+    @XmlXPathSelector("Summary")
     public Summary: string;
 
-    @XmlXPathSelector("ComicInfo/Year")
+    @XmlXPathSelector("Year")
     public Year: number;
 
-    @XmlXPathSelector("ComicInfo/PageCount")
+    @XmlXPathSelector("PageCount")
     public PageCount: number;
 
-    @XmlXPathSelector("ComicInfo/Pages/Page")
+    @XmlXPathSelector("Pages/Page")
     @XmlItemType(Page)
     public Pages: Page[];
 

@@ -3,6 +3,8 @@ import { XmlObject, XmlXPathSelector } from "../../xml-js-mapper";
 @XmlObject()
 export class Rootfile {
 
+    // XPATH ROOT: /epub:container/epub:rootfiles/epub:rootfile
+
     @XmlXPathSelector("@full-path")
     public Path: string;
 

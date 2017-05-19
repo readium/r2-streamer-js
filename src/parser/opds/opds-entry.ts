@@ -25,6 +25,8 @@ import {
 })
 export class Entry {
 
+    // XPATH ROOT: /atom:feed/atom:entry
+
     @XmlXPathSelector("schema:Rating/@schema:ratingValue")
     public SchemaRatingValue: string;
     @XmlXPathSelector("schema:Rating/@schema:additionalType")

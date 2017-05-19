@@ -18,6 +18,9 @@ import {
 })
 export class Author {
 
+    // XPATH ROOT: /atom:feed/atom:author
+    // XPATH ROOT: /atom:feed/atom:entry/atom:author
+
     @XmlXPathSelector("atom:name/text()")
     public Name: string;
 

@@ -18,6 +18,8 @@ import {
 })
 export class Category {
 
+    // XPATH ROOT: /atom:feed/atom:entry/atom:category
+
     @XmlXPathSelector("@term")
     public Term: string;
 

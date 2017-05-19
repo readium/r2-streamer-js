@@ -12,6 +12,8 @@ import {
 })
 export class Spine {
 
+    // XPATH ROOT: /opf:package/opf:spine
+
     @XmlXPathSelector("@id")
     public ID: string;
 

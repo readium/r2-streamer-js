@@ -9,6 +9,8 @@ import {
 })
 export class Metafield {
 
+    // XPATH ROOT: /opf:package/opf:metadata/opf:meta
+
     @XmlXPathSelector("text()")
     public Data: string;
 

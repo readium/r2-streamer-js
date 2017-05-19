@@ -8,6 +8,9 @@ import {
     smil: "http://www.w3.org/ns/SMIL",
 })
 export class Text {
+
+    // XPATH ROOT: /smil:smil/smil:body/**/smil:text
+
     @XmlXPathSelector("@src")
     public Src: string;
 }

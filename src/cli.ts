@@ -43,9 +43,9 @@ const ext = path.extname(fileName).toLowerCase();
 if (ext === ".epub") {
 
     EpubParsePromise(filePath)
-        .then((publication) => {
+        .then((_publication) => {
             console.log("== EpubParser: resolve");
-            dumpPublication(publication);
+            // dumpPublication(publication);
         }).catch((err) => {
             console.log("== EpubParser: reject");
             console.log(err);

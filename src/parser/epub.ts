@@ -127,12 +127,54 @@ export async function EpubParsePromise(filePath: string): Promise<Publication> {
 
     const rootfile = container.Rootfile[0];
 
+    console.log(`${rootfile.Path}:`);
+
+    // let timeBegin = process.hrtime();
+
     const opfZipStream_ = await zip.entryStreamPromise(rootfile.Path);
     const opfZipStream = opfZipStream_.stream;
+
+    // const timeElapsed1 = process.hrtime(timeBegin);
+    // console.log(`1) ${timeElapsed1[0]} seconds + ${timeElapsed1[1]} nanoseconds`);
+    // timeBegin = process.hrtime();
+
     const opfZipData = await streamToBufferPromise(opfZipStream);
+
+    // console.log(`${opfZipData.length} bytes`);
+
+    // const timeElapsed2 = process.hrtime(timeBegin);
+    // console.log(`2) ${timeElapsed2[0]} seconds + ${timeElapsed2[1]} nanoseconds`);
+    // timeBegin = process.hrtime();
+
     const opfStr = opfZipData.toString("utf8");
+
+    // const timeElapsed3 = process.hrtime(timeBegin);
+    // console.log(`3) ${timeElapsed3[0]} seconds + ${timeElapsed3[1]} nanoseconds`);
+    // timeBegin = process.hrtime();
+
+    // TODO: this takes some time with large OPF XML data
+    // (typically: many manifest items),
+    // but it remains acceptable.
+    // e.g. BasicTechnicalMathWithCalculus.epub with 2.5MB OPF!
     const opfDoc = new xmldom.DOMParser().parseFromString(opfStr);
+
+    // const timeElapsed4 = process.hrtime(timeBegin);
+    // console.log(`4) ${timeElapsed4[0]} seconds + ${timeElapsed4[1]} nanoseconds`);
+    // timeBegin = process.hrtime();
+
+    // tslint:disable-next-line:no-string-literal
+    // process.env["OPF_PARSE"] = "true";
+    // TODO: this takes a MASSIVE amount of time with large OPF XML data
+    // (typically: many manifest items)
+    // e.g. BasicTechnicalMathWithCalculus.epub with 2.5MB OPF!
+    // culprit: probably because of XPath? Or reflection/annotations...to be determined
     const opf = XML.deserialize<OPF>(opfDoc, OPF);
+    // tslint:disable-next-line:no-string-literal
+    // process.env["OPF_PARSE"] = "false";
+
+    // const timeElapsed5 = process.hrtime(timeBegin);
+    // console.log(`5) ${timeElapsed5[0]} seconds + ${timeElapsed5[1]} nanoseconds`);
+
     opf.ZipPath = rootfile.Path;
 
     // breakLength: 100  maxArrayLength: undefined

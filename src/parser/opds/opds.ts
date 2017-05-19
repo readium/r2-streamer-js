@@ -25,40 +25,42 @@ import {
 })
 export class OPDS {
 
-    @XmlXPathSelector("/atom:feed/opensearch:totalResults/text()")
+    // XPATH ROOT: /atom:feed
+
+    @XmlXPathSelector("opensearch:totalResults/text()")
     public OpensearchTotalResults: string;
 
-    @XmlXPathSelector("/atom:feed/opensearch:itemsPerPage/text()")
+    @XmlXPathSelector("opensearch:itemsPerPage/text()")
     public OpensearchItemsPerPage: string;
 
-    @XmlXPathSelector("/atom:feed/atom:id/text()")
+    @XmlXPathSelector("atom:id/text()")
     public Id: string;
 
-    @XmlXPathSelector("/atom:feed/atom:title/text()")
+    @XmlXPathSelector("atom:title/text()")
     public Title: string;
 
-    @XmlXPathSelector("/atom:feed/atom:subtitle/text()")
+    @XmlXPathSelector("atom:subtitle/text()")
     public SubTitle: string;
 
-    @XmlXPathSelector("/atom:feed/atom:updated/text()")
+    @XmlXPathSelector("atom:updated/text()")
     @XmlConverter(DateConverter)
     public Updated: Date;
 
-    @XmlXPathSelector("/atom:feed/atom:icon/text()")
+    @XmlXPathSelector("atom:icon/text()")
     public Icon: string;
 
-    @XmlXPathSelector("/atom:feed/atom:author")
+    @XmlXPathSelector("atom:author")
     @XmlItemType(Author)
     public Authors: Author[];
 
-    @XmlXPathSelector("/atom:feed/@lang")
+    @XmlXPathSelector("@lang")
     public Lang: string;
 
-    @XmlXPathSelector("/atom:feed/atom:link")
+    @XmlXPathSelector("atom:link")
     @XmlItemType(Link)
     public Links: Link[];
 
-    @XmlXPathSelector("/atom:feed/atom:entry")
+    @XmlXPathSelector("atom:entry")
     @XmlItemType(Entry)
     public Entries: Entry[];
 }

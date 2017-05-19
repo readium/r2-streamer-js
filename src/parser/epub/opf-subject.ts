@@ -9,6 +9,8 @@ import {
 })
 export class Subject {
 
+    // XPATH ROOT: /opf:package/opf:metadata/dc:subject
+
     @XmlXPathSelector("text()")
     public Data: string;
 

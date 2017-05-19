@@ -9,6 +9,8 @@ import {
 })
 export class SpineItem {
 
+    // XPATH ROOT: /opf:package/opf:spine/opf:itemref
+
     @XmlXPathSelector("@idref")
     public IDref: string;
 

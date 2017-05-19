@@ -12,11 +12,13 @@ import {
 })
 export class NCX {
 
-    @XmlXPathSelector("/ncx:ncx/ncx:navMap/ncx:navPoint")
+    // XPATH ROOT: /ncx:ncx
+
+    @XmlXPathSelector("ncx:navMap/ncx:navPoint")
     @XmlItemType(NavPoint)
     public Points: NavPoint[];
 
-    @XmlXPathSelector("/ncx:ncx/ncx:pageList")
+    @XmlXPathSelector("ncx:pageList")
     public PageList: PageList;
 
     public ZipPath: string;

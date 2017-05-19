@@ -11,6 +11,8 @@ import {
 })
 export class PageList {
 
+    // XPATH ROOT: /ncx:ncx/ncx:pageList
+
     @XmlXPathSelector("ncx:pageTarget")
     @XmlItemType(PageTarget)
     public PageTarget: PageTarget[];

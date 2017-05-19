@@ -10,6 +10,8 @@ import {
 })
 export class PageTarget {
 
+    // XPATH ROOT: /ncx:ncx/ncx:pageList/ncx:pageTarget
+
     @XmlXPathSelector("ncx:navLabel/ncx:text/text()")
     public Text: string;
 
