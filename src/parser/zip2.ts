@@ -2,7 +2,7 @@ import * as debug_ from "debug";
 import * as request from "request";
 import * as yauzl from "yauzl";
 
-import { streamToBufferPromise } from "../utils";
+import { isHTTP, streamToBufferPromise } from "../utils";
 import { HttpZipReader } from "./HttpZipReader";
 import { IStreamAndLength, IZip, Zip } from "./zip";
 
@@ -13,7 +13,7 @@ interface IStringKeyedObject { [key: string]: any; }
 export class Zip2 extends Zip {
 
     public static loadPromise(filePath: string): Promise<IZip> {
-        if (filePath.indexOf("http") === 0) {
+        if (isHTTP(filePath)) {
             return Zip2.loadPromiseHTTP(filePath);
         }
 

@@ -7,7 +7,7 @@ import * as morgan from "morgan";
 
 import { Server } from "./server";
 import { trailingSlashRedirect } from "./server-trailing-slash-redirect";
-import { encodeURIComponent_RFC3986 } from "./utils";
+import { encodeURIComponent_RFC3986, isHTTP } from "./utils";
 
 const debug = debug_("r2:server:pub");
 
@@ -43,7 +43,7 @@ export function serverPub(server: Server, topRouter: express.Router): express.Ro
     routerPathBase64.param("pathBase64", (req, res, next, value, _name) => {
 
         const valueStr = new Buffer(value, "base64").toString("utf8");
-        if (valueStr.indexOf("http") === 0) {
+        if (isHTTP(valueStr)) {
             // debug(`Publication URL: ${valueStr}`);
 
             (req as any).pathBase64 = value;

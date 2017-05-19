@@ -12,14 +12,15 @@ import { OPDS } from "./parser/opds/opds";
 import { Entry } from "./parser/opds/opds-entry";
 import { Server } from "./server";
 import { trailingSlashRedirect } from "./server-trailing-slash-redirect";
-import { encodeURIComponent_RFC3986, streamToBufferPromise } from "./utils";
+import { encodeURIComponent_RFC3986, isHTTP, streamToBufferPromise } from "./utils";
 import { XML } from "./xml-js-mapper";
 
 const debug = debug_("r2:server:opds");
 
+// TODO: use URI/URL lib to do this?
 function ensureAbsolute(rootUrl: string, linkHref: string) {
     let url = linkHref;
-    if (url.indexOf("http") !== 0 && url.indexOf("data:") !== 0) {
+    if (!isHTTP(url) && url.indexOf("data:") !== 0) {
 
         if (url.indexOf("//") === 0) {
             if (rootUrl.indexOf("https://") === 0) {

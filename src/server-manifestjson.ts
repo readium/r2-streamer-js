@@ -10,7 +10,7 @@ import { JSON } from "ta-json";
 import { EpubParsePromise, mediaOverlayURLParam, mediaOverlayURLPath } from "./parser/epub";
 import { Server } from "./server";
 import { sortObject } from "./utils";
-import { encodeURIComponent_RFC3986 } from "./utils";
+import { encodeURIComponent_RFC3986, isHTTP } from "./utils";
 
 const debug = debug_("r2:server:manifestjson");
 
@@ -91,13 +91,13 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
                 traverseJsonObjects(jsonObj,
                     (obj) => {
                         if (obj.href && typeof obj.href === "string"
-                            && obj.href.indexOf("http") !== 0) {
+                            && !isHTTP(obj.href)) {
                             obj.href_ = obj.href;
                             obj.href = absoluteURL(obj.href);
                         }
 
                         if (obj["media-overlay"] && typeof obj["media-overlay"] === "string"
-                            && obj["media-overlay"].indexOf("http") !== 0) {
+                            && !isHTTP(obj["media-overlay"])) {
                             obj["media-overlay_"] = obj["media-overlay"];
                             obj["media-overlay"] = absoluteURL(obj["media-overlay"]);
                         }
@@ -129,7 +129,7 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
             const coverLink = publication.GetCover();
             if (coverLink) {
                 coverImage = coverLink.Href;
-                if (coverImage && coverImage.indexOf("http") !== 0) {
+                if (coverImage && !isHTTP(coverImage)) {
                     coverImage = absoluteURL(coverImage);
                 }
             }

@@ -10,7 +10,7 @@ import { serverMediaOverlays } from "./server-mediaoverlays";
 import { serverOPDS } from "./server-opds";
 import { serverPub } from "./server-pub";
 import { serverUrl } from "./server-url";
-import { encodeURIComponent_RFC3986 } from "./utils";
+import { encodeURIComponent_RFC3986, isHTTP } from "./utils";
 
 const debug = debug_("r2:server:main");
 
@@ -43,7 +43,7 @@ export class Server {
                 const filePathBase64 = new Buffer(pub).toString("base64");
 
                 html += "<p><strong>"
-                    + (pub.indexOf("http") === 0 ? pub : path.basename(pub))
+                    + (isHTTP(pub) ? pub : path.basename(pub))
                     + "</strong><br> => <a href='./pub/" + encodeURIComponent_RFC3986(filePathBase64)
                     + "'>" + "./pub/" + filePathBase64 + "</a></p>";
             });

@@ -4,7 +4,7 @@ import * as unzipper from "unzipper";
 
 import { IStreamAndLength, IZip, Zip } from "./zip";
 
-// import { bufferToStream } from "../utils";
+import { isHTTP } from "../utils";
 
 const debug = debug_("r2:zip3");
 
@@ -13,7 +13,7 @@ interface IStringKeyedObject { [key: string]: any; }
 export class Zip3 extends Zip {
 
     public static loadPromise(filePath: string): Promise<IZip> {
-        if (filePath.indexOf("http") === 0) {
+        if (isHTTP(filePath)) {
             return Zip3.loadPromiseHTTP(filePath);
         }
 
