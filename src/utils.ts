@@ -2,6 +2,17 @@ import * as querystring from "querystring";
 
 import { PassThrough } from "stream";
 
+import { IZip } from "./parser/zip";
+import { Zip1 } from "./parser/zip1";
+import { Zip2 } from "./parser/zip2";
+
+export function zipLoadPromise(filePath: string): Promise<IZip> {
+    if (filePath.indexOf("http") === 0) {
+        return Zip2.loadPromise(filePath);
+    }
+    return Zip1.loadPromise(filePath);
+}
+
 interface IStringKeyedObject { [key: string]: any; }
 
 export function sortObject(obj: any): any {

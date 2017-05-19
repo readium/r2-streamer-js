@@ -1,14 +1,13 @@
 import * as debug_ from "debug";
 import * as StreamZip from "node-stream-zip";
 
-import { RangeStream } from "./RangeStream";
-import { IStreamAndLength, IZip } from "./zip";
+import { IStreamAndLength, IZip, Zip } from "./zip";
 
 // import { bufferToStream } from "../utils";
 
 const debug = debug_("r2:zip1");
 
-export class Zip1 implements IZip {
+export class Zip1 extends Zip {
 
     public static loadPromise(filePath: string): Promise<IZip> {
 
@@ -50,6 +49,7 @@ export class Zip1 implements IZip {
     }
 
     private constructor(readonly filePath: string, readonly zip: any) {
+        super();
     }
 
     public entriesCount(): number {
@@ -57,7 +57,7 @@ export class Zip1 implements IZip {
     }
 
     public hasEntries(): boolean {
-        return this.zip.entriesCount > 0;
+        return this.entriesCount() > 0;
     }
 
     public hasEntry(entryPath: string): boolean {
@@ -109,33 +109,6 @@ export class Zip1 implements IZip {
                 };
                 resolve(streamAndLength);
             });
-        });
-    }
-
-    public entryStreamRangePromise(entryPath: string, begin: number, end: number): Promise<IStreamAndLength> {
-
-        return new Promise<IStreamAndLength>((resolve, reject) => {
-            this.entryStreamPromise(entryPath)
-                .then((streamAndLength) => {
-
-                    const b = begin < 0 ? 0 : begin;
-                    const e = end < 0 ? (streamAndLength.length - 1) : end;
-                    // const length = e - b + 1;
-                    debug(`entryStreamRangePromise: ${b}-${e}/${streamAndLength.length}`);
-
-                    const stream = new RangeStream(b, e, streamAndLength.length);
-
-                    streamAndLength.stream.pipe(stream);
-
-                    const sal: IStreamAndLength = {
-                        stream,
-                        length: streamAndLength.length,
-                    };
-                    resolve(sal);
-                })
-                .catch((err) => {
-                    reject(err);
-                });
         });
     }
 }

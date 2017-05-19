@@ -4,14 +4,13 @@ import * as yauzl from "yauzl";
 
 import { streamToBufferPromise } from "../utils";
 import { HttpZipReader } from "./HttpZipReader";
-import { RangeStream } from "./RangeStream";
-import { IStreamAndLength, IZip } from "./zip";
+import { IStreamAndLength, IZip, Zip } from "./zip";
 
 const debug = debug_("r2:zip2");
 
 interface IStringKeyedObject { [key: string]: any; }
 
-export class Zip2 implements IZip {
+export class Zip2 extends Zip {
 
     public static loadPromise(filePath: string): Promise<IZip> {
         if (filePath.indexOf("http") === 0) {
@@ -202,6 +201,7 @@ export class Zip2 implements IZip {
     private entries: IStringKeyedObject;
 
     private constructor(readonly filePath: string, readonly zip: any) {
+        super();
 
         // see addEntry()
         this.entries = {};
@@ -212,14 +212,11 @@ export class Zip2 implements IZip {
     }
 
     public hasEntries(): boolean {
-        return this.zip.entryCount > 0;
+        return this.entriesCount() > 0;
     }
 
     public hasEntry(entryPath: string): boolean {
-        if (!this.hasEntries()) {
-            return false;
-        }
-        return true && this.entries[entryPath];
+        return this.hasEntries() && this.entries[entryPath];
     }
 
     public forEachEntry(callback: (entryName: string) => void) {
@@ -258,32 +255,6 @@ export class Zip2 implements IZip {
                 };
                 resolve(streamAndLength);
             });
-        });
-    }
-
-    public entryStreamRangePromise(entryPath: string, begin: number, end: number): Promise<IStreamAndLength> {
-
-        return new Promise<IStreamAndLength>((resolve, reject) => {
-            this.entryStreamPromise(entryPath)
-                .then((streamAndLength) => {
-
-                    const b = begin < 0 ? 0 : begin;
-                    const e = end < 0 ? (streamAndLength.length - 1) : end;
-                    // const length = e - b + 1;
-
-                    const stream = new RangeStream(b, e, streamAndLength.length);
-
-                    streamAndLength.stream.pipe(stream);
-
-                    const sal: IStreamAndLength = {
-                        stream,
-                        length: streamAndLength.length,
-                    };
-                    resolve(sal);
-                })
-                .catch((err) => {
-                    reject(err);
-                });
         });
     }
 

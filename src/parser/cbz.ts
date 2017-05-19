@@ -7,8 +7,8 @@ import { XML } from "../xml-js-mapper";
 
 import { ComicInfo } from "./comicrack/comicrack";
 
-import { streamToBufferPromise } from "../utils";
-import { IZip, zipLoadPromise } from "./zip";
+import { streamToBufferPromise, zipLoadPromise } from "../utils";
+import { IZip } from "./zip";
 
 import { Link } from "../models/publication-link";
 

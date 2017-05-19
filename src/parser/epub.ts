@@ -8,8 +8,8 @@ import { XML } from "../xml-js-mapper";
 
 import { JSON } from "ta-json";
 
-import { streamToBufferPromise } from "../utils";
-import { IZip, zipLoadPromise } from "./zip";
+import { streamToBufferPromise, zipLoadPromise } from "../utils";
+import { IZip } from "./zip";
 
 import { MediaOverlayNode, timeStrToSeconds } from "../models/media-overlay";
 

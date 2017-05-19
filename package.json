@@ -51,6 +51,7 @@
     "request": "latest",
     "slugify": "latest",
     "ta-json": "latest",
+    "unzipper": "latest",
     "xmldom": "latest",
     "xpath": "latest",
     "yauzl": "latest"

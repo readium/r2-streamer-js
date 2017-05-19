@@ -1,0 +1,100 @@
+import * as debug_ from "debug";
+import * as unzipper from "unzipper";
+
+import { IStreamAndLength, IZip, Zip } from "./zip";
+
+// import { bufferToStream } from "../utils";
+
+const debug = debug_("r2:zip3");
+
+interface IStringKeyedObject { [key: string]: any; }
+
+export class Zip3 extends Zip {
+
+    public static loadPromise(filePath: string): Promise<IZip> {
+        if (filePath.indexOf("http") === 0) {
+            return Zip3.loadPromiseHTTP(filePath);
+        }
+
+        return new Promise<IZip>((resolve, reject) => {
+            unzipper.Open.file(filePath)
+                .then((zip: any) => {
+                    debug(zip);
+                    resolve(new Zip3(filePath, zip));
+                }).catch((err: any): any => {
+                    debug(err);
+                    reject(err);
+                });
+        });
+    }
+
+    private static loadPromiseHTTP(filePath: string): Promise<IZip> {
+
+        return new Promise<IZip>((resolve, reject) => {
+            unzipper.Open.url(filePath)
+                .then((zip: any) => {
+                    debug(zip);
+                    resolve(new Zip3(filePath, zip));
+                }).catch((err: any): any => {
+                    debug(err);
+                    reject(err);
+                });
+        });
+    }
+
+    private entries: IStringKeyedObject;
+
+    private constructor(readonly filePath: string, readonly zip: any) {
+        super();
+
+        this.entries = {};
+        this.zip.files.forEach((file: any) => {
+            this.entries[file.path] = file;
+        });
+    }
+
+    public entriesCount(): number {
+        return this.zip.files.length;
+    }
+
+    public hasEntries(): boolean {
+        return this.entriesCount() > 0;
+    }
+
+    public hasEntry(entryPath: string): boolean {
+        return this.hasEntries() && this.entries[entryPath];
+    }
+
+    public forEachEntry(callback: (entryName: string) => void) {
+
+        if (!this.hasEntries()) {
+            return;
+        }
+
+        Object.keys(this.entries).forEach((entryName) => {
+            callback(entryName);
+        });
+    }
+
+    public entryStreamPromise(entryPath: string): Promise<IStreamAndLength> {
+
+        // debug(`entryStreamPromise: ${entryPath}`);
+
+        if (!this.hasEntries() || !this.hasEntry(entryPath)) {
+            return Promise.reject("no such path in zip");
+        }
+
+        return new Promise<IStreamAndLength>((resolve, _reject) => {
+
+            const entry = this.entries[entryPath];
+            debug(entry);
+
+            const stream: NodeJS.ReadableStream = entry.stream();
+            const streamAndLength: IStreamAndLength = {
+                stream,
+                length: entry.size,
+            };
+            resolve(streamAndLength);
+        });
+    }
+}

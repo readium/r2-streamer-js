@@ -1,4 +1,9 @@
-import { Zip2 } from "./zip2";
+import { RangeStream } from "./RangeStream";
+
+export interface IStreamAndLength {
+    stream: NodeJS.ReadableStream;
+    length: number;
+}
 
 export interface IZip {
     hasEntries: () => boolean;
@@ -9,11 +14,37 @@ export interface IZip {
     entryStreamRangePromise: (entryPath: string, begin: number, end: number) => Promise<IStreamAndLength>;
 }
 
-export interface IStreamAndLength {
-    stream: NodeJS.ReadableStream;
-    length: number;
-}
+export abstract class Zip implements IZip {
+    public abstract hasEntries(): boolean;
+    public abstract entriesCount(): number;
+    public abstract hasEntry(entryPath: string): boolean;
+    public abstract forEachEntry(callback: (entryName: string) => void): void;
+    public abstract entryStreamPromise(entryPath: string): Promise<IStreamAndLength>;
 
-export function zipLoadPromise(filePath: string): Promise<IZip> {
-    return Zip2.loadPromise(filePath);
+    public entryStreamRangePromise(entryPath: string, begin: number, end: number): Promise<IStreamAndLength> {
+
+        return new Promise<IStreamAndLength>((resolve, reject) => {
+            this.entryStreamPromise(entryPath)
+                .then((streamAndLength) => {
+
+                    const b = begin < 0 ? 0 : begin;
+                    const e = end < 0 ? (streamAndLength.length - 1) : end;
+                    // const length = e - b + 1;
+                    // debug(`entryStreamRangePromise: ${b}-${e}/${streamAndLength.length}`);
+
+                    const stream = new RangeStream(b, e, streamAndLength.length);
+
+                    streamAndLength.stream.pipe(stream);
+
+                    const sal: IStreamAndLength = {
+                        stream,
+                        length: streamAndLength.length,
+                    };
+                    resolve(sal);
+                })
+                .catch((err) => {
+                    reject(err);
+                });
+        });
+    }
 }
