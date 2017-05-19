@@ -1,4 +1,5 @@
 import * as debug_ from "debug";
+import * as request from "request";
 import * as unzipper from "unzipper";
 
 import { IStreamAndLength, IZip, Zip } from "./zip";
@@ -31,7 +32,13 @@ export class Zip3 extends Zip {
     private static loadPromiseHTTP(filePath: string): Promise<IZip> {
 
         return new Promise<IZip>((resolve, reject) => {
-            unzipper.Open.url(filePath)
+            unzipper.Open.url(request.get,
+                {
+                    headers: {},
+                    method: "GET",
+                    uri: filePath,
+                    url: filePath,
+                })
                 .then((zip: any) => {
                     debug(zip);
                     resolve(new Zip3(filePath, zip));
