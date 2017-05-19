@@ -66,6 +66,3 @@ var child = exec(cmdline,
             console.log('exec error: ' + error);
         }
     });
-// cp ./src/cli.ts ./dist/src/
-// node node_modules/typescript/bin/tsc --strictNullChecks --sourceMap --noImplicitAny --module commonjs --target es2015 --experimentalDecorators --emitDecoratorMetadata --declaration --noUnusedLocals false --noUnusedParameters --outDir ./dist/ --rootDir ./dist/ ./src/declarations.d.ts ./dist/src/cli.ts
-// && rm ./dist/src/cli.ts
