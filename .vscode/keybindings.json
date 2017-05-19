@@ -1,0 +1,5 @@
+{
+    "key": "shift+alt+b",
+    "command": "workbench.action.tasks.runTask",
+    "args": "typescript"
+}
