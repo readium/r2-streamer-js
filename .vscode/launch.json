@@ -60,7 +60,7 @@
       "name": "cli+server",
       "configurations": [
         "cli",
-        "server-cli"
+        "server"
       ]
     }
   ]

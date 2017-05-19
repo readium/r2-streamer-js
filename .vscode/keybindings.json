@@ -1,5 +1,11 @@
-{
+[{
     "key": "shift+alt+b",
     "command": "workbench.action.tasks.runTask",
     "args": "typescript"
+},
+{
+    "key": "shift+ctrl+alt+b",
+    "command": "workbench.action.tasks.runTask",
+    "args": "lintbuild"
 }
+]

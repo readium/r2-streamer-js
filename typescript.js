@@ -47,14 +47,35 @@ console.log(`path (relative): ${filePathRelative}`);
 var filePathRelativeDist = path.join("dist", filePathRelative);
 console.log(`path (relative in DIST): ${filePathRelativeDist}`);
 
-var cmdline = `cp ${filePathRelative} ${filePathRelativeDist} \
+var filePathRelativeDist_JS = filePathRelativeDist.replace(".ts", ".js");
+var filePathRelativeDist_JS_MAP = filePathRelativeDist.replace(".ts", ".js.map");
+var filePathRelativeDist_D_TS = filePathRelativeDist.replace(".ts", ".d.ts");
+var filePathRelativeDist_X = filePathRelativeDist.replace(".ts", "*");
+
+var parentDistDir = path.dirname(filePathRelativeDist);
+
+var cmdline =
+`echo "TYPESCRIPT" && cp ${filePathRelative} ${filePathRelativeDist} \
+&& mv ${filePathRelativeDist_JS} ${filePathRelativeDist_JS}_PREVIOUS \
+&& mv ${filePathRelativeDist_JS_MAP} ${filePathRelativeDist_JS_MAP}_PREVIOUS \
+&& mv ${filePathRelativeDist_D_TS} ${filePathRelativeDist_D_TS}_PREVIOUS \
 && node node_modules/typescript/bin/tsc \
 --strictNullChecks --sourceMap --noImplicitAny --module commonjs --target es2015 --experimentalDecorators --emitDecoratorMetadata --declaration --noUnusedLocals false --noUnusedParameters \
+--sourceRoot ../../ \
 --outDir ./dist/ \
 --rootDir ./dist/ \
 ./src/declarations.d.ts \
 ${filePathRelativeDist} \
-&& rm ${filePathRelativeDist}`;
+&& rm ${filePathRelativeDist} \
+&& echo "DIFF JS:" && diff ${filePathRelativeDist_JS} ${filePathRelativeDist_JS}_PREVIOUS \
+; echo "DIFF D TS:" && diff ${filePathRelativeDist_D_TS} ${filePathRelativeDist_D_TS}_PREVIOUS \
+; rm ${filePathRelativeDist_JS}_PREVIOUS \
+&& rm ${filePathRelativeDist_JS_MAP}_PREVIOUS \
+&& rm ${filePathRelativeDist_D_TS}_PREVIOUS \
+&& ls ${filePathRelativeDist_X} \
+`;
+// ; echo "DIFF JS MAP:" && diff ${filePathRelativeDist_JS_MAP} ${filePathRelativeDist_JS_MAP}_PREVIOUS \
+// && ls -als ${parentDistDir} \
 
 console.log(cmdline);
 

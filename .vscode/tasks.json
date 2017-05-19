@@ -17,7 +17,7 @@
       "taskName": "build",
       "args": [
         "run",
-        "build"
+        "transpile:typescript"
       ],
       "isBuildCommand": true,
       "problemMatcher": [
@@ -26,30 +26,17 @@
       ]
     },
     {
-      "taskName": "tests",
-      "args": [
-        "test"
-      ]
-    },
-    {
-      "taskName": "cli",
+      "taskName": "lintbuild",
       "args": [
         "run",
-        "cli"
-      ]
-    },
-    {
-      "taskName": "server",
-      "args": [
-        "run",
-        "server"
+        "build"
       ]
     },
     {
       "taskName": "typescript",
       "args": [
         "run",
-        "typescript",
+        "transpile:typescript:single",
         "${file}"
       ]
     }
