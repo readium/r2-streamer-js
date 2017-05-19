@@ -91,6 +91,7 @@
     "lint:all": "eclint check \"**/*\" \"[!].git/**/*\" \"[!]node_modules/**/*\" \"[!]dist/**/*\" \"[!]reader*/**/*\" \"[!]now/**/*\" \"[!].vscode/**/*\" \"[!]**/.DS_Store\" \"[!]**/*.epub\" \"[!]**/*.cbz\"  \"[!]**/*.jpg\"  \"[!]**/*.jpeg\"  \"[!]**/*.png\"",
     "lint:typescript": "tslint --type-check --project \"./tsconfig.json\" -c \"./tslint.json\" \"./src/**/*.ts\" \"./test/**/*.ts\"",
     "transpile:typescript": "tsc -p \"./tsconfig.json\"",
+    "typescript": "node typescript.js",
     "test": "ava --verbose \"./dist/test/test.js\"",
     "cli": "node \"./dist/src/cli.js\"",
     "cli-debug": "cross-env DEBUG=r2:* npm run cli",
