@@ -44,6 +44,14 @@
         "run",
         "server"
       ]
+    },
+    {
+      "taskName": "typescript",
+      "args": [
+        "run",
+        "typescript",
+        "${file}"
+      ]
     }
   ]
 }
