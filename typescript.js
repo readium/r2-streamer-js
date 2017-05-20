@@ -50,7 +50,7 @@ console.log(`path (relative in DIST): ${filePathRelativeDist}`);
 var filePathRelativeDist_JS = filePathRelativeDist.replace(".ts", ".js");
 var filePathRelativeDist_JS_MAP = filePathRelativeDist.replace(".ts", ".js.map");
 var filePathRelativeDist_D_TS = filePathRelativeDist.replace(".ts", ".d.ts");
-var filePathRelativeDist_X = filePathRelativeDist.replace(".ts", "*");
+var filePathRelativeDist_X = filePathRelativeDist.replace(".ts", ".*");
 
 var parentDistDir = path.dirname(filePathRelativeDist);
 

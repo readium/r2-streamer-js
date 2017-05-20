@@ -8,7 +8,7 @@ import { PropertyDefinition } from "../classes/property-definition";
 
 import { propertyConverters } from "../converters/converter";
 
-import { FunctionType, IXmlNamespaces } from "../types";
+import { FunctionType, IXmlNamespaces, IXPathSelectorItem } from "../types";
 
 export function deserialize(
     objectInstance: Node,
@@ -27,8 +27,8 @@ function deserializeRootObject(
     objectType: FunctionType = Object,
     options: IParseOptions): any {
 
-    // tslint:disable-next-line:no-string-literal
-    const debug = process.env["OPF_PARSE"] === "true";
+    // // tslint:disable-next-line:no-string-literal
+    // const debug = process.env["OPF_PARSE"] === "true";
 
     if (!objectDefinitions.has(objectType)) {
         return undefined;
@@ -51,9 +51,9 @@ function deserializeRootObject(
 
         d.beforeDeserialized.call(output);
 
-        if (debug) {
-            console.log("======== PROPS: " + objectInstance.localName);
-        }
+        // if (debug) {
+        //     console.log("======== PROPS: " + objectInstance.localName);
+        // }
 
         d.properties.forEach((p, key) => {
             if (!p.objectType) {
@@ -80,57 +80,146 @@ function deserializeRootObject(
             //     }
             // }
 
-            if (debug) {
-                console.log(`${p.xpathSelector}`);
-            }
+            // if (debug) {
+            //     console.log(`${p.xpathSelector}`);
+            // }
 
-            const timeBegin = process.hrtime();
-            // console.log(namespaces);
-            // console.log(p.xpathSelector);
-            const select = xpath.useNamespaces(p.namespaces || {});
-            const xPathSelected = select(p.xpathSelector, objectInstance);
-
-            if (xPathSelected && xPathSelected.length) {
-
-                const timeElapsed = process.hrtime(timeBegin);
-                if (debug) {
-                    console.log(`=-------- ${timeElapsed[0]} seconds + ${timeElapsed[1]} nanoseconds`);
-                }
-                if (timeElapsed[0] > 1) {
-                    process.exit(1);
-                }
+            if (p.xpathSelectorParsed) {
 
                 const xpathMatched = Array<Node>();
 
-                // console.log("XPATH MATCH: " + p.xpathSelector
-                //     + " == " + (xPathSelected instanceof Array)
-                //     + " -- " + xPathSelected.length);
+                let currentNodes = [objectInstance];
 
-                if (!(xPathSelected instanceof Array)) {
-                    xpathMatched.push(xPathSelected);
-                } else {
-                    xPathSelected.forEach((item: Node) => {
-                        // console.log(item.nodeValue || item.localName);
-                        xpathMatched.push(item);
+                p.xpathSelectorParsed.forEach((item: IXPathSelectorItem, index: number) => {
+                    const nextCurrentNodes: Node[] = [];
+
+                    currentNodes.forEach((currentNode) => {
+
+                        if (item.isText) {
+                            let textNode = currentNode.firstChild;
+                            if (currentNode.childNodes && currentNode.childNodes.length) {
+                                for (let i = 0; i < currentNode.childNodes.length; i++) {
+                                    const childNode = currentNode.childNodes.item(i);
+                                    if (childNode.nodeType === 3) { // TEXT_NODE
+                                        textNode = childNode;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (textNode) {
+                                xpathMatched.push(textNode);
+                            }
+                        } else if (item.isAttribute) {
+                            if (currentNode.attributes) {
+
+                                const attr = item.namespaceUri ?
+                                    currentNode.attributes.getNamedItemNS(item.namespaceUri, item.localName) :
+                                    currentNode.attributes.getNamedItem(item.localName);
+
+                                if (attr) {
+                                    xpathMatched.push(attr);
+                                }
+                            }
+                        } else {
+                            if (currentNode.childNodes && currentNode.childNodes.length) {
+
+                                for (let i = 0; i < currentNode.childNodes.length; i++) {
+                                    const childNode = currentNode.childNodes.item(i);
+                                    if (childNode.nodeType !== 1) { // ELEMENT_NODE
+                                        continue;
+                                    }
+                                    if (childNode.localName !== item.localName) {
+                                        continue;
+                                    }
+                                    if (item.namespaceUri && item.namespaceUri !== childNode.namespaceURI) {
+                                        continue;
+                                    }
+
+                                    nextCurrentNodes.push(childNode);
+                                }
+                            }
+                        }
                     });
-                }
 
-                if (p.array || p.set) {
-                    output[key] = Array<IDynamicObject>();
-                    xpathMatched.forEach((item) => {
-                        output[key].push(deserializeObject(item, p, options));
-                    });
+                    currentNodes = nextCurrentNodes;
 
-                    if (p.set) {
-                        output[key] = new Set(output[key]);
+                    if (index === p.xpathSelectorParsed.length - 1) {
+                        currentNodes.forEach((node) => {
+                            xpathMatched.push(node);
+                        });
                     }
+                });
+
+                if (xpathMatched && xpathMatched.length) {
+
+                    if (p.array || p.set) {
+                        output[key] = Array<IDynamicObject>();
+                        xpathMatched.forEach((item) => {
+                            output[key].push(deserializeObject(item, p, options));
+                        });
+
+                        if (p.set) {
+                            output[key] = new Set(output[key]);
+                        }
+                        return;
+                    }
+
+                    output[key] = deserializeObject(xpathMatched[0], p, options);
+                } else {
                     return;
                 }
-
-                output[key] = deserializeObject(xpathMatched[0], p, options);
             } else {
-                // console.log("XPATH NO MATCH: " + p.xpathSelector);
-                return;
+                // console.log("########### USING XPATH!");
+                // console.log(`${p.xpathSelector}`);
+
+                // const timeBegin = process.hrtime();
+                // console.log(namespaces);
+                // console.log(p.xpathSelector);
+                const select = xpath.useNamespaces(p.namespaces || {});
+                const xPathSelected = select(p.xpathSelector, objectInstance);
+
+                if (xPathSelected && xPathSelected.length) {
+
+                    // const timeElapsed = process.hrtime(timeBegin);
+                    // if (debug) {
+                    //     console.log(`=-------- ${timeElapsed[0]} seconds + ${timeElapsed[1]} nanoseconds`);
+                    // }
+                    // if (timeElapsed[0] > 1) {
+                    //     process.exit(1);
+                    // }
+
+                    const xpathMatched = Array<Node>();
+
+                    // console.log("XPATH MATCH: " + p.xpathSelector
+                    //     + " == " + (xPathSelected instanceof Array)
+                    //     + " -- " + xPathSelected.length);
+
+                    if (!(xPathSelected instanceof Array)) {
+                        xpathMatched.push(xPathSelected);
+                    } else {
+                        xPathSelected.forEach((item: Node) => {
+                            // console.log(item.nodeValue || item.localName);
+                            xpathMatched.push(item);
+                        });
+                    }
+
+                    if (p.array || p.set) {
+                        output[key] = Array<IDynamicObject>();
+                        xpathMatched.forEach((item) => {
+                            output[key].push(deserializeObject(item, p, options));
+                        });
+
+                        if (p.set) {
+                            output[key] = new Set(output[key]);
+                        }
+                        return;
+                    }
+
+                    output[key] = deserializeObject(xpathMatched[0], p, options);
+                } else {
+                    // console.log("XPATH NO MATCH: " + p.xpathSelector);
+                    return;
+                }
             }
         });
 

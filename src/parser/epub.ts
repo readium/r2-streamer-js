@@ -160,7 +160,7 @@ export async function EpubParsePromise(filePath: string): Promise<Publication> {
 
     // const timeElapsed4 = process.hrtime(timeBegin);
     // console.log(`4) ${timeElapsed4[0]} seconds + ${timeElapsed4[1]} nanoseconds`);
-    // timeBegin = process.hrtime();
+    const timeBegin = process.hrtime();
 
     // tslint:disable-next-line:no-string-literal
     // process.env["OPF_PARSE"] = "true";
@@ -172,8 +172,8 @@ export async function EpubParsePromise(filePath: string): Promise<Publication> {
     // tslint:disable-next-line:no-string-literal
     // process.env["OPF_PARSE"] = "false";
 
-    // const timeElapsed5 = process.hrtime(timeBegin);
-    // console.log(`5) ${timeElapsed5[0]} seconds + ${timeElapsed5[1]} nanoseconds`);
+    const timeElapsed5 = process.hrtime(timeBegin);
+    console.log(`5) ${timeElapsed5[0]} seconds + ${timeElapsed5[1]} nanoseconds`);
 
     opf.ZipPath = rootfile.Path;
 
