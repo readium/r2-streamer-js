@@ -71,7 +71,7 @@ export function XmlXPathSelector(selector: string, namespaces?: IXmlNamespaces) 
                 //     console.log(subitems[1]);
                 // }
                 const isAttribute = item[0] === "@";
-                const isText = item[0] === "text()";
+                const isText = item === "text()";
                 const localName = subitems.length > 1 ?
                     subitems[1] :
                     (isAttribute ? subitems[0].substr(1) : subitems[0]);

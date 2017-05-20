@@ -122,7 +122,6 @@ function deserializeRootObject(
                             }
                         } else {
                             if (currentNode.childNodes && currentNode.childNodes.length) {
-
                                 for (let i = 0; i < currentNode.childNodes.length; i++) {
                                     const childNode = currentNode.childNodes.item(i);
                                     if (childNode.nodeType !== 1) { // ELEMENT_NODE
@@ -150,6 +149,37 @@ function deserializeRootObject(
                     }
                 });
 
+                // // CHECKING ...
+                // const select = xpath.useNamespaces(p.namespaces || {});
+                // const xPathSelected = select(p.xpathSelector, objectInstance);
+                // if (xPathSelected && xPathSelected.length) {
+                //     const xpathMatchedCheck = Array<Node>();
+                //     if (!(xPathSelected instanceof Array)) {
+                //         xpathMatchedCheck.push(xPathSelected);
+                //     } else {
+                //         xPathSelected.forEach((item: Node) => {
+                //             // console.log(item.nodeValue || item.localName);
+                //             xpathMatchedCheck.push(item);
+                //         });
+                //     }
+                //     if (!xpathMatched || !xpathMatched.length) {
+                //         console.log("########################## XPATH NO MATCH 1 !!!!!!");
+                //         console.log(p.xpathSelector);
+                //     } else if (xpathMatchedCheck.length !== xpathMatched.length) {
+                //         console.log("########################## XPATH NO MATCH 2 !!!!!!");
+                //     } else {
+                //         xpathMatchedCheck.forEach((item: Node, index: number) => {
+                //             if (item !== xpathMatched[index]) {
+                //                 console.log("########################## XPATH NO MATCH 3 !!!!!!");
+                //             }
+                //         });
+                //     }
+                // } else {
+                //     if (xpathMatched && xpathMatched.length) {
+                //         console.log("########################## XPATH NO MATCH 4 !!!!!!");
+                //     }
+                // }
+
                 if (xpathMatched && xpathMatched.length) {
 
                     if (p.array || p.set) {
@@ -165,8 +195,6 @@ function deserializeRootObject(
                     }
 
                     output[key] = deserializeObject(xpathMatched[0], p, options);
-                } else {
-                    return;
                 }
             } else {
                 // console.log("########### USING XPATH!");
@@ -216,9 +244,6 @@ function deserializeRootObject(
                     }
 
                     output[key] = deserializeObject(xpathMatched[0], p, options);
-                } else {
-                    // console.log("XPATH NO MATCH: " + p.xpathSelector);
-                    return;
                 }
             }
         });
