@@ -614,4 +614,3 @@
   scope.URL = jURL;
 
 })(window);
-

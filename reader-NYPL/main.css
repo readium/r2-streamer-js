@@ -120,6 +120,8 @@ a {
       padding-top: 0.625rem;
       position: fixed;
       width: 100%; }
+      .controls .links.bottom.inactive {
+        height: 0; }
       @media (min-width: 30rem) {
         .controls .links.bottom {
           padding-top: 0; } }
@@ -206,6 +208,8 @@ a {
     height: 0; }
   .controls-view.active {
     transition: opacity 300ms cubic-bezier(0, 0.03, 0.63, 0.99); }
+  .controls-view > ul {
+    padding-bottom: 1rem; }
 
 .info {
   color: #373737;

@@ -646,12 +646,18 @@ define("ScrollingBookView", ["require", "exports", "BrowserUtilities", "HTMLUtil
             this.bookElement.style.height = "";
             this.bookElement.style.width = BrowserUtilities.getWidth() + "px";
             var body = HTMLUtilities.findRequiredElement(this.bookElement.contentDocument, "body");
-            body.style.width = (BrowserUtilities.getWidth() - this.sideMargin * 2) + "px";
+            var width = (BrowserUtilities.getWidth() - this.sideMargin * 2) + "px";
+            body.style.width = width;
             body.style.marginLeft = this.sideMargin + "px";
             body.style.marginRight = this.sideMargin + "px";
             var minHeight = this.height;
             var bodyHeight = body.scrollHeight;
             this.bookElement.style.height = Math.max(minHeight, bodyHeight) + "px";
+            var images = Array.prototype.slice.call(body.querySelectorAll("img"));
+            for (var _i = 0, images_1 = images; _i < images_1.length; _i++) {
+                var image = images_1[_i];
+                image.style.maxWidth = width;
+            }
         };
         ScrollingBookView.prototype.start = function (position) {
             this.goToPosition(position);
@@ -663,6 +669,11 @@ define("ScrollingBookView", ["require", "exports", "BrowserUtilities", "HTMLUtil
             body.style.width = "";
             body.style.marginLeft = "";
             body.style.marginRight = "";
+            var images = Array.prototype.slice.call(body.querySelectorAll("img"));
+            for (var _i = 0, images_2 = images; _i < images_2.length; _i++) {
+                var image = images_2[_i];
+                image.style.maxWidth = "";
+            }
         };
         ScrollingBookView.prototype.getCurrentPosition = function () {
             return document.body.scrollTop / document.body.scrollHeight;
@@ -1927,7 +1938,25 @@ define("IFrameNavigator", ["require", "exports", "Cacher", "Manifest", "EventHan
         IFrameNavigator.prototype.navigate = function (readingPosition) {
             this.showLoadingMessageAfterDelay();
             this.newPosition = readingPosition;
-            this.iframe.src = readingPosition.resource;
+            if (readingPosition.resource.indexOf("#") === -1) {
+                this.iframe.src = readingPosition.resource;
+            }
+            else {
+                // We're navigating to an anchor within the resource,
+                // rather than the resource itself. Go to the resource
+                // first, then go to the anchor.
+                this.newElementId = readingPosition.resource.slice(readingPosition.resource.indexOf("#") + 1);
+                var newResource = readingPosition.resource.slice(0, readingPosition.resource.indexOf("#"));
+                if (newResource === this.iframe.src) {
+                    // The resource isn't changing, but handle it like a new
+                    // iframe load to hide the menus and popups and go to the 
+                    // new element.
+                    this.handleIFrameLoad();
+                }
+                else {
+                    this.iframe.src = newResource;
+                }
+            }
         };
         IFrameNavigator.prototype.showLoadingMessageAfterDelay = function () {
             var _this = this;
@@ -1975,6 +2004,7 @@ define("ColumnsPaginatedBookView", ["require", "exports", "HTMLUtilities", "Brow
             this.label = "Paginated";
             this.sideMargin = 0;
             this.height = 0;
+            this.hasFixedScrollWidth = false;
         }
         ColumnsPaginatedBookView.prototype.start = function (position) {
             document.body.style.overflow = "hidden";
@@ -2003,7 +2033,19 @@ define("ColumnsPaginatedBookView", ["require", "exports", "HTMLUtilities", "Brow
             if (head) {
                 head.appendChild(viewportElement);
             }
+            this.checkForFixedScrollWidth();
             this.goToPosition(position);
+        };
+        ColumnsPaginatedBookView.prototype.checkForFixedScrollWidth = function () {
+            // Determine if the scroll width changes when the left position
+            // changes. This differs across browsers and sometimes across
+            // books in the same browser.
+            var body = HTMLUtilities.findRequiredElement(this.bookElement.contentDocument, "body");
+            var originalLeft = (body.style.left || "0px").slice(0, -2);
+            var originalScrollWidth = body.scrollWidth;
+            body.style.left = (originalLeft - 1) + "px";
+            this.hasFixedScrollWidth = (body.scrollWidth === originalScrollWidth);
+            body.style.left = originalLeft + "px";
         };
         ColumnsPaginatedBookView.prototype.setSize = function () {
             // any is necessary because CSSStyleDeclaration type does not include
@@ -2026,8 +2068,8 @@ define("ColumnsPaginatedBookView", ["require", "exports", "HTMLUtilities", "Brow
             this.bookElement.style.height = this.height + "px";
             this.bookElement.style.width = BrowserUtilities.getWidth() + "px";
             var images = body.querySelectorAll("img");
-            for (var _i = 0, images_1 = images; _i < images_1.length; _i++) {
-                var image = images_1[_i];
+            for (var _i = 0, images_3 = images; _i < images_3.length; _i++) {
+                var image = images_3[_i];
                 image.style.maxWidth = width;
                 image.style.maxHeight = this.height + "px";
                 // Without this, an image at the end of a resource can end up
@@ -2068,6 +2110,15 @@ define("ColumnsPaginatedBookView", ["require", "exports", "HTMLUtilities", "Brow
             this.bookElement.contentDocument.documentElement.style.height = "";
             this.bookElement.style.height = "";
             this.bookElement.style.width = "";
+            var images = body.querySelectorAll("img");
+            for (var _i = 0, images_4 = images; _i < images_4.length; _i++) {
+                var image = images_4[_i];
+                image.style.maxWidth = "";
+                image.style.maxHeight = "";
+                image.style.display = "";
+                image.style.marginLeft = "";
+                image.style.marginRight = "";
+            }
         };
         /** Returns the total width of the columns that are currently
             positioned to the left of the iframe viewport. */
@@ -2086,16 +2137,15 @@ define("ColumnsPaginatedBookView", ["require", "exports", "HTMLUtilities", "Brow
         /** Returns the total width of the columns that are currently
             positioned to the right of the iframe viewport. */
         ColumnsPaginatedBookView.prototype.getRightColumnsWidth = function () {
-            var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') !== -1;
-            var isIE = navigator.userAgent.toLowerCase().indexOf('trident') !== -1;
             // scrollWidth includes the column in the iframe viewport as well as
             // columns to the right.
             var body = HTMLUtilities.findRequiredElement(this.bookElement.contentDocument, "body");
             var scrollWidth = body.scrollWidth;
             var width = this.getColumnWidth();
             var rightWidth = scrollWidth + this.sideMargin - width;
-            if (isFirefox || isIE) {
-                // In Firefox and IE, scrollWidth doesn't change when some columns
+            if (this.hasFixedScrollWidth) {
+                // In some browsers (IE and Firefox with certain books), 
+                // scrollWidth doesn't change when some columns
                 // are off to the left, so we need to subtract them.
                 var leftWidth = this.getLeftColumnsWidth();
                 rightWidth = rightWidth - leftWidth;
