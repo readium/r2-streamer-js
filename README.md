@@ -59,6 +59,17 @@ https://readium2-cmcbgxpaft.now.sh
 
 (all quoted HTTP routes below use the GET verb)
 
+### /opds2/ and /opds2/publications.json
+
+This route serves the list of available publications as an "OPDS 2" JSON file using the `application/opds+json` content type (canonical syntax, keys are recursively alphabetically sorted).
+More information about the OPDS format here: https://github.com/opds-community/opds-revision
+
+#### /opds2/publications.json/show
+
+This route serves a pretty-printed representation of the "OPDS 2" JSON, with clickable links for easy navigation (e.g. the cover image of each listed publication).
+
+`/show` is equivalent to `/show/all`. Here is a list of available JSON "filters": Metadata: `/show/metadata`, Links: `/show/links`, Publications: `/show/publications`.
+
 ### /pub/{PUB_ID}
 
 `{PUB_ID}` is the base64 encoding of a local publication file (server filesystem, therefore limited to app-approved files), or of any arbitrary HTTP URL (see the "Support for remote publications" section below).
@@ -73,7 +84,7 @@ This route serves the "webpub manifest" JSON file using the `application/webpub+
 
 This route serves a pretty-printed representation of the "webpub manifest" JSON, with clickable links for easy navigation into individual publication assets (see next route below).
 
-`/show` is equivalent to `/show/all`. Here is a list of available JSON "filters": Cover image: `/cover`, Table of Contents: `/toc`, Metadata: `/metadata`, Spine: `/spine`, Page List: `/pagelist`, Landmarks: `/landmarks`, Links: `/links`, Resources: `/resources`, Media Overlays: `/mediaoverlays`.
+`/show` is equivalent to `/show/all`. Here is a list of available JSON "filters": Cover image: `/show/cover`, Table of Contents: `/show/toc`, Metadata: `/show/metadata`, Spine: `/show/spine`, Page List: `/show/pagelist`, Landmarks: `/show/landmarks`, Links: `/show/links`, Resources: `/show/resources`, Media Overlays: `/show/mediaoverlays`.
 
 #### /pub/{PUB_ID}/{ASSET_PATH}
 
