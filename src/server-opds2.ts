@@ -146,7 +146,7 @@ export function serverOPDS2(server: Server, topRouter: express.Router) {
                     "</body></html>");
             } else {
                 res.setHeader("Access-Control-Allow-Origin", "*");
-                res.set("Content-Type", "application/webpub+json; charset=utf-8");
+                res.set("Content-Type", "application/opds+json; charset=utf-8");
 
                 const publicationsJsonObj = TAJSON.serialize(publications);
 
@@ -160,7 +160,7 @@ export function serverOPDS2(server: Server, topRouter: express.Router) {
 
                 const match = req.header("If-None-Match");
                 if (match === hash) {
-                    debug("manifest.json cache");
+                    debug("publications.json cache");
                     res.status(304); // StatusNotModified
                     return;
                 }
