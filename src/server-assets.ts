@@ -6,6 +6,7 @@ import * as express from "express";
 import * as mime from "mime-types";
 
 import { Link } from "./models/publication-link";
+import { CbzParsePromise } from "./parser/cbz";
 import { EpubParsePromise } from "./parser/epub";
 import { IZip } from "./parser/zip";
 import { Server } from "./server";
@@ -38,7 +39,14 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
 
             let publication = server.cachedPublication(pathBase64Str);
             if (!publication) {
-                publication = await EpubParsePromise(pathBase64Str);
+
+                const fileName = path.basename(pathBase64Str);
+                const ext = path.extname(fileName).toLowerCase();
+
+                publication = ext === ".epub" ?
+                    await EpubParsePromise(pathBase64Str) :
+                    await CbzParsePromise(pathBase64Str);
+
                 server.cachePublication(pathBase64Str, publication);
             }
             // dumpPublication(publication);

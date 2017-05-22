@@ -6,7 +6,7 @@ import * as xpath from "xpath";
 
 import { XML } from "../xml-js-mapper";
 
-import { JSON } from "ta-json";
+import { JSON as TAJSON } from "ta-json";
 
 import { streamToBufferPromise, zipLoadPromise } from "../utils";
 import { IZip } from "./zip";
@@ -82,7 +82,7 @@ export async function EpubParsePromise(filePath: string): Promise<Publication> {
 
         const lcplStr = lcplZipData.toString("utf8");
         const lcplJson = global.JSON.parse(lcplStr);
-        lcpl = JSON.deserialize<LCP>(lcplJson, LCP);
+        lcpl = TAJSON.deserialize<LCP>(lcplJson, LCP);
         lcpl.ZipPath = lcplZipPath;
 
         // breakLength: 100  maxArrayLength: undefined
@@ -127,7 +127,7 @@ export async function EpubParsePromise(filePath: string): Promise<Publication> {
 
     const rootfile = container.Rootfile[0];
 
-    console.log(`${rootfile.Path}:`);
+    // console.log(`${rootfile.Path}:`);
 
     // let timeBegin = process.hrtime();
 
@@ -160,7 +160,7 @@ export async function EpubParsePromise(filePath: string): Promise<Publication> {
 
     // const timeElapsed4 = process.hrtime(timeBegin);
     // console.log(`4) ${timeElapsed4[0]} seconds + ${timeElapsed4[1]} nanoseconds`);
-    const timeBegin = process.hrtime();
+    // const timeBegin = process.hrtime();
 
     // tslint:disable-next-line:no-string-literal
     // process.env["OPF_PARSE"] = "true";
@@ -172,8 +172,8 @@ export async function EpubParsePromise(filePath: string): Promise<Publication> {
     // tslint:disable-next-line:no-string-literal
     // process.env["OPF_PARSE"] = "false";
 
-    const timeElapsed5 = process.hrtime(timeBegin);
-    console.log(`5) ${timeElapsed5[0]} seconds + ${timeElapsed5[1]} nanoseconds`);
+    // const timeElapsed5 = process.hrtime(timeBegin);
+    // console.log(`5) ${timeElapsed5[0]} seconds + ${timeElapsed5[1]} nanoseconds`);
 
     opf.ZipPath = rootfile.Path;
 

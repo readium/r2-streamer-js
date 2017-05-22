@@ -1,11 +1,12 @@
 // https://github.com/edcarroll/ta-json
 import {
-    DateConverter,
     JsonConverter,
     JsonElementType,
     JsonObject,
     JsonProperty,
 } from "ta-json";
+
+import { DateConverter } from "../../xml-js-mapper";
 
 import { Encryption } from "./lcp-encryption";
 import { Link } from "./lcp-link";

@@ -1,10 +1,11 @@
 // https://github.com/edcarroll/ta-json
 import {
-    DateConverter,
     JsonConverter,
     JsonObject,
     JsonProperty,
 } from "ta-json";
+
+import { DateConverter } from "../../xml-js-mapper";
 
 @JsonObject()
 export class Rights {

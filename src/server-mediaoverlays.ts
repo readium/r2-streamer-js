@@ -4,8 +4,9 @@ import * as path from "path";
 import * as util from "util";
 
 import * as express from "express";
-import { JSON } from "ta-json";
+import { JSON as TAJSON } from "ta-json";
 
+import { CbzParsePromise } from "./parser/cbz";
 import { EpubParsePromise, mediaOverlayURLParam, mediaOverlayURLPath } from "./parser/epub";
 import { Server } from "./server";
 import { sortObject } from "./utils";
@@ -17,7 +18,7 @@ export function serverMediaOverlays(server: Server, routerPathBase64: express.Ro
     const routerMediaOverlays = express.Router({ strict: false });
     // routerMediaOverlays.use(morgan("combined"));
 
-    routerMediaOverlays.get(["", "/show/:" + mediaOverlayURLParam + "?"],
+    routerMediaOverlays.get(["/", "/show/:" + mediaOverlayURLParam + "?"],
         async (req: express.Request, res: express.Response) => {
 
             if (!req.params.pathBase64) {
@@ -28,7 +29,14 @@ export function serverMediaOverlays(server: Server, routerPathBase64: express.Ro
 
             let publication = server.cachedPublication(pathBase64Str);
             if (!publication) {
-                publication = await EpubParsePromise(pathBase64Str);
+
+                const fileName = path.basename(pathBase64Str);
+                const ext = path.extname(fileName).toLowerCase();
+
+                publication = ext === ".epub" ?
+                    await EpubParsePromise(pathBase64Str) :
+                    await CbzParsePromise(pathBase64Str);
+
                 server.cachePublication(pathBase64Str, publication);
             }
             // dumpPublication(publication);
@@ -49,7 +57,7 @@ export function serverMediaOverlays(server: Server, routerPathBase64: express.Ro
                 objToSerialize = [];
             }
 
-            let jsonObj = JSON.serialize(objToSerialize);
+            let jsonObj = TAJSON.serialize(objToSerialize);
             jsonObj = { "media-overlay": jsonObj };
 
             if (isShow) {

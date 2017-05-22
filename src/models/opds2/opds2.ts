@@ -6,9 +6,9 @@ import {
     OnDeserialized,
 } from "ta-json";
 
-import { Link } from "./publication-link";
+import { Link } from "../publication-link";
 
-import { Publication } from "./publication";
+import { Publication } from "../publication";
 
 import { OPDSMetadata } from "./opds2-metadata";
 

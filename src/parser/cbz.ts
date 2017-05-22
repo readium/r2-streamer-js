@@ -35,16 +35,16 @@ export async function CbzParsePromise(filePath: string): Promise<Publication> {
 
     let comicInfoEntryName: string | undefined;
     zip.forEachEntry((entryName: string) => {
-        console.log("++ZIP: entry");
+        // console.log("++ZIP: entry");
 
-        console.log(entryName);
+        // console.log(entryName);
 
         const link = new Link();
         link.Href = entryName;
 
         const mediaType = mime.lookup(entryName);
         if (mediaType) {
-            console.log(mediaType);
+            // console.log(mediaType);
 
             link.TypeLink = mediaType as string;
         } else {

@@ -18,7 +18,7 @@ export function serverUrl(_server: Server, topRouter: express.Router) {
 
     routerUrl.use(trailingSlashRedirect);
 
-    routerUrl.get("", (_req: express.Request, res: express.Response) => {
+    routerUrl.get("/", (_req: express.Request, res: express.Response) => {
 
         let html = "<html><head>";
         html += `<script type="text/javascript">function encodeURIComponent_RFC3986(str) { ` +

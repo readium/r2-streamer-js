@@ -2,7 +2,7 @@ import { IPropertyConverter } from "./converter";
 
 export class DateConverter implements IPropertyConverter {
     public serialize(property: Date): string {
-        return property.toString();
+        return property.toISOString();
     }
 
     public deserialize(value: string): Date {

@@ -5,8 +5,9 @@ import * as path from "path";
 import * as css2json from "css2json";
 import * as express from "express";
 import * as jsonMarkup from "json-markup";
-import { JSON } from "ta-json";
+import { JSON as TAJSON } from "ta-json";
 
+import { CbzParsePromise } from "./parser/cbz";
 import { EpubParsePromise, mediaOverlayURLParam, mediaOverlayURLPath } from "./parser/epub";
 import { Server } from "./server";
 import { sortObject } from "./utils";
@@ -62,7 +63,14 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
 
             let publication = server.cachedPublication(pathBase64Str);
             if (!publication) {
-                publication = await EpubParsePromise(pathBase64Str);
+
+                const fileName = path.basename(pathBase64Str);
+                const ext = path.extname(fileName).toLowerCase();
+
+                publication = ext === ".epub" ?
+                    await EpubParsePromise(pathBase64Str) :
+                    await CbzParsePromise(pathBase64Str);
+
                 server.cachePublication(pathBase64Str, publication);
             }
             // dumpPublication(publication);
@@ -192,7 +200,7 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
                     objToSerialize = {};
                 }
 
-                const jsonObj = JSON.serialize(objToSerialize);
+                const jsonObj = TAJSON.serialize(objToSerialize);
 
                 absolutizeURLs(jsonObj);
 
@@ -215,7 +223,7 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
                 res.setHeader("Access-Control-Allow-Origin", "*");
                 res.set("Content-Type", "application/webpub+json; charset=utf-8");
 
-                const publicationJsonObj = JSON.serialize(publication);
+                const publicationJsonObj = TAJSON.serialize(publication);
 
                 absolutizeURLs(publicationJsonObj);
 

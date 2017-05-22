@@ -55,12 +55,12 @@ function ensureAbsolute(rootUrl: string, linkHref: string) {
 
 export function serverOPDS(_server: Server, topRouter: express.Router) {
 
-    const routerUrl = express.Router({ strict: false });
-    routerUrl.use(morgan("combined"));
+    const routerOPDS = express.Router({ strict: false });
+    routerOPDS.use(morgan("combined"));
 
-    routerUrl.use(trailingSlashRedirect);
+    routerOPDS.use(trailingSlashRedirect);
 
-    routerUrl.get("", (_req: express.Request, res: express.Response) => {
+    routerOPDS.get("/", (_req: express.Request, res: express.Response) => {
 
         let html = "<html><head>";
         html += `<script type="text/javascript">function encodeURIComponent_RFC3986(str) { ` +
@@ -87,12 +87,12 @@ export function serverOPDS(_server: Server, topRouter: express.Router) {
         res.status(200).send(html);
     });
 
-    routerUrl.param("urlEncoded", (req, _res, next, value, _name) => {
+    routerOPDS.param("urlEncoded", (req, _res, next, value, _name) => {
         (req as any).urlEncoded = value;
         next();
     });
 
-    routerUrl.get("/:urlEncoded(*)", (req: express.Request, res: express.Response) => {
+    routerOPDS.get("/:urlEncoded(*)", (req: express.Request, res: express.Response) => {
 
         if (!req.params.urlEncoded) {
             req.params.urlEncoded = (req as any).urlEncoded;
@@ -261,5 +261,5 @@ export function serverOPDS(_server: Server, topRouter: express.Router) {
             });
     });
 
-    topRouter.use("/opds", routerUrl);
+    topRouter.use("/opds", routerOPDS);
 }

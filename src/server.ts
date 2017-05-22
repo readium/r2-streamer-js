@@ -1,13 +1,18 @@
+import * as child_process from "child_process";
 import * as debug_ from "debug";
+import * as express from "express";
+import * as fs from "fs";
 import * as path from "path";
 
-import * as express from "express";
+import { JSON as TAJSON } from "ta-json";
 
+import { OPDSFeed } from "./models/opds2/opds2";
 import { Publication } from "./models/publication";
 import { serverAssets } from "./server-assets";
 import { serverManifestJson } from "./server-manifestjson";
 import { serverMediaOverlays } from "./server-mediaoverlays";
 import { serverOPDS } from "./server-opds";
+import { serverOPDS2 } from "./server-opds2";
 import { serverPub } from "./server-pub";
 import { serverUrl } from "./server-url";
 import { encodeURIComponent_RFC3986, isHTTP } from "./utils";
@@ -18,11 +23,15 @@ interface IPathPublicationMap { [key: string]: any; }
 
 export class Server {
     private readonly publications: string[];
+    private publicationsOPDSfeed: OPDSFeed | undefined;
     private readonly pathPublicationMap: IPathPublicationMap;
+    private creatingPublicationsOPDS: boolean;
 
     constructor() {
         this.publications = [];
         this.pathPublicationMap = {};
+        this.publicationsOPDSfeed = undefined;
+        this.creatingPublicationsOPDS = false;
 
         const server = express();
         // server.enable('strict routing');
@@ -56,6 +65,7 @@ export class Server {
 
         serverUrl(this, server);
         serverOPDS(this, server);
+        serverOPDS2(this, server);
 
         const routerPathBase64: express.Router = serverPub(this, server);
         serverManifestJson(this, routerPathBase64);
@@ -94,5 +104,52 @@ export class Server {
         if (!this.isPublicationCached(filePath)) {
             this.pathPublicationMap[filePath] = pub;
         }
+    }
+
+    public publicationsOPDS(): OPDSFeed | undefined {
+
+        if (this.publicationsOPDSfeed) {
+            return this.publicationsOPDSfeed;
+        }
+
+        const opdsJsonFilePath = path.join(process.cwd(), "OPDS2.json");
+        if (!fs.existsSync(opdsJsonFilePath)) {
+            if (!this.creatingPublicationsOPDS) {
+                this.creatingPublicationsOPDS = true;
+
+                const jsFile = path.join(__dirname, "opds2-create-cli.js");
+                const args = [jsFile];
+                this.publications.forEach((pub) => {
+                    const filePathBase64 = new Buffer(pub).toString("base64");
+                    args.push(filePathBase64);
+                });
+                // debug("SPAWN OPDS2 create: %o", args);
+                debug(`SPAWN OPDS2-create: ${args[0]}`);
+
+                const child = child_process.spawn("node", args, {
+                    cwd: process.cwd(),
+                    // detached: true,
+                    env: process.env,
+                    // stdio: ["ignore"],
+                })
+                    // .unref()
+                    ;
+                child.stdout.on("data", (data) => {
+                    console.log(data.toString());
+                });
+                child.stderr.on("data", (data) => {
+                    console.log(data.toString());
+                });
+            }
+            return undefined;
+        }
+        const jsonStr = fs.readFileSync(opdsJsonFilePath, "utf8");
+        if (!jsonStr) {
+            return undefined;
+        }
+        const json = global.JSON.parse(jsonStr);
+
+        this.publicationsOPDSfeed = TAJSON.deserialize<OPDSFeed>(json, OPDSFeed);
+        return this.publicationsOPDSfeed;
     }
 }

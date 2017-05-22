@@ -1,6 +1,5 @@
 // https://github.com/edcarroll/ta-json
 import {
-    DateConverter,
     // IPropertyConverter,
     JsonConverter,
     JsonElementType,
@@ -8,6 +7,8 @@ import {
     JsonProperty,
     OnDeserialized,
 } from "ta-json";
+
+import { DateConverter } from "../xml-js-mapper";
 
 import { IStringMap } from "./metadata-multilang";
 

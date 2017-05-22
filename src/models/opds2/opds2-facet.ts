@@ -6,21 +6,15 @@ import {
     OnDeserialized,
 } from "ta-json";
 
-import { Link } from "./publication-link";
-
-import { Publication } from "./publication";
+import { Link } from "../publication-link";
 
 import { OPDSMetadata } from "./opds2-metadata";
 
 @JsonObject()
-export class OPDSGroup {
+export class OPDSFacet {
 
     @JsonProperty("metadata")
     public Metadata: OPDSMetadata;
-
-    @JsonProperty("publications")
-    @JsonElementType(Publication)
-    public Publications: Publication[];
 
     @JsonProperty("links")
     @JsonElementType(Link)
@@ -30,13 +24,10 @@ export class OPDSGroup {
     // tslint:disable-next-line:no-unused-variable
     private _OnDeserialized() {
         if (!this.Metadata) {
-            console.log("OPDSGroup.Metadata is not set!");
+            console.log("OPDSFacet.Metadata is not set!");
         }
         if (!this.Links) {
-            console.log("OPDSGroup.Links is not set!");
-        }
-        if (!this.Publications) {
-            console.log("OPDSGroup.Publications is not set!");
+            console.log("OPDSFacet.Links is not set!");
         }
     }
 }
