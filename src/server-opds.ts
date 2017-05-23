@@ -111,7 +111,15 @@ export function serverOPDS(_server: Server, topRouter: express.Router) {
         }).
             on("response", async (response: request.RequestResponse) => {
 
-                const responseData = await streamToBufferPromise(response);
+                let responseData: Buffer | undefined;
+                try {
+                    responseData = await streamToBufferPromise(response);
+                } catch (err) {
+                    debug(err);
+                    res.status(500).send("<html><body><p>Internal Server Error</p><p>"
+                        + err + "</p></body></html>");
+                    return;
+                }
                 const responseStr = responseData.toString("utf8");
                 const responseXml = new xmldom.DOMParser().parseFromString(responseStr);
                 // debug(responseXml);

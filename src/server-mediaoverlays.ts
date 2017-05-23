@@ -33,9 +33,16 @@ export function serverMediaOverlays(server: Server, routerPathBase64: express.Ro
                 const fileName = path.basename(pathBase64Str);
                 const ext = path.extname(fileName).toLowerCase();
 
-                publication = ext === ".epub" ?
-                    await EpubParsePromise(pathBase64Str) :
-                    await CbzParsePromise(pathBase64Str);
+                try {
+                    publication = ext === ".epub" ?
+                        await EpubParsePromise(pathBase64Str) :
+                        await CbzParsePromise(pathBase64Str);
+                } catch (err) {
+                    debug(err);
+                    res.status(500).send("<html><body><p>Internal Server Error</p><p>"
+                        + err + "</p></body></html>");
+                    return;
+                }
 
                 server.cachePublication(pathBase64Str, publication);
             }

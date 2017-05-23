@@ -101,53 +101,55 @@ export class Zip2 extends Zip {
                             method: "GET",
                             uri: filePath,
                         }).
-                            on("response", (ress: request.RequestResponse) => {
+                            on("response", async (ress: request.RequestResponse) => {
                                 // debug(filePath);
                                 // debug(res.headers);
-                                streamToBufferPromise(ress).then((buffer) => {
-                                    // debug(`streamToBufferPromise: ${buffer.length}`);
-
-                                    yauzl.fromBuffer(buffer,
-                                        { lazyEntries: true },
-                                        (err: any, zip: any) => {
-                                            if (err) {
-                                                debug("yauzl init ERROR");
-                                                debug(err);
-                                                reject(err);
-                                                return;
-                                            }
-                                            const zip2 = new Zip2(filePath, zip);
-
-                                            zip.on("error", (erro: any) => {
-                                                debug("yauzl ERROR");
-                                                debug(erro);
-                                                reject(erro);
-                                            });
-
-                                            zip.readEntry(); // next (lazyEntries)
-                                            zip.on("entry", (entry: any) => {
-                                                if (entry.fileName[entry.fileName.length - 1] === "/") {
-                                                    // skip directories / folders
-                                                } else {
-                                                    // debug(entry.fileName);
-                                                    zip2.addEntry(entry);
-                                                }
-                                                zip.readEntry(); // next (lazyEntries)
-                                            });
-
-                                            zip.on("end", () => {
-                                                debug("yauzl END");
-                                                resolve(zip2);
-                                            });
-
-                                            zip.on("close", () => {
-                                                debug("yauzl CLOSE");
-                                            });
-                                        });
-                                }).catch((err) => {
+                                let buffer: Buffer | undefined;
+                                try {
+                                    buffer = await streamToBufferPromise(ress);
+                                } catch (err) {
                                     debug(err);
                                     reject(err);
-                                });
+                                    return;
+                                }
+
+                                yauzl.fromBuffer(buffer,
+                                    { lazyEntries: true },
+                                    (err: any, zip: any) => {
+                                        if (err) {
+                                            debug("yauzl init ERROR");
+                                            debug(err);
+                                            reject(err);
+                                            return;
+                                        }
+                                        const zip2 = new Zip2(filePath, zip);
+
+                                        zip.on("error", (erro: any) => {
+                                            debug("yauzl ERROR");
+                                            debug(erro);
+                                            reject(erro);
+                                        });
+
+                                        zip.readEntry(); // next (lazyEntries)
+                                        zip.on("entry", (entry: any) => {
+                                            if (entry.fileName[entry.fileName.length - 1] === "/") {
+                                                // skip directories / folders
+                                            } else {
+                                                // debug(entry.fileName);
+                                                zip2.addEntry(entry);
+                                            }
+                                            zip.readEntry(); // next (lazyEntries)
+                                        });
+
+                                        zip.on("end", () => {
+                                            debug("yauzl END");
+                                            resolve(zip2);
+                                        });
+
+                                        zip.on("close", () => {
+                                            debug("yauzl CLOSE");
+                                        });
+                                    });
                             }).
                             on("error", (err: any) => {
                                 debug(err);

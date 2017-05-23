@@ -8,7 +8,7 @@ import { XML } from "../xml-js-mapper";
 import { ComicInfo } from "./comicrack/comicrack";
 
 import { streamToBufferPromise, zipLoadPromise } from "../utils";
-import { IZip } from "./zip";
+import { IStreamAndLength, IZip } from "./zip";
 
 import { Link } from "../models/publication-link";
 
@@ -20,7 +20,12 @@ import { Contributor } from "../models/metadata-contributor";
 
 export async function CbzParsePromise(filePath: string): Promise<Publication> {
 
-    const zip = await zipLoadPromise(filePath);
+    let zip: any;
+    try {
+        zip = await zipLoadPromise(filePath);
+    } catch (err) {
+        return Promise.reject(err);
+    }
 
     if (!zip.hasEntries()) {
         return Promise.reject("CBZ zip empty");
@@ -67,7 +72,11 @@ export async function CbzParsePromise(filePath: string): Promise<Publication> {
     }
 
     if (comicInfoEntryName) {
-        await comicRackMetadata(zip, comicInfoEntryName, publication);
+        try {
+            await comicRackMetadata(zip, comicInfoEntryName, publication);
+        } catch (err) {
+            console.log(err);
+        }
     }
 
     return publication;
@@ -79,9 +88,21 @@ const filePathToTitle = (filePath: string): string => {
 };
 
 const comicRackMetadata = async (zip: IZip, entryName: string, publication: Publication) => {
-    const comicZipStream_ = await zip.entryStreamPromise(entryName);
+    let comicZipStream_: IStreamAndLength | undefined;
+    try {
+        comicZipStream_ = await zip.entryStreamPromise(entryName);
+    } catch (err) {
+        console.log(err);
+        return;
+    }
     const comicZipStream = comicZipStream_.stream;
-    const comicZipData = await streamToBufferPromise(comicZipStream);
+    let comicZipData: Buffer | undefined;
+    try {
+        comicZipData = await streamToBufferPromise(comicZipStream);
+    } catch (err) {
+        console.log(err);
+        return;
+    }
 
     const comicXmlStr = comicZipData.toString("utf8");
     const comicXmlDoc = new xmldom.DOMParser().parseFromString(comicXmlStr);

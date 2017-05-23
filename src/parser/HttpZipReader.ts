@@ -57,7 +57,7 @@ export class HttpZipReader implements RandomAccessReader {
             method: "GET",
             uri: this.url,
         }).
-            on("response", (res: request.RequestResponse) => {
+            on("response", async (res: request.RequestResponse) => {
                 // debug(res.headers);
                 // debug(res.headers["content-type"]);
                 // debug(`HTTP response content-range: ${res.headers["content-range"]}`);
@@ -69,19 +69,22 @@ export class HttpZipReader implements RandomAccessReader {
                     // //     debug("END");
                     // // });
                 } else {
-                    streamToBufferPromise(res).then((buffer) => {
-                        // debug(`streamToBufferPromise: ${buffer.length}`);
-
-                        this.firstBuffer = buffer;
-                        this.firstBufferStart = start;
-                        this.firstBufferEnd = end;
-
-                        stream.write(buffer);
-                        stream.end();
-                    }).catch((err) => {
+                    let buffer: Buffer | undefined;
+                    try {
+                        buffer = await streamToBufferPromise(res);
+                    } catch (err) {
                         debug(err);
                         stream.end();
-                    });
+                        return;
+                    }
+                    // debug(`streamToBufferPromise: ${buffer.length}`);
+
+                    this.firstBuffer = buffer;
+                    this.firstBufferStart = start;
+                    this.firstBufferEnd = end;
+
+                    stream.write(buffer);
+                    stream.end();
                 }
             }).
             on("error", (err: any) => {

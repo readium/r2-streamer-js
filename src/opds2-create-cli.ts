@@ -55,9 +55,16 @@ if (fs.existsSync(opdsJsonFilePath)) {
         const ext = path.extname(fileName).toLowerCase();
 
         debug(`OPDS parsing: ${pathBase64Str}`);
-        const publication = ext === ".epub" ?
-            await EpubParsePromise(pathBase64Str) :
-            await CbzParsePromise(pathBase64Str);
+        let publication: Publication | undefined;
+        try {
+            publication = ext === ".epub" ?
+                await EpubParsePromise(pathBase64Str) :
+                await CbzParsePromise(pathBase64Str);
+        } catch (err) {
+            debug(err);
+            continue;
+        }
+
         nPubs++;
         const filePathBase64Encoded = encodeURIComponent_RFC3986(pathBase64);
 

@@ -17,35 +17,39 @@ export class Zip3 extends Zip {
             return Zip3.loadPromiseHTTP(filePath);
         }
 
-        return new Promise<IZip>((resolve, reject) => {
-            unzipper.Open.file(filePath)
-                .then((zip: any) => {
-                    debug(zip);
-                    resolve(new Zip3(filePath, zip));
-                }).catch((err: any): any => {
-                    debug(err);
-                    reject(err);
-                });
+        return new Promise<IZip>(async (resolve, reject) => {
+            let zip: any | undefined;
+            try {
+                zip = await unzipper.Open.file(filePath);
+            } catch (err) {
+                debug(err);
+                reject(err);
+                return;
+            }
+            debug(zip);
+            resolve(new Zip3(filePath, zip));
         });
     }
 
     private static loadPromiseHTTP(filePath: string): Promise<IZip> {
 
-        return new Promise<IZip>((resolve, reject) => {
-            unzipper.Open.url(request.get,
-                {
-                    headers: {},
-                    method: "GET",
-                    uri: filePath,
-                    url: filePath,
-                })
-                .then((zip: any) => {
-                    debug(zip);
-                    resolve(new Zip3(filePath, zip));
-                }).catch((err: any): any => {
-                    debug(err);
-                    reject(err);
-                });
+        return new Promise<IZip>(async (resolve, reject) => {
+            let zip: any | undefined;
+            try {
+                zip = await unzipper.Open.url(request.get,
+                    {
+                        headers: {},
+                        method: "GET",
+                        uri: filePath,
+                        url: filePath,
+                    });
+            } catch (err) {
+                debug(err);
+                reject(err);
+                return;
+            }
+            debug(zip);
+            resolve(new Zip3(filePath, zip));
         });
     }
 

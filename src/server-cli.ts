@@ -50,16 +50,16 @@ if (!stats.isFile() && !stats.isDirectory()) {
 if (stats.isDirectory()) {
     debug("Analysing directory...");
 
-    const filesPromise = filehound.create()
-        .discard("node_modules")
-        .depth(5)
-        .paths(filePath)
-        .ext([".epub", ".cbz"])
-        .find();
-    filesPromise.then((files: string[]) => {
+    (async () => {
+        const files: string[] = await filehound.create()
+            .discard("node_modules")
+            .depth(5)
+            .paths(filePath)
+            .ext([".epub", ".cbz"])
+            .find();
         const server = new Server();
         server.addPublications(files);
-    });
+    })();
 
     // filePaths = fs.readdirSync(filePath);
 

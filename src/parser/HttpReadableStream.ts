@@ -48,20 +48,24 @@ export class HttpReadableStream extends Readable {
             method: "GET",
             uri: this.url,
         }).
-            on("response", (res: request.RequestResponse) => {
+            on("response", async (res: request.RequestResponse) => {
                 // debug(res.headers);
                 // debug(res.headers["content-type"]);
                 // debug(`HTTP response content-range: ${res.headers["content-range"]}`);
                 // debug(`HTTP response content-length: ${res.headers["content-length"]}`);
 
-                streamToBufferPromise(res).then((buffer) => {
-                    // debug(`streamToBufferPromise: ${buffer.length}`);
-                    this.alreadyRead += buffer.length;
-                    this.push(buffer);
-                }).catch((err) => {
+                let buffer: Buffer | undefined;
+                try {
+                    buffer = await streamToBufferPromise(res);
+                } catch (err) {
                     debug(err);
                     this.push(null);
-                });
+                    return;
+                }
+
+                // debug(`streamToBufferPromise: ${buffer.length}`);
+                this.alreadyRead += buffer.length;
+                this.push(buffer);
             }).
             on("error", (err: any) => {
                 debug(err);

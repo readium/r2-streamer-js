@@ -8,7 +8,7 @@ import * as mime from "mime-types";
 import { Link } from "./models/publication-link";
 import { CbzParsePromise } from "./parser/cbz";
 import { EpubParsePromise } from "./parser/epub";
-import { IZip } from "./parser/zip";
+import { IStreamAndLength, IZip } from "./parser/zip";
 import { Server } from "./server";
 import { parseRangeHeader, streamToBufferPromise } from "./utils";
 
@@ -43,9 +43,16 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                 const fileName = path.basename(pathBase64Str);
                 const ext = path.extname(fileName).toLowerCase();
 
-                publication = ext === ".epub" ?
-                    await EpubParsePromise(pathBase64Str) :
-                    await CbzParsePromise(pathBase64Str);
+                try {
+                    publication = ext === ".epub" ?
+                        await EpubParsePromise(pathBase64Str) :
+                        await CbzParsePromise(pathBase64Str);
+                } catch (err) {
+                    debug(err);
+                    res.status(500).send("<html><body><p>Internal Server Error</p><p>"
+                        + err + "</p></body></html>");
+                    return;
+                }
 
                 server.cachePublication(pathBase64Str, publication);
             }
@@ -178,9 +185,17 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
             }
 
             // debug(`${pathInZip} >> ${partialByteBegin}-${partialByteEnd}`);
-            const zipStream_ = isPartialByteRangeRequest ?
-                await zip.entryStreamRangePromise(pathInZip, partialByteBegin, partialByteEnd) :
-                await zip.entryStreamPromise(pathInZip);
+            let zipStream_: IStreamAndLength | undefined;
+            try {
+                zipStream_ = isPartialByteRangeRequest ?
+                    await zip.entryStreamRangePromise(pathInZip, partialByteBegin, partialByteEnd) :
+                    await zip.entryStreamPromise(pathInZip);
+            } catch (err) {
+                debug(err);
+                res.status(500).send("<html><body><p>Internal Server Error</p><p>"
+                    + err + "</p></body></html>");
+                return;
+            }
             const zipStream = zipStream_.stream;
             const totalByteLength = zipStream_.length;
             // debug(`${totalByteLength} total stream bytes`);
@@ -195,7 +210,14 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
 
             let zipData: Buffer | undefined;
             if (!isHead && (isEncrypted || (req.query.show && isText))) {
-                zipData = await streamToBufferPromise(zipStream);
+                try {
+                    zipData = await streamToBufferPromise(zipStream);
+                } catch (err) {
+                    debug(err);
+                    res.status(500).send("<html><body><p>Internal Server Error</p><p>"
+                        + err + "</p></body></html>");
+                    return;
+                }
                 // debug(`${zipData.length} buffer bytes`);
             }
 

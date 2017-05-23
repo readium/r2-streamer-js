@@ -23,28 +23,31 @@ export abstract class Zip implements IZip {
 
     public entryStreamRangePromise(entryPath: string, begin: number, end: number): Promise<IStreamAndLength> {
 
-        return new Promise<IStreamAndLength>((resolve, reject) => {
-            this.entryStreamPromise(entryPath)
-                .then((streamAndLength) => {
+        return new Promise<IStreamAndLength>(async (resolve, reject) => {
+            let streamAndLength: IStreamAndLength | undefined;
+            try {
+                streamAndLength = await this.entryStreamPromise(entryPath);
+            } catch (err) {
+                reject(err);
+                return;
+            }
+            // necessary for TypeScript compiler :(
+            streamAndLength = streamAndLength as IStreamAndLength;
 
-                    const b = begin < 0 ? 0 : begin;
-                    const e = end < 0 ? (streamAndLength.length - 1) : end;
-                    // const length = e - b + 1;
-                    // debug(`entryStreamRangePromise: ${b}-${e}/${streamAndLength.length}`);
+            const b = begin < 0 ? 0 : begin;
+            const e = end < 0 ? (streamAndLength.length - 1) : end;
+            // const length = e - b + 1;
+            // debug(`entryStreamRangePromise: ${b}-${e}/${streamAndLength.length}`);
 
-                    const stream = new RangeStream(b, e, streamAndLength.length);
+            const stream = new RangeStream(b, e, streamAndLength.length);
 
-                    streamAndLength.stream.pipe(stream);
+            streamAndLength.stream.pipe(stream);
 
-                    const sal: IStreamAndLength = {
-                        length: streamAndLength.length,
-                        stream,
-                    };
-                    resolve(sal);
-                })
-                .catch((err) => {
-                    reject(err);
-                });
+            const sal: IStreamAndLength = {
+                length: streamAndLength.length,
+                stream,
+            };
+            resolve(sal);
         });
     }
 }
