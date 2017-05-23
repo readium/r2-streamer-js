@@ -8,12 +8,10 @@ import {
     OnDeserialized,
 } from "ta-json";
 
-import { DateConverter } from "../xml-js-mapper";
-
-import { IStringMap } from "./metadata-multilang";
-
+import { DateConverter } from "../_utils/xml-js-mapper";
 import { BelongsTo } from "./metadata-belongsto";
 import { Contributor } from "./metadata-contributor";
+import { IStringMap } from "./metadata-multilang";
 import { Properties } from "./metadata-properties";
 import { Subject } from "./metadata-subject";
 

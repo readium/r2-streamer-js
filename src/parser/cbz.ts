@@ -3,20 +3,14 @@ import * as path from "path";
 import * as slugify from "slugify";
 import * as xmldom from "xmldom";
 
-import { XML } from "../xml-js-mapper";
-
-import { ComicInfo } from "./comicrack/comicrack";
-
-import { streamToBufferPromise, zipLoadPromise } from "../utils";
-import { IStreamAndLength, IZip } from "./zip";
-
-import { Link } from "../models/publication-link";
-
+import { XML } from "../_utils/xml-js-mapper";
 import { Metadata } from "../models/metadata";
-
-import { Publication } from "../models/publication";
-
 import { Contributor } from "../models/metadata-contributor";
+import { Publication } from "../models/publication";
+import { Link } from "../models/publication-link";
+import { streamToBufferPromise, zipLoadPromise } from "../utils";
+import { ComicInfo } from "./comicrack/comicrack";
+import { IStreamAndLength, IZip } from "./zip";
 
 export async function CbzParsePromise(filePath: string): Promise<Publication> {
 

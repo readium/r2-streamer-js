@@ -4,7 +4,7 @@ import { Par } from "./smil-par";
 import {
     XmlObject,
     XmlXPathSelector,
-} from "../../xml-js-mapper";
+} from "../../_utils/xml-js-mapper";
 
 @XmlObject({
     epub: "http://www.idpf.org/2007/ops",

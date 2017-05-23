@@ -1,48 +1,40 @@
-import * as moment from "moment";
 import * as path from "path";
 import * as querystring from "querystring";
+
+import * as moment from "moment";
+import { JSON as TAJSON } from "ta-json";
 import * as xmldom from "xmldom";
 import * as xpath from "xpath";
 
-import { XML } from "../xml-js-mapper";
-
-import { JSON as TAJSON } from "ta-json";
-
-import { streamToBufferPromise, zipLoadPromise } from "../utils";
-import { IZip } from "./zip";
-
+import { XML } from "../_utils/xml-js-mapper";
 import { MediaOverlayNode, timeStrToSeconds } from "../models/media-overlay";
-
+import { Metadata } from "../models/metadata";
+import { BelongsTo } from "../models/metadata-belongsto";
+import { Collection } from "../models/metadata-collection";
+import { Contributor } from "../models/metadata-contributor";
+import { Encrypted } from "../models/metadata-encrypted";
+import { IStringMap } from "../models/metadata-multilang";
+import { Properties } from "../models/metadata-properties";
+import { Subject } from "../models/metadata-subject";
+import { Publication } from "../models/publication";
+import { Link } from "../models/publication-link";
+import { streamToBufferPromise, zipLoadPromise } from "../utils";
 import { Container } from "./epub/container";
 import { Rootfile } from "./epub/container-rootfile";
 import { Encryption } from "./epub/encryption";
 import { LCP } from "./epub/lcp";
 import { NCX } from "./epub/ncx";
+import { NavPoint } from "./epub/ncx-navpoint";
 import { OPF } from "./epub/opf";
 import { Author } from "./epub/opf-author";
 import { Manifest } from "./epub/opf-manifest";
 import { Metafield } from "./epub/opf-metafield";
 import { Title } from "./epub/opf-title";
 import { SMIL } from "./epub/smil";
-
-import { IStringMap } from "../models/metadata-multilang";
-
-import { Link } from "../models/publication-link";
-
-import { Metadata } from "../models/metadata";
-
-import { Publication } from "../models/publication";
-
-import { BelongsTo } from "../models/metadata-belongsto";
-import { Collection } from "../models/metadata-collection";
-import { Contributor } from "../models/metadata-contributor";
-import { Encrypted } from "../models/metadata-encrypted";
-import { Properties } from "../models/metadata-properties";
-import { Subject } from "../models/metadata-subject";
-import { NavPoint } from "./epub/ncx-navpoint";
 import { Par } from "./epub/smil-par";
 import { Seq } from "./epub/smil-seq";
 import { SeqOrPar } from "./epub/smil-seq-or-par";
+import { IZip } from "./zip";
 
 const epub3 = "3.0";
 const epub301 = "3.0.1";

@@ -1,4 +1,5 @@
 import * as debug_ from "debug";
+import * as request from "request";
 import * as requestPromise from "request-promise-native";
 import * as yauzl from "yauzl";
 
@@ -62,82 +63,134 @@ export class Zip2 extends Zip {
 
         return new Promise<IZip>(async (resolve, reject) => {
 
-            // TODO: instead of a HEAD request, if not supported then
-            // GET with immediate req.abort() in the response callback
-            let res: requestPromise.FullResponse | undefined;
-            try {
-                res = await requestPromise({
-                    headers: {},
-                    method: "HEAD",
-                    resolveWithFullResponse: true,
-                    uri: filePath,
-                });
-            } catch (err) {
+            const failure = (err: any) => {
                 debug(err);
                 reject(err);
-                return;
-            }
+            };
 
-            // To please the TypeScript compiler :(
-            res = res as requestPromise.FullResponse;
+            const success = async (res: request.RequestResponse) => {
 
-            debug(filePath);
-            debug(res.headers);
+                debug(filePath);
+                debug(res.headers);
 
-            // if (!res.headers["content-type"]
-            //     || res.headers["content-type"] !== "application/epub+zip") {
-            //     reject("content-type not supported!");
-            //     return;
-            // }
+                // if (!res.headers["content-type"]
+                //     || res.headers["content-type"] !== "application/epub+zip") {
+                //     reject("content-type not supported!");
+                //     return;
+                // }
 
-            // TODO: if the HTTP server does not provide Content-Length,
-            // then fallback on download, but interrupt (req.abort())
-            // if response payload reaches the max limit
-            if (!res.headers["content-length"]) {
-                reject("content-length not supported!");
-                return;
-            }
-            const httpZipByteLength = parseInt(res.headers["content-length"], 10);
-            debug(`Content-Length: ${httpZipByteLength}`);
-
-            if (!res.headers["accept-ranges"]
-                || res.headers["accept-ranges"] !== "bytes") {
-                if (httpZipByteLength > (2 * 1024 * 1024)) {
-                    reject("accept-ranges not supported, file too big to download: " + httpZipByteLength);
+                // TODO: if the HTTP server does not provide Content-Length,
+                // then fallback on download, but interrupt (req.abort())
+                // if response payload reaches the max limit
+                if (!res.headers["content-length"]) {
+                    reject("content-length not supported!");
                     return;
                 }
-                debug("Downloading: " + filePath);
+                const httpZipByteLength = parseInt(res.headers["content-length"], 10);
+                debug(`Content-Length: ${httpZipByteLength}`);
 
-                let ress: requestPromise.FullResponse | undefined;
-                try {
-                    ress = await requestPromise({
-                        headers: {},
-                        method: "GET",
-                        resolveWithFullResponse: true,
-                        uri: filePath,
-                    });
-                } catch (err) {
-                    debug(err);
-                    reject(err);
+                if (!res.headers["accept-ranges"]
+                    || res.headers["accept-ranges"] !== "bytes") {
+                    if (httpZipByteLength > (2 * 1024 * 1024)) {
+                        reject("accept-ranges not supported, file too big to download: " + httpZipByteLength);
+                        return;
+                    }
+                    debug("Downloading: " + filePath);
+
+                    const failure_ = (err: any) => {
+
+                        debug(err);
+                        reject(err);
+                    };
+
+                    const success_ = async (ress: request.RequestResponse) => {
+
+                        // debug(filePath);
+                        // debug(res.headers);
+                        let buffer: Buffer | undefined;
+                        try {
+                            buffer = await streamToBufferPromise(ress);
+                        } catch (err) {
+                            debug(err);
+                            reject(err);
+                            return;
+                        }
+
+                        yauzl.fromBuffer(buffer,
+                            { lazyEntries: true },
+                            (err: any, zip: any) => {
+                                if (err) {
+                                    debug("yauzl init ERROR");
+                                    debug(err);
+                                    reject(err);
+                                    return;
+                                }
+                                const zip2 = new Zip2(filePath, zip);
+
+                                zip.on("error", (erro: any) => {
+                                    debug("yauzl ERROR");
+                                    debug(erro);
+                                    reject(erro);
+                                });
+
+                                zip.readEntry(); // next (lazyEntries)
+                                zip.on("entry", (entry: any) => {
+                                    if (entry.fileName[entry.fileName.length - 1] === "/") {
+                                        // skip directories / folders
+                                    } else {
+                                        // debug(entry.fileName);
+                                        zip2.addEntry(entry);
+                                    }
+                                    zip.readEntry(); // next (lazyEntries)
+                                });
+
+                                zip.on("end", () => {
+                                    debug("yauzl END");
+                                    resolve(zip2);
+                                });
+
+                                zip.on("close", () => {
+                                    debug("yauzl CLOSE");
+                                });
+                            });
+                    };
+
+                    // No response streaming! :(
+                    // https://github.com/request/request-promise/issues/90
+                    const needsStreamingResponse = true;
+                    if (needsStreamingResponse) {
+                        request.get({
+                            headers: {},
+                            method: "GET",
+                            uri: filePath,
+                        })
+                            .on("response", success_)
+                            .on("error", failure_);
+                    } else {
+                        let ress: requestPromise.FullResponse | undefined;
+                        try {
+                            ress = await requestPromise({
+                                headers: {},
+                                method: "GET",
+                                resolveWithFullResponse: true,
+                                uri: filePath,
+                            });
+                        } catch (err) {
+                            failure_(err);
+                            return;
+                        }
+
+                        // To please the TypeScript compiler :(
+                        ress = ress as requestPromise.FullResponse;
+                        success_(ress);
+                    }
+
                     return;
                 }
 
-                // To please the TypeScript compiler :(
-                ress = ress as requestPromise.FullResponse;
-
-                // debug(filePath);
-                // debug(res.headers);
-                let buffer: Buffer | undefined;
-                try {
-                    buffer = await streamToBufferPromise(ress);
-                } catch (err) {
-                    debug(err);
-                    reject(err);
-                    return;
-                }
-
-                yauzl.fromBuffer(buffer,
-                    { lazyEntries: true },
+                const httpZipReader = new HttpZipReader(filePath, httpZipByteLength);
+                yauzl.fromRandomAccessReader(httpZipReader, httpZipByteLength,
+                    { lazyEntries: true, autoClose: false },
                     (err: any, zip: any) => {
                         if (err) {
                             debug("yauzl init ERROR");
@@ -145,6 +198,7 @@ export class Zip2 extends Zip {
                             reject(err);
                             return;
                         }
+                        zip.httpZipReader = httpZipReader;
                         const zip2 = new Zip2(filePath, zip);
 
                         zip.on("error", (erro: any) => {
@@ -173,48 +227,39 @@ export class Zip2 extends Zip {
                             debug("yauzl CLOSE");
                         });
                     });
-                return;
+            };
+
+            // No response streaming! :(
+            // https://github.com/request/request-promise/issues/90
+            const needsStreamingResponse = true;
+            if (needsStreamingResponse) {
+                request.get({
+                    headers: {},
+                    method: "HEAD",
+                    uri: filePath,
+                })
+                    .on("response", success)
+                    .on("error", failure);
+            } else {
+                // TODO: instead of a HEAD request, if not supported then
+                // GET with immediate req.abort() in the response callback
+                let res: requestPromise.FullResponse | undefined;
+                try {
+                    res = await requestPromise({
+                        headers: {},
+                        method: "HEAD",
+                        resolveWithFullResponse: true,
+                        uri: filePath,
+                    });
+                } catch (err) {
+                    failure(err);
+                    return;
+                }
+
+                // To please the TypeScript compiler :(
+                res = res as requestPromise.FullResponse;
+                success(res);
             }
-
-            const httpZipReader = new HttpZipReader(filePath, httpZipByteLength);
-            yauzl.fromRandomAccessReader(httpZipReader, httpZipByteLength,
-                { lazyEntries: true, autoClose: false },
-                (err: any, zip: any) => {
-                    if (err) {
-                        debug("yauzl init ERROR");
-                        debug(err);
-                        reject(err);
-                        return;
-                    }
-                    zip.httpZipReader = httpZipReader;
-                    const zip2 = new Zip2(filePath, zip);
-
-                    zip.on("error", (erro: any) => {
-                        debug("yauzl ERROR");
-                        debug(erro);
-                        reject(erro);
-                    });
-
-                    zip.readEntry(); // next (lazyEntries)
-                    zip.on("entry", (entry: any) => {
-                        if (entry.fileName[entry.fileName.length - 1] === "/") {
-                            // skip directories / folders
-                        } else {
-                            // debug(entry.fileName);
-                            zip2.addEntry(entry);
-                        }
-                        zip.readEntry(); // next (lazyEntries)
-                    });
-
-                    zip.on("end", () => {
-                        debug("yauzl END");
-                        resolve(zip2);
-                    });
-
-                    zip.on("close", () => {
-                        debug("yauzl CLOSE");
-                    });
-                });
         });
     }
 

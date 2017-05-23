@@ -1,6 +1,7 @@
 import { PassThrough } from "stream";
 
 import * as debug_ from "debug";
+import * as request from "request";
 import * as requestPromise from "request-promise-native";
 import * as util from "util";
 import * as yauzl from "yauzl";
@@ -24,7 +25,7 @@ export class HttpZipReader implements RandomAccessReader {
     }
 
     public _readStreamForRange(start: number, end: number) {
-        // const length = end - start;
+        const length = end - start;
         // debug(`_readStreamForRange (new HttpReadableStream) ${this.url}` +
         //     ` content-length=${this.byteLength} start=${start} end+1=${end} (length=${length})`);
 
@@ -46,29 +47,21 @@ export class HttpZipReader implements RandomAccessReader {
             return bufferToStream(this.firstBuffer.slice(begin, stop));
         }
 
-        // console.log(`HTTP GET ${this.url}: ${start}-${end} (${length}) [${this.byteLength}]`);
-
         const stream = new PassThrough();
 
-        (async () => {
-            const lastByteIndex = end - 1;
-            const range = `${start}-${lastByteIndex}`;
-            let res: requestPromise.FullResponse | undefined;
-            try {
-                res = await requestPromise({
-                    headers: { Range: `bytes=${range}` },
-                    method: "GET",
-                    resolveWithFullResponse: true,
-                    uri: this.url,
-                });
-            } catch (err) {
-                debug(err);
-                // this.stream.end();
-                return;
-            }
+        const lastByteIndex = end - 1;
+        const range = `${start}-${lastByteIndex}`;
 
-            // To please the TypeScript compiler :(
-            res = res as requestPromise.FullResponse;
+        // console.log(`HTTP GET ${this.url}: ${start}-${end} (${length}) [${this.byteLength}]`);
+
+        const failure = (err: any) => {
+            debug(err);
+            // this.stream.end();
+        };
+
+        const success = async (res: request.RequestResponse) => {
+
+            // debug(res);
 
             // debug(res.headers);
             // debug(res.headers["content-type"]);
@@ -98,7 +91,39 @@ export class HttpZipReader implements RandomAccessReader {
                 stream.write(buffer);
                 stream.end();
             }
-        })();
+        };
+
+        // No response streaming! :(
+        // https://github.com/request/request-promise/issues/90
+        const needsStreamingResponse = true;
+        if (needsStreamingResponse) {
+            request.get({
+                headers: { Range: `bytes=${range}` },
+                method: "GET",
+                uri: this.url,
+            })
+                .on("response", success)
+                .on("error", failure);
+        } else {
+            (async () => {
+                let res: requestPromise.FullResponse | undefined;
+                try {
+                    res = await requestPromise({
+                        headers: { Range: `bytes=${range}` },
+                        method: "GET",
+                        resolveWithFullResponse: true,
+                        uri: this.url,
+                    });
+                } catch (err) {
+                    failure(err);
+                    return;
+                }
+
+                // To please the TypeScript compiler :(
+                res = res as requestPromise.FullResponse;
+                success(res);
+            })();
+        }
 
         return stream;
     }

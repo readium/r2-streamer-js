@@ -3,7 +3,7 @@ import { Content } from "./ncx-content";
 import {
     XmlObject,
     XmlXPathSelector,
-} from "../../xml-js-mapper";
+} from "../../_utils/xml-js-mapper";
 
 @XmlObject({
     ncx: "http://www.daisy.org/z3986/2005/ncx/",

@@ -7,7 +7,7 @@ import {
     OnDeserialized,
 } from "ta-json";
 
-import { DateConverter } from "../../xml-js-mapper";
+import { DateConverter } from "../../_utils/xml-js-mapper";
 
 @JsonObject()
 export class OPDSMetadata {

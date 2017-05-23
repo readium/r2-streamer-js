@@ -3,7 +3,7 @@ import { Compression } from "./encryption-compression";
 import {
     XmlObject,
     XmlXPathSelector,
-} from "../../xml-js-mapper";
+} from "../../_utils/xml-js-mapper";
 
 @XmlObject({
     ds: "http://www.w3.org/2000/09/xmldsig#",

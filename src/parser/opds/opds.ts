@@ -7,9 +7,9 @@ import {
     XmlItemType,
     XmlObject,
     XmlXPathSelector,
-} from "../../xml-js-mapper";
+} from "../../_utils/xml-js-mapper";
 
-import { DateConverter } from "../../xml-js-mapper";
+import { DateConverter } from "../../_utils/xml-js-mapper";
 
 @XmlObject({
     app: "http://www.w3.org/2007/app",

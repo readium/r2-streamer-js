@@ -11,6 +11,7 @@ import { Readable } from "stream";
 import { streamToBufferPromise } from "../utils";
 
 import * as debug_ from "debug";
+import * as request from "request";
 import * as requestPromise from "request-promise-native";
 
 const debug = debug_("r2:httpStream");
@@ -39,29 +40,12 @@ export class HttpReadableStream extends Readable {
             return;
         }
 
-        (async () => {
-            console.log(`HTTP GET ${this.url}: ${this.byteStart}-${this.byteEnd} (${this.byteEnd - this.byteStart})`);
+        const failure = (err: any) => {
+            debug(err);
+            this.push(null);
+        };
 
-            const lastByteIndex = this.byteEnd - 1;
-            const range = `${this.byteStart}-${lastByteIndex}`;
-
-            let res: requestPromise.FullResponse | undefined;
-            try {
-                res = await requestPromise({
-                    headers: { Range: `bytes=${range}` },
-                    method: "GET",
-                    resolveWithFullResponse: true,
-                    uri: this.url,
-                });
-            } catch (err) {
-                debug(err);
-                this.push(null);
-                return;
-            }
-
-            // To please the TypeScript compiler :(
-            res = res as requestPromise.FullResponse;
-
+        const success = async (res: request.RequestResponse) => {
             // debug(res.headers);
             // debug(res.headers["content-type"]);
             // debug(`HTTP response content-range: ${res.headers["content-range"]}`);
@@ -71,14 +55,50 @@ export class HttpReadableStream extends Readable {
             try {
                 buffer = await streamToBufferPromise(res);
             } catch (err) {
-                debug(err);
-                this.push(null);
+                failure(err);
                 return;
             }
 
             // debug(`streamToBufferPromise: ${buffer.length}`);
             this.alreadyRead += buffer.length;
             this.push(buffer);
-        })();
+        };
+
+        console.log(`HTTP GET ${this.url}: ${this.byteStart}-${this.byteEnd} (${this.byteEnd - this.byteStart})`);
+
+        const lastByteIndex = this.byteEnd - 1;
+        const range = `${this.byteStart}-${lastByteIndex}`;
+
+        // No response streaming! :(
+        // https://github.com/request/request-promise/issues/90
+        const needsStreamingResponse = true;
+        if (needsStreamingResponse) {
+            request.get({
+                headers: { Range: `bytes=${range}` },
+                method: "GET",
+                uri: this.url,
+            })
+                .on("response", success)
+                .on("error", failure);
+        } else {
+            (async () => {
+                let res: requestPromise.FullResponse | undefined;
+                try {
+                    res = await requestPromise({
+                        headers: { Range: `bytes=${range}` },
+                        method: "GET",
+                        resolveWithFullResponse: true,
+                        uri: this.url,
+                    });
+                } catch (err) {
+                    failure(err);
+                    return;
+                }
+
+                // To please the TypeScript compiler :(
+                res = res as requestPromise.FullResponse;
+                success(res);
+            })();
+        }
     }
 }

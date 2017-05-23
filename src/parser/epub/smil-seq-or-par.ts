@@ -1,7 +1,7 @@
 import {
     XmlDiscriminatorProperty,
     XmlObject,
-} from "../../xml-js-mapper";
+} from "../../_utils/xml-js-mapper";
 
 @XmlObject({
     epub: "http://www.idpf.org/2007/ops",
