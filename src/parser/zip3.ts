@@ -98,8 +98,8 @@ export class Zip3 extends Zip {
 
             const stream: NodeJS.ReadableStream = entry.stream();
             const streamAndLength: IStreamAndLength = {
-                stream,
                 length: entry.size,
+                stream,
             };
             resolve(streamAndLength);
         });

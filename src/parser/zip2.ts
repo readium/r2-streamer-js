@@ -255,8 +255,8 @@ export class Zip2 extends Zip {
                     return;
                 }
                 const streamAndLength: IStreamAndLength = {
-                    stream,
                     length: entry.uncompressedSize as number,
+                    stream,
                 };
                 resolve(streamAndLength);
             });

@@ -18,14 +18,15 @@ const debug = debug_("r2:opds2create");
 debug(`process.cwd(): ${process.cwd()}`);
 debug(`__dirname: ${__dirname}`);
 
-const args = process.argv.slice(2);
+let args = process.argv.slice(2);
 // debug("process.argv.slice(2): %o", args);
 
 if (!args.length) {
     debug("FILEPATH ARGUMENTS ARE MISSING.");
     process.exit(1);
 }
-const opdsJsonFilePath = path.join(process.cwd(), "OPDS2.json");
+const opdsJsonFilePath = args[0];
+args = args.slice(1);
 if (fs.existsSync(opdsJsonFilePath)) {
     debug("OPDS2 JSON file already exists.");
     process.exit(1);

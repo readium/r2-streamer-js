@@ -37,8 +37,8 @@ export abstract class Zip implements IZip {
                     streamAndLength.stream.pipe(stream);
 
                     const sal: IStreamAndLength = {
-                        stream,
                         length: streamAndLength.length,
+                        stream,
                     };
                     resolve(sal);
                 })

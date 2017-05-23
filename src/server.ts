@@ -5,6 +5,7 @@ import * as fs from "fs";
 import * as path from "path";
 
 import { JSON as TAJSON } from "ta-json";
+import { tmpNameSync } from "tmp";
 
 import { OPDSFeed } from "./models/opds2/opds2";
 import { Publication } from "./models/publication";
@@ -26,12 +27,15 @@ export class Server {
     private publicationsOPDSfeed: OPDSFeed | undefined;
     private readonly pathPublicationMap: IPathPublicationMap;
     private creatingPublicationsOPDS: boolean;
+    private readonly opdsJsonFilePath: string;
 
     constructor() {
         this.publications = [];
         this.pathPublicationMap = {};
         this.publicationsOPDSfeed = undefined;
         this.creatingPublicationsOPDS = false;
+
+        this.opdsJsonFilePath = tmpNameSync({ prefix: "readium2-OPDS2-", postfix: ".json" });
 
         const server = express();
         // server.enable('strict routing');
@@ -112,13 +116,13 @@ export class Server {
             return this.publicationsOPDSfeed;
         }
 
-        const opdsJsonFilePath = path.join(process.cwd(), "OPDS2.json");
-        if (!fs.existsSync(opdsJsonFilePath)) {
+        debug(`OPDS2.json => ${this.opdsJsonFilePath}`);
+        if (!fs.existsSync(this.opdsJsonFilePath)) {
             if (!this.creatingPublicationsOPDS) {
                 this.creatingPublicationsOPDS = true;
 
                 const jsFile = path.join(__dirname, "opds2-create-cli.js");
-                const args = [jsFile];
+                const args = [jsFile, this.opdsJsonFilePath];
                 this.publications.forEach((pub) => {
                     const filePathBase64 = new Buffer(pub).toString("base64");
                     args.push(filePathBase64);
@@ -143,7 +147,7 @@ export class Server {
             }
             return undefined;
         }
-        const jsonStr = fs.readFileSync(opdsJsonFilePath, "utf8");
+        const jsonStr = fs.readFileSync(this.opdsJsonFilePath, "utf8");
         if (!jsonStr) {
             return undefined;
         }

@@ -104,8 +104,8 @@ export class Zip1 extends Zip {
                 const entry = this.zip.entries()[entryPath];
 
                 const streamAndLength: IStreamAndLength = {
-                    stream,
                     length: entry.size,
+                    stream,
                 };
                 resolve(streamAndLength);
             });
