@@ -7,11 +7,11 @@ import * as express from "express";
 import * as jsonMarkup from "json-markup";
 import { JSON as TAJSON } from "ta-json";
 
+import { encodeURIComponent_RFC3986, isHTTP } from "./_utils/http/UrlUtils";
+import { sortObject } from "./_utils/JsonUtils";
 import { CbzParsePromise } from "./parser/cbz";
 import { EpubParsePromise, mediaOverlayURLParam, mediaOverlayURLPath } from "./parser/epub";
 import { Server } from "./server";
-import { sortObject } from "./utils";
-import { encodeURIComponent_RFC3986, isHTTP } from "./utils";
 
 const debug = debug_("r2:server:manifestjson");
 

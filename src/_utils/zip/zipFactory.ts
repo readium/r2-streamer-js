@@ -1,4 +1,4 @@
-import { isHTTP } from "../../utils";
+import { isHTTP } from "../http/UrlUtils";
 import { IZip } from "./zip";
 import { Zip1 } from "./zip1";
 import { Zip2 } from "./zip2";

@@ -6,10 +6,10 @@ import * as util from "util";
 import * as express from "express";
 import { JSON as TAJSON } from "ta-json";
 
+import { sortObject } from "./_utils/JsonUtils";
 import { CbzParsePromise } from "./parser/cbz";
 import { EpubParsePromise, mediaOverlayURLParam, mediaOverlayURLPath } from "./parser/epub";
 import { Server } from "./server";
-import { sortObject } from "./utils";
 
 const debug = debug_("r2:server:mediaoverlays");
 

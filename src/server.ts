@@ -7,6 +7,7 @@ import * as path from "path";
 import { JSON as TAJSON } from "ta-json";
 import { tmpNameSync } from "tmp";
 
+import { encodeURIComponent_RFC3986, isHTTP } from "./_utils/http/UrlUtils";
 import { OPDSFeed } from "./models/opds2/opds2";
 import { Publication } from "./models/publication";
 import { serverAssets } from "./server-assets";
@@ -16,7 +17,6 @@ import { serverOPDS } from "./server-opds";
 import { serverOPDS2 } from "./server-opds2";
 import { serverPub } from "./server-pub";
 import { serverUrl } from "./server-url";
-import { encodeURIComponent_RFC3986, isHTTP } from "./utils";
 
 const debug = debug_("r2:server:main");
 

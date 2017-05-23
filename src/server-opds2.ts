@@ -6,10 +6,11 @@ import * as express from "express";
 import * as jsonMarkup from "json-markup";
 import { JSON as TAJSON } from "ta-json";
 
+import { isHTTP } from "./_utils/http/UrlUtils";
+import { sortObject } from "./_utils/JsonUtils";
 import { Link } from "./models/publication-link";
 import { Server } from "./server";
 import { trailingSlashRedirect } from "./server-trailing-slash-redirect";
-import { isHTTP, sortObject } from "./utils";
 
 const debug = debug_("r2:server:opds2");
 

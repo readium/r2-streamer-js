@@ -5,13 +5,13 @@ import * as path from "path";
 
 import { JSON as TAJSON } from "ta-json";
 
+import { encodeURIComponent_RFC3986, isHTTP } from "./_utils/http/UrlUtils";
 import { OPDSFeed } from "./models/opds2/opds2";
 import { OPDSMetadata } from "./models/opds2/opds2-metadata";
 import { Publication } from "./models/publication";
 import { Link } from "./models/publication-link";
 import { CbzParsePromise } from "./parser/cbz";
 import { EpubParsePromise } from "./parser/epub";
-import { encodeURIComponent_RFC3986, isHTTP } from "./utils";
 
 const debug = debug_("r2:opds2create");
 
