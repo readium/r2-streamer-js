@@ -10,6 +10,7 @@
     "css2json": "latest",
     "debug": "latest",
     "express": "latest",
+    "filehound": "latest",
     "json-markup": "latest",
     "mime-types": "latest",
     "moment": "latest",
@@ -19,6 +20,8 @@
     "request": "latest",
     "slugify": "latest",
     "ta-json": "latest",
+    "tmp": "latest",
+    "unzipper": "latest",
     "xmldom": "latest",
     "xpath": "latest",
     "yauzl": "latest"
