@@ -1,7 +1,7 @@
 import { PassThrough } from "stream";
 
 import * as debug_ from "debug";
-import * as request from "request";
+import * as requestPromise from "request-promise-native";
 import * as util from "util";
 import * as yauzl from "yauzl";
 
@@ -50,47 +50,55 @@ export class HttpZipReader implements RandomAccessReader {
 
         const stream = new PassThrough();
 
-        const lastByteIndex = end - 1;
-        const range = `${start}-${lastByteIndex}`;
-        request.get({
-            headers: { Range: `bytes=${range}` },
-            method: "GET",
-            uri: this.url,
-        }).
-            on("response", async (res: request.RequestResponse) => {
-                // debug(res.headers);
-                // debug(res.headers["content-type"]);
-                // debug(`HTTP response content-range: ${res.headers["content-range"]}`);
-                // debug(`HTTP response content-length: ${res.headers["content-length"]}`);
-
-                if (this.firstBuffer) {
-                    res.pipe(stream);
-                    // // .on("end", () => {
-                    // //     debug("END");
-                    // // });
-                } else {
-                    let buffer: Buffer | undefined;
-                    try {
-                        buffer = await streamToBufferPromise(res);
-                    } catch (err) {
-                        debug(err);
-                        stream.end();
-                        return;
-                    }
-                    // debug(`streamToBufferPromise: ${buffer.length}`);
-
-                    this.firstBuffer = buffer;
-                    this.firstBufferStart = start;
-                    this.firstBufferEnd = end;
-
-                    stream.write(buffer);
-                    stream.end();
-                }
-            }).
-            on("error", (err: any) => {
+        (async () => {
+            const lastByteIndex = end - 1;
+            const range = `${start}-${lastByteIndex}`;
+            let res: requestPromise.FullResponse | undefined;
+            try {
+                res = await requestPromise({
+                    headers: { Range: `bytes=${range}` },
+                    method: "GET",
+                    resolveWithFullResponse: true,
+                    uri: this.url,
+                });
+            } catch (err) {
                 debug(err);
                 // this.stream.end();
-            });
+                return;
+            }
+
+            // To please the TypeScript compiler :(
+            res = res as requestPromise.FullResponse;
+
+            // debug(res.headers);
+            // debug(res.headers["content-type"]);
+            // debug(`HTTP response content-range: ${res.headers["content-range"]}`);
+            // debug(`HTTP response content-length: ${res.headers["content-length"]}`);
+
+            if (this.firstBuffer) {
+                res.pipe(stream);
+                // // .on("end", () => {
+                // //     debug("END");
+                // // });
+            } else {
+                let buffer: Buffer | undefined;
+                try {
+                    buffer = await streamToBufferPromise(res);
+                } catch (err) {
+                    debug(err);
+                    stream.end();
+                    return;
+                }
+                // debug(`streamToBufferPromise: ${buffer.length}`);
+
+                this.firstBuffer = buffer;
+                this.firstBufferStart = start;
+                this.firstBufferEnd = end;
+
+                stream.write(buffer);
+                stream.end();
+            }
+        })();
 
         return stream;
     }

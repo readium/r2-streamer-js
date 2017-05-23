@@ -11,7 +11,7 @@ import { Readable } from "stream";
 import { streamToBufferPromise } from "../utils";
 
 import * as debug_ from "debug";
-import * as request from "request";
+import * as requestPromise from "request-promise-native";
 
 const debug = debug_("r2:httpStream");
 
@@ -39,37 +39,46 @@ export class HttpReadableStream extends Readable {
             return;
         }
 
-        console.log(`HTTP GET ${this.url}: ${this.byteStart}-${this.byteEnd} (${this.byteEnd - this.byteStart})`);
+        (async () => {
+            console.log(`HTTP GET ${this.url}: ${this.byteStart}-${this.byteEnd} (${this.byteEnd - this.byteStart})`);
 
-        const lastByteIndex = this.byteEnd - 1;
-        const range = `${this.byteStart}-${lastByteIndex}`;
-        request.get({
-            headers: { Range: `bytes=${range}` },
-            method: "GET",
-            uri: this.url,
-        }).
-            on("response", async (res: request.RequestResponse) => {
-                // debug(res.headers);
-                // debug(res.headers["content-type"]);
-                // debug(`HTTP response content-range: ${res.headers["content-range"]}`);
-                // debug(`HTTP response content-length: ${res.headers["content-length"]}`);
+            const lastByteIndex = this.byteEnd - 1;
+            const range = `${this.byteStart}-${lastByteIndex}`;
 
-                let buffer: Buffer | undefined;
-                try {
-                    buffer = await streamToBufferPromise(res);
-                } catch (err) {
-                    debug(err);
-                    this.push(null);
-                    return;
-                }
-
-                // debug(`streamToBufferPromise: ${buffer.length}`);
-                this.alreadyRead += buffer.length;
-                this.push(buffer);
-            }).
-            on("error", (err: any) => {
+            let res: requestPromise.FullResponse | undefined;
+            try {
+                res = await requestPromise({
+                    headers: { Range: `bytes=${range}` },
+                    method: "GET",
+                    resolveWithFullResponse: true,
+                    uri: this.url,
+                });
+            } catch (err) {
                 debug(err);
                 this.push(null);
-            });
+                return;
+            }
+
+            // To please the TypeScript compiler :(
+            res = res as requestPromise.FullResponse;
+
+            // debug(res.headers);
+            // debug(res.headers["content-type"]);
+            // debug(`HTTP response content-range: ${res.headers["content-range"]}`);
+            // debug(`HTTP response content-length: ${res.headers["content-length"]}`);
+
+            let buffer: Buffer | undefined;
+            try {
+                buffer = await streamToBufferPromise(res);
+            } catch (err) {
+                debug(err);
+                this.push(null);
+                return;
+            }
+
+            // debug(`streamToBufferPromise: ${buffer.length}`);
+            this.alreadyRead += buffer.length;
+            this.push(buffer);
+        })();
     }
 }
