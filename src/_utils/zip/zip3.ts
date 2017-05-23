@@ -2,9 +2,8 @@ import * as debug_ from "debug";
 import * as request from "request";
 import * as unzipper from "unzipper";
 
+import { isHTTP } from "../../utils";
 import { IStreamAndLength, IZip, Zip } from "./zip";
-
-import { isHTTP } from "../utils";
 
 const debug = debug_("r2:zip3");
 

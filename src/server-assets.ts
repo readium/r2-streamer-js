@@ -5,10 +5,10 @@ import * as path from "path";
 import * as express from "express";
 import * as mime from "mime-types";
 
+import { IStreamAndLength, IZip } from "./_utils/zip/zip";
 import { Link } from "./models/publication-link";
 import { CbzParsePromise } from "./parser/cbz";
 import { EpubParsePromise } from "./parser/epub";
-import { IStreamAndLength, IZip } from "./parser/zip";
 import { Server } from "./server";
 import { parseRangeHeader, streamToBufferPromise } from "./utils";
 

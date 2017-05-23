@@ -3,9 +3,9 @@ import * as request from "request";
 import * as requestPromise from "request-promise-native";
 import * as yauzl from "yauzl";
 
-import { isHTTP, streamToBufferPromise } from "../utils";
-import { HttpZipReader } from "./HttpZipReader";
+import { isHTTP, streamToBufferPromise } from "../../utils";
 import { IStreamAndLength, IZip, Zip } from "./zip";
+import { HttpZipReader } from "./zip2RandomAccessReader_Http";
 
 const debug = debug_("r2:zip2");
 

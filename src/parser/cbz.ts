@@ -4,13 +4,14 @@ import * as slugify from "slugify";
 import * as xmldom from "xmldom";
 
 import { XML } from "../_utils/xml-js-mapper";
+import { IStreamAndLength, IZip } from "../_utils/zip/zip";
+import { zipLoadPromise } from "../_utils/zip/zipFactory";
 import { Metadata } from "../models/metadata";
 import { Contributor } from "../models/metadata-contributor";
 import { Publication } from "../models/publication";
 import { Link } from "../models/publication-link";
-import { streamToBufferPromise, zipLoadPromise } from "../utils";
+import { streamToBufferPromise } from "../utils";
 import { ComicInfo } from "./comicrack/comicrack";
-import { IStreamAndLength, IZip } from "./zip";
 
 export async function CbzParsePromise(filePath: string): Promise<Publication> {
 

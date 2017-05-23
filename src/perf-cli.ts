@@ -1,10 +1,10 @@
 import * as fs from "fs";
 import * as path from "path";
 
-import { IZip } from "./parser/zip";
-import { Zip1 } from "./parser/zip1";
-import { Zip2 } from "./parser/zip2";
-import { Zip3 } from "./parser/zip3";
+import { IZip } from "./_utils/zip/zip";
+import { Zip1 } from "./_utils/zip/zip1";
+import { Zip2 } from "./_utils/zip/zip2";
+import { Zip3 } from "./_utils/zip/zip3";
 
 console.log("process.cwd():");
 console.log(process.cwd());

@@ -1,4 +1,4 @@
-import { RangeStream } from "./RangeStream";
+import { RangeStream } from "../stream/RangeStream";
 
 export interface IStreamAndLength {
     stream: NodeJS.ReadableStream;

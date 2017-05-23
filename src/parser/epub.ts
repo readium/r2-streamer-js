@@ -7,6 +7,8 @@ import * as xmldom from "xmldom";
 import * as xpath from "xpath";
 
 import { XML } from "../_utils/xml-js-mapper";
+import { IZip } from "../_utils/zip/zip";
+import { zipLoadPromise } from "../_utils/zip/zipFactory";
 import { MediaOverlayNode, timeStrToSeconds } from "../models/media-overlay";
 import { Metadata } from "../models/metadata";
 import { BelongsTo } from "../models/metadata-belongsto";
@@ -18,7 +20,7 @@ import { Properties } from "../models/metadata-properties";
 import { Subject } from "../models/metadata-subject";
 import { Publication } from "../models/publication";
 import { Link } from "../models/publication-link";
-import { streamToBufferPromise, zipLoadPromise } from "../utils";
+import { streamToBufferPromise } from "../utils";
 import { Container } from "./epub/container";
 import { Rootfile } from "./epub/container-rootfile";
 import { Encryption } from "./epub/encryption";
@@ -34,7 +36,6 @@ import { SMIL } from "./epub/smil";
 import { Par } from "./epub/smil-par";
 import { Seq } from "./epub/smil-seq";
 import { SeqOrPar } from "./epub/smil-seq-or-par";
-import { IZip } from "./zip";
 
 const epub3 = "3.0";
 const epub301 = "3.0.1";

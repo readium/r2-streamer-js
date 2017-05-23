@@ -2,20 +2,9 @@ import * as querystring from "querystring";
 
 import { PassThrough } from "stream";
 
-import { IZip } from "./parser/zip";
-import { Zip1 } from "./parser/zip1";
-import { Zip2 } from "./parser/zip2";
-
 export function isHTTP(urlOrPath: string): boolean {
     // TODO: smarter regexp
     return urlOrPath.indexOf("http") === 0;
-}
-
-export function zipLoadPromise(filePath: string): Promise<IZip> {
-    if (isHTTP(filePath)) {
-        return Zip2.loadPromise(filePath);
-    }
-    return Zip1.loadPromise(filePath);
 }
 
 interface IStringKeyedObject { [key: string]: any; }
