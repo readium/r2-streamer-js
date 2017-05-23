@@ -5,12 +5,13 @@ import * as path from "path";
 import * as express from "express";
 import * as mime from "mime-types";
 
+import { streamToBufferPromise } from "./_utils/stream/BufferUtils";
 import { IStreamAndLength, IZip } from "./_utils/zip/zip";
 import { Link } from "./models/publication-link";
 import { CbzParsePromise } from "./parser/cbz";
 import { EpubParsePromise } from "./parser/epub";
 import { Server } from "./server";
-import { parseRangeHeader, streamToBufferPromise } from "./utils";
+import { parseRangeHeader } from "./utils";
 
 const debug = debug_("r2:server:assets");
 

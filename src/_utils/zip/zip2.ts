@@ -3,7 +3,8 @@ import * as request from "request";
 import * as requestPromise from "request-promise-native";
 import * as yauzl from "yauzl";
 
-import { isHTTP, streamToBufferPromise } from "../../utils";
+import { isHTTP } from "../../utils";
+import { streamToBufferPromise } from "../stream/BufferUtils";
 import { IStreamAndLength, IZip, Zip } from "./zip";
 import { HttpZipReader } from "./zip2RandomAccessReader_Http";
 

@@ -6,6 +6,7 @@ import { JSON as TAJSON } from "ta-json";
 import * as xmldom from "xmldom";
 import * as xpath from "xpath";
 
+import { streamToBufferPromise } from "../_utils/stream/BufferUtils";
 import { XML } from "../_utils/xml-js-mapper";
 import { IZip } from "../_utils/zip/zip";
 import { zipLoadPromise } from "../_utils/zip/zipFactory";
@@ -20,7 +21,6 @@ import { Properties } from "../models/metadata-properties";
 import { Subject } from "../models/metadata-subject";
 import { Publication } from "../models/publication";
 import { Link } from "../models/publication-link";
-import { streamToBufferPromise } from "../utils";
 import { Container } from "./epub/container";
 import { Rootfile } from "./epub/container-rootfile";
 import { Encryption } from "./epub/encryption";

@@ -3,7 +3,7 @@ import * as StreamZip from "node-stream-zip";
 
 import { IStreamAndLength, IZip, Zip } from "./zip";
 
-// import { bufferToStream } from "../utils";
+// import { bufferToStream } from "../stream/BufferUtils";
 
 const debug = debug_("r2:zip1");
 

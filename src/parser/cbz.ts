@@ -3,6 +3,7 @@ import * as path from "path";
 import * as slugify from "slugify";
 import * as xmldom from "xmldom";
 
+import { streamToBufferPromise } from "../_utils/stream/BufferUtils";
 import { XML } from "../_utils/xml-js-mapper";
 import { IStreamAndLength, IZip } from "../_utils/zip/zip";
 import { zipLoadPromise } from "../_utils/zip/zipFactory";
@@ -10,7 +11,6 @@ import { Metadata } from "../models/metadata";
 import { Contributor } from "../models/metadata-contributor";
 import { Publication } from "../models/publication";
 import { Link } from "../models/publication-link";
-import { streamToBufferPromise } from "../utils";
 import { ComicInfo } from "./comicrack/comicrack";
 
 export async function CbzParsePromise(filePath: string): Promise<Publication> {

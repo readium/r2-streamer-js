@@ -8,7 +8,7 @@
 
 import { Readable } from "stream";
 
-import { streamToBufferPromise } from "../utils";
+import { streamToBufferPromise } from "../_utils/stream/BufferUtils";
 
 import * as debug_ from "debug";
 import * as request from "request";
