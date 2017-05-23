@@ -1,4 +1,5 @@
 import * as debug_ from "debug";
+import * as filehound from "filehound";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -46,44 +47,38 @@ if (!stats.isFile() && !stats.isDirectory()) {
     process.exit(1);
 }
 
-let filePaths = [filePath];
-
 if (stats.isDirectory()) {
     debug("Analysing directory...");
 
-    filePaths = fs.readdirSync(filePath);
-
-    filePaths = filePaths.filter((filep) => {
-        const fileName = path.basename(filep);
-        const ext = path.extname(fileName).toLowerCase();
-        return (ext === ".epub" || ext === ".cbz") &&
-            fs.lstatSync(path.join(filePath, filep)).isFile();
+    const filesPromise = filehound.create()
+        .discard("node_modules")
+        .depth(5)
+        .paths(filePath)
+        .ext([".epub", ".cbz"])
+        .find();
+    filesPromise.then((files: string[]) => {
+        const server = new Server();
+        server.addPublications(files);
     });
 
-    filePaths = filePaths.map((filep) => {
-        return path.join(filePath, filep);
-    });
+    // filePaths = fs.readdirSync(filePath);
 
-    debug("Publications:");
-    filePaths.forEach((filep) => {
-        debug(filep);
-    });
+    // filePaths = filePaths.filter((filep) => {
+    //     const fileName = path.basename(filep);
+    //     const ext = path.extname(fileName).toLowerCase();
+    //     return (ext === ".epub" || ext === ".cbz") &&
+    //         fs.lstatSync(path.join(filePath, filep)).isFile();
+    // });
+
+    // filePaths = filePaths.map((filep) => {
+    //     return path.join(filePath, filep);
+    // });
+
+    // debug("Publications:");
+    // filePaths.forEach((filep) => {
+    //     debug(filep);
+    // });
+} else {
+    const server = new Server();
+    server.addPublications([filePath]);
 }
-
-filePaths.push("https://readium.firebaseapp.com/epub_content/epubReadingSystem.epub");
-filePaths.push("https://readium.firebaseapp.com/epub_content/internal_link.epub");
-
-// SmokeTestFXL.epub
-// SOURCE:
-// https://github.com/readium/readium-test-files/tree/master/functional/smoke-tests/SmokeTestFXL
-filePaths.push(
-    "https://rawgit.com/readium/readium-test-files/master/functional/smoke-tests/SmokeTestFXL/SmokeTestFXL.epub");
-
-// SmokeTest-EPUB2.epub
-// SOURCE:
-// https://github.com/readium/readium-test-files/tree/master/functional/smoke-tests/SmokeTest-EPUB2
-filePaths.push(
-    "https://rawgit.com/readium/readium-test-files/master/functional/smoke-tests/SmokeTest-EPUB2/SmokeTest-EPUB2.epub");
-
-const server = new Server();
-server.addPublications(filePaths);
