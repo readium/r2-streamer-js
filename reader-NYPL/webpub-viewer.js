@@ -2071,7 +2071,20 @@ define("ColumnsPaginatedBookView", ["require", "exports", "HTMLUtilities", "Brow
             for (var _i = 0, images_3 = images; _i < images_3.length; _i++) {
                 var image = images_3[_i];
                 image.style.maxWidth = width;
-                image.style.maxHeight = this.height + "px";
+                // Determine how much vertical space there is for the image.
+                var nextElement = image;
+                var totalMargins = 0;
+                while (nextElement !== body) {
+                    var computedStyle = window.getComputedStyle(nextElement);
+                    if (computedStyle.marginTop) {
+                        totalMargins += parseInt(computedStyle.marginTop.slice(0, -2), 10);
+                    }
+                    if (computedStyle.marginBottom) {
+                        totalMargins += parseInt(computedStyle.marginBottom.slice(0, -2), 10);
+                    }
+                    nextElement = nextElement.parentElement;
+                }
+                image.style.maxHeight = (this.height - totalMargins) + "px";
                 // Without this, an image at the end of a resource can end up
                 // with an extra empty column after it.
                 image.style.display = "block";
@@ -2148,7 +2161,7 @@ define("ColumnsPaginatedBookView", ["require", "exports", "HTMLUtilities", "Brow
                 // scrollWidth doesn't change when some columns
                 // are off to the left, so we need to subtract them.
                 var leftWidth = this.getLeftColumnsWidth();
-                rightWidth = rightWidth - leftWidth;
+                rightWidth = Math.max(0, rightWidth - leftWidth);
             }
             if (rightWidth === this.sideMargin) {
                 return 0;
@@ -2246,9 +2259,17 @@ define("ColumnsPaginatedBookView", ["require", "exports", "HTMLUtilities", "Brow
             if (element) {
                 // Get the element's position in the iframe, and
                 // round that to figure out the column it's in.
+                // There is a bug in Safari when using getBoundingClientRect
+                // on an element that spans multiple columns. Temporarily
+                // set the element's height to fit it on one column so we
+                // can determine the first column position.
+                var originalHeight = element.style.height;
+                element.style.height = "0";
                 var left = element.getBoundingClientRect().left;
                 var width = this.getColumnWidth();
                 var roundedLeftWidth = Math.floor(left / width) * width;
+                // Restore element's original height.
+                element.style.height = originalHeight;
                 this.setLeftColumnsWidth(roundedLeftWidth);
             }
         };
