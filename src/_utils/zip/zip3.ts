@@ -11,7 +11,7 @@ interface IStringKeyedObject { [key: string]: any; }
 
 export class Zip3 extends Zip {
 
-    public static loadPromise(filePath: string): Promise<IZip> {
+    public static async loadPromise(filePath: string): Promise<IZip> {
         if (isHTTP(filePath)) {
             return Zip3.loadPromiseHTTP(filePath);
         }
@@ -30,7 +30,7 @@ export class Zip3 extends Zip {
         });
     }
 
-    private static loadPromiseHTTP(filePath: string): Promise<IZip> {
+    private static async loadPromiseHTTP(filePath: string): Promise<IZip> {
 
         return new Promise<IZip>(async (resolve, reject) => {
             let zip: any | undefined;
@@ -86,7 +86,7 @@ export class Zip3 extends Zip {
         });
     }
 
-    public entryStreamPromise(entryPath: string): Promise<IStreamAndLength> {
+    public async entryStreamPromise(entryPath: string): Promise<IStreamAndLength> {
 
         // debug(`entryStreamPromise: ${entryPath}`);
 

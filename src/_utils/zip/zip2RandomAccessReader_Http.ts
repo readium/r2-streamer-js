@@ -105,9 +105,11 @@ export class HttpZipReader implements RandomAccessReader {
                 .on("response", success)
                 .on("error", failure);
         } else {
+            // tslint:disable-next-line:no-floating-promises
             (async () => {
                 let res: requestPromise.FullResponse | undefined;
                 try {
+                    // tslint:disable-next-line:await-promise no-floating-promises
                     res = await requestPromise({
                         headers: { Range: `bytes=${range}` },
                         method: "GET",
@@ -121,8 +123,14 @@ export class HttpZipReader implements RandomAccessReader {
 
                 // To please the TypeScript compiler :(
                 res = res as requestPromise.FullResponse;
-                success(res);
-            })();
+                await success(res);
+            })()
+                // .then(() => {
+                //     console.log("done");
+                // }).catch((err) => {
+                //     console.log(err);
+                // })
+                ;
         }
 
         return stream;

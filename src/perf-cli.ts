@@ -41,8 +41,8 @@ const fileName = path.basename(filePath);
 const ext = path.extname(fileName).toLowerCase();
 
 if (ext === ".epub" || ext === ".cbz" || ext === ".zip") {
+    // tslint:disable-next-line:no-floating-promises
     (async () => {
-
         const time3 = process.hrtime();
         const zip3: IZip = await Zip3.loadPromise(filePath);
         const diff3 = process.hrtime(time3);

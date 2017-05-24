@@ -9,7 +9,7 @@ const debug = debug_("r2:zip1");
 
 export class Zip1 extends Zip {
 
-    public static loadPromise(filePath: string): Promise<IZip> {
+    public static async loadPromise(filePath: string): Promise<IZip> {
 
         return new Promise<IZip>((resolve, reject) => {
 
@@ -76,7 +76,7 @@ export class Zip1 extends Zip {
         });
     }
 
-    public entryStreamPromise(entryPath: string): Promise<IStreamAndLength> {
+    public async entryStreamPromise(entryPath: string): Promise<IStreamAndLength> {
 
         // debug(`entryStreamPromise: ${entryPath}`);
 

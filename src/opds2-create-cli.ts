@@ -32,8 +32,8 @@ if (fs.existsSync(opdsJsonFilePath)) {
     process.exit(1);
 }
 
+// tslint:disable-next-line:no-floating-promises
 (async () => {
-
     const publications = new OPDSFeed();
     publications.Context = ["http://opds-spec.org/opds.jsonld"];
     publications.Metadata = new OPDSMetadata();
@@ -77,14 +77,21 @@ if (fs.existsSync(opdsJsonFilePath)) {
         linkSelf.Rel.push("self");
         publi.Links.push(linkSelf);
 
+        publi.Images = new Array<Link>();
         const coverLink = publication.GetCover();
         if (coverLink) {
             const linkCover = new Link();
             linkCover.Href = filePathBase64Encoded + "/" + coverLink.Href;
             linkCover.TypeLink = coverLink.TypeLink;
-            linkCover.Rel = new Array<string>();
-            linkCover.Rel.push("cover");
-            publi.Links.push(linkCover);
+            // linkCover.Rel = new Array<string>();
+            // linkCover.Rel.push("cover");
+
+            if (coverLink.Width && coverLink.Height) {
+                linkCover.Width = coverLink.Width;
+                linkCover.Height = coverLink.Height;
+
+            }
+            publi.Images.push(linkCover);
         }
 
         if (publications.Metadata) {

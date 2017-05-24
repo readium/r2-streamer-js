@@ -40,20 +40,24 @@ if (!fs.existsSync(filePath)) {
 const fileName = path.basename(filePath);
 const ext = path.extname(fileName).toLowerCase();
 
-if (ext === ".epub") {
+// tslint:disable-next-line:no-floating-promises
+(async () => {
 
-    EpubParsePromise(filePath)
-        .then((_publication) => {
-            console.log("== EpubParser: resolve");
-            // dumpPublication(publication);
-        }).catch((err) => {
+    if (ext === ".epub") {
+
+        let publication: Publication | undefined;
+        try {
+            publication = await EpubParsePromise(filePath);
+        } catch (err) {
             console.log("== EpubParser: reject");
             console.log(err);
-        });
+            return;
+        }
+        console.log("== EpubParser: resolve: " + publication.Links);
+        // dumpPublication(publication);
 
-} else if (ext === ".cbz") {
+    } else if (ext === ".cbz") {
 
-    (async () => {
         let publication: Publication | undefined;
         try {
             publication = await CbzParsePromise(filePath);
@@ -62,24 +66,15 @@ if (ext === ".epub") {
             console.log(err);
             return;
         }
-        if (!publication) {
-            console.log("== CbzParser: nil resolve");
-            return;
-        }
+        // if (!publication) {
+        //     console.log("== CbzParser: nil resolve");
+        //     return;
+        // }
 
         console.log("== CbzParser: resolve");
         dumpPublication(publication);
-    })();
-
-    // CbzParse(filePath)
-    //     .then((publication) => {
-    //         console.log("== CbzParser: resolve");
-    //         dumpPublication(publication);
-    //     }).catch((err) => {
-    //         console.log("== CbzParser: reject");
-    //         console.log(err);
-    //     });
-}
+    }
+})();
 
 export function dumpPublication(publication: Publication) {
 

@@ -87,7 +87,7 @@ export function serverOPDS2(server: Server, topRouter: express.Router) {
                     (obj) => {
                         if (obj.href && typeof obj.href === "string"
                             && !isHTTP(obj.href)) {
-                            obj.href_ = obj.href;
+                            // obj.href_ = obj.href;
                             obj.href = absoluteURL(obj.href);
                         }
                     });

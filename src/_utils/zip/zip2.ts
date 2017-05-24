@@ -14,7 +14,7 @@ interface IStringKeyedObject { [key: string]: any; }
 
 export class Zip2 extends Zip {
 
-    public static loadPromise(filePath: string): Promise<IZip> {
+    public static async loadPromise(filePath: string): Promise<IZip> {
         if (isHTTP(filePath)) {
             return Zip2.loadPromiseHTTP(filePath);
         }
@@ -60,7 +60,7 @@ export class Zip2 extends Zip {
         });
     }
 
-    private static loadPromiseHTTP(filePath: string): Promise<IZip> {
+    private static async loadPromiseHTTP(filePath: string): Promise<IZip> {
 
         return new Promise<IZip>(async (resolve, reject) => {
 
@@ -170,6 +170,7 @@ export class Zip2 extends Zip {
                     } else {
                         let ress: requestPromise.FullResponse | undefined;
                         try {
+                            // tslint:disable-next-line:await-promise no-floating-promises
                             ress = await requestPromise({
                                 headers: {},
                                 method: "GET",
@@ -183,7 +184,7 @@ export class Zip2 extends Zip {
 
                         // To please the TypeScript compiler :(
                         ress = ress as requestPromise.FullResponse;
-                        success_(ress);
+                        await success_(ress);
                     }
 
                     return;
@@ -246,6 +247,7 @@ export class Zip2 extends Zip {
                 // GET with immediate req.abort() in the response callback
                 let res: requestPromise.FullResponse | undefined;
                 try {
+                    // tslint:disable-next-line:await-promise no-floating-promises
                     res = await requestPromise({
                         headers: {},
                         method: "HEAD",
@@ -259,7 +261,7 @@ export class Zip2 extends Zip {
 
                 // To please the TypeScript compiler :(
                 res = res as requestPromise.FullResponse;
-                success(res);
+                await success(res);
             }
         });
     }
@@ -296,7 +298,7 @@ export class Zip2 extends Zip {
         });
     }
 
-    public entryStreamPromise(entryPath: string): Promise<IStreamAndLength> {
+    public async entryStreamPromise(entryPath: string): Promise<IStreamAndLength> {
 
         // debug(`entryStreamPromise: ${entryPath}`);
 

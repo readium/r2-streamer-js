@@ -280,6 +280,7 @@ export function serverOPDS(_server: Server, topRouter: express.Router) {
         } else {
             let response: requestPromise.FullResponse | undefined;
             try {
+                // tslint:disable-next-line:await-promise no-floating-promises
                 response = await requestPromise({
                     headers: {},
                     method: "GET",
@@ -293,7 +294,7 @@ export function serverOPDS(_server: Server, topRouter: express.Router) {
 
             // To please the TypeScript compiler :(
             response = response as requestPromise.FullResponse;
-            success(response);
+            await success(response);
         }
     });
 

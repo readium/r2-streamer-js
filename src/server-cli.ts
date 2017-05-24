@@ -50,6 +50,7 @@ if (!stats.isFile() && !stats.isDirectory()) {
 if (stats.isDirectory()) {
     debug("Analysing directory...");
 
+    // tslint:disable-next-line:no-floating-promises
     (async () => {
         const files: string[] = await filehound.create()
             .discard("node_modules")

@@ -107,7 +107,7 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
                     (obj) => {
                         if (obj.href && typeof obj.href === "string"
                             && !isHTTP(obj.href)) {
-                            obj.href_ = obj.href;
+                            // obj.href_ = obj.href;
                             obj.href = absoluteURL(obj.href);
                         }
 

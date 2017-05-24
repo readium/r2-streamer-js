@@ -84,6 +84,7 @@ export class HttpReadableStream extends Readable {
             (async () => {
                 let res: requestPromise.FullResponse | undefined;
                 try {
+                    // tslint:disable-next-line:await-promise no-floating-promises
                     res = await requestPromise({
                         headers: { Range: `bytes=${range}` },
                         method: "GET",
@@ -97,7 +98,7 @@ export class HttpReadableStream extends Readable {
 
                 // To please the TypeScript compiler :(
                 res = res as requestPromise.FullResponse;
-                success(res);
+                await success(res);
             })();
         }
     }

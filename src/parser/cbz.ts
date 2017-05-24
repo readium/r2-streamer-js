@@ -12,6 +12,7 @@ import { Contributor } from "../models/metadata-contributor";
 import { Publication } from "../models/publication";
 import { Link } from "../models/publication-link";
 import { ComicInfo } from "./comicrack/comicrack";
+import { addCoverDimensions } from "./epub";
 
 export async function CbzParsePromise(filePath: string): Promise<Publication> {
 
@@ -68,7 +69,8 @@ export async function CbzParsePromise(filePath: string): Promise<Publication> {
 
     if (comicInfoEntryName) {
         try {
-            await comicRackMetadata(zip, comicInfoEntryName, publication);
+            const _b = await comicRackMetadata(zip, comicInfoEntryName, publication);
+            console.log(_b);
         } catch (err) {
             console.log(err);
         }
@@ -82,7 +84,7 @@ const filePathToTitle = (filePath: string): string => {
     return slugify(fileName, "_").replace(/[\.]/g, "_");
 };
 
-const comicRackMetadata = async (zip: IZip, entryName: string, publication: Publication) => {
+const comicRackMetadata = async (zip: IZip, entryName: string, publication: Publication): Promise<void> => {
     let comicZipStream_: IStreamAndLength | undefined;
     try {
         comicZipStream_ = await zip.entryStreamPromise(entryName);
@@ -164,10 +166,13 @@ const comicRackMetadata = async (zip: IZip, entryName: string, publication: Publ
     }
 
     if (comicMeta.Pages) {
-        comicMeta.Pages.forEach((p) => {
+        // no forEach(), because of await/async within the iteration body
+        // comicMeta.Pages.forEach(async (p) => {
+        for (const p of comicMeta.Pages) {
             const l = new Link();
             if (p.Type === "FrontCover") {
                 l.AddRel("cover");
+                await addCoverDimensions(publication, l);
             }
             l.Href = publication.Spine[p.Image].Href;
             if (p.ImageHeight) {
@@ -183,6 +188,6 @@ const comicRackMetadata = async (zip: IZip, entryName: string, publication: Publ
                 publication.TOC = [];
             }
             publication.TOC.push(l);
-        });
+        }
     }
 };

@@ -1,14 +1,14 @@
+import * as sizeOf from "image-size";
+import * as moment from "moment";
 import * as path from "path";
 import * as querystring from "querystring";
-
-import * as moment from "moment";
 import { JSON as TAJSON } from "ta-json";
 import * as xmldom from "xmldom";
 import * as xpath from "xpath";
 
 import { streamToBufferPromise } from "../_utils/stream/BufferUtils";
 import { XML } from "../_utils/xml-js-mapper";
-import { IZip } from "../_utils/zip/zip";
+import { IStreamAndLength, IZip } from "../_utils/zip/zip";
 import { zipLoadPromise } from "../_utils/zip/zipFactory";
 import { MediaOverlayNode, timeStrToSeconds } from "../models/media-overlay";
 import { Metadata } from "../models/metadata";
@@ -48,6 +48,46 @@ const reflowableMeta = "reflowable";
 
 export const mediaOverlayURLPath = "media-overlay";
 export const mediaOverlayURLParam = "resource";
+
+export const addCoverDimensions = async (publication: Publication, coverLink: Link): Promise<void> => {
+    if (publication.Internal) {
+        const zipInternal = publication.Internal.find((i) => {
+            if (i.Name === "zip") {
+                return true;
+            }
+            return false;
+        });
+        if (zipInternal) {
+            const zip = zipInternal.Value as IZip;
+            if (zip.hasEntry(coverLink.Href)) {
+                let zipStream: IStreamAndLength | undefined;
+                try {
+                    zipStream = await zip.entryStreamPromise(coverLink.Href);
+
+                    let zipData: Buffer | undefined;
+                    try {
+                        zipData = await streamToBufferPromise(zipStream.stream);
+
+                        const imageInfo = sizeOf(zipData);
+                        if (imageInfo) {
+                            coverLink.Width = imageInfo.width;
+                            coverLink.Height = imageInfo.height;
+
+                            if (coverLink.TypeLink &&
+                                coverLink.TypeLink.replace("jpeg", "jpg") !== ("image/" + imageInfo.type)) {
+                                console.log(`Wrong image type? ${coverLink.TypeLink} -- ${imageInfo.type}`);
+                            }
+                        }
+                    } catch (err) {
+                        console.log(err);
+                    }
+                } catch (err) {
+                    console.log(err);
+                }
+            }
+        }
+    }
+};
 
 export async function EpubParsePromise(filePath: string): Promise<Publication> {
 
@@ -252,18 +292,18 @@ export async function EpubParsePromise(filePath: string): Promise<Publication> {
     if (isEpub3OrMore(rootfile, opf)) {
         findContributorInMeta(publication, rootfile, opf);
     }
-
-    fillSpineAndResource(publication, rootfile, opf);
+    await fillSpineAndResource(publication, rootfile, opf);
 
     addRendition(publication, rootfile, opf);
 
-    addCoverRel(publication, rootfile, opf);
+    await addCoverRel(publication, rootfile, opf);
 
     if (encryption) {
         fillEncryptionInfo(publication, rootfile, opf, encryption, lcpl);
     }
 
     await fillTOCFromNavDoc(publication, rootfile, opf, zip);
+
     if (!publication.TOC || !publication.TOC.length) {
         if (ncx) {
             fillTOCFromNCX(publication, rootfile, opf, ncx);
@@ -287,106 +327,109 @@ export async function EpubParsePromise(filePath: string): Promise<Publication> {
 //     return slugify(fileName, "_").replace(/[\.]/g, "_");
 // }
 
-const fillMediaOverlay = async (publication: Publication, rootfile: Rootfile, opf: OPF, zip: IZip) => {
+const fillMediaOverlay =
+    async (publication: Publication, rootfile: Rootfile, opf: OPF, zip: IZip)
+        : Promise<void> => {
 
-    if (!publication.Resources) {
+        if (!publication.Resources) {
+            return;
+        }
+
+        // no forEach(), because of await/async within the iteration body
+        // publication.Resources.forEach(async (item) => {
+        for (const item of publication.Resources) {
+            if (item.TypeLink !== "application/smil+xml") {
+                continue;
+            }
+
+            const smilFilePath = item.Href;
+            if (!zip.hasEntry(smilFilePath)) {
+                continue;
+            }
+
+            const mo = new MediaOverlayNode();
+            mo.SmilPathInZip = smilFilePath;
+
+            const manItemsHtmlWithSmil = Array<Manifest>();
+            opf.Manifest.forEach((manItemHtmlWithSmil) => {
+                if (manItemHtmlWithSmil.MediaOverlay) { // HTML
+                    const manItemSmil = opf.Manifest.find((mi) => {
+                        if (mi.ID === manItemHtmlWithSmil.MediaOverlay) {
+                            return true;
+                        }
+                        return false;
+                    });
+                    if (manItemSmil) {
+                        const smilFilePath2 = path.join(path.dirname(opf.ZipPath), manItemSmil.Href)
+                            .replace(/\\/g, "/");
+                        if (smilFilePath2 === smilFilePath) {
+                            manItemsHtmlWithSmil.push(manItemHtmlWithSmil);
+                        }
+                    }
+                }
+            });
+
+            manItemsHtmlWithSmil.forEach((manItemHtmlWithSmil) => {
+
+                const htmlPathInZip = path.join(path.dirname(opf.ZipPath), manItemHtmlWithSmil.Href)
+                    .replace(/\\/g, "/");
+
+                const link = findLinKByHref(publication, rootfile, opf, htmlPathInZip);
+                if (link) {
+                    if (!link.MediaOverlays) {
+                        link.MediaOverlays = [];
+                    }
+
+                    const alreadyExists = link.MediaOverlays.find((moo) => {
+                        if (mo.SmilPathInZip === moo.SmilPathInZip) {
+                            return true;
+                        }
+                        return false;
+                    });
+                    if (!alreadyExists) {
+                        link.MediaOverlays.push(mo);
+                    }
+
+                    if (!link.Properties) {
+                        link.Properties = new Properties();
+                    }
+                    link.Properties.MediaOverlay = mediaOverlayURLPath + "?" +
+                        mediaOverlayURLParam + "=" + querystring.escape(link.Href);
+                }
+            });
+
+            const smilZipStream_ = await zip.entryStreamPromise(smilFilePath);
+            const smilZipStream = smilZipStream_.stream;
+            const smilZipData = await streamToBufferPromise(smilZipStream);
+            const smilStr = smilZipData.toString("utf8");
+            const smilXmlDoc = new xmldom.DOMParser().parseFromString(smilStr);
+            const smil = XML.deserialize<SMIL>(smilXmlDoc, SMIL);
+            smil.ZipPath = smilFilePath;
+
+            // breakLength: 100  maxArrayLength: undefined
+            // console.log(util.inspect(smil,
+            //     { showHidden: false, depth: 1000, colors: true, customInspect: true }));
+
+            mo.Role = [];
+            mo.Role.push("section");
+
+            if (smil.Body) {
+                if (smil.Body.TextRef) {
+                    mo.Text = smil.Body.TextRef;
+                }
+                if (smil.Body.Children && smil.Body.Children.length) {
+                    smil.Body.Children.forEach((seqChild) => {
+                        if (!mo.Children) {
+                            mo.Children = [];
+                        }
+                        addSeqToMediaOverlay(publication, rootfile, opf, mo, mo.Children, seqChild);
+                    });
+                }
+            }
+        }
+
         return;
-    }
-
-    // no forEach(), because of await/async within the iteration body
-    for (const item of publication.Resources) {
-        if (item.TypeLink !== "application/smil+xml") {
-            continue;
-        }
-
-        const smilFilePath = item.Href;
-        if (!zip.hasEntry(smilFilePath)) {
-            continue;
-        }
-
-        const mo = new MediaOverlayNode();
-        mo.SmilPathInZip = smilFilePath;
-
-        const manItemsHtmlWithSmil = Array<Manifest>();
-        opf.Manifest.forEach((manItemHtmlWithSmil) => {
-            if (manItemHtmlWithSmil.MediaOverlay) { // HTML
-                const manItemSmil = opf.Manifest.find((mi) => {
-                    if (mi.ID === manItemHtmlWithSmil.MediaOverlay) {
-                        return true;
-                    }
-                    return false;
-                });
-                if (manItemSmil) {
-                    const smilFilePath2 = path.join(path.dirname(opf.ZipPath), manItemSmil.Href)
-                        .replace(/\\/g, "/");
-                    if (smilFilePath2 === smilFilePath) {
-                        manItemsHtmlWithSmil.push(manItemHtmlWithSmil);
-                    }
-                }
-            }
-        });
-
-        manItemsHtmlWithSmil.forEach((manItemHtmlWithSmil) => {
-
-            const htmlPathInZip = path.join(path.dirname(opf.ZipPath), manItemHtmlWithSmil.Href)
-                .replace(/\\/g, "/");
-
-            const link = findLinKByHref(publication, rootfile, opf, htmlPathInZip);
-            if (link) {
-                if (!link.MediaOverlays) {
-                    link.MediaOverlays = [];
-                }
-
-                const alreadyExists = link.MediaOverlays.find((moo) => {
-                    if (mo.SmilPathInZip === moo.SmilPathInZip) {
-                        return true;
-                    }
-                    return false;
-                });
-                if (!alreadyExists) {
-                    link.MediaOverlays.push(mo);
-                }
-
-                if (!link.Properties) {
-                    link.Properties = new Properties();
-                }
-                link.Properties.MediaOverlay = mediaOverlayURLPath + "?" +
-                    mediaOverlayURLParam + "=" + querystring.escape(link.Href);
-            }
-        });
-
-        const smilZipStream_ = await zip.entryStreamPromise(smilFilePath);
-        const smilZipStream = smilZipStream_.stream;
-        const smilZipData = await streamToBufferPromise(smilZipStream);
-        const smilStr = smilZipData.toString("utf8");
-        const smilXmlDoc = new xmldom.DOMParser().parseFromString(smilStr);
-        const smil = XML.deserialize<SMIL>(smilXmlDoc, SMIL);
-        smil.ZipPath = smilFilePath;
-
-        // breakLength: 100  maxArrayLength: undefined
-        // console.log(util.inspect(smil,
-        //     { showHidden: false, depth: 1000, colors: true, customInspect: true }));
-
-        mo.Role = [];
-        mo.Role.push("section");
-
-        if (smil.Body) {
-            if (smil.Body.TextRef) {
-                mo.Text = smil.Body.TextRef;
-            }
-            if (smil.Body.Children && smil.Body.Children.length) {
-                smil.Body.Children.forEach((seqChild) => {
-                    if (!mo.Children) {
-                        mo.Children = [];
-                    }
-                    addSeqToMediaOverlay(publication, rootfile, opf, mo, mo.Children, seqChild);
-                });
-            }
-        }
-    }
-    // publication.Resources.forEach(async (item) => {
-    // });
-};
+    };
 
 const addSeqToMediaOverlay = (
     publication: Publication, rootfile: Rootfile, opf: OPF,
@@ -675,29 +718,35 @@ const addTitle = (publication: Publication, rootfile: Rootfile, opf: OPF) => {
     }
 };
 
-const addRelAndPropertiesToLink = (link: Link, linkEpub: Manifest, rootfile: Rootfile, opf: OPF) => {
+const addRelAndPropertiesToLink =
+    async (publication: Publication, link: Link, linkEpub: Manifest, rootfile: Rootfile, opf: OPF)
+        : Promise<void> => {
 
-    if (linkEpub.Properties) {
-        addToLinkFromProperties(link, linkEpub.Properties);
-    }
-    const spineProperties = findPropertiesInSpineForManifest(linkEpub, rootfile, opf);
-    if (spineProperties) {
-        addToLinkFromProperties(link, spineProperties);
-    }
-};
+        if (linkEpub.Properties) {
+            await addToLinkFromProperties(publication, link, linkEpub.Properties);
+        }
+        const spineProperties = findPropertiesInSpineForManifest(linkEpub, rootfile, opf);
+        if (spineProperties) {
+            await addToLinkFromProperties(publication, link, spineProperties);
+        }
+    };
 
-const addToLinkFromProperties = (link: Link, propertiesString: string) => {
+const addToLinkFromProperties = async (publication: Publication, link: Link, propertiesString: string)
+    : Promise<void> => {
 
     const properties = propertiesString.split(" ");
 
     const propertiesStruct = new Properties();
 
     // https://idpf.github.io/epub-vocabs/rendition/
-    properties.forEach((p) => {
 
+    // no forEach(), because of await/async within the iteration body
+    // properties.forEach(async (p) => {
+    for (const p of properties) {
         switch (p) {
             case "cover-image": {
                 link.AddRel("cover");
+                await addCoverDimensions(publication, link);
                 break;
             }
             case "nav": {
@@ -828,7 +877,7 @@ const addToLinkFromProperties = (link: Link, propertiesString: string) => {
 
             link.Properties = propertiesStruct;
         }
-    });
+    }
 };
 
 const addMediaOverlay = (link: Link, linkEpub: Manifest, rootfile: Rootfile, opf: OPF) => {
@@ -840,28 +889,29 @@ const addMediaOverlay = (link: Link, linkEpub: Manifest, rootfile: Rootfile, opf
     }
 };
 
-const findInManifestByID = (rootfile: Rootfile, opf: OPF, ID: string): Link | undefined => {
+const findInManifestByID =
+    async (publication: Publication, rootfile: Rootfile, opf: OPF, ID: string): Promise<Link> => {
 
-    if (opf.Manifest && opf.Manifest.length) {
-        const item = opf.Manifest.find((manItem) => {
-            if (manItem.ID === ID) {
-                return true;
+        if (opf.Manifest && opf.Manifest.length) {
+            const item = opf.Manifest.find((manItem) => {
+                if (manItem.ID === ID) {
+                    return true;
+                }
+                return false;
+            });
+            if (item) {
+                const linkItem = new Link();
+                linkItem.TypeLink = item.MediaType;
+                const zipPath = path.join(path.dirname(opf.ZipPath), item.Href)
+                    .replace(/\\/g, "/");
+                linkItem.Href = zipPath;
+                await addRelAndPropertiesToLink(publication, linkItem, item, rootfile, opf);
+                addMediaOverlay(linkItem, item, rootfile, opf);
+                return linkItem;
             }
-            return false;
-        });
-        if (item) {
-            const linkItem = new Link();
-            linkItem.TypeLink = item.MediaType;
-            const zipPath = path.join(path.dirname(opf.ZipPath), item.Href)
-                .replace(/\\/g, "/");
-            linkItem.Href = zipPath;
-            addRelAndPropertiesToLink(linkItem, item, rootfile, opf);
-            addMediaOverlay(linkItem, item, rootfile, opf);
-            return linkItem;
         }
-    }
-    return undefined;
-};
+        return Promise.reject(`${ID} not found`);
+    };
 
 const addRendition = (publication: Publication, _rootfile: Rootfile, opf: OPF) => {
 
@@ -902,14 +952,22 @@ const addRendition = (publication: Publication, _rootfile: Rootfile, opf: OPF) =
     }
 };
 
-const fillSpineAndResource = (publication: Publication, rootfile: Rootfile, opf: OPF) => {
+const fillSpineAndResource = async (publication: Publication, rootfile: Rootfile, opf: OPF)
+    : Promise<void> => {
 
     if (opf.Spine && opf.Spine.Items && opf.Spine.Items.length) {
-        opf.Spine.Items.forEach((item) => {
+        // no forEach(), because of await/async within the iteration body
+        // opf.Spine.Items.forEach(async (item) => {
+        for (const item of opf.Spine.Items) {
 
             if (!item.Linear || item.Linear === "yes") {
 
-                const linkItem = findInManifestByID(rootfile, opf, item.IDref);
+                let linkItem: Link | undefined;
+                try {
+                    linkItem = await findInManifestByID(publication, rootfile, opf, item.IDref);
+                } catch (err) {
+                    console.log(err);
+                }
 
                 if (linkItem && linkItem.Href) {
                     if (!publication.Spine) {
@@ -918,11 +976,15 @@ const fillSpineAndResource = (publication: Publication, rootfile: Rootfile, opf:
                     publication.Spine.push(linkItem);
                 }
             }
-        });
+        }
     }
 
     if (opf.Manifest && opf.Manifest.length) {
-        opf.Manifest.forEach((item) => {
+
+        // no forEach(), because of await/async within the iteration body
+        // opf.Manifest.forEach(async (item) => {
+        for (const item of opf.Manifest) {
+
             const zipPath = path.join(path.dirname(opf.ZipPath), item.Href)
                 .replace(/\\/g, "/");
             const linkSpine = findInSpineByHref(publication, zipPath);
@@ -931,7 +993,7 @@ const fillSpineAndResource = (publication: Publication, rootfile: Rootfile, opf:
                 const linkItem = new Link();
                 linkItem.TypeLink = item.MediaType;
                 linkItem.Href = zipPath;
-                addRelAndPropertiesToLink(linkItem, item, rootfile, opf);
+                await addRelAndPropertiesToLink(publication, linkItem, item, rootfile, opf);
                 addMediaOverlay(linkItem, item, rootfile, opf);
 
                 if (!publication.Resources) {
@@ -939,7 +1001,7 @@ const fillSpineAndResource = (publication: Publication, rootfile: Rootfile, opf:
                 }
                 publication.Resources.push(linkItem);
             }
-        });
+        }
     }
 };
 
@@ -1122,7 +1184,8 @@ const fillCalibreSerieInfo = (publication: Publication, _rootfile: Rootfile, opf
     }
 };
 
-const fillTOCFromNavDoc = async (publication: Publication, _rootfile: Rootfile, _opf: OPF, zip: IZip) => {
+const fillTOCFromNavDoc = async (publication: Publication, _rootfile: Rootfile, _opf: OPF, zip: IZip)
+    : Promise<void> => {
 
     const navLink = publication.GetNavDoc();
     if (!navLink) {
@@ -1246,7 +1309,8 @@ const fillTOCFromNavDocWithOL = (select: any, olElems: Element[], node: Link[], 
     });
 };
 
-const addCoverRel = (publication: Publication, rootfile: Rootfile, opf: OPF) => {
+const addCoverRel = async (publication: Publication, rootfile: Rootfile, opf: OPF)
+    : Promise<void> => {
 
     let coverID: string | undefined;
 
@@ -1261,17 +1325,25 @@ const addCoverRel = (publication: Publication, rootfile: Rootfile, opf: OPF) => 
     }
 
     if (coverID) {
-        const manifestInfo = findInManifestByID(rootfile, opf, coverID);
+        let manifestInfo: Link | undefined;
+        try {
+            manifestInfo = await findInManifestByID(publication, rootfile, opf, coverID);
+        } catch (err) {
+            console.log(err);
+        }
         if (manifestInfo && manifestInfo.Href && publication.Resources && publication.Resources.length) {
 
-            publication.Resources.find((item, i, _arr) => {
-
-                if (item.Href === manifestInfo.Href) {
-                    publication.Resources[i].AddRel("cover");
+            const href = manifestInfo.Href;
+            const linky = publication.Resources.find((item, _i, _arr) => {
+                if (item.Href === href) {
                     return true;
                 }
                 return false;
             });
+            if (linky) { // publication.Resources[i]
+                linky.AddRel("cover");
+                await addCoverDimensions(publication, linky);
+            }
         }
     }
 };
