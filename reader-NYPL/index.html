@@ -21,74 +21,52 @@
     //https://github.com/NYPL-Simplified/webpub-viewer
     //https://github.com/NYPL-Simplified/webpub-viewer/tree/master/examples
     //https://github.com/NYPL-Simplified/web-reader-landing-page/blob/master/book_index.html.template
-var getURLQueryParams = function() {
-    var params = {};
 
-    var query = window.location.search;
-    if (query && query.length) {
+    var getURLQueryParams = function() {
+      var params = {};
+      var query = window.location.search;
+      if (query && query.length) {
         query = query.substring(1);
         var keyParams = query.split('&');
-        for (var x = 0; x < keyParams.length; x++)
-        {
-            var keyVal = keyParams[x].split('=');
-            if (keyVal.length > 1) {
-                params[keyVal[0]] = decodeURIComponent(keyVal[1]);
-            }
+        for (var x = 0; x < keyParams.length; x++) {
+          var keyVal = keyParams[x].split('=');
+          if (keyVal.length > 1) {
+            params[keyVal[0]] = decodeURIComponent(keyVal[1]);
+          }
         }
-    }
-
-    return params;
-};
+      }
+      return params;
+    };
 
     require(["LocalStorageStore", "ServiceWorkerCacher", "IFrameNavigator", "ColumnsPaginatedBookView", "ScrollingBookView", "LocalAnnotator", "BookSettings"],
             function (LocalStorageStore, ServiceWorkerCacher, IFrameNavigator, ColumnsPaginatedBookView, ScrollingBookView, LocalAnnotator, BookSettings) {
       var element = document.getElementById("viewer");
-
-var urlParams = getURLQueryParams();
-      var webpubManifestUrl = urlParams['url'];
-      if (webpubManifestUrl) {
-        webpubManifestUrl = new URL(webpubManifestUrl);
-      } else {
-        webpubManifestUrl = new URL("manifest.json", window.location.href);
-      }
-      console.log("=====================");
-      console.log(webpubManifestUrl);
-
-      var bookCacheUrl = new URL("appcache.html", window.location.href);
-
+      var urlParams = getURLQueryParams();
+      var webpubManifestUrl = new URL(urlParams['url']);
       var store = new LocalStorageStore.default({ prefix: webpubManifestUrl.href });
-
       var cacher = new ServiceWorkerCacher.default({
         store: store,
         manifestUrl: webpubManifestUrl,
         serviceWorkerUrl: new URL("sw.js", window.location.href),
         staticFileUrls: [
-
           new URL(window.location.href),
           new URL("index.html", window.location.href),
           new URL("main.css", window.location.href),
           new URL("require.js", window.location.href),
           new URL("fetch.js", window.location.href),
-          new URL("url-polyfill.js", window.location.href),
+          new URL("url.js", window.location.href),
           new URL("promise.js", window.location.href),
           new URL("webpub-viewer.js", window.location.href)
-
-        ],
-        fallbackBookCacheUrl: bookCacheUrl
-      }
-      );
-
+        ]
+      });
       var paginator = new ColumnsPaginatedBookView.default();
       var scroller = new ScrollingBookView.default();
       var annotator = new LocalAnnotator.default({ store: store });
-      //var eventHandler = new EventHandler.default();
-
-      var settingsStore = new LocalStorageStore.default({ prefix: "webpub-viewer-library" });
-
-var fontSizes = [ 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32 ];
+      var settingsStore = new LocalStorageStore.default({ prefix: "webpub-viewer" });
+      var fontSizes = [ 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32 ];
       var defaultFontSize = 20;
       BookSettings.default.create({
-        store: settingsStore, // store?
+        store: settingsStore,
         bookViews: [paginator, scroller],
         fontSizesInPixels: fontSizes,
         defaultFontSizeInPixels: defaultFontSize
@@ -101,16 +79,11 @@ var fontSizes = [ 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32 ];
           settings: settings,
           annotator: annotator,
           paginator: paginator,
-          scroller: scroller,
-          //eventHandler: eventHandler,
-          upLink: {
-            url: new URL("index.html", window.location.href),
-            label: "Details"
-          }
+          scroller: scroller
         });
       });
-
     });
+
   </script>
 </body>
 </html>
