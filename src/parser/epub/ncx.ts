@@ -1,11 +1,10 @@
-import { NavPoint } from "./ncx-navpoint";
-import { PageList } from "./ncx-pagelist";
-
 import {
     XmlItemType,
     XmlObject,
     XmlXPathSelector,
 } from "../../_utils/xml-js-mapper";
+import { NavPoint } from "./ncx-navpoint";
+import { PageList } from "./ncx-pagelist";
 
 @XmlObject({
     ncx: "http://www.daisy.org/z3986/2005/ncx/",

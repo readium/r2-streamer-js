@@ -1,13 +1,12 @@
-import { Manifest } from "./opf-manifest";
-import { Metadata } from "./opf-metadata";
-import { Reference } from "./opf-reference";
-import { Spine } from "./opf-spine";
-
 import {
     XmlItemType,
     XmlObject,
     XmlXPathSelector,
 } from "../../_utils/xml-js-mapper";
+import { Manifest } from "./opf-manifest";
+import { Metadata } from "./opf-metadata";
+import { Reference } from "./opf-reference";
+import { Spine } from "./opf-spine";
 
 @XmlObject({
     dc: "http://purl.org/dc/elements/1.1/",

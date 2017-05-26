@@ -1,9 +1,8 @@
-import { Compression } from "./encryption-compression";
-
 import {
     XmlObject,
     XmlXPathSelector,
 } from "../../_utils/xml-js-mapper";
+import { Compression } from "./encryption-compression";
 
 @XmlObject({
     ds: "http://www.w3.org/2000/09/xmldsig#",

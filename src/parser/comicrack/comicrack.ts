@@ -1,10 +1,9 @@
-import { Page } from "./comicrack-page";
-
 import {
     XmlItemType,
     XmlObject,
     XmlXPathSelector,
 } from "../../_utils/xml-js-mapper";
+import { Page } from "./comicrack-page";
 
 @XmlObject({
     xsd: "http://www.w3.org/2001/XMLSchema",

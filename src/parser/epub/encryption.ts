@@ -1,10 +1,9 @@
-import { EncryptedData } from "./encryption-data";
-
 import {
     XmlItemType,
     XmlObject,
     XmlXPathSelector,
 } from "../../_utils/xml-js-mapper";
+import { EncryptedData } from "./encryption-data";
 
 @XmlObject({
     ds: "http://www.w3.org/2000/09/xmldsig#",

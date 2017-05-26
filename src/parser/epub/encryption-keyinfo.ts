@@ -1,9 +1,8 @@
-import { RetrievalMethod } from "./encryption-retrievalmethod";
-
 import {
     XmlObject,
     XmlXPathSelector,
 } from "../../_utils/xml-js-mapper";
+import { RetrievalMethod } from "./encryption-retrievalmethod";
 
 @XmlObject({
     ds: "http://www.w3.org/2000/09/xmldsig#",

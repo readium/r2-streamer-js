@@ -1,10 +1,9 @@
-import { Content } from "./ncx-content";
-
 import {
     XmlItemType,
     XmlObject,
     XmlXPathSelector,
 } from "../../_utils/xml-js-mapper";
+import { Content } from "./ncx-content";
 
 @XmlObject({
     ncx: "http://www.daisy.org/z3986/2005/ncx/",

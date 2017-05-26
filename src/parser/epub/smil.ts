@@ -1,10 +1,9 @@
-import { Body } from "./smil-body";
-import { Par } from "./smil-par";
-
 import {
     XmlObject,
     XmlXPathSelector,
 } from "../../_utils/xml-js-mapper";
+import { Body } from "./smil-body";
+import { Par } from "./smil-par";
 
 @XmlObject({
     epub: "http://www.idpf.org/2007/ops",

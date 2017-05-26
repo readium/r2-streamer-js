@@ -1,15 +1,14 @@
+import {
+    XmlItemType,
+    XmlObject,
+    XmlXPathSelector,
+} from "../../_utils/xml-js-mapper";
 import { Author } from "./opf-author";
 import { MetaDate } from "./opf-date";
 import { Identifier } from "./opf-identifier";
 import { Metafield } from "./opf-metafield";
 import { Subject } from "./opf-subject";
 import { Title } from "./opf-title";
-
-import {
-    XmlItemType,
-    XmlObject,
-    XmlXPathSelector,
-} from "../../_utils/xml-js-mapper";
 
 @XmlObject({
     dc: "http://purl.org/dc/elements/1.1/",

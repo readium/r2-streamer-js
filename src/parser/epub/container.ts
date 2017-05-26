@@ -1,10 +1,9 @@
-import { Rootfile } from "./container-rootfile";
-
 import {
     XmlItemType,
     XmlObject,
     XmlXPathSelector,
 } from "../../_utils/xml-js-mapper";
+import { Rootfile } from "./container-rootfile";
 
 @XmlObject({
     dummyNS: "dummyURI",

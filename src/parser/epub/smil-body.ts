@@ -1,8 +1,7 @@
-import { Seq } from "./smil-seq";
-
 import {
     XmlObject,
 } from "../../_utils/xml-js-mapper";
+import { Seq } from "./smil-seq";
 
 @XmlObject({
     epub: "http://www.idpf.org/2007/ops",

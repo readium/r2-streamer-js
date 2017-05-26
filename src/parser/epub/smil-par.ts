@@ -1,13 +1,11 @@
-import { Audio } from "./smil-audio";
-import { Text } from "./smil-text";
-
-import { SeqOrPar } from "./smil-seq-or-par";
-
 import {
     XmlDiscriminatorValue,
     XmlObject,
     XmlXPathSelector,
 } from "../../_utils/xml-js-mapper";
+import { Audio } from "./smil-audio";
+import { SeqOrPar } from "./smil-seq-or-par";
+import { Text } from "./smil-text";
 
 @XmlObject({
     epub: "http://www.idpf.org/2007/ops",

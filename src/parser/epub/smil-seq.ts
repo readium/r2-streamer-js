@@ -1,11 +1,10 @@
-import { SeqOrPar } from "./smil-seq-or-par";
-
 import {
     XmlDiscriminatorValue,
     XmlItemType,
     XmlObject,
     XmlXPathSelector,
 } from "../../_utils/xml-js-mapper";
+import { SeqOrPar } from "./smil-seq-or-par";
 
 @XmlObject({
     epub: "http://www.idpf.org/2007/ops",

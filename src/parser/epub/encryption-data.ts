@@ -1,13 +1,12 @@
-import { CipherData } from "./encryption-cypherdata";
-import { KeyInfo } from "./encryption-keyinfo";
-import { EncryptionMethod } from "./encryption-method";
-import { EncryptionProperty } from "./encryption-property";
-
 import {
     XmlItemType,
     XmlObject,
     XmlXPathSelector,
 } from "../../_utils/xml-js-mapper";
+import { CipherData } from "./encryption-cypherdata";
+import { KeyInfo } from "./encryption-keyinfo";
+import { EncryptionMethod } from "./encryption-method";
+import { EncryptionProperty } from "./encryption-property";
 
 @XmlObject({
     ds: "http://www.w3.org/2000/09/xmldsig#",
