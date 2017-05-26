@@ -1,12 +1,13 @@
 import { PassThrough } from "stream";
+import * as util from "util";
 
 import * as debug_ from "debug";
 import * as request from "request";
 import * as requestPromise from "request-promise-native";
-import * as util from "util";
 import * as yauzl from "yauzl";
 
 import { bufferToStream, streamToBufferPromise } from "../stream/BufferUtils";
+
 // import { HttpReadableStream } from "./HttpReadableStream";
 
 const debug = debug_("r2:httpStream");

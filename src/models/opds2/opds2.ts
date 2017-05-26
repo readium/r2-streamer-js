@@ -6,15 +6,11 @@ import {
     OnDeserialized,
 } from "ta-json";
 
-import { Link } from "../publication-link";
-
 import { Publication } from "../publication";
-
-import { OPDSMetadata } from "./opds2-metadata";
-
+import { Link } from "../publication-link";
 import { OPDSFacet } from "./opds2-facet";
-
 import { OPDSGroup } from "./opds2-group";
+import { OPDSMetadata } from "./opds2-metadata";
 
 @JsonObject()
 export class OPDSFeed {

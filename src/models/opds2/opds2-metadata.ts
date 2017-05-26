@@ -1,6 +1,5 @@
 // https://github.com/edcarroll/ta-json
 import {
-    // IPropertyConverter,
     JsonConverter,
     JsonObject,
     JsonProperty,

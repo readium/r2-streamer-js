@@ -7,7 +7,6 @@ import {
 } from "ta-json";
 
 import { Link } from "../publication-link";
-
 import { OPDSMetadata } from "./opds2-metadata";
 
 @JsonObject()

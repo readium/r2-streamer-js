@@ -6,15 +6,11 @@ import {
     OnDeserialized,
 } from "ta-json";
 
-import { Link } from "./publication-link";
-
-import { Metadata } from "./metadata";
-
-import { MediaOverlayNode } from "./media-overlay";
-
-import { IPublicationCollection } from "./publication-collection";
-
 import { IInternal } from "./internal";
+import { MediaOverlayNode } from "./media-overlay";
+import { Metadata } from "./metadata";
+import { IPublicationCollection } from "./publication-collection";
+import { Link } from "./publication-link";
 
 @JsonObject()
 export class Publication {

@@ -1,6 +1,5 @@
-import { Link } from "./publication-link";
-
 import { IMeta } from "./metadata";
+import { Link } from "./publication-link";
 
 export interface IPublicationCollection {
     Role: string;

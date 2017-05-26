@@ -1,11 +1,8 @@
 // https://github.com/edcarroll/ta-json
 import {
-    // BeforeDeserialized,
-    // JsonConstructor,
     JsonElementType,
     JsonObject,
     JsonProperty,
-    // OnDeserialized,
 } from "ta-json";
 
 // http://www.idpf.org/epub/31/spec/epub-mediaoverlays.html#app-clock-examples
