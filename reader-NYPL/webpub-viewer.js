@@ -2007,13 +2007,6 @@ define("ColumnsPaginatedBookView", ["require", "exports", "HTMLUtilities", "Brow
             this.hasFixedScrollWidth = false;
         }
         ColumnsPaginatedBookView.prototype.start = function (position) {
-            document.body.style.overflow = "hidden";
-            // This prevents overscroll/bouncing on iOS.
-            document.body.style.position = "fixed";
-            document.body.style.left = "0";
-            document.body.style.right = "0";
-            document.body.style.top = "0";
-            document.body.style.bottom = "0";
             // any is necessary because CSSStyleDeclaration type does not include
             // all the vendor-prefixed attributes.
             var body = HTMLUtilities.findRequiredElement(this.bookElement.contentDocument, "body");
@@ -2035,6 +2028,17 @@ define("ColumnsPaginatedBookView", ["require", "exports", "HTMLUtilities", "Brow
             }
             this.checkForFixedScrollWidth();
             this.goToPosition(position);
+            // This is delayed to prevent a bug in iOS 10.3 that causes
+            // the top links to be displayed in the middle of the page.
+            setTimeout(function () {
+                document.body.style.overflow = "hidden";
+                // This prevents overscroll/bouncing on iOS.
+                document.body.style.position = "fixed";
+                document.body.style.left = "0";
+                document.body.style.right = "0";
+                document.body.style.top = "0";
+                document.body.style.bottom = "0";
+            }, 0);
         };
         ColumnsPaginatedBookView.prototype.checkForFixedScrollWidth = function () {
             // Determine if the scroll width changes when the left position
