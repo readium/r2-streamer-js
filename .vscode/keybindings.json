@@ -1,11 +1,21 @@
-[{
-    "key": "shift+alt+b",
-    "command": "workbench.action.tasks.runTask",
-    "args": "typescript"
-},
-{
-    "key": "shift+ctrl+alt+b",
-    "command": "workbench.action.tasks.runTask",
-    "args": "lintbuild"
-}
+// Place your key bindings in this file to overwrite the defaults
+[
+    {
+        "key": "shift+alt+b",
+        "command": "workbench.action.tasks.runTask",
+        "args": "typescript"
+    },
+    {
+        "key": "shift+ctrl+alt+b",
+        "command": "workbench.action.tasks.runTask",
+        "args": "lintbuild"
+    },
+    {
+        "key": "shift+alt+s",
+        "command": "sortImports.sort"
+    },
+    {
+        "key": "shift+ctrl+alt+s",
+        "command": "macros.sortImports"
+    }
 ]
