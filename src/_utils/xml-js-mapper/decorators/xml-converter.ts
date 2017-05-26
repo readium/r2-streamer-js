@@ -1,7 +1,5 @@
 import { getDefinition } from "../classes/object-definition";
-
 import { IPropertyConverter } from "../converters/converter";
-
 import { IParameterlessConstructor } from "../types";
 
 export function XmlConverter(converter: IPropertyConverter | IParameterlessConstructor<IPropertyConverter>) {

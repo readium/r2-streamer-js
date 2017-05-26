@@ -1,5 +1,4 @@
 import { getDefinition } from "../classes/object-definition";
-
 import { FunctionType, IXmlNamespaces } from "../types";
 
 export function XmlObject(namespaces?: IXmlNamespaces) {

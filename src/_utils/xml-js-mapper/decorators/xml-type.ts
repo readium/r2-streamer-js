@@ -1,5 +1,4 @@
 import { getDefinition } from "../classes/object-definition";
-
 import { FunctionType } from "../types";
 
 export function XmlType(objectType: FunctionType) {

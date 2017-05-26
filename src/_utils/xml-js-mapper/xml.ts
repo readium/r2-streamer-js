@@ -1,7 +1,6 @@
 // import { serialize } from "./methods/serialize";
 
 import { deserialize } from "./methods/deserialize";
-
 import { FunctionType, IParseOptions } from "./types";
 
 export class XML {

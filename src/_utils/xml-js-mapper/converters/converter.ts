@@ -1,8 +1,6 @@
-import { DateConverter } from "./date-converter";
-
-import { BufferConverter } from "./buffer-converter";
-
 import { FunctionType } from "../types";
+import { BufferConverter } from "./buffer-converter";
+import { DateConverter } from "./date-converter";
 
 export interface IPropertyConverter {
     serialize(property: any): string;

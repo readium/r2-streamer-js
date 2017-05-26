@@ -1,14 +1,10 @@
 import * as xpath from "xpath";
 
-import { IDynamicObject, IParseOptions } from "../types";
-
 import { getTypedInheritanceChain, objectDefinitions } from "../classes/object-definition";
-
 import { PropertyDefinition } from "../classes/property-definition";
-
 import { propertyConverters } from "../converters/converter";
-
-import { FunctionType, IXmlNamespaces, IXPathSelectorItem } from "../types";
+import { IDynamicObject, IParseOptions } from "../types";
+import { FunctionType, IXPathSelectorItem, IXmlNamespaces } from "../types";
 
 export function deserialize(
     objectInstance: Node,
