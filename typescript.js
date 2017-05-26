@@ -20,6 +20,12 @@ if (!filePath) {
     process.exit(1);
 }
 
+let target = args[1];
+if (!target) {
+    console.log("TARGET ARGUMENT IS MISSING.");
+    process.exit(1);
+}
+
 filePath = filePath.trim();
 console.log(filePath);
 if (!fs.existsSync(filePath)) {
@@ -44,7 +50,7 @@ const ext = path.extname(fileName).toLowerCase();
 var filePathRelative = path.relative(path.resolve("."), filePath);
 console.log(`path (relative): ${filePathRelative}`);
 
-var filePathRelativeDist = path.join("dist", filePathRelative);
+var filePathRelativeDist = path.join("dist", target, filePathRelative);
 console.log(`path (relative in DIST): ${filePathRelativeDist}`);
 
 var filePathRelativeDist_JS = filePathRelativeDist.replace(".ts", ".js");
@@ -54,36 +60,66 @@ var filePathRelativeDist_X = filePathRelativeDist.replace(".ts", ".*");
 
 var parentDistDir = path.dirname(filePathRelativeDist);
 
-var cmdline =
-`echo "TYPESCRIPT" && cp ${filePathRelative} ${filePathRelativeDist} \
-&& mv ${filePathRelativeDist_JS} ${filePathRelativeDist_JS}_PREVIOUS \
-&& mv ${filePathRelativeDist_JS_MAP} ${filePathRelativeDist_JS_MAP}_PREVIOUS \
-&& mv ${filePathRelativeDist_D_TS} ${filePathRelativeDist_D_TS}_PREVIOUS \
-&& node node_modules/typescript/bin/tsc \
---strictNullChecks --sourceMap --noImplicitAny --module commonjs --target es2015 --experimentalDecorators --emitDecoratorMetadata --declaration --noUnusedLocals false --noUnusedParameters \
---sourceRoot ../../ \
---outDir ./dist/ \
---rootDir ./dist/ \
-./src/declarations.d.ts \
-${filePathRelativeDist} \
-&& rm ${filePathRelativeDist} \
-&& echo "DIFF JS:" && diff ${filePathRelativeDist_JS} ${filePathRelativeDist_JS}_PREVIOUS \
-; echo "DIFF D TS:" && diff ${filePathRelativeDist_D_TS} ${filePathRelativeDist_D_TS}_PREVIOUS \
-; rm ${filePathRelativeDist_JS}_PREVIOUS \
-&& rm ${filePathRelativeDist_JS_MAP}_PREVIOUS \
-&& rm ${filePathRelativeDist_D_TS}_PREVIOUS \
-&& ls ${filePathRelativeDist_X} \
+var cmdlines = [];
+
+var cmdLine = `cp "${filePathRelative}" "${filePathRelativeDist}" \
+&& mv "${filePathRelativeDist_JS}" "${filePathRelativeDist_JS}_PREVIOUS" \
+&& mv "${filePathRelativeDist_JS_MAP}" "${filePathRelativeDist_JS_MAP}_PREVIOUS" \
+&& mv "${filePathRelativeDist_D_TS}" "${filePathRelativeDist_D_TS}_PREVIOUS"`;
+cmdlines.push(cmdLine);
+
+const tmpTsConfigPath = "./tsconfig-TMP.json";
+
+const tsconfigJsonStr =
+`{ "extends": "./tsconfigs/tsconfig-${target}", "include": [ "./src/declarations.d.ts", "./${filePathRelativeDist}" ] }`;
+fs.writeFileSync(tmpTsConfigPath, tsconfigJsonStr, "utf8");
+
+// cmdLine = `echo "TSCONFIG: ${tsconfigJsonStr}"`;
+// cmdlines.push(cmdLine);
+
+cmdLine = `node "node_modules/typescript/bin/tsc" \
+-p "${tmpTsConfigPath}" \
+--rootDir ./dist/${target} \
 `;
-// ; echo "DIFF JS MAP:" && diff ${filePathRelativeDist_JS_MAP} ${filePathRelativeDist_JS_MAP}_PREVIOUS \
-// && ls -als ${parentDistDir} \
+cmdlines.push(cmdLine);
 
-console.log(cmdline);
+cmdLine = `rm "${tmpTsConfigPath}" \
+rm "${filePathRelativeDist}" \
+&& echo "==== DIFF JS:" \
+&& diff "${filePathRelativeDist_JS}" "${filePathRelativeDist_JS}_PREVIOUS" \
+; echo "==== DIFF D TS:" \
+&& diff "${filePathRelativeDist_D_TS}" "${filePathRelativeDist_D_TS}_PREVIOUS" \
+; rm "${filePathRelativeDist_JS}_PREVIOUS" \
+&& rm "${filePathRelativeDist_JS_MAP}_PREVIOUS" \
+&& rm "${filePathRelativeDist_D_TS}_PREVIOUS" \
+`;
+//&& ls "${filePathRelativeDist_X}" \
+// ; echo "DIFF JS MAP:" && diff "${filePathRelativeDist_JS_MAP}" "${filePathRelativeDist_JS_MAP}_PREVIOUS" \
+// && ls -als "${parentDistDir}" \
+cmdlines.push(cmdLine);
 
-var child = exec(cmdline,
-    function (error, stdout, stderr) {
-        console.log('exec stdout: ' + stdout);
-        console.log('exec stderr: ' + stderr);
-        if (error !== null) {
-            console.log('exec error: ' + error);
-        }
-    });
+// console.log(cmdlines);
+
+function execCmd(i) {
+    var cmd = cmdlines[i];
+    if (!cmd) return;
+
+    var child = exec(cmd,
+        function (error, stdout, stderr) {
+            if (stdout) {
+                console.log('-- exec stdout: ');
+                console.log(stdout);
+            }
+            if (stderr) {
+                console.log('-- exec stderr: ');
+                console.log(stderr);
+            }
+            if (error) {
+                console.log('-- exec error: ');
+                console.log(error);
+            }
+
+            execCmd(++i);
+        });
+}
+execCmd(0);

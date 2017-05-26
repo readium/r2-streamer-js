@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig-common",
+  "compilerOptions": {
+    "target": "es2015",
+    "module": "es6",
+    "moduleResolution": "node",
+    "outDir": "../dist/es6-es2015/"
+  }
+}

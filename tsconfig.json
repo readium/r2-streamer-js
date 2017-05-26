@@ -1,27 +1,3 @@
 {
-  "compilerOptions": {
-    "strictNullChecks": true,
-    "outDir": "./dist/",
-    "rootDir": "./",
-    "rootDirs": [
-      "./src/",
-      "./test/"
-    ],
-    "sourceMap": true,
-    "noImplicitAny": true,
-    "module": "commonjs",
-    "target": "es2015",
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "declaration": true,
-    "noUnusedLocals": false,
-    "noUnusedParameters": true
-  },
-  "include": [
-    "./src/**/*",
-    "./test/**/*"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+  "extends": "./tsconfigs/tsconfig-es6-es2015-all"
 }

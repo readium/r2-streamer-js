@@ -1,0 +1,63 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "rootDir": "../",
+    "rootDirs": [
+      "../src/",
+      "../test/"
+    ],
+    "baseUrl": "..",
+    "paths": {
+      "r2-streamer-js": [
+        "src/index.ts"
+      ]
+    },
+    "strictNullChecks": true,
+    "sourceMap": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": false,
+    "noImplicitThis": false,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "declaration": true,
+    "noEmit": false,
+    "noEmitHelpers": false,
+    "noEmitOnError": false,
+    "noFallthroughCasesInSwitch": false,
+    "noImplicitUseStrict": false,
+    "noLib": false,
+    "noResolve": false,
+    "forceConsistentCasingInFileNames": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": true,
+    "inlineSources": false,
+    "inlineSourceMap": false,
+    "isolatedModules": false,
+    "allowJs": false,
+    "maxNodeModuleJsDepth": 0,
+    "checkJs": false,
+    "stripInternal": false,
+    "suppressExcessPropertyErrors": false,
+    "suppressImplicitAnyIndexErrors":false,
+    "charset": "utf8",
+    "downlevelIteration": false,
+    "emitBOM": false,
+    "allowSyntheticDefaultImports": false,
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    "importHelpers": false,
+    "pretty": true,
+    "diagnostics": false,
+    "listFiles": false,
+    "listEmittedFiles": false,
+    "traceResolution": false,
+    "disableSizeLimit": false,
+    "preserveConstEnums": false,
+    "removeComments": true,
+    "skipLibCheck": false,
+    "locale": "en-US"
+  },
+  "exclude": [
+    "node_modules"
+  ]
+}

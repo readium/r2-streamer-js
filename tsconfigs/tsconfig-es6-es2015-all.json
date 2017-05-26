@@ -1,0 +1,7 @@
+{
+  "extends": "./tsconfig-es6-es2015",
+  "include": [
+    "../src/**/*",
+    "../test/**/*"
+  ]
+}

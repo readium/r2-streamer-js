@@ -37,7 +37,8 @@
       "args": [
         "run",
         "transpile:typescript:single",
-        "${file}"
+        "${file}",
+        "es6-es2015"
       ]
     }
   ]

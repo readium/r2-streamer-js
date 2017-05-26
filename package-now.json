@@ -27,6 +27,6 @@
     "yauzl": "latest"
   },
   "scripts": {
-    "now-start": "node './src/server-cli.js' ."
+    "now-start": "node './es6-es2015/src/server-cli.js' ."
   }
 }
