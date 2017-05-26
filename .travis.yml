@@ -4,7 +4,7 @@ branches:
   - develop
 language: node_js
 node_js:
-- '6'
+- '7'
 before_install:
 - 'pwd && ls -als'
 install:
@@ -13,7 +13,7 @@ before_script:
 - 'pwd && ls -als'
 - 'yarn install'
 script:
-- 'yarn run build'
+- 'yarn run build:es7-es2016'
 - 'yarn test'
 after_success:
 - 'pwd && ls -als'

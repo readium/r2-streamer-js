@@ -1,6 +1,6 @@
 {
   "name": "r2-streamer-js",
-  "version": "0.0.1-alpha19",
+  "version": "0.0.1-alpha20",
   "description": "Readium 2 'streamer' for NodeJS (TypeScript, ECMAScript 2015 / ES6)",
   "keywords": [
     "readium",
@@ -9,14 +9,18 @@
     "EPUB",
     "TypeScript",
     "JavaScript",
+    "ES5",
     "ES6",
     "ECMAScript 2015",
-    "ECMAScript 6"
+    "ECMAScript 6",
+    "ES7",
+    "ECMAScript 2016",
+    "ECMAScript 7"
   ],
   "engines": {
     "node": ">=6",
     "npm": ">=3",
-    "yarn": ">= 0.23"
+    "yarn": ">=0.23"
   },
   "repository": {
     "type": "git",
@@ -91,11 +95,23 @@
     "dist/**/*"
   ],
   "scripts": {
-    "prepublish_": "npm run build && npm test",
-    "now": "rm -rf ./now && mkdir now && mkdir now/reader-NYPL && mkdir now/reader-HADRIEN && cp -r dist/ now/ && cp -r reader-NYPL/ now/reader-NYPL/ && cp -r reader-HADRIEN/ now/reader-HADRIEN/ && cp *.epub now/ && cp package-now.json now/ && cd now/ && mv package-now.json package.json && now && cd ..",
     "start": "npm run server-debug .",
+    "prepare_": "npm run build:all && npm test",
+    "prepublish_": "npm run prepare_",
+    "prenow": "npm run clean && npm run transpile:typescript:es8-es2017",
+    "now": "rm -rf ./now && mkdir now && cp yarn.lock ./now && mkdir now/reader-NYPL && mkdir now/reader-HADRIEN && cp -r dist/ now/ && cp -r reader-NYPL/ now/reader-NYPL/ && cp -r reader-HADRIEN/ now/reader-HADRIEN/ && cp *.epub now/ && cp package-now.json now/ && cd now/ && mv package-now.json package.json && now && cd ..",
     "prebuild": "npm run lint",
     "build": "npm run transpile:typescript",
+    "prebuild:all": "npm run lint",
+    "build:all": "npm run transpile:typescript:all",
+    "prebuild:es5": "npm run lint && npm run clean",
+    "build:es5": "npm run transpile:typescript:es5",
+    "prebuild:es6-es2015": "npm run lint && npm run clean",
+    "build:es6-es2015": "npm run transpile:typescript:es6-es2015",
+    "prebuild:es7-es2016": "npm run lint && npm run clean",
+    "build:es7-es2016": "npm run transpile:typescript:es7-es2016",
+    "prebuild:es8-es2017": "npm run lint && npm run clean",
+    "build:es8-es2017": "npm run transpile:typescript:es8-es2017",
     "clean": "rimraf ./dist && rimraf ./now && mkdirp ./dist",
     "lint": "npm run lint:all && npm run lint:typescript:full",
     "lint:all": "eclint check \"**/*\" \"[!].git/**/*\" \"[!]node_modules/**/*\" \"[!]dist/**/*\" \"[!]reader*/**/*\" \"[!]now/**/*\" \"[!].vscode/**/*\" \"[!]**/.DS_Store\" \"[!]**/*.epub\" \"[!]**/*.cbz\"  \"[!]**/*.jpg\"  \"[!]**/*.jpeg\"  \"[!]**/*.png\"",
@@ -103,16 +119,22 @@
     "lint:typescript:full": "tslint --type-check --project \"./tsconfig.json\" -c \"./tslint.json\" \"./src/**/*.ts\" \"./test/**/*.ts\"",
     "pretranspile:typescript": "npm run clean",
     "transpile:typescript": "tsc -p \"./tsconfig.json\"",
+    "pretranspile:typescript:all": "npm run clean",
+    "transpile:typescript:all": "npm run transpile:typescript:es5 && npm run transpile:typescript:es6-es2015 && transpile:typescript:es7-es2016 && transpile:typescript:es8-es2017",
+    "transpile:typescript:es5": "tsc -p \"./tsconfigs/tsconfig-es5-all.json\"",
+    "transpile:typescript:es6-es2015": "tsc -p \"./tsconfigs/tsconfig-es6-es2015-all.json\"",
+    "transpile:typescript:es7-es2016": "tsc -p \"./tsconfigs/tsconfig-es7-es2016-all.json\"",
+    "transpile:typescript:es8-es2017": "tsc -p \"./tsconfigs/tsconfig-es8-es2017-all.json\"",
     "transpile:typescript:single": "node typescript.js",
-    "test": "ava --verbose \"./dist/es6-es2015/test/test.js\"",
-    "cli": "node \"./dist/es6-es2015/src/cli.js\"",
+    "test": "ava --verbose \"./dist/es8-es2017/test/test.js\"",
+    "cli": "node \"./dist/es8-es2017/src/cli.js\"",
     "cli-debug": "cross-env DEBUG=r2:* npm run cli",
     "cli-debug-x": "cross-env DEBUG=* npm run cli",
-    "server": "node \"./dist/es6-es2015/src/server-cli.js\"",
+    "server": "node \"./dist/es8-es2017/src/server-cli.js\"",
     "server-debug": "cross-env DEBUG=r2:* npm run server",
     "server-debug-x": "cross-env DEBUG=* npm run server",
     "heroku-prebuild": "echo \"heroku-prebuild\"",
-    "heroku-postbuild": "echo \"heroku-postbuild\" && npm run clean && npm run transpile:typescript"
+    "heroku-postbuild": "echo \"heroku-postbuild\" && npm run clean && npm run transpile:typescript:es8-es2017"
   },
   "importSort": {
     ".ts": {

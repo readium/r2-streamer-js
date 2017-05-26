@@ -21,7 +21,7 @@
       "console": "internalConsole",
       "sourceMaps": true,
       "outFiles": [
-        "${workspaceRoot}/dist/**/*.js"
+        "${workspaceRoot}/dist/es8-es2017/**/*.js"
       ]
     },
     {
@@ -45,7 +45,7 @@
       "console": "internalConsole",
       "sourceMaps": true,
       "outFiles": [
-        "${workspaceRoot}/dist/**/*.js"
+        "${workspaceRoot}/dist/es8-es2017/**/*.js"
       ]
     },
     {

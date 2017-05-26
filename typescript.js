@@ -14,15 +14,15 @@ const args = process.argv.slice(2);
 console.log("args:");
 console.log(args);
 
-let filePath = args[0];
-if (!filePath) {
-    console.log("FILEPATH ARGUMENT IS MISSING.");
+let target = args[0];
+if (!target) {
+    console.log("TARGET ARGUMENT IS MISSING.");
     process.exit(1);
 }
 
-let target = args[1];
-if (!target) {
-    console.log("TARGET ARGUMENT IS MISSING.");
+let filePath = args[1];
+if (!filePath) {
+    console.log("FILEPATH ARGUMENT IS MISSING.");
     process.exit(1);
 }
 
@@ -84,7 +84,7 @@ cmdLine = `node "node_modules/typescript/bin/tsc" \
 cmdlines.push(cmdLine);
 
 cmdLine = `rm "${tmpTsConfigPath}" \
-rm "${filePathRelativeDist}" \
+&& rm "${filePathRelativeDist}" \
 && echo "==== DIFF JS:" \
 && diff "${filePathRelativeDist_JS}" "${filePathRelativeDist_JS}_PREVIOUS" \
 ; echo "==== DIFF D TS:" \

@@ -17,7 +17,7 @@
       "taskName": "build",
       "args": [
         "run",
-        "transpile:typescript"
+        "transpile:typescript:es8-es2017"
       ],
       "isBuildCommand": true,
       "problemMatcher": [
@@ -29,7 +29,7 @@
       "taskName": "lintbuild",
       "args": [
         "run",
-        "build"
+        "build:es8-es2017"
       ]
     },
     {
@@ -37,8 +37,8 @@
       "args": [
         "run",
         "transpile:typescript:single",
-        "${file}",
-        "es6-es2015"
+        "es8-es2017",
+        "${file}"
       ]
     }
   ]

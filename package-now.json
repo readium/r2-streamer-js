@@ -1,16 +1,17 @@
 {
   "name": "readium2",
-  "version": "0.0.1-alpha19",
+  "version": "0.0.1-alpha20",
   "engines": {
-    "node": "6.x.x",
-    "npm": ">=3",
-    "yarn": ">= 0.23"
+    "node": ">=7",
+    "npm": ">=4",
+    "yarn": ">=0.23"
   },
   "dependencies": {
     "css2json": "latest",
     "debug": "latest",
     "express": "latest",
     "filehound": "latest",
+    "image-size": "latest",
     "json-markup": "latest",
     "mime-types": "latest",
     "moment": "latest",
@@ -18,6 +19,7 @@
     "node-stream-zip": "latest",
     "reflect-metadata": "latest",
     "request": "latest",
+    "request-promise-native": "latest",
     "slugify": "latest",
     "ta-json": "latest",
     "tmp": "latest",
@@ -27,6 +29,6 @@
     "yauzl": "latest"
   },
   "scripts": {
-    "now-start": "node './es6-es2015/src/server-cli.js' ."
+    "now-start": "node './es8-es2017/src/server-cli.js' ."
   }
 }

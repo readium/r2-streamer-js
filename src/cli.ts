@@ -9,7 +9,7 @@ import { EpubParsePromise } from "./parser/epub";
 console.log("process.cwd():");
 console.log(process.cwd());
 
-console.log("__dirname:");
+console.log("__dirname: ");
 console.log(__dirname);
 
 const args = process.argv.slice(2);
