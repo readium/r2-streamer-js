@@ -1,15 +1,13 @@
-import { Author } from "./opds-author";
-import { Category } from "./opds-category";
-import { Link } from "./opds-link";
-
 import {
     XmlConverter,
     XmlItemType,
     XmlObject,
     XmlXPathSelector,
 } from "../../_utils/xml-js-mapper";
-
 import { DateConverter } from "../../_utils/xml-js-mapper";
+import { Author } from "./opds-author";
+import { Category } from "./opds-category";
+import { Link } from "./opds-link";
 
 @XmlObject({
     app: "http://www.w3.org/2007/app",

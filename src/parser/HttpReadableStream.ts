@@ -1,3 +1,11 @@
+import { Readable } from "stream";
+
+import * as debug_ from "debug";
+import * as request from "request";
+import * as requestPromise from "request-promise-native";
+
+import { streamToBufferPromise } from "../_utils/stream/BufferUtils";
+
 /////////////
 /////////////
 /////////////
@@ -5,14 +13,6 @@
 /////////////
 /////////////
 /////////////
-
-import { Readable } from "stream";
-
-import { streamToBufferPromise } from "../_utils/stream/BufferUtils";
-
-import * as debug_ from "debug";
-import * as request from "request";
-import * as requestPromise from "request-promise-native";
 
 const debug = debug_("r2:httpStream");
 

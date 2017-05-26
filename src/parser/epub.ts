@@ -1,7 +1,8 @@
-import * as sizeOf from "image-size";
-import * as moment from "moment";
 import * as path from "path";
 import * as querystring from "querystring";
+
+import * as sizeOf from "image-size";
+import * as moment from "moment";
 import { JSON as TAJSON } from "ta-json";
 import * as xmldom from "xmldom";
 import * as xpath from "xpath";

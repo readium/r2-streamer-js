@@ -1,5 +1,6 @@
-import * as mime from "mime-types";
 import * as path from "path";
+
+import * as mime from "mime-types";
 import * as slugify from "slugify";
 import * as xmldom from "xmldom";
 
