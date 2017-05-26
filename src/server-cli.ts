@@ -1,7 +1,8 @@
-import * as debug_ from "debug";
-import * as filehound from "filehound";
 import * as fs from "fs";
 import * as path from "path";
+
+import * as debug_ from "debug";
+import * as filehound from "filehound";
 
 import { Server } from "./server";
 

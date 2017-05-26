@@ -1,9 +1,9 @@
 import * as child_process from "child_process";
-import * as debug_ from "debug";
-import * as express from "express";
 import * as fs from "fs";
 import * as path from "path";
 
+import * as debug_ from "debug";
+import * as express from "express";
 import { JSON as TAJSON } from "ta-json";
 import { tmpNameSync } from "tmp";
 

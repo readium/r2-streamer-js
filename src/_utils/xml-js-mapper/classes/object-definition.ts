@@ -1,6 +1,5 @@
-import { PropertyDefinition } from "./property-definition";
-
 import { FunctionType, IXmlNamespaces } from "../types"; // IXmlValueObject
+import { PropertyDefinition } from "./property-definition";
 
 export class ObjectDefinition {
     public ctr: () => void;

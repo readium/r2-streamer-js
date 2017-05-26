@@ -1,8 +1,8 @@
 import * as crypto from "crypto";
-import * as debug_ from "debug";
 import * as path from "path";
 import * as util from "util";
 
+import * as debug_ from "debug";
 import * as express from "express";
 import { JSON as TAJSON } from "ta-json";
 

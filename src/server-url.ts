@@ -1,13 +1,9 @@
 import * as debug_ from "debug";
-// import * as path from "path";
-// import * as querystring from "querystring";
-
 import * as express from "express";
 import * as morgan from "morgan";
 
 import { Server } from "./server";
 import { trailingSlashRedirect } from "./server-trailing-slash-redirect";
-// import { encodeURIComponent_RFC3986 } from "./utils";
 
 const debug = debug_("r2:server:url");
 

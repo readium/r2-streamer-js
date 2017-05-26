@@ -1,5 +1,4 @@
 import { test } from "ava";
-// import * as ava from "ava";
 
 import { timeStrToSeconds } from "../src/models/media-overlay";
 

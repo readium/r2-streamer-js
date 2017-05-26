@@ -1,7 +1,7 @@
 import * as crypto from "crypto";
-import * as debug_ from "debug";
 
 import * as css2json from "css2json";
+import * as debug_ from "debug";
 import * as express from "express";
 import * as jsonMarkup from "json-markup";
 import { JSON as TAJSON } from "ta-json";
