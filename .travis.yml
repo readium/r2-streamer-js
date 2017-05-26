@@ -13,7 +13,7 @@ before_script:
 - 'pwd && ls -als'
 - 'yarn install'
 script:
-- 'yarn run build:es7-es2016'
+- 'yarn run build:es8-es2017'
 - 'yarn test'
 after_success:
 - 'pwd && ls -als'
