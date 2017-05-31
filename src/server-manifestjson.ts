@@ -113,7 +113,7 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
 
                         if (obj["media-overlay"] && typeof obj["media-overlay"] === "string"
                             && !isHTTP(obj["media-overlay"])) {
-                            obj["media-overlay_"] = obj["media-overlay"];
+                            // obj["media-overlay_"] = obj["media-overlay"];
                             obj["media-overlay"] = absoluteURL(obj["media-overlay"]);
                         }
                     });
