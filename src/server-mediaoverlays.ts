@@ -1,6 +1,5 @@
 import * as crypto from "crypto";
 import * as path from "path";
-import * as util from "util";
 
 import * as css2json from "css2json";
 import * as debug_ from "debug";
@@ -168,7 +167,6 @@ export function serverMediaOverlays(server: Server, routerPathBase64: express.Ro
 
     routerPathBase64.use("/:pathBase64/" + mediaOverlayURLPath, routerMediaOverlays);
 }
-
 
 function traverseJsonObjects(obj: any, func: (item: any) => void) {
     func(obj);

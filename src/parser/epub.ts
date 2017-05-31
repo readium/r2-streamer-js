@@ -416,14 +416,17 @@ const fillMediaOverlay =
 
             if (smil.Body) {
                 if (smil.Body.TextRef) {
-                    mo.Text = smil.Body.TextRef;
+                    const zipPath = path.join(path.dirname(smil.ZipPath), smil.Body.TextRef)
+                        .replace(/\\/g, "/");
+                    mo.Text = zipPath;
+
                 }
                 if (smil.Body.Children && smil.Body.Children.length) {
                     smil.Body.Children.forEach((seqChild) => {
                         if (!mo.Children) {
                             mo.Children = [];
                         }
-                        addSeqToMediaOverlay(publication, rootfile, opf, mo, mo.Children, seqChild);
+                        addSeqToMediaOverlay(smil, publication, rootfile, opf, mo, mo.Children, seqChild);
                     });
                 }
             }
@@ -433,7 +436,7 @@ const fillMediaOverlay =
     };
 
 const addSeqToMediaOverlay = (
-    publication: Publication, rootfile: Rootfile, opf: OPF,
+    smil: SMIL, publication: Publication, rootfile: Rootfile, opf: OPF,
     rootMO: MediaOverlayNode, mo: MediaOverlayNode[], seqChild: SeqOrPar) => {
 
     const moc = new MediaOverlayNode();
@@ -446,7 +449,9 @@ const addSeqToMediaOverlay = (
         const seq = seqChild as Seq;
 
         if (seq.TextRef) {
-            moc.Text = seq.TextRef;
+            const zipPath = path.join(path.dirname(smil.ZipPath), seq.TextRef)
+                .replace(/\\/g, "/");
+            moc.Text = zipPath;
         }
 
         if (seq.Children && seq.Children.length) {
@@ -454,17 +459,21 @@ const addSeqToMediaOverlay = (
                 if (!moc.Children) {
                     moc.Children = [];
                 }
-                addSeqToMediaOverlay(publication, rootfile, opf, rootMO, moc.Children, child);
+                addSeqToMediaOverlay(smil, publication, rootfile, opf, rootMO, moc.Children, child);
             });
         }
     } else { // Par
         const par = seqChild as Par;
 
         if (par.Text && par.Text.Src) {
-            moc.Text = par.Text.Src;
+            const zipPath = path.join(path.dirname(smil.ZipPath), par.Text.Src)
+                .replace(/\\/g, "/");
+            moc.Text = zipPath;
         }
         if (par.Audio && par.Audio.Src) {
-            moc.Audio = par.Audio.Src;
+            const zipPath = path.join(path.dirname(smil.ZipPath), par.Audio.Src)
+                .replace(/\\/g, "/");
+            moc.Audio = zipPath;
             moc.Audio += "#t=";
             moc.Audio += par.Audio.ClipBegin ? timeStrToSeconds(par.Audio.ClipBegin) : "0";
             if (par.Audio.ClipEnd) {
