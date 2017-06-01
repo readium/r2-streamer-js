@@ -81,7 +81,7 @@ export class Zip1 extends Zip {
         // debug(`entryStreamPromise: ${entryPath}`);
 
         if (!this.hasEntries() || !this.hasEntry(entryPath)) {
-            return Promise.reject("no such path in zip");
+            return Promise.reject("no such path in zip: " + entryPath);
         }
 
         // return new Promise<IStreamAndLength>((resolve, _reject) => {

@@ -42,7 +42,19 @@ export function serverPub(server: Server, topRouter: express.Router): express.Ro
 
     routerPathBase64.param("pathBase64", (req, res, next, value, _name) => {
 
+        if (value.indexOf(server.lcpBeginToken) === 0 && value.indexOf(server.lcpEndToken) > 0) {
+            const i = value.indexOf(server.lcpEndToken);
+            const pass64 = value.substr(server.lcpBeginToken.length, i - server.lcpBeginToken.length);
+            // const pass = new Buffer(pass64, "base64").toString("utf8");
+            (req as any).lcpPass64 = pass64;
+
+            value = value.substr(i + server.lcpEndToken.length);
+            req.params.pathBase64 = value;
+            debug(value);
+        }
+
         const valueStr = new Buffer(value, "base64").toString("utf8");
+        debug(valueStr);
         if (isHTTP(valueStr)) {
             // debug(`Publication URL: ${valueStr}`);
 

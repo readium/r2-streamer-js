@@ -1,5 +1,6 @@
 import * as path from "path";
 import * as querystring from "querystring";
+// import * as util from "util";
 
 import * as sizeOf from "image-size";
 import * as moment from "moment";
@@ -122,6 +123,15 @@ export async function EpubParsePromise(filePath: string): Promise<Publication> {
         // breakLength: 100  maxArrayLength: undefined
         // console.log(util.inspect(lcpl,
         //     { showHidden: false, depth: 1000, colors: true, customInspect: true }));
+
+        publication.LCP = lcpl;
+
+        // // breakLength: 100  maxArrayLength: undefined
+        // console.log(util.inspect(this.LCP,
+        //     { showHidden: false, depth: 1000, colors: true, customInspect: true }));
+
+        publication.AddLink("application/vnd.readium.lcp.license-1.0+json", ["license"],
+            lcpl.ZipPath, false);
     }
 
     let encryption: Encryption | undefined;
@@ -1040,7 +1050,6 @@ const fillEncryptionInfo =
                         }
                     }
                 });
-
             }
 
             publication.Resources.forEach((l, _i, _arr) => {
@@ -1064,22 +1073,6 @@ const fillEncryptionInfo =
                 }
             });
         });
-
-        if (lcp) {
-
-            const decodedKeyCheck = new Buffer(lcp.Encryption.UserKey.KeyCheck, "base64").toString("utf8");
-            const decodedContentKey = new Buffer(lcp.Encryption.ContentKey.EncryptedValue, "base64").toString("utf8");
-            // publication.LCP = lcp;
-
-            publication.AddToInternal("lcp_id", lcp.ID);
-            publication.AddToInternal("lcp_content_key", decodedContentKey);
-            publication.AddToInternal("lcp_content_key_algorithm", lcp.Encryption.ContentKey.Algorithm);
-            publication.AddToInternal("lcp_user_hint", lcp.Encryption.UserKey.TextHint);
-            publication.AddToInternal("lcp_user_key_check", decodedKeyCheck);
-
-            publication.AddLink("application/vnd.readium.lcp.license-1.0+json", ["license"],
-                lcp.ZipPath, false);
-        }
     };
 
 const fillPageListFromNCX = (publication: Publication, _rootfile: Rootfile, _opf: OPF, ncx: NCX) => {

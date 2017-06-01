@@ -51,6 +51,9 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
             if (!req.params.pathBase64) {
                 req.params.pathBase64 = (req as any).pathBase64;
             }
+            if (!req.params.lcpPass64) {
+                req.params.lcpPass64 = (req as any).lcpPass64;
+            }
 
             const isSecureHttp = req.secure ||
                 req.protocol === "https" ||
@@ -90,8 +93,12 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
 
             const rootUrl = (isSecureHttp ? "https://" : "http://")
                 + req.headers.host + "/pub/"
+                + (req.params.lcpPass64 ?
+                    (server.lcpBeginToken + encodeURIComponent_RFC3986(req.params.lcpPass64) + server.lcpEndToken) :
+                    "")
                 + encodeURIComponent_RFC3986(req.params.pathBase64);
-            const manifestURL = rootUrl + "/manifest.json";
+            const manifestURL = // rootUrl +
+                "/manifest.json";
 
             const selfLink = publication.searchLinkByRel("self");
             if (!selfLink) {
@@ -134,7 +141,8 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
             if (hasMO) {
                 const moLink = publication.searchLinkByRel("media-overlay");
                 if (!moLink) {
-                    const moURL = rootUrl + "/" + mediaOverlayURLPath +
+                    const moURL = // rootUrl + "/" +
+                        mediaOverlayURLPath +
                         "?" + mediaOverlayURLParam + "={path}";
                     publication.AddLink("application/vnd.readium.mo+json", ["media-overlay"], moURL, true);
                 }

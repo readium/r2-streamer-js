@@ -110,3 +110,14 @@ See: https://github.com/edrlab/r2-streamer-js/blob/develop/docs/remote-epub.md
 ## Support for OPDS feeds
 
 See: https://github.com/edrlab/r2-streamer-js/blob/develop/docs/opds.md
+
+## Obfuscated fonts and encrypted resources
+
+Both IDPF and Adobe font de-obfuscation schemes are supported.
+
+LCP support temporarily requires (for testing only) passing the base64 encoding of the hexadecimal representation of the SHA256 digest of the user passphrase, in the URL request.
+
+For example: user passphrase `dan` is SHA256 `ec4f2dbb3b140095550c9afbbb69b5d6fd9e814b9da82fad0b34e9fcbe56f1cb` which is base64 `ZWM0ZjJkYmIzYjE0MDA5NTU1MGM5YWZiYmI2OWI1ZDZmZDllODE0YjlkYTgyZmFkMGIzNGU5ZmNiZTU2ZjFjYg==`.
+
+The special URL syntax is `http://domain.com/pub/*-{LCP_PASS}-*{PUB_ID}/` where `{LCP_PASS}` is automatically propagated into the webpub manifest.
+

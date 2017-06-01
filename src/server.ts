@@ -23,6 +23,10 @@ const debug = debug_("r2:server:main");
 interface IPathPublicationMap { [key: string]: any; }
 
 export class Server {
+
+    public readonly lcpBeginToken = "*-";
+    public readonly lcpEndToken = "-*";
+
     private readonly publications: string[];
     private publicationsOPDSfeed: OPDSFeed | undefined;
     private readonly pathPublicationMap: IPathPublicationMap;

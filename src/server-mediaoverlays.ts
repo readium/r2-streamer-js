@@ -51,6 +51,9 @@ export function serverMediaOverlays(server: Server, routerPathBase64: express.Ro
             if (!req.params.pathBase64) {
                 req.params.pathBase64 = (req as any).pathBase64;
             }
+            if (!req.params.lcpPass64) {
+                req.params.lcpPass64 = (req as any).lcpPass64;
+            }
 
             const isSecureHttp = req.secure ||
                 req.protocol === "https" ||
@@ -84,6 +87,9 @@ export function serverMediaOverlays(server: Server, routerPathBase64: express.Ro
 
             const rootUrl = (isSecureHttp ? "https://" : "http://")
                 + req.headers.host + "/pub/"
+                + (req.params.lcpPass64 ?
+                    (server.lcpBeginToken + encodeURIComponent_RFC3986(req.params.lcpPass64) + server.lcpEndToken) :
+                    "")
                 + encodeURIComponent_RFC3986(req.params.pathBase64);
 
             function absoluteURL(href: string): string {

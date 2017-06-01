@@ -4,6 +4,8 @@ import * as path from "path";
 import * as debug_ from "debug";
 import * as express from "express";
 import * as mime from "mime-types";
+import * as forge from "node-forge";
+import * as zlib from "zlib";
 
 import { parseRangeHeader } from "./_utils/http/RangeUtils";
 import { streamToBufferPromise } from "./_utils/stream/BufferUtils";
@@ -28,6 +30,9 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
             }
             if (!req.params.asset) {
                 req.params.asset = (req as any).asset;
+            }
+            if (!req.params.lcpPass64) {
+                req.params.lcpPass64 = (req as any).lcpPass64;
             }
 
             // debug(req.method);
@@ -92,28 +97,6 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                 return;
             }
 
-            const mediaType = mime.lookup(pathInZip);
-
-            const isText = mediaType && (
-                mediaType.indexOf("text/") === 0 ||
-                mediaType.indexOf("application/xhtml") === 0 ||
-                mediaType.indexOf("application/xml") === 0 ||
-                mediaType.indexOf("application/json") === 0 ||
-                mediaType.indexOf("application/svg") === 0 ||
-                mediaType.indexOf("application/smil") === 0 ||
-                mediaType.indexOf("+json") > 0 ||
-                mediaType.indexOf("+smil") > 0 ||
-                mediaType.indexOf("+svg") > 0 ||
-                mediaType.indexOf("+xhtml") > 0 ||
-                mediaType.indexOf("+xml") > 0);
-
-            // const isVideoAudio = mediaType && (
-            //     mediaType.indexOf("audio/") === 0 ||
-            //     mediaType.indexOf("video/") === 0);
-            // if (isVideoAudio) {
-            //     debug(req.headers);
-            // }
-
             let link: Link | undefined;
 
             if (publication.Resources
@@ -144,6 +127,31 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                     return;
                 }
             }
+
+            let mediaType = mime.lookup(pathInZip);
+            if (link && link.TypeLink) {
+                mediaType = link.TypeLink;
+            }
+
+            const isText = mediaType && (
+                mediaType.indexOf("text/") === 0 ||
+                mediaType.indexOf("application/xhtml") === 0 ||
+                mediaType.indexOf("application/xml") === 0 ||
+                mediaType.indexOf("application/json") === 0 ||
+                mediaType.indexOf("application/svg") === 0 ||
+                mediaType.indexOf("application/smil") === 0 ||
+                mediaType.indexOf("+json") > 0 ||
+                mediaType.indexOf("+smil") > 0 ||
+                mediaType.indexOf("+svg") > 0 ||
+                mediaType.indexOf("+xhtml") > 0 ||
+                mediaType.indexOf("+xml") > 0);
+
+            // const isVideoAudio = mediaType && (
+            //     mediaType.indexOf("audio/") === 0 ||
+            //     mediaType.indexOf("video/") === 0);
+            // if (isVideoAudio) {
+            //     debug(req.headers);
+            // }
 
             const isEncrypted = link && link.Properties && link.Properties.Encrypted;
 
@@ -271,11 +279,67 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                     const zipDataRemainder = zipData.slice(prefixLength);
                     zipData = Buffer.concat([zipDataPrefix, zipDataRemainder]);
 
-                } else if (link.Properties.Encrypted.Algorithm
-                    === "http://www.w3.org/2001/04/xmlenc#aes256-cbc") {
-                    // TODO LCP userKey --> contentKey
+                } else if (
+                    link.Properties.Encrypted.Scheme === "http://readium.org/2014/01/lcp"
+                    && link.Properties.Encrypted.Profile === "http://readium.org/lcp/basic-profile"
+                    && link.Properties.Encrypted.Algorithm === "http://www.w3.org/2001/04/xmlenc#aes256-cbc") {
 
-                    const err = "LCP encryption not supported.";
+                    let contentKey: string | undefined;
+                    if (req.params.lcpPass64) {
+                        const lcpPass = new Buffer(req.params.lcpPass64, "base64").toString("utf8");
+                        contentKey = publication.UpdateLCP(lcpPass);
+                    }
+                    // else {
+                    //     contentKey = publication.Internal.find((i) => {
+                    //         if (i.Name === "lcp_content_key") {
+                    //             return true;
+                    //         }
+                    //         return false;
+                    //     });
+
+                    //     contentKey = contentKey ? contentKey.Value : undefined;
+                    // }
+
+                    if (!contentKey) {
+                        const err = "LCP missing key.";
+                        debug(err);
+                        res.status(500).send("<html><body><p>Internal Server Error</p><p>"
+                            + err + "</p></body></html>");
+                        return;
+                    }
+
+                    try {
+                        const AES_BLOCK_SIZE = 16;
+                        const iv = zipData.slice(0, AES_BLOCK_SIZE).toString("binary");
+                        const toDecrypt =
+                            forge.util.createBuffer(zipData.slice(AES_BLOCK_SIZE).toString("binary"), "binary");
+                        // const toDecrypt = aesCbcCipher.output;
+                        const aesCbcDecipher = (forge as any).cipher.createDecipher("AES-CBC", contentKey);
+                        aesCbcDecipher.start({ iv, additionalData_: "binary-encoded string" });
+                        aesCbcDecipher.update(toDecrypt);
+                        aesCbcDecipher.finish();
+
+                        const decryptedZipData = aesCbcDecipher.output.bytes();
+
+                        zipData = new Buffer(decryptedZipData, "binary");
+                        if (link.Properties.Encrypted.Compression === "deflate") {
+                            zipData = zlib.inflateRawSync(zipData);
+                        }
+
+                        if (link.Properties.Encrypted.OriginalLength
+                            && link.Properties.Encrypted.OriginalLength !== zipData.length) {
+                            debug(`LENGTH NOT MATCH ${link.Properties.Encrypted.OriginalLength} !== ${zipData.length}`);
+                        }
+                    } catch (erro) {
+                        const err = "LCP decrypt error.";
+                        debug(err);
+                        debug(erro);
+                        res.status(500).send("<html><body><p>Internal Server Error</p><p>"
+                            + err + " (" + erro + ")</p></body></html>");
+                        return;
+                    }
+                } else {
+                    const err = "Encryption scheme not supported.";
                     debug(err);
                     res.status(500).send("<html><body><p>Internal Server Error</p><p>"
                         + err + "</p></body></html>");

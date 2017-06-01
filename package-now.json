@@ -16,6 +16,7 @@
     "mime-types": "latest",
     "moment": "latest",
     "morgan": "latest",
+    "node-forge": "latest",
     "node-stream-zip": "latest",
     "reflect-metadata": "latest",
     "request": "latest",
