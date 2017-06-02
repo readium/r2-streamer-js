@@ -1,7 +1,7 @@
 {
   "name": "r2-streamer-js",
-  "version": "0.0.1-alpha20",
-  "description": "Readium 2 'streamer' for NodeJS (TypeScript, ECMAScript 2015 / ES6)",
+  "version": "0.0.1-alpha21",
+  "description": "Readium 2 'streamer' for NodeJS (TypeScript)",
   "keywords": [
     "readium",
     "readium2",
@@ -15,7 +15,10 @@
     "ECMAScript 6",
     "ES7",
     "ECMAScript 2016",
-    "ECMAScript 7"
+    "ECMAScript 7",
+    "ES8",
+    "ECMAScript 2017",
+    "ECMAScript 8"
   ],
   "engines": {
     "node": ">=6",

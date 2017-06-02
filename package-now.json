@@ -1,6 +1,6 @@
 {
   "name": "readium2",
-  "version": "0.0.1-alpha20",
+  "version": "0.0.1-alpha21",
   "engines": {
     "node": ">=7",
     "npm": ">=4",
