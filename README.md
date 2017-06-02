@@ -108,6 +108,10 @@ Command line steps:
 
 ## Documentation
 
+### HTTP API
+
+https://github.com/edrlab/r2-streamer-js/blob/develop/docs/http.md
+
 ### Support for remote publications
 
 https://github.com/edrlab/r2-streamer-js/blob/develop/docs/remote-epub.md
@@ -116,6 +120,6 @@ https://github.com/edrlab/r2-streamer-js/blob/develop/docs/remote-epub.md
 
 https://github.com/edrlab/r2-streamer-js/blob/develop/docs/opds.md
 
-### HTTP API
+### Support for encrypted content
 
-https://github.com/edrlab/r2-streamer-js/blob/develop/docs/http.md
+https://github.com/edrlab/r2-streamer-js/blob/develop/docs/encryption.md
