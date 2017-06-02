@@ -19,9 +19,9 @@ Public APIs are not stable. The internal logical architecture and physical code 
 
 https://github.com/edrlab/r2-streamer-js
 
-There is no "github.io" (`gh-pages`) site for this project.
+There is no [github.io](https://edrlab.github.io/r2-streamer-js) site for this project (no [gh-pages](https://github.com/edrlab/r2-streamer-js/tree/gh-pages) branch).
 
-Wiki documentation is not used, instead there are Markdown files inside the repository (`docs` folder).
+Wiki documentation is not used, instead there are Markdown files inside the repository ([docs](https://github.com/edrlab/r2-streamer-js/tree/develop/docs) folder).
 
 Note that there are currently no API docs for the source code.
 
