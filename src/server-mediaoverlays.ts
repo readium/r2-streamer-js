@@ -150,7 +150,7 @@ export function serverMediaOverlays(server: Server, routerPathBase64: express.Ro
                     // "<p><pre>" + dumpStr + "</pre></p>" +
                     "</body></html>");
             } else {
-                res.setHeader("Access-Control-Allow-Origin", "*");
+                server.setResponseCORS(res);
                 res.set("Content-Type", "application/vnd.readium.mo+json; charset=utf-8");
 
                 const jsonStr = global.JSON.stringify(sortObject(jsonObj), null, "");

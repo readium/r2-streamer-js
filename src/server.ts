@@ -87,6 +87,17 @@ export class Server {
         });
     }
 
+    public setResponseCORS(res: express.Response) {
+        res.setHeader("Access-Control-Allow-Origin",
+            "*");
+
+        res.setHeader("Access-Control-Allow-Methods",
+            "GET, OPTIONS"); // POST, DELETE, PUT, PATCH
+
+        res.setHeader("Access-Control-Allow-Headers",
+            "Content-Type, Content-Length, Accept-Ranges, Link, Transfer-Encoding");
+    }
+
     public addPublications(pubs: string[]) {
         pubs.forEach((pub) => {
             if (this.publications.indexOf(pub) < 0) {

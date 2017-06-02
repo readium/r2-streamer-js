@@ -362,7 +362,7 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                         : "<p>BINARY</p>"
                     ) + "</body></html>");
             } else {
-                res.setHeader("Access-Control-Allow-Origin", "*");
+                server.setResponseCORS(res);
                 res.setHeader("Cache-Control", "public,max-age=86400");
 
                 if (mediaType) {

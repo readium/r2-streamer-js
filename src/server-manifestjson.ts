@@ -235,7 +235,7 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
                     // "<p><pre>" + dumpStr + "</pre></p>" +
                     "</body></html>");
             } else {
-                res.setHeader("Access-Control-Allow-Origin", "*");
+                server.setResponseCORS(res);
                 res.set("Content-Type", "application/webpub+json; charset=utf-8");
 
                 const publicationJsonObj = TAJSON.serialize(publication);
