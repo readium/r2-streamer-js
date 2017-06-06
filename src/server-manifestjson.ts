@@ -17,6 +17,8 @@ const debug = debug_("r2:server:manifestjson");
 
 export function serverManifestJson(server: Server, routerPathBase64: express.Router) {
 
+    const JSON_LD_URI = "http://readium.org/webpub/default.jsonld";
+
     // https://github.com/mafintosh/json-markup/blob/master/style.css
     const jsonStyle = `
 .json-markup {
@@ -219,6 +221,8 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
 
                 absolutizeURLs(jsonObj);
 
+                jsonObj["@context"] = JSON_LD_URI;
+
                 // const jsonStr = global.JSON.stringify(jsonObj, null, "    ");
 
                 // // breakLength: 100  maxArrayLength: undefined
@@ -241,6 +245,8 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
                 const publicationJsonObj = TAJSON.serialize(publication);
 
                 absolutizeURLs(publicationJsonObj);
+
+                publicationJsonObj["@context"] = JSON_LD_URI;
 
                 const publicationJsonStr = global.JSON.stringify(sortObject(publicationJsonObj), null, "");
 
