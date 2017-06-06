@@ -231,7 +231,11 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
 
                 const jsonPretty = jsonMarkup(jsonObj, css2json(jsonStyle));
 
-                res.status(200).send("<html><body>" +
+                res.status(200).send("<html>" +
+                    "<head><script type=\"application/ld+json\" href=\"" +
+                    manifestURL +
+                    "\"></script></head>" +
+                    "<body>" +
                     "<h1>" + path.basename(pathBase64Str) + "</h1>" +
                     (coverImage ? "<img src=\"" + coverImage + "\" alt=\"\"/>" : "") +
                     "<hr><p><pre>" + jsonPretty + "</pre></p>" +
