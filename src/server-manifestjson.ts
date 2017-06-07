@@ -104,8 +104,7 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
                     (server.lcpBeginToken + encodeURIComponent_RFC3986(req.params.lcpPass64) + server.lcpEndToken) :
                     "")
                 + encodeURIComponent_RFC3986(req.params.pathBase64);
-            const manifestURL = // rootUrl +
-                "manifest.json";
+            const manifestURL = rootUrl + "/" + "manifest.json";
 
             const selfLink = publication.searchLinkByRel("self");
             if (!selfLink) {
@@ -238,7 +237,7 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
 
                 res.status(200).send("<html>" +
                     "<head><script type=\"application/ld+json\" href=\"" +
-                    rootUrl + "/" + manifestURL +
+                    manifestURL +
                     "\"></script></head>" +
                     "<body>" +
                     "<h1>" + path.basename(pathBase64Str) + "</h1>" +
