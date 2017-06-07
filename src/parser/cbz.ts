@@ -29,6 +29,7 @@ export async function CbzParsePromise(filePath: string): Promise<Publication> {
     }
 
     const publication = new Publication();
+    publication.Context = ["http://readium.org/webpub/default.jsonld"];
     publication.Metadata = new Metadata();
     publication.Metadata.Identifier = filePathToTitle(filePath);
 
