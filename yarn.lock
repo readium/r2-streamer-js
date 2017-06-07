@@ -1687,8 +1687,8 @@ glob@^7.0.3, glob@^7.0.5, glob@^7.1.1:
     path-is-absolute "^1.0.0"
 
 globals@^9.0.0:
-  version "9.17.0"
-  resolved "https://registry.yarnpkg.com/globals/-/globals-9.17.0.tgz#0c0ca696d9b9bb694d2e5470bd37777caad50286"
+  version "9.18.0"
+  resolved "https://registry.yarnpkg.com/globals/-/globals-9.18.0.tgz#aa3896b3e69b487f17e31ed2143d69a8e30c2d8a"
 
 globby@^6.0.0:
   version "6.1.0"
