@@ -117,7 +117,8 @@ export function serverMediaOverlays(server: Server, routerPathBase64: express.Ro
 
             let objToSerialize: any = null;
 
-            const resource = (isShow && !req.query.show) ? req.params[mediaOverlayURLParam] :
+            const resource = isShow ?
+                (req.query.show ? req.query.show : req.params[mediaOverlayURLParam]) :
                 req.query[mediaOverlayURLParam];
             if (resource && resource !== "all") {
                 objToSerialize = publication.FindMediaOverlayByHref(resource);
