@@ -47,6 +47,11 @@ export function serverOPDS2(server: Server, topRouter: express.Router) {
     routerOPDS2.get(["/", "/show/:jsonPath?"],
         (req: express.Request, res: express.Response) => {
 
+            const isShow = req.url.indexOf("/show") >= 0 || req.query.show;
+            if (!req.params.jsonPath && req.query.show) {
+                req.params.jsonPath = req.query.show;
+            }
+
             const isSecureHttp = req.secure ||
                 req.protocol === "https" ||
                 req.get("X-Forwarded-Proto") === "https"
@@ -93,7 +98,7 @@ export function serverOPDS2(server: Server, topRouter: express.Router) {
                     });
             }
 
-            if (req.url.indexOf("/show") >= 0) {
+            if (isShow) {
                 let objToSerialize: any = null;
 
                 if (req.params.jsonPath) {

@@ -55,6 +55,8 @@ export function serverMediaOverlays(server: Server, routerPathBase64: express.Ro
                 req.params.lcpPass64 = (req as any).lcpPass64;
             }
 
+            const isShow = req.url.indexOf("/show") >= 0 || req.query.show;
+
             const isSecureHttp = req.secure ||
                 req.protocol === "https" ||
                 req.get("X-Forwarded-Proto") === "https"
@@ -113,11 +115,9 @@ export function serverMediaOverlays(server: Server, routerPathBase64: express.Ro
                     });
             }
 
-            const isShow = req.url.indexOf("/show") >= 0;
-
             let objToSerialize: any = null;
 
-            const resource = isShow ? req.params[mediaOverlayURLParam] :
+            const resource = (isShow && !req.query.show) ? req.params[mediaOverlayURLParam] :
                 req.query[mediaOverlayURLParam];
             if (resource && resource !== "all") {
                 objToSerialize = publication.FindMediaOverlayByHref(resource);

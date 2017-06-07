@@ -57,6 +57,11 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
                 req.params.lcpPass64 = (req as any).lcpPass64;
             }
 
+            const isShow = req.url.indexOf("/show") >= 0 || req.query.show;
+            if (!req.params.jsonPath && req.query.show) {
+                req.params.jsonPath = req.query.show;
+            }
+
             const isSecureHttp = req.secure ||
                 req.protocol === "https" ||
                 req.get("X-Forwarded-Proto") === "https"
@@ -159,7 +164,7 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
                 }
             }
 
-            if (req.url.indexOf("/show") >= 0) {
+            if (isShow) {
                 let objToSerialize: any = null;
 
                 if (req.params.jsonPath) {

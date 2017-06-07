@@ -35,6 +35,8 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                 req.params.lcpPass64 = (req as any).lcpPass64;
             }
 
+            const isShow = req.query.show;
+
             // debug(req.method);
             const isHead = req.method.toLowerCase() === "head";
             if (isHead) {
@@ -218,7 +220,7 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                 totalByteLength;
 
             let zipData: Buffer | undefined;
-            if (!isHead && (isEncrypted || (req.query.show && isText))) {
+            if (!isHead && (isEncrypted || (isShow && isText))) {
                 try {
                     zipData = await streamToBufferPromise(zipStream);
                 } catch (err) {
@@ -347,7 +349,7 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                 }
             }
 
-            if (req.query.show) {
+            if (isShow) {
                 res.status(200).send("<html><body>" +
                     "<h1>" + path.basename(pathBase64Str) + "</h1>" +
                     "<h2>" + mediaType + "</h2>" +
