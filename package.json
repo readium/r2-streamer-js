@@ -101,11 +101,11 @@
     "dist/**/*"
   ],
   "scripts": {
-    "start": "npm run server-debug .",
+    "start": "npm run server-debug ./misc/epubs/",
     "prepare_": "npm run build:all && npm test",
     "prepublish_": "npm run prepare_",
     "prenow": "npm run clean && npm run transpile:typescript:es8-es2017",
-    "now": "rm -rf ./now && mkdir now && cp yarn.lock ./now && mkdir now/reader-NYPL && mkdir now/reader-HADRIEN && cp -r dist/ now/ && cp -r reader-NYPL/ now/reader-NYPL/ && cp -r reader-HADRIEN/ now/reader-HADRIEN/ && cp *.epub now/ && cp package-now.json now/ && cd now/ && mv package-now.json package.json && now && cd ..",
+    "now": "rm -rf ./now && mkdir now && cp yarn.lock ./now && mkdir now/misc && mkdir now/misc/readers && mkdir now/misc/epubs && mkdir now/misc/readers/reader-NYPL && mkdir now/misc/readers/reader-HADRIEN && cp -r dist/ now/ && cp -r misc/readers/reader-NYPL/ now/misc/readers/reader-NYPL/ && cp -r misc/readers/reader-HADRIEN/ now/misc/readers/reader-HADRIEN/ && cp misc/epubs/*.epub now/misc/epubs/ && cp package-now.json now/ && cd now/ && mv package-now.json package.json && now && cd ..",
     "prebuild": "npm run lint",
     "build": "npm run transpile:typescript",
     "prebuild:all": "npm run lint",
@@ -120,7 +120,7 @@
     "build:es8-es2017": "npm run transpile:typescript:es8-es2017",
     "clean": "rimraf ./dist && rimraf ./now && mkdirp ./dist",
     "lint": "npm run lint:all && npm run lint:typescript:full",
-    "lint:all": "eclint check \"**/*\" \"[!].git/**/*\" \"[!]node_modules/**/*\" \"[!]dist/**/*\" \"[!]reader*/**/*\" \"[!]now/**/*\" \"[!].vscode/**/*\" \"[!]**/.DS_Store\" \"[!]**/*.epub\" \"[!]**/*.cbz\"  \"[!]**/*.jpg\"  \"[!]**/*.jpeg\"  \"[!]**/*.png\"",
+    "lint:all": "eclint check \"**/*\" \"[!].git/**/*\" \"[!]node_modules/**/*\" \"[!]dist/**/*\" \"[!]misc/**/*\" \"[!]now/**/*\" \"[!].vscode/**/*\" \"[!]**/.DS_Store\" \"[!]**/*.epub\" \"[!]**/*.cbz\"  \"[!]**/*.jpg\"  \"[!]**/*.jpeg\"  \"[!]**/*.png\"",
     "lint:typescript": "tslint -c \"./tslint.json\" \"./src/**/*.ts\" \"./test/**/*.ts\"",
     "lint:typescript:full": "tslint --type-check --project \"./tsconfig.json\" -c \"./tslint.json\" \"./src/**/*.ts\" \"./test/**/*.ts\"",
     "pretranspile:typescript": "npm run clean",

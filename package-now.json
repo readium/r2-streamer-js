@@ -30,6 +30,6 @@
     "yauzl": "latest"
   },
   "scripts": {
-    "now-start": "node './es8-es2017/src/server-cli.js' ."
+    "now-start": "node './es8-es2017/src/server-cli.js' ./misc/epubs"
   }
 }

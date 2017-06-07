@@ -49,8 +49,8 @@ export class Server {
             etag: false,
         };
 
-        server.use("/readerNYPL", express.static("reader-NYPL", staticOptions));
-        server.use("/readerHADRIEN", express.static("reader-HADRIEN", staticOptions));
+        server.use("/readerNYPL", express.static("misc/readers/reader-NYPL", staticOptions));
+        server.use("/readerHADRIEN", express.static("misc/readers/reader-HADRIEN", staticOptions));
 
         server.get("/", (_req: express.Request, res: express.Response) => {
 

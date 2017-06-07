@@ -10,8 +10,9 @@
       "cwd": "${workspaceRoot}",
       "internalConsoleOptions": "openOnSessionStart",
       "args": [
+        "./misc/epubs",
         "${file}",
-        "${workspaceRoot}/wasteland-otf-obf.epub"
+        "${workspaceRoot}/misc/epubs/wasteland-otf-obf.epub"
       ],
       "env": {
         "DEBUG": "*",
@@ -33,9 +34,9 @@
       "cwd": "${workspaceRoot}",
       "internalConsoleOptions": "openOnSessionStart",
       "args": [
-        ".",
+        "./misc/epubs",
         "${file}",
-        "${workspaceRoot}/wasteland-otf-obf.epub"
+        "${workspaceRoot}/misc/epubs/wasteland-otf-obf.epub"
       ],
       "env": {
         "DEBUG": "*",
