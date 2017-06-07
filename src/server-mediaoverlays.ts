@@ -57,6 +57,8 @@ export function serverMediaOverlays(server: Server, routerPathBase64: express.Ro
 
             const isShow = req.url.indexOf("/show") >= 0 || req.query.show;
 
+            const isCanonical = req.query.canonical && req.query.canonical === "true";
+
             const isSecureHttp = req.secure ||
                 req.protocol === "https" ||
                 req.get("X-Forwarded-Proto") === "https"
@@ -133,9 +135,9 @@ export function serverMediaOverlays(server: Server, routerPathBase64: express.Ro
             let jsonObj = TAJSON.serialize(objToSerialize);
             jsonObj = { "media-overlay": jsonObj };
 
-            absolutizeURLs(jsonObj);
-
             if (isShow) {
+                absolutizeURLs(jsonObj);
+
                 // const jsonStr = global.JSON.stringify(jsonObj, null, "    ");
 
                 // // breakLength: 100  maxArrayLength: undefined
@@ -151,10 +153,14 @@ export function serverMediaOverlays(server: Server, routerPathBase64: express.Ro
                     // "<p><pre>" + dumpStr + "</pre></p>" +
                     "</body></html>");
             } else {
+                // absolutizeURLs(jsonObj);
+
                 server.setResponseCORS(res);
                 res.set("Content-Type", "application/vnd.readium.mo+json; charset=utf-8");
 
-                const jsonStr = global.JSON.stringify(sortObject(jsonObj), null, "");
+                const jsonStr = isCanonical ?
+                    global.JSON.stringify(sortObject(jsonObj), null, "") :
+                    global.JSON.stringify(jsonObj, null, "  ");
 
                 const checkSum = crypto.createHash("sha256");
                 checkSum.update(jsonStr);

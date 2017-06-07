@@ -62,6 +62,8 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
                 req.params.jsonPath = req.query.show;
             }
 
+            const isCanonical = req.query.canonical && req.query.canonical === "true";
+
             const isSecureHttp = req.secure ||
                 req.protocol === "https" ||
                 req.get("X-Forwarded-Proto") === "https"
@@ -252,11 +254,19 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
 
                 const publicationJsonObj = TAJSON.serialize(publication);
 
-                absolutizeURLs(publicationJsonObj);
+                // absolutizeURLs(publicationJsonObj);
 
-                publicationJsonObj["@context"] = JSON_LD_URI;
+                if (isCanonical) {
+                    if (publicationJsonObj.links) {
+                        delete publicationJsonObj.links;
+                    }
+                } else {
+                    publicationJsonObj["@context"] = JSON_LD_URI;
+                }
 
-                const publicationJsonStr = global.JSON.stringify(sortObject(publicationJsonObj), null, "");
+                const publicationJsonStr = isCanonical ?
+                    global.JSON.stringify(sortObject(publicationJsonObj), null, "") :
+                    global.JSON.stringify(publicationJsonObj, null, "  ");
 
                 const checkSum = crypto.createHash("sha256");
                 checkSum.update(publicationJsonStr);

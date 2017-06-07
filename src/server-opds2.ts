@@ -52,6 +52,8 @@ export function serverOPDS2(server: Server, topRouter: express.Router) {
                 req.params.jsonPath = req.query.show;
             }
 
+            const isCanonical = req.query.canonical && req.query.canonical === "true";
+
             const isSecureHttp = req.secure ||
                 req.protocol === "https" ||
                 req.get("X-Forwarded-Proto") === "https"
@@ -158,7 +160,9 @@ export function serverOPDS2(server: Server, topRouter: express.Router) {
 
                 absolutizeURLs(publicationsJsonObj);
 
-                const publicationsJsonStr = global.JSON.stringify(sortObject(publicationsJsonObj), null, "");
+                const publicationsJsonStr = isCanonical ?
+                    global.JSON.stringify(sortObject(publicationsJsonObj), null, "") :
+                    global.JSON.stringify(publicationsJsonObj, null, "  ");
 
                 const checkSum = crypto.createHash("sha256");
                 checkSum.update(publicationsJsonStr);
