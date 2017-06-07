@@ -28,12 +28,17 @@ export function serverPub(server: Server, topRouter: express.Router): express.Ro
         "https://hadriengardeur.github.io/webpub-manifest/examples/viewer/?manifest=true&href=PREFIX"
         + querystring.escape(urlBook);
 
+    const urlReaderREADIUM1 =
+        "http://readium-2.surge.sh/?epub=PREFIX"
+        + querystring.escape(urlBook);
+
     const htmlLanding = "<html><body><h1>PATH_STR</h1><h2><a href='" +
         urlBookShowAll + "'>" + urlBookShowAll + "</a></h2><p>Reader NYPL:<br><a href='" +
         urlReaderNYPL + "'>" + urlReaderNYPL + "</a></p><p>Reader HADRIEN:<br><a href='" +
         urlReaderHADRIEN + "'>" + urlReaderHADRIEN + "</a></p><p>Reader EPUB.js:<br><a href='" +
         urlReaderEPUBJS + "'>" + urlReaderEPUBJS + "</a></p><p>Reader HADRIEN BASIC:<br><a href='" +
-        urlReaderHADRIENbasic + "'>" + urlReaderHADRIENbasic + "</a></p></body></html>";
+        urlReaderHADRIENbasic + "'>" + urlReaderHADRIENbasic + "</a></p><p>Reader READIUM-1:<br><a href='" +
+        urlReaderREADIUM1 + "'>" + urlReaderREADIUM1 + "</a></p></body></html>";
 
     const routerPathBase64 = express.Router({ strict: false });
     routerPathBase64.use(morgan("combined"));
