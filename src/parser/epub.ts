@@ -76,7 +76,8 @@ export const addCoverDimensions = async (publication: Publication, coverLink: Li
                             coverLink.Height = imageInfo.height;
 
                             if (coverLink.TypeLink &&
-                                coverLink.TypeLink.replace("jpeg", "jpg") !== ("image/" + imageInfo.type)) {
+                                coverLink.TypeLink.replace("jpeg", "jpg").replace("+xml", "")
+                                !== ("image/" + imageInfo.type)) {
                                 console.log(`Wrong image type? ${coverLink.TypeLink} -- ${imageInfo.type}`);
                             }
                         }
