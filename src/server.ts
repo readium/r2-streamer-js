@@ -92,7 +92,7 @@ export class Server {
             "*");
 
         res.setHeader("Access-Control-Allow-Methods",
-            "GET, OPTIONS"); // POST, DELETE, PUT, PATCH
+            "GET, HEAD, OPTIONS"); // POST, DELETE, PUT, PATCH
 
         res.setHeader("Access-Control-Allow-Headers",
             "Content-Type, Content-Length, Accept-Ranges, Link, Transfer-Encoding");
