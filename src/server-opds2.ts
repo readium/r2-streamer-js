@@ -172,6 +172,7 @@ export function serverOPDS2(server: Server, topRouter: express.Router) {
                 if (match === hash) {
                     debug("publications.json cache");
                     res.status(304); // StatusNotModified
+                    res.end();
                     return;
                 }
 

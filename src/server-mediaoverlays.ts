@@ -57,6 +57,12 @@ export function serverMediaOverlays(server: Server, routerPathBase64: express.Ro
 
             const isShow = req.url.indexOf("/show") >= 0 || req.query.show;
 
+            // debug(req.method);
+            const isHead = req.method.toLowerCase() === "head";
+            if (isHead) {
+                console.log("HEAD !!!!!!!!!!!!!!!!!!!");
+            }
+
             const isCanonical = req.query.canonical && req.query.canonical === "true";
 
             const isSecureHttp = req.secure ||
@@ -170,11 +176,18 @@ export function serverMediaOverlays(server: Server, routerPathBase64: express.Ro
                 if (match === hash) {
                     debug("smil cache");
                     res.status(304); // StatusNotModified
+                    res.end();
                     return;
                 }
 
                 res.setHeader("ETag", hash);
-                res.status(200).send(jsonStr);
+                res.status(200);
+
+                if (isHead) {
+                    res.end();
+                } else {
+                    res.send(jsonStr);
+                }
             }
         });
 

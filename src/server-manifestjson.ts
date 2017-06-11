@@ -60,6 +60,12 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
                 req.params.jsonPath = req.query.show;
             }
 
+            // debug(req.method);
+            const isHead = req.method.toLowerCase() === "head";
+            if (isHead) {
+                console.log("HEAD !!!!!!!!!!!!!!!!!!!");
+            }
+
             const isCanonical = req.query.canonical && req.query.canonical === "true";
 
             const isSecureHttp = req.secure ||
@@ -270,6 +276,7 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
                 if (match === hash) {
                     debug("manifest.json cache");
                     res.status(304); // StatusNotModified
+                    res.end();
                     return;
                 }
 
@@ -288,7 +295,13 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
 
                 // res.setHeader("Cache-Control", "public,max-age=86400");
 
-                res.status(200).send(publicationJsonStr);
+                res.status(200);
+
+                if (isHead) {
+                    res.end();
+                } else {
+                    res.send(publicationJsonStr);
+                }
             }
         });
 
