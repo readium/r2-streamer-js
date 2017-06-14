@@ -1,4 +1,4 @@
-import { XmlObject, XmlXPathSelector } from "../../_utils/xml-js-mapper";
+import { XmlObject, XmlXPathSelector } from "@utils/xml-js-mapper";
 
 @XmlObject()
 export class Rootfile {

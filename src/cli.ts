@@ -2,9 +2,10 @@ import * as fs from "fs";
 import * as path from "path";
 import * as util from "util";
 
-import { Publication } from "./models/publication";
-import { CbzParsePromise } from "./parser/cbz";
-import { EpubParsePromise } from "./parser/epub";
+import { CbzParsePromise } from "@parser/cbz";
+import { EpubParsePromise } from "@parser/epub";
+
+import { Publication } from "@models/publication";
 
 console.log("process.cwd():");
 console.log(process.cwd());

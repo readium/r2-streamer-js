@@ -1,5 +1,10 @@
 import * as path from "path";
 
+import { OPDS } from "@parser/opds/opds";
+import { Entry } from "@parser/opds/opds-entry";
+import { encodeURIComponent_RFC3986, isHTTP } from "@utils/http/UrlUtils";
+import { streamToBufferPromise } from "@utils/stream/BufferUtils";
+import { XML } from "@utils/xml-js-mapper";
 import * as debug_ from "debug";
 import * as express from "express";
 import * as morgan from "morgan";
@@ -7,11 +12,6 @@ import * as request from "request";
 import * as requestPromise from "request-promise-native";
 import * as xmldom from "xmldom";
 
-import { encodeURIComponent_RFC3986, isHTTP } from "./_utils/http/UrlUtils";
-import { streamToBufferPromise } from "./_utils/stream/BufferUtils";
-import { XML } from "./_utils/xml-js-mapper";
-import { OPDS } from "./parser/opds/opds";
-import { Entry } from "./parser/opds/opds-entry";
 import { Server } from "./server";
 import { trailingSlashRedirect } from "./server-trailing-slash-redirect";
 

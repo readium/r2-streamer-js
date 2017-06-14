@@ -1,7 +1,7 @@
 import {
     XmlObject,
     XmlXPathSelector,
-} from "../../_utils/xml-js-mapper";
+} from "@utils/xml-js-mapper";
 
 @XmlObject({
     epub: "http://www.idpf.org/2007/ops",

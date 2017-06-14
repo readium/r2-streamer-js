@@ -7,7 +7,7 @@ import {
     OnDeserialized,
 } from "ta-json";
 
-import { DateConverter } from "../_utils/xml-js-mapper";
+import { DateConverter } from "@utils/xml-js-mapper";
 import { BelongsTo } from "./metadata-belongsto";
 import { Contributor } from "./metadata-contributor";
 import { IStringMap } from "./metadata-multilang";

@@ -1,7 +1,7 @@
 import {
     XmlObject,
     XmlXPathSelector,
-} from "../../_utils/xml-js-mapper";
+} from "@utils/xml-js-mapper";
 
 @XmlObject({
     app: "http://www.w3.org/2007/app",

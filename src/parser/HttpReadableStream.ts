@@ -4,7 +4,7 @@ import * as debug_ from "debug";
 import * as request from "request";
 import * as requestPromise from "request-promise-native";
 
-import { streamToBufferPromise } from "../_utils/stream/BufferUtils";
+import { streamToBufferPromise } from "@utils/stream/BufferUtils";
 
 /////////////
 /////////////

@@ -1,10 +1,10 @@
 import {
+    DateConverter,
     XmlConverter,
     XmlItemType,
     XmlObject,
     XmlXPathSelector,
-} from "../../_utils/xml-js-mapper";
-import { DateConverter } from "../../_utils/xml-js-mapper";
+} from "@utils/xml-js-mapper";
 import { Author } from "./opds-author";
 import { Entry } from "./opds-entry";
 import { Link } from "./opds-link";

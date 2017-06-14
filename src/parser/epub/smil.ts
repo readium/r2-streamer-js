@@ -1,7 +1,7 @@
 import {
     XmlObject,
     XmlXPathSelector,
-} from "../../_utils/xml-js-mapper";
+} from "@utils/xml-js-mapper";
 import { Body } from "./smil-body";
 import { Par } from "./smil-par";
 

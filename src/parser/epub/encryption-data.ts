@@ -2,7 +2,7 @@ import {
     XmlItemType,
     XmlObject,
     XmlXPathSelector,
-} from "../../_utils/xml-js-mapper";
+} from "@utils/xml-js-mapper";
 import { CipherData } from "./encryption-cypherdata";
 import { KeyInfo } from "./encryption-keyinfo";
 import { EncryptionMethod } from "./encryption-method";

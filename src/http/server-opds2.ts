@@ -1,14 +1,14 @@
 import * as crypto from "crypto";
 
+import { Link } from "@models/publication-link";
+import { isHTTP } from "@utils/http/UrlUtils";
+import { sortObject } from "@utils/JsonUtils";
 import * as css2json from "css2json";
 import * as debug_ from "debug";
 import * as express from "express";
 import * as jsonMarkup from "json-markup";
 import { JSON as TAJSON } from "ta-json";
 
-import { isHTTP } from "./_utils/http/UrlUtils";
-import { sortObject } from "./_utils/JsonUtils";
-import { Link } from "./models/publication-link";
 import { Server } from "./server";
 import { trailingSlashRedirect } from "./server-trailing-slash-redirect";
 

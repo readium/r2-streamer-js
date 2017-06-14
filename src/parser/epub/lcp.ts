@@ -6,7 +6,7 @@ import {
     JsonProperty,
 } from "ta-json";
 
-import { DateConverter } from "../../_utils/xml-js-mapper";
+import { DateConverter } from "@utils/xml-js-mapper";
 import { Encryption } from "./lcp-encryption";
 import { Link } from "./lcp-link";
 import { Rights } from "./lcp-rights";

@@ -1,7 +1,7 @@
 import {
     XmlObject,
     XmlXPathSelector,
-} from "../../_utils/xml-js-mapper";
+} from "@utils/xml-js-mapper";
 import { Content } from "./ncx-content";
 
 @XmlObject({

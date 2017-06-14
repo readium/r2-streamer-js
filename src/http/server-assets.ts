@@ -1,18 +1,18 @@
 import * as crypto from "crypto";
 import * as path from "path";
+import * as zlib from "zlib";
 
+import { CbzParsePromise } from "@parser/cbz";
+import { EpubParsePromise } from "@parser/epub";
+import { parseRangeHeader } from "@utils/http/RangeUtils";
+import { streamToBufferPromise } from "@utils/stream/BufferUtils";
+import { IStreamAndLength, IZip } from "@utils/zip/zip";
 import * as debug_ from "debug";
 import * as express from "express";
 import * as mime from "mime-types";
 import * as forge from "node-forge";
-import * as zlib from "zlib";
 
-import { parseRangeHeader } from "./_utils/http/RangeUtils";
-import { streamToBufferPromise } from "./_utils/stream/BufferUtils";
-import { IStreamAndLength, IZip } from "./_utils/zip/zip";
-import { Link } from "./models/publication-link";
-import { CbzParsePromise } from "./parser/cbz";
-import { EpubParsePromise } from "./parser/epub";
+import { Link } from "@models/publication-link";
 import { Server } from "./server";
 
 const debug = debug_("r2:server:assets");

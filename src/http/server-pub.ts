@@ -5,7 +5,7 @@ import * as debug_ from "debug";
 import * as express from "express";
 import * as morgan from "morgan";
 
-import { encodeURIComponent_RFC3986, isHTTP } from "./_utils/http/UrlUtils";
+import { encodeURIComponent_RFC3986, isHTTP } from "@utils/http/UrlUtils";
 import { Server } from "./server";
 import { trailingSlashRedirect } from "./server-trailing-slash-redirect";
 

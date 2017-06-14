@@ -1,6 +1,6 @@
 import {
     XmlObject,
-} from "../../_utils/xml-js-mapper";
+} from "@utils/xml-js-mapper";
 import { Seq } from "./smil-seq";
 
 @XmlObject({

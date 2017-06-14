@@ -2,7 +2,7 @@ import {
     XmlItemType,
     XmlObject,
     XmlXPathSelector,
-} from "../../_utils/xml-js-mapper";
+} from "@utils/xml-js-mapper";
 import { Manifest } from "./opf-manifest";
 import { Metadata } from "./opf-metadata";
 import { Reference } from "./opf-reference";

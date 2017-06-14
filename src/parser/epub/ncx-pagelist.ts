@@ -2,7 +2,7 @@ import {
     XmlItemType,
     XmlObject,
     XmlXPathSelector,
-} from "../../_utils/xml-js-mapper";
+} from "@utils/xml-js-mapper";
 import { PageTarget } from "./ncx-pagetarget";
 
 @XmlObject({

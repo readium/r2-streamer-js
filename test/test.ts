@@ -1,6 +1,6 @@
 import { test } from "ava";
 
-import { timeStrToSeconds } from "../src/models/media-overlay";
+import { timeStrToSeconds } from "@models/media-overlay";
 
 async function fn() {
     return Promise.resolve("foo");

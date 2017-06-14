@@ -29,7 +29,7 @@
       "name": "server",
       "type": "node",
       "request": "launch",
-      "program": "${workspaceRoot}/src/server-cli.ts",
+      "program": "${workspaceRoot}/src/http/server-cli.ts",
       "stopOnEntry": false,
       "cwd": "${workspaceRoot}",
       "internalConsoleOptions": "openOnSessionStart",

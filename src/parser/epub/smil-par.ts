@@ -2,7 +2,7 @@ import {
     XmlDiscriminatorValue,
     XmlObject,
     XmlXPathSelector,
-} from "../../_utils/xml-js-mapper";
+} from "@utils/xml-js-mapper";
 import { Audio } from "./smil-audio";
 import { SeqOrPar } from "./smil-seq-or-par";
 import { Text } from "./smil-text";

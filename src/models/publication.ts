@@ -7,7 +7,7 @@ import {
     OnDeserialized,
 } from "ta-json";
 
-import { LCP } from "../parser/epub/lcp";
+import { LCP } from "@parser/epub/lcp";
 import { IInternal } from "./internal";
 import { MediaOverlayNode } from "./media-overlay";
 import { Metadata } from "./metadata";

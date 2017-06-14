@@ -8,8 +8,14 @@
     ],
     "baseUrl": "..",
     "paths": {
-      "r2-streamer-js": [
-        "src/index.ts"
+      "@utils/*": [
+        "src/_utils/*"
+      ],
+      "@parser/*": [
+        "src/parser/*"
+      ],
+      "@models/*": [
+        "src/models/*"
       ]
     },
     "strictNullChecks": true,

@@ -2,14 +2,14 @@ import * as child_process from "child_process";
 import * as fs from "fs";
 import * as path from "path";
 
+import { OPDSFeed } from "@models/opds2/opds2";
+import { Publication } from "@models/publication";
+import { encodeURIComponent_RFC3986, isHTTP } from "@utils/http/UrlUtils";
 import * as debug_ from "debug";
 import * as express from "express";
 import { JSON as TAJSON } from "ta-json";
 import { tmpNameSync } from "tmp";
 
-import { encodeURIComponent_RFC3986, isHTTP } from "./_utils/http/UrlUtils";
-import { OPDSFeed } from "./models/opds2/opds2";
-import { Publication } from "./models/publication";
 import { serverAssets } from "./server-assets";
 import { serverManifestJson } from "./server-manifestjson";
 import { serverMediaOverlays } from "./server-mediaoverlays";

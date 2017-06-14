@@ -1,16 +1,16 @@
 import * as crypto from "crypto";
 import * as path from "path";
 
+import { CbzParsePromise } from "@parser/cbz";
+import { EpubParsePromise, mediaOverlayURLParam, mediaOverlayURLPath } from "@parser/epub";
+import { encodeURIComponent_RFC3986, isHTTP } from "@utils/http/UrlUtils";
+import { sortObject } from "@utils/JsonUtils";
 import * as css2json from "css2json";
 import * as debug_ from "debug";
 import * as express from "express";
 import * as jsonMarkup from "json-markup";
 import { JSON as TAJSON } from "ta-json";
 
-import { encodeURIComponent_RFC3986, isHTTP } from "./_utils/http/UrlUtils";
-import { sortObject } from "./_utils/JsonUtils";
-import { CbzParsePromise } from "./parser/cbz";
-import { EpubParsePromise, mediaOverlayURLParam, mediaOverlayURLPath } from "./parser/epub";
 import { Server } from "./server";
 
 const debug = debug_("r2:server:mediaoverlays");
