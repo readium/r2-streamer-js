@@ -91,7 +91,6 @@
   "main": "dist/es6-es2015/src/index.js",
   "types": "dist/es6-es2015/src/index.d.js",
   "bin": {
-    "r2-streamer-js-cli": "dist/es6-es2015/src/cli.js",
     "r2-streamer-js-server": "dist/es6-es2015/src/http/server-cli.js"
   },
   "files": [
@@ -104,7 +103,7 @@
     "start": "npm run server-debug ./misc/epubs/",
     "prepare_": "npm run build:all && npm test",
     "prepublish_": "npm run prepare_",
-    "prenow": "npm run clean && npm run transpile:typescript:es8-es2017",
+    "prenow": "npm run clean && npm run build:es8-es2017",
     "now": "rm -rf ./now && mkdir now && cp yarn.lock ./now && mkdir now/misc && mkdir now/misc/readers && mkdir now/misc/epubs && mkdir now/misc/readers/reader-NYPL && mkdir now/misc/readers/reader-HADRIEN && cp -r dist/ now/ && cp -r misc/readers/reader-NYPL/ now/misc/readers/reader-NYPL/ && cp -r misc/readers/reader-HADRIEN/ now/misc/readers/reader-HADRIEN/ && cp misc/epubs/*.epub now/misc/epubs/ && cp package-now.json now/ && cd now/ && mv package-now.json package.json && now && cd ..",
     "typescript:imports": "node tools/typescript_relativize_path_mapping_imports.js",
     "prebuild": "npm run lint",
@@ -138,10 +137,11 @@
     "transpile:typescript:es6-es2015": "tsc -p \"./tsconfigs/tsconfig-es6-es2015-all.json\"",
     "transpile:typescript:es7-es2016": "tsc -p \"./tsconfigs/tsconfig-es7-es2016-all.json\"",
     "transpile:typescript:es8-es2017": "tsc -p \"./tsconfigs/tsconfig-es8-es2017-all.json\"",
+    "transpile:typescript:es8-es2017+imports": "npm run transpile:typescript:es8-es2017 && npm run typescript:imports",
     "transpile:typescript:single": "node tools/typescript_compile_single.js",
     "posttranspile:typescript:single": "npm run typescript:imports",
     "test": "ava --verbose \"./dist/es8-es2017/test/test.js\"",
-    "cli": "node \"./dist/es8-es2017/src/cli.js\"",
+    "cli": "node \"./dist/es8-es2017/src/_utils/cli.js\"",
     "cli-debug": "cross-env DEBUG=r2:* npm run cli",
     "cli-debug-x": "cross-env DEBUG=* npm run cli",
     "server": "node \"./dist/es8-es2017/src/http/server-cli.js\"",
