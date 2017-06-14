@@ -148,7 +148,7 @@
     "server-debug": "cross-env DEBUG=r2:* npm run server",
     "server-debug-x": "cross-env DEBUG=* npm run server",
     "heroku-prebuild": "echo \"heroku-prebuild\"",
-    "heroku-postbuild": "echo \"heroku-postbuild\" && npm run clean && npm run transpile:typescript:es8-es2017"
+    "heroku-postbuild": "echo \"heroku-postbuild\" && npm run clean && npm run transpile:typescript:es8-es2017 && npm run typescript:imports"
   },
   "importSort": {
     ".ts": {
