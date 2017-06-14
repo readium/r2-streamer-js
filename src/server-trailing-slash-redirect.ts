@@ -22,6 +22,9 @@ export function trailingSlashRedirect(req: express.Request, res: express.Respons
         redirect += req.originalUrl.substr(i);
     }
 
+    // Note that the HTTP 301 redirect does not contain CORS headers
+    // server.setResponseCORS(res);
+
     debug(`REDIRECT: ${req.originalUrl} ==> ${redirect}`);
     res.redirect(301, redirect);
 }
