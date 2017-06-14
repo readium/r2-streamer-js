@@ -205,6 +205,9 @@ export function serverOPDS2(server: Server, topRouter: express.Router) {
             redirect += req.originalUrl.substr(i);
         }
 
+        // No need for CORS with "show" URL redirect
+        // server.setResponseCORS(res);
+
         debug(`REDIRECT: ${req.originalUrl} ==> ${redirect}`);
         res.redirect(301, redirect);
     });

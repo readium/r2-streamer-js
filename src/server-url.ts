@@ -61,6 +61,10 @@ export function serverUrl(_server: Server, topRouter: express.Router) {
         const urlDecodedBase64 = new Buffer(urlDecoded).toString("base64");
         const redirect = req.originalUrl.substr(0, req.originalUrl.indexOf("/url/"))
             + "/pub/" + urlDecodedBase64 + "/";
+
+        // No need for CORS with this URL redirect (HTML page lists available services)
+        // server.setResponseCORS(res);
+
         debug(`REDIRECT: ${req.originalUrl} ==> ${redirect}`);
         res.redirect(301, redirect);
     });

@@ -48,7 +48,7 @@ const autoMeta = "auto";
 const noneMeta = "none";
 const reflowableMeta = "reflowable";
 
-export const mediaOverlayURLPath = "media-overlay";
+export const mediaOverlayURLPath = "media-overlay.json";
 export const mediaOverlayURLParam = "resource";
 
 export const addCoverDimensions = async (publication: Publication, coverLink: Link): Promise<void> => {
