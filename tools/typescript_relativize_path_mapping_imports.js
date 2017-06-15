@@ -62,7 +62,7 @@ const pathMappingsKeys = Object.keys(pathMappings);
 
         const filePaths = await filehound.create()
             .paths(dirPath) // relative to process.cwd(), not __dirname
-            .ext([".js"], [".ts"])
+            .ext([".js", ".ts"])
             .find();
         dirPath = fs.realpathSync(dirPath);
         filePaths.forEach((filePath) => {
@@ -72,7 +72,11 @@ const pathMappingsKeys = Object.keys(pathMappings);
             // relative to process.cwd(), not __dirname
             let code = fs.readFileSync(filePath, "utf8");
 
-            const regex1 = /require[\s]*\([\s]*('|")(.+)('|")[\s]*\)/g;
+            const isTypeScript = filePath.endsWith(".ts");
+
+            const regex1 = isTypeScript ?
+                /from[\s]*('|")(.+)('|")/g :
+                /require[\s]*\([\s]*('|")(.+)('|")[\s]*\)/g;
             let regex1Match = regex1.exec(code);
             let firstMatch = true;
             while (regex1Match) {
@@ -97,7 +101,11 @@ const pathMappingsKeys = Object.keys(pathMappings);
 
                     // console.log(`${regex1Match[2]} ==> ${replacement}`);
 
-                    code = code.replace(regex1Match[0], "require(" + regex1Match[1] + replacement + regex1Match[3] + ")");
+                    code = code.replace(regex1Match[0],
+                        (isTypeScript ? "from " : "require(")
+                        + regex1Match[1] + replacement + regex1Match[3]
+                        + (isTypeScript ? "" : ")")
+                    );
                 });
 
                 regex1Match = regex1.exec(code); // loop

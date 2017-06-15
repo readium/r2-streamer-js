@@ -84,7 +84,11 @@
   version "0.6.9"
   resolved "https://registry.yarnpkg.com/@types/node-forge/-/node-forge-0.6.9.tgz#38e0e00de8e6f3ff0bb1f4cddcad43e7b580733a"
 
-"@types/node@*", "@types/node@^6.0.55":
+"@types/node@*":
+  version "7.0.31"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-7.0.31.tgz#80ea4d175599b2a00149c29a10a4eb2dff592e86"
+
+"@types/node@^6.0.55":
   version "6.0.78"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-6.0.78.tgz#5d4a3f579c1524e01ee21bf474e6fba09198f470"
 
@@ -696,7 +700,11 @@ block-stream@*:
   dependencies:
     inherits "~2.0.0"
 
-bluebird@^3.0.0, bluebird@^3.0.5, bluebird@^3.4.1, bluebird@^3.4.7, bluebird@~3.4.1:
+bluebird@^3.0.0, bluebird@^3.0.5, bluebird@^3.4.1, bluebird@^3.4.7:
+  version "3.5.0"
+  resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-3.5.0.tgz#791420d7f551eea2897453a8a77653f96606d67c"
+
+bluebird@~3.4.1:
   version "3.4.7"
   resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-3.4.7.tgz#f72d760be09b7f76d08ed8fae98b289a8d05fab3"
 
