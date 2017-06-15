@@ -94,13 +94,14 @@
     "r2-streamer-js-server": "dist/es6-es2015/src/http/server-cli.js"
   },
   "files": [
-    "LICENCE",
+    "LICENSE",
     "README.md",
     "docs/**/*",
     "dist/**/*"
   ],
   "scripts": {
     "electron": "cross-env BUILD_ENV=DEV electron dist/es8-es2017/src/electron/main.js",
+    "gitdist": "cp package.json ../r2-streamer-js-dist/ && cp LICENSE ../r2-streamer-js-dist/ && cp README.md ../r2-streamer-js-dist/ && mkdir ../r2-streamer-js-dist/docs/ || echo ok && cp -r docs/ ../r2-streamer-js-dist/docs/ && mkdir ../r2-streamer-js-dist/dist/ || echo ok && cp -r dist/ ../r2-streamer-js-dist/dist/ && cd ../r2-streamer-js-dist && git commit -a -m\"dist update\" || echo commit && git push || echo push && cd -",
     "start": "npm run server-debug ./misc/epubs/",
     "prepare_": "npm run build:all && npm test",
     "prepublish_": "npm run prepare_",
