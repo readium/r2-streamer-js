@@ -93,6 +93,24 @@ Both servers run NodeJS 8, and the apps are based on the ES8-2017 code transpile
 
 HTTP CORS headers are served to allow cross-origin / remote API requests.
 
+## Version(s), Git revision(s)
+
+NPM package (latest published):
+
+https://unpkg.com/r2-streamer-js/dist/gitrev.json
+
+GitHub "dist" repository (latest pushed):
+
+https://github.com/edrlab/r2-streamer-js-dist/blob/master/dist/gitrev.json
+
+Heroku app (latest deployed):
+
+https://readium2.herokuapp.com/version/show
+
+Now app (latest deployed):
+
+https://readium2.now.sh/version/show
+
 ## Quick start
 
 Command line steps:
