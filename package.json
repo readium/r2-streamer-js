@@ -101,7 +101,7 @@
     "dist/**/*"
   ],
   "scripts": {
-    "electron": "cross-env BUILD_ENV=DEV electron dist/es8-es2017/src/electron/main.js",
+    "electron": "cross-env DEBUG=r2:* BUILD_ENV=DEV electron dist/es8-es2017/src/electron/main.js",
     "pregitdist": "npm run build:all",
     "gitdist": "cp package.json ../r2-streamer-js-dist/ && cp LICENSE ../r2-streamer-js-dist/ && cp README.md ../r2-streamer-js-dist/ && mkdir ../r2-streamer-js-dist/docs/ || echo ok && cp -r docs/ ../r2-streamer-js-dist/docs/ && mkdir ../r2-streamer-js-dist/dist/ || echo ok && cp -r dist/ ../r2-streamer-js-dist/dist/ && cd ../r2-streamer-js-dist && git status || echo status && git commit -a -m\"dist update\" || echo commit && git push || echo push && cd -",
     "start": "npm run server-debug ./misc/epubs/",
