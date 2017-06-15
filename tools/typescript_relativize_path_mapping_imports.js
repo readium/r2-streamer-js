@@ -62,7 +62,7 @@ const pathMappingsKeys = Object.keys(pathMappings);
 
         const filePaths = await filehound.create()
             .paths(dirPath) // relative to process.cwd(), not __dirname
-            .ext([".js"])
+            .ext([".js"], [".ts"])
             .find();
         dirPath = fs.realpathSync(dirPath);
         filePaths.forEach((filePath) => {
