@@ -87,7 +87,7 @@ export class Zip2 extends Zip {
                     reject("content-length not supported!");
                     return;
                 }
-                const httpZipByteLength = parseInt(res.headers["content-length"], 10);
+                const httpZipByteLength = parseInt(res.headers["content-length"] as string, 10);
                 debug(`Content-Length: ${httpZipByteLength}`);
 
                 if (!res.headers["accept-ranges"]
