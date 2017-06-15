@@ -112,7 +112,7 @@ export class Server {
                     req.params.jsonPath = req.query.show;
                 }
 
-                const gitRevJson = "../../../gitrev_.json";
+                const gitRevJson = "../../../gitrev.json";
                 if (!fs.existsSync(path.resolve(path.join(__dirname, gitRevJson)))) {
 
                     const err = "Missing Git rev JSON! ";
