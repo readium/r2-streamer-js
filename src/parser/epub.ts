@@ -37,7 +37,6 @@ import { SMIL } from "./epub/smil";
 import { Par } from "./epub/smil-par";
 import { Seq } from "./epub/smil-seq";
 import { SeqOrPar } from "./epub/smil-seq-or-par";
-// import * as util from "util";
 
 const epub3 = "3.0";
 const epub301 = "3.0.1";
