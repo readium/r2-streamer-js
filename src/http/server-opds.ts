@@ -53,7 +53,7 @@ function ensureAbsolute(rootUrl: string, linkHref: string) {
     return url;
 }
 
-export function serverOPDS(_server: Server, topRouter: express.Router) {
+export function serverOPDS(_server: Server, topRouter: express.Application) {
 
     const routerOPDS = express.Router({ strict: false });
     routerOPDS.use(morgan("combined"));

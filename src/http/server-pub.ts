@@ -11,7 +11,7 @@ import { trailingSlashRedirect } from "./server-trailing-slash-redirect";
 
 const debug = debug_("r2:server:pub");
 
-export function serverPub(server: Server, topRouter: express.Router): express.Router {
+export function serverPub(server: Server, topRouter: express.Application): express.Router {
 
     const urlBook = "/pub/PATH_BASE64/manifest.json";
     const urlBookShowAll = "./manifest.json/show/all";

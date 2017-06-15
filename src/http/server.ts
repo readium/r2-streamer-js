@@ -1,5 +1,6 @@
 import * as child_process from "child_process";
 import * as fs from "fs";
+import * as http from "http";
 import * as path from "path";
 
 import { OPDSFeed } from "@models/opds2/opds2";
@@ -33,6 +34,9 @@ export class Server {
     private creatingPublicationsOPDS: boolean;
     private readonly opdsJsonFilePath: string;
 
+    private readonly expressApp: express.Application;
+    private httpServer: http.Server;
+
     constructor() {
         this.publications = [];
         this.pathPublicationMap = {};
@@ -41,7 +45,7 @@ export class Server {
 
         this.opdsJsonFilePath = tmpNameSync({ prefix: "readium2-OPDS2-", postfix: ".json" });
 
-        const server = express();
+        this.expressApp = express();
         // server.enable('strict routing');
 
         // https://expressjs.com/en/4x/api.html#express.static
@@ -49,10 +53,10 @@ export class Server {
             etag: false,
         };
 
-        server.use("/readerNYPL", express.static("misc/readers/reader-NYPL", staticOptions));
-        server.use("/readerHADRIEN", express.static("misc/readers/reader-HADRIEN", staticOptions));
+        this.expressApp.use("/readerNYPL", express.static("misc/readers/reader-NYPL", staticOptions));
+        this.expressApp.use("/readerHADRIEN", express.static("misc/readers/reader-HADRIEN", staticOptions));
 
-        server.get("/", (_req: express.Request, res: express.Response) => {
+        this.expressApp.get("/", (_req: express.Request, res: express.Response) => {
 
             let html = "<html><body><h1>Publications</h1>";
 
@@ -71,20 +75,29 @@ export class Server {
             res.status(200).send(html);
         });
 
-        serverUrl(this, server);
-        serverOPDS(this, server);
-        serverOPDS2(this, server);
+        serverUrl(this, this.expressApp);
+        serverOPDS(this, this.expressApp);
+        serverOPDS2(this, this.expressApp);
 
-        const routerPathBase64: express.Router = serverPub(this, server);
+        const routerPathBase64: express.Router = serverPub(this, this.expressApp);
         serverManifestJson(this, routerPathBase64);
         serverMediaOverlays(this, routerPathBase64);
         serverAssets(this, routerPathBase64);
+    }
+
+    public start(): string {
 
         const port = process.env.PORT || 3000;
         debug(`PORT: ${process.env.PORT} => ${port}`);
-        server.listen(port, () => {
+        this.httpServer = this.expressApp.listen(port, () => {
             debug(`http://localhost:${port}`);
         });
+
+        return `http://127.0.0.1:${port}`;
+    }
+
+    public stop() {
+        this.httpServer.close();
     }
 
     public setResponseCORS(res: express.Response) {

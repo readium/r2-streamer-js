@@ -7,7 +7,7 @@ import { trailingSlashRedirect } from "./server-trailing-slash-redirect";
 
 const debug = debug_("r2:server:url");
 
-export function serverUrl(_server: Server, topRouter: express.Router) {
+export function serverUrl(_server: Server, topRouter: express.Application) {
 
     const routerUrl = express.Router({ strict: false });
     routerUrl.use(morgan("combined"));

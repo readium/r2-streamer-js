@@ -14,7 +14,7 @@ import { trailingSlashRedirect } from "./server-trailing-slash-redirect";
 
 const debug = debug_("r2:server:opds2");
 
-export function serverOPDS2(server: Server, topRouter: express.Router) {
+export function serverOPDS2(server: Server, topRouter: express.Application) {
 
     // https://github.com/mafintosh/json-markup/blob/master/style.css
     const jsonStyle = `

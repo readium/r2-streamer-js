@@ -70,6 +70,7 @@
   },
   "devDependencies": {
     "@types/debug": "latest",
+    "@types/electron": "latest",
     "@types/express": "latest",
     "@types/image-size": "latest",
     "@types/mime-types": "latest",
