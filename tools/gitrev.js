@@ -26,21 +26,21 @@ try {
     // console.log("args:");
     // console.log(args);
 
+    const detached = "Detached: ";
+    const branch = git.branch();
+    if (branch.indexOf(detached) === 0) {
+        branch = branch.substr(detached.length);
+    }
     const gitUrlBase = "https://github.com/edrlab/r2-streamer-js/";
     json = {
         "short": git.short(),
         "long": git.long(),
-        "branch": git.branch(),
+        "branch": branch,
         "date": git.date(),
         "dirty": git.isTagDirty(),
     };
     json["urlHistory"] = gitUrlBase + "commits/" + json.long;
     json["urlDiff"] = gitUrlBase + "compare/" + json.long + "..." + json.branch;
-
-    const detached = "Detached: ";
-    if (json.branch.indexOf(detached) === 0) {
-        json.branch = json.branch.substr(detached.length);
-    }
 
     // relative to process.cwd(), not __dirname
     fs.writeFileSync("./dist/gitrev.json", JSON.stringify(json, null, "  "), "utf8");
