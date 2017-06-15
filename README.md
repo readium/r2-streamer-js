@@ -101,15 +101,15 @@ https://unpkg.com/r2-streamer-js/dist/gitrev.json
 
 GitHub "dist" repository (latest pushed):
 
-https://github.com/edrlab/r2-streamer-js-dist/blob/master/dist/gitrev.json
+https://rawgit.com/edrlab/r2-streamer-js-dist/master/dist/gitrev.json
 
 Heroku app (latest deployed):
 
-https://readium2.herokuapp.com/version/show
+https://readium2.herokuapp.com/version
 
 Now app (latest deployed):
 
-https://readium2.now.sh/version/show
+https://readium2.now.sh/version
 
 ## Quick start
 
