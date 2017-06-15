@@ -4,6 +4,7 @@ import * as path from "path";
 import * as debug_ from "debug";
 import { BrowserWindow, app } from "electron";
 import * as filehound from "filehound";
+import * as portfinder from "portfinder";
 
 import { Server } from "../http/Server";
 
@@ -25,7 +26,10 @@ function createElectronBrowserWindow() {
 
         const server = new Server();
         const pubPaths = server.addPublications(files);
-        const url = server.start();
+
+        const port = await portfinder.getPortPromise();
+        const url = server.start(port);
+
         const pubManifestUrls = pubPaths.map((pubPath) => {
             return `${url}${pubPath}`;
         });

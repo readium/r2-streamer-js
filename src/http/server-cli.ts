@@ -61,7 +61,7 @@ if (stats.isDirectory()) {
             .find();
         const server = new Server();
         server.addPublications(files);
-        server.start();
+        server.start(0);
     })();
 
     // filePaths = fs.readdirSync(filePath);
@@ -84,5 +84,5 @@ if (stats.isDirectory()) {
 } else {
     const server = new Server();
     server.addPublications([filePath]);
-    server.start();
+    server.start(0);
 }
