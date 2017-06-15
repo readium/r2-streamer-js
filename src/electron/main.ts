@@ -6,7 +6,7 @@ import { BrowserWindow, app } from "electron";
 import * as filehound from "filehound";
 import * as portfinder from "portfinder";
 
-import { Server } from "../http/Server";
+import { Server } from "../http/server";
 
 const debug = debug_("r2:electron:main");
 

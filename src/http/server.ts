@@ -88,7 +88,7 @@ export class Server {
     public start(port: number): string {
 
         const p = port || process.env.PORT || 3000;
-        debug(`PORT: ${p} => ${process.env.PORT} => ${p}`);
+        debug(`PORT: ${p} || ${process.env.PORT} || 3000 => ${p}`);
 
         this.httpServer = this.expressApp.listen(p, () => {
             debug(`http://localhost:${p}`);
