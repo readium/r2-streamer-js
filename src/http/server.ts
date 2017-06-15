@@ -1,4 +1,5 @@
 import * as child_process from "child_process";
+import * as crypto from "crypto";
 import * as fs from "fs";
 import * as http from "http";
 import * as path from "path";
@@ -6,8 +7,10 @@ import * as path from "path";
 import { OPDSFeed } from "@models/opds2/opds2";
 import { Publication } from "@models/publication";
 import { encodeURIComponent_RFC3986, isHTTP } from "@utils/http/UrlUtils";
+import * as css2json from "css2json";
 import * as debug_ from "debug";
 import * as express from "express";
+import * as jsonMarkup from "json-markup";
 import { JSON as TAJSON } from "ta-json";
 import { tmpNameSync } from "tmp";
 
@@ -22,6 +25,31 @@ import { serverUrl } from "./server-url";
 const debug = debug_("r2:server:main");
 
 interface IPathPublicationMap { [key: string]: any; }
+
+// https://github.com/mafintosh/json-markup/blob/master/style.css
+const jsonStyle = `
+.json-markup {
+    line-height: 17px;
+    font-size: 13px;
+    font-family: monospace;
+    white-space: pre;
+}
+.json-markup-key {
+    font-weight: bold;
+}
+.json-markup-bool {
+    color: firebrick;
+}
+.json-markup-string {
+    color: green;
+}
+.json-markup-null {
+    color: gray;
+}
+.json-markup-number {
+    color: blue;
+}
+`;
 
 export class Server {
 
@@ -46,7 +74,7 @@ export class Server {
         this.opdsJsonFilePath = tmpNameSync({ prefix: "readium2-OPDS2-", postfix: ".json" });
 
         this.expressApp = express();
-        // server.enable('strict routing');
+        // this.expressApp.enable('strict routing');
 
         // https://expressjs.com/en/4x/api.html#express.static
         const staticOptions = {
@@ -70,10 +98,57 @@ export class Server {
             });
             html += "<h1>Custom publication URL</h1><p><a href='./url'>CLICK HERE</a></p>";
             html += "<h1>OPDS feed</h1><p><a href='./opds'>CLICK HERE</a></p>";
+            html += "<h1>Server version</h1><p><a href='./version/show'>CLICK HERE</a></p>";
             html += "</body></html>";
 
             res.status(200).send(html);
         });
+
+        this.expressApp.get(["/version", "/version/show/:jsonPath?"],
+            (req: express.Request, res: express.Response) => {
+
+                const isShow = req.url.indexOf("/show") >= 0 || req.query.show;
+                if (!req.params.jsonPath && req.query.show) {
+                    req.params.jsonPath = req.query.show;
+                }
+
+                const jsonObj = require("../../../gitrev.json");
+                // debug(jsonObj);
+
+                if (isShow) {
+                    const jsonPretty = jsonMarkup(jsonObj, css2json(jsonStyle));
+
+                    res.status(200).send("<html><body>" +
+                        "<h1>R2-STREAMER-JS VERSION INFO</h1>" +
+                        "<hr><p><pre>" + jsonPretty + "</pre></p>" +
+                        // "<hr><p><pre>" + jsonStr + "</pre></p>" +
+                        // "<p><pre>" + dumpStr + "</pre></p>" +
+                        "</body></html>");
+                } else {
+                    this.setResponseCORS(res);
+                    res.set("Content-Type", "application/json; charset=utf-8");
+
+                    const jsonStr = JSON.stringify(jsonObj, null, "  ");
+
+                    const checkSum = crypto.createHash("sha256");
+                    checkSum.update(jsonStr);
+                    const hash = checkSum.digest("hex");
+
+                    const match = req.header("If-None-Match");
+                    if (match === hash) {
+                        debug("publications.json cache");
+                        res.status(304); // StatusNotModified
+                        res.end();
+                        return;
+                    }
+
+                    res.setHeader("ETag", hash);
+
+                    // res.setHeader("Cache-Control", "public,max-age=86400");
+
+                    res.status(200).send(jsonStr);
+                }
+            });
 
         serverUrl(this, this.expressApp);
         serverOPDS(this, this.expressApp);

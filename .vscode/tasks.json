@@ -17,7 +17,7 @@
       "taskName": "build",
       "args": [
         "run",
-        "transpile:typescript:es8-es2017+imports"
+        "transpile:typescript:es8-es2017+afterdist"
       ],
       "isBuildCommand": true,
       "problemMatcher": [
