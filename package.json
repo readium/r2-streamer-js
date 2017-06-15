@@ -1,6 +1,6 @@
 {
   "name": "r2-streamer-js",
-  "version": "0.0.1-alpha25",
+  "version": "0.0.1-alpha26",
   "description": "Readium 2 'streamer' for NodeJS (TypeScript)",
   "keywords": [
     "readium",
