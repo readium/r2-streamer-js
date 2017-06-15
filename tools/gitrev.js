@@ -27,7 +27,7 @@ try {
     // console.log(args);
 
     const detached = "Detached: ";
-    const branch = git.branch();
+    let branch = git.branch();
     if (branch.indexOf(detached) === 0) {
         branch = branch.substr(detached.length);
     }
