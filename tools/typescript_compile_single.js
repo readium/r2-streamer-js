@@ -62,7 +62,7 @@ var parentDistDir = path.dirname(filePathRelativeDist);
 
 var cmdlines = [];
 
-var cmdLine = `cp "${filePathRelative}" "${filePathRelativeDist}" \
+var cmdLine = `cp "./${filePathRelative}" "./${filePathRelativeDist}" \
 && mv "${filePathRelativeDist_JS}" "${filePathRelativeDist_JS}_PREVIOUS" \
 && mv "${filePathRelativeDist_JS_MAP}" "${filePathRelativeDist_JS_MAP}_PREVIOUS" \
 && mv "${filePathRelativeDist_D_TS}" "${filePathRelativeDist_D_TS}_PREVIOUS"`;
@@ -77,9 +77,13 @@ fs.writeFileSync(tmpTsConfigPath, tsconfigJsonStr, "utf8");
 // cmdLine = `echo "TSCONFIG: ${tsconfigJsonStr}"`;
 // cmdlines.push(cmdLine);
 
+const distDirFullPath = fs.realpathSync(path.resolve(`./dist/${target}`));
+console.log(`dist target dir path: ${distDirFullPath}`);
+
 cmdLine = `node "node_modules/typescript/bin/tsc" \
 -p "${tmpTsConfigPath}" \
---rootDir ./dist/${target} \
+--rootDir ${distDirFullPath} \
+--baseUrl ${distDirFullPath}
 `;
 cmdlines.push(cmdLine);
 
