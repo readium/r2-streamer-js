@@ -111,11 +111,16 @@ export class Server {
             "Content-Type, Content-Length, Accept-Ranges, Link, Transfer-Encoding");
     }
 
-    public addPublications(pubs: string[]) {
+    public addPublications(pubs: string[]): string[] {
         pubs.forEach((pub) => {
             if (this.publications.indexOf(pub) < 0) {
                 this.publications.push(pub);
             }
+        });
+
+        return pubs.map((pub) => {
+            const pubid = new Buffer(pub).toString("base64");
+            return `/pub/${pubid}/manifest.json`;
         });
     }
 

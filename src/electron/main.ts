@@ -14,6 +14,8 @@ let electronBrowserWindow: Electron.BrowserWindow | undefined;
 function createElectronBrowserWindow() {
 
     debug("Server start, Electron main window ...");
+
+    // tslint:disable-next-line:no-floating-promises
     (async () => {
         const dirPath = fs.realpathSync(path.resolve("./misc/epubs/"));
         const files: string[] = await filehound.create()
@@ -22,8 +24,12 @@ function createElectronBrowserWindow() {
             .find();
 
         const server = new Server();
-        server.addPublications(files);
+        const pubPaths = server.addPublications(files);
         const url = server.start();
+        const pubManifestUrls = pubPaths.map((pubPath) => {
+            return `${url}${pubPath}`;
+        });
+        debug(pubManifestUrls);
 
         electronBrowserWindow = new BrowserWindow({ width: 800, height: 600 });
 
@@ -31,7 +37,9 @@ function createElectronBrowserWindow() {
         electronBrowserWindow.webContents.openDevTools();
 
         electronBrowserWindow.on("closed", () => {
+            debug("Server stop ...");
             electronBrowserWindow = undefined;
+            server.stop();
         });
     })();
 }
