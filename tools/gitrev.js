@@ -37,6 +37,11 @@ try {
     json["urlHistory"] = gitUrlBase + "commits/" + json.long;
     json["urlDiff"] = gitUrlBase + "compare/" + json.long + "..." + json.branch;
 
+    const detached = "Detached: ";
+    if (json.branch.indexOf(detached) === 0) {
+        json.branch = json.branch.substr(detached.length);
+    }
+
     // relative to process.cwd(), not __dirname
     fs.writeFileSync("./dist/gitrev.json", JSON.stringify(json, null, "  "), "utf8");
 } catch (err) {
