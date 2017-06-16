@@ -1,3 +1,5 @@
+import { LCP } from "@parser/epub/lcp";
+import { IZip } from "@utils/zip/zip";
 import * as forge from "node-forge";
 // https://github.com/edcarroll/ta-json
 import {
@@ -7,7 +9,6 @@ import {
     OnDeserialized,
 } from "ta-json";
 
-import { LCP } from "@parser/epub/lcp";
 import { IInternal } from "./internal";
 import { MediaOverlayNode } from "./media-overlay";
 import { Metadata } from "./metadata";
@@ -75,6 +76,22 @@ export class Publication {
     public LCP: LCP;
 
     public Internal: IInternal[];
+
+    public freeDestroy() {
+        console.log("freeDestroy: Publication");
+        if (this.Internal) {
+            const zipInternal = this.Internal.find((i) => {
+                if (i.Name === "zip") {
+                    return true;
+                }
+                return false;
+            });
+            if (zipInternal) {
+                const zip = zipInternal.Value as IZip;
+                zip.freeDestroy();
+            }
+        }
+    }
 
     public UpdateLCP(lcpPassHash: string): string | undefined {
 

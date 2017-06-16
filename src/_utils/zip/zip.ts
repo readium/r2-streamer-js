@@ -12,6 +12,7 @@ export interface IZip {
     forEachEntry: (callback: (entryName: string) => void) => void;
     entryStreamPromise: (entryPath: string) => Promise<IStreamAndLength>;
     entryStreamRangePromise: (entryPath: string, begin: number, end: number) => Promise<IStreamAndLength>;
+    freeDestroy: () => void;
 }
 
 export abstract class Zip implements IZip {
@@ -20,6 +21,7 @@ export abstract class Zip implements IZip {
     public abstract hasEntry(entryPath: string): boolean;
     public abstract forEachEntry(callback: (entryName: string) => void): void;
     public abstract entryStreamPromise(entryPath: string): Promise<IStreamAndLength>;
+    public abstract freeDestroy(): void;
 
     public async entryStreamRangePromise(entryPath: string, begin: number, end: number): Promise<IStreamAndLength> {
 

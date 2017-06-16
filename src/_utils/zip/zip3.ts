@@ -63,6 +63,14 @@ export class Zip3 extends Zip {
         });
     }
 
+    public freeDestroy(): void {
+        console.log("freeDestroy: Zip3");
+        if (this.zip) {
+            // TODO?
+            // this.zip.close();
+        }
+    }
+
     public entriesCount(): number {
         return this.zip.files.length;
     }

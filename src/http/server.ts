@@ -198,6 +198,7 @@ export class Server {
         if (this.started) {
             this.httpServer.close();
             this.started = false;
+            this.uncachePublications();
         }
     }
 
@@ -253,9 +254,19 @@ export class Server {
 
     public uncachePublication(filePath: string) {
         if (this.isPublicationCached(filePath)) {
+            const pub = this.cachedPublication(filePath);
+            if (pub) {
+                pub.freeDestroy();
+            }
             this.pathPublicationMap[filePath] = undefined;
             delete this.pathPublicationMap[filePath];
         }
+    }
+
+    public uncachePublications() {
+        Object.keys(this.pathPublicationMap).forEach((filePath) => {
+            this.uncachePublication(filePath);
+        });
     }
 
     public publicationsOPDS(): OPDSFeed | undefined {

@@ -52,6 +52,13 @@ export class Zip1 extends Zip {
         super();
     }
 
+    public freeDestroy(): void {
+        console.log("freeDestroy: Zip1");
+        if (this.zip) {
+            this.zip.close();
+        }
+    }
+
     public entriesCount(): number {
         return this.zip.entriesCount;
     }
