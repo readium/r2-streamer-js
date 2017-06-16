@@ -51,7 +51,12 @@ const jsonStyle = `
 }
 `;
 
+export interface IServerOptions {
+    disableReaders: boolean;
+}
+
 export class Server {
+    public readonly disableReaders: boolean;
 
     public readonly lcpBeginToken = "*-";
     public readonly lcpEndToken = "-*";
@@ -68,7 +73,10 @@ export class Server {
 
     private started: boolean;
 
-    constructor() {
+    constructor(options?: IServerOptions) {
+
+        this.disableReaders = options ? options.disableReaders : false;
+
         this.publications = [];
         this.pathPublicationMap = {};
         this.publicationsOPDSfeed = undefined;
@@ -87,8 +95,10 @@ export class Server {
             etag: false,
         };
 
-        this.expressApp.use("/readerNYPL", express.static("misc/readers/reader-NYPL", staticOptions));
-        this.expressApp.use("/readerHADRIEN", express.static("misc/readers/reader-HADRIEN", staticOptions));
+        if (!this.disableReaders) {
+            this.expressApp.use("/readerNYPL", express.static("misc/readers/reader-NYPL", staticOptions));
+            this.expressApp.use("/readerHADRIEN", express.static("misc/readers/reader-HADRIEN", staticOptions));
+        }
 
         this.expressApp.get("/", (_req: express.Request, res: express.Response) => {
 
@@ -224,6 +234,22 @@ export class Server {
             if (this.publications.indexOf(pub) < 0) {
                 this.publicationsOPDSfeedNeedsUpdate = true;
                 this.publications.push(pub);
+            }
+        });
+
+        return pubs.map((pub) => {
+            const pubid = new Buffer(pub).toString("base64");
+            return `/pub/${pubid}/manifest.json`;
+        });
+    }
+
+    public removePublications(pubs: string[]): string[] {
+        pubs.forEach((pub) => {
+            this.uncachePublication(pub);
+            const i = this.publications.indexOf(pub);
+            if (i >= 0) {
+                this.publicationsOPDSfeedNeedsUpdate = true;
+                this.publications.splice(i, 1);
             }
         });
 
