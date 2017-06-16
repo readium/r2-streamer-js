@@ -16,6 +16,9 @@
       ],
       "@models/*": [
         "src/models/*"
+      ],
+      "@transform/*": [
+        "src/transform/*"
       ]
     },
     "strictNullChecks": true,

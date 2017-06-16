@@ -1,18 +1,16 @@
-import * as crypto from "crypto";
 import * as path from "path";
-import * as zlib from "zlib";
 
+import { Link } from "@models/publication-link";
 import { CbzParsePromise } from "@parser/cbz";
 import { EpubParsePromise } from "@parser/epub";
+import { Transformers } from "@transform/transformer";
 import { parseRangeHeader } from "@utils/http/RangeUtils";
 import { streamToBufferPromise } from "@utils/stream/BufferUtils";
 import { IStreamAndLength, IZip } from "@utils/zip/zip";
 import * as debug_ from "debug";
 import * as express from "express";
 import * as mime from "mime-types";
-import * as forge from "node-forge";
 
-import { Link } from "@models/publication-link";
 import { Server } from "./server";
 
 const debug = debug_("r2:server:assets");
@@ -234,112 +232,15 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
 
             // TODO: isHead for encrypted Content-Length
             if (zipData && isEncrypted && link) {
-                if (link.Properties.Encrypted.Algorithm === "http://www.idpf.org/2008/embedding") {
 
-                    let pubID = publication.Metadata.Identifier;
-                    pubID = pubID.replace(/\s/g, "");
+                if (req.params.lcpPass64) {
+                    const lcpPass = new Buffer(req.params.lcpPass64, "base64").toString("utf8");
+                    publication.AddToInternal("lcp_content_key", lcpPass);
+                }
 
-                    const checkSum = crypto.createHash("sha1");
-                    checkSum.update(pubID);
-                    // const hash = checkSum.digest("hex");
-                    // console.log(hash);
-                    const key = checkSum.digest();
-
-                    const prefixLength = 1040;
-                    const zipDataPrefix = zipData.slice(0, prefixLength);
-
-                    for (let i = 0; i < prefixLength; i++) {
-                        /* tslint:disable:no-bitwise */
-                        zipDataPrefix[i] = zipDataPrefix[i] ^ (key[i % key.length]);
-                    }
-
-                    const zipDataRemainder = zipData.slice(prefixLength);
-                    zipData = Buffer.concat([zipDataPrefix, zipDataRemainder]);
-
-                } else if (link.Properties.Encrypted.Algorithm === "http://ns.adobe.com/pdf/enc#RC") {
-
-                    let pubID = publication.Metadata.Identifier;
-                    pubID = pubID.replace("urn:uuid:", "");
-                    pubID = pubID.replace(/-/g, "");
-                    pubID = pubID.replace(/\s/g, "");
-
-                    const key = [];
-                    for (let i = 0; i < 16; i++) {
-                        const byteHex = pubID.substr(i * 2, 2);
-                        const byteNumer = parseInt(byteHex, 16);
-                        key.push(byteNumer);
-                    }
-
-                    const prefixLength = 1024;
-                    const zipDataPrefix = zipData.slice(0, prefixLength);
-
-                    for (let i = 0; i < prefixLength; i++) {
-                        /* tslint:disable:no-bitwise */
-                        zipDataPrefix[i] = zipDataPrefix[i] ^ (key[i % key.length]);
-                    }
-
-                    const zipDataRemainder = zipData.slice(prefixLength);
-                    zipData = Buffer.concat([zipDataPrefix, zipDataRemainder]);
-
-                } else if (
-                    link.Properties.Encrypted.Scheme === "http://readium.org/2014/01/lcp"
-                    && link.Properties.Encrypted.Profile === "http://readium.org/lcp/basic-profile"
-                    && link.Properties.Encrypted.Algorithm === "http://www.w3.org/2001/04/xmlenc#aes256-cbc") {
-
-                    let contentKey: string | undefined;
-                    if (req.params.lcpPass64) {
-                        const lcpPass = new Buffer(req.params.lcpPass64, "base64").toString("utf8");
-                        contentKey = publication.UpdateLCP(lcpPass);
-                    }
-                    // else {
-                    //     contentKey = publication.Internal.find((i) => {
-                    //         if (i.Name === "lcp_content_key") {
-                    //             return true;
-                    //         }
-                    //         return false;
-                    //     });
-
-                    //     contentKey = contentKey ? contentKey.Value : undefined;
-                    // }
-
-                    if (!contentKey) {
-                        const err = "LCP missing key.";
-                        debug(err);
-                        res.status(500).send("<html><body><p>Internal Server Error</p><p>"
-                            + err + "</p></body></html>");
-                        return;
-                    }
-
-                    try {
-                        const AES_BLOCK_SIZE = 16;
-                        const iv = zipData.slice(0, AES_BLOCK_SIZE).toString("binary");
-                        const toDecrypt =
-                            forge.util.createBuffer(zipData.slice(AES_BLOCK_SIZE).toString("binary"), "binary");
-                        // const toDecrypt = aesCbcCipher.output;
-                        const aesCbcDecipher = (forge as any).cipher.createDecipher("AES-CBC", contentKey);
-                        aesCbcDecipher.start({ iv, additionalData_: "binary-encoded string" });
-                        aesCbcDecipher.update(toDecrypt);
-                        aesCbcDecipher.finish();
-
-                        const decryptedZipData = aesCbcDecipher.output.bytes();
-
-                        zipData = new Buffer(decryptedZipData, "binary");
-                        if (link.Properties.Encrypted.Compression === "deflate") {
-                            zipData = zlib.inflateRawSync(zipData);
-                        }
-
-                        if (link.Properties.Encrypted.OriginalLength
-                            && link.Properties.Encrypted.OriginalLength !== zipData.length) {
-                            debug(`LENGTH NOT MATCH ${link.Properties.Encrypted.OriginalLength} !== ${zipData.length}`);
-                        }
-                    } catch (erro) {
-                        const err = "LCP decrypt error.";
-                        debug(err);
-                        debug(erro);
-                        res.status(500).send("<html><body><p>Internal Server Error</p><p>"
-                            + err + " (" + erro + ")</p></body></html>");
-                        return;
-                    }
+                const transformedData = Transformers.try(publication, link, zipData);
+                if (transformedData) {
+                    zipData = transformedData;
                 } else {
                     const err = "Encryption scheme not supported.";
                     debug(err);
