@@ -58,6 +58,7 @@ export class Server {
 
     private readonly publications: string[];
     private publicationsOPDSfeed: OPDSFeed | undefined;
+    private publicationsOPDSfeedNeedsUpdate: boolean;
     private readonly pathPublicationMap: IPathPublicationMap;
     private creatingPublicationsOPDS: boolean;
     private readonly opdsJsonFilePath: string;
@@ -71,6 +72,7 @@ export class Server {
         this.publications = [];
         this.pathPublicationMap = {};
         this.publicationsOPDSfeed = undefined;
+        this.publicationsOPDSfeedNeedsUpdate = true;
         this.creatingPublicationsOPDS = false;
 
         this.opdsJsonFilePath = tmpNameSync({ prefix: "readium2-OPDS2-", postfix: ".json" });
@@ -219,6 +221,7 @@ export class Server {
     public addPublications(pubs: string[]): string[] {
         pubs.forEach((pub) => {
             if (this.publications.indexOf(pub) < 0) {
+                this.publicationsOPDSfeedNeedsUpdate = true;
                 this.publications.push(pub);
             }
         });
@@ -248,7 +251,21 @@ export class Server {
         }
     }
 
+    public uncachePublication(filePath: string) {
+        if (this.isPublicationCached(filePath)) {
+            this.pathPublicationMap[filePath] = undefined;
+            delete this.pathPublicationMap[filePath];
+        }
+    }
+
     public publicationsOPDS(): OPDSFeed | undefined {
+
+        if (this.publicationsOPDSfeedNeedsUpdate) {
+            this.publicationsOPDSfeed = undefined;
+            if (fs.existsSync(this.opdsJsonFilePath)) {
+                fs.unlinkSync(this.opdsJsonFilePath);
+            }
+        }
 
         if (this.publicationsOPDSfeed) {
             return this.publicationsOPDSfeed;
@@ -258,6 +275,8 @@ export class Server {
         if (!fs.existsSync(this.opdsJsonFilePath)) {
             if (!this.creatingPublicationsOPDS) {
                 this.creatingPublicationsOPDS = true;
+
+                this.publicationsOPDSfeedNeedsUpdate = false;
 
                 const jsFile = path.join(__dirname, "opds2-create-cli.js");
                 const args = [jsFile, this.opdsJsonFilePath];
@@ -285,6 +304,7 @@ export class Server {
             }
             return undefined;
         }
+        this.creatingPublicationsOPDS = false;
         const jsonStr = fs.readFileSync(this.opdsJsonFilePath, "utf8");
         if (!jsonStr) {
             return undefined;
