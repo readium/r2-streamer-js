@@ -8,7 +8,7 @@ import {
     OnDeserialized,
 } from "ta-json";
 
-import { OPDSBelongsTo } from "./opds2-belongsto";
+import { OPDSBelongsTo } from "./opds2-belongsTo";
 import { OPDSContributor } from "./opds2-contributor";
 import { IStringMap } from "./opds2-multilang";
 import { OPDSSubject } from "./opds2-subject";
