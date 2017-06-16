@@ -65,6 +65,8 @@ export class Server {
     private readonly expressApp: express.Application;
     private httpServer: http.Server;
 
+    private started: boolean;
+
     constructor() {
         this.publications = [];
         this.pathPublicationMap = {};
@@ -72,6 +74,8 @@ export class Server {
         this.creatingPublicationsOPDS = false;
 
         this.opdsJsonFilePath = tmpNameSync({ prefix: "readium2-OPDS2-", postfix: ".json" });
+
+        this.started = false;
 
         this.expressApp = express();
         // this.expressApp.enable('strict routing');
@@ -172,6 +176,10 @@ export class Server {
 
     public start(port: number): string {
 
+        if (this.started) {
+            return this.url() as string;
+        }
+
         const p = port || process.env.PORT || 3000;
         debug(`PORT: ${p} || ${process.env.PORT} || 3000 => ${p}`);
 
@@ -179,11 +187,22 @@ export class Server {
             debug(`http://localhost:${p}`);
         });
 
+        this.started = true;
+
         return `http://127.0.0.1:${p}`; // this.httpServer.address().port
     }
 
     public stop() {
-        this.httpServer.close();
+        if (this.started) {
+            this.httpServer.close();
+            this.started = false;
+        }
+    }
+
+    public url(): string | undefined {
+        return this.started ?
+            `http://127.0.0.1:${this.httpServer.address().port}` :
+            undefined;
     }
 
     public setResponseCORS(res: express.Response) {
