@@ -3,6 +3,7 @@ import * as path from "path";
 
 import { Publication } from "@models/publication";
 import { OPDSFeed } from "@opds/opds2/opds2";
+import { OPDSContributor } from "@opds/opds2/opds2-contributor";
 import { OPDSLink } from "@opds/opds2/opds2-link";
 import { OPDSMetadata } from "@opds/opds2/opds2-metadata";
 import { OPDSPublication } from "@opds/opds2/opds2-publication";
@@ -96,9 +97,29 @@ if (fs.existsSync(opdsJsonFilePath)) {
         }
 
         if (feed.Metadata) {
-            // publi.Metadata = publication.Metadata;
             publi.Metadata = new OPDSPublicationMetadata();
-            // TODO copy
+            // TODO copy metadata (many more!!!)
+            // There must be a more effective and elegant way to do this!!
+            // ==> implement shared data model, clone the common parts
+            if (publication.Metadata.Artist) {
+                publi.Metadata.Artist = new Array<OPDSContributor>();
+                publication.Metadata.Artist.forEach((contributor) => {
+                    const c = new OPDSContributor();
+                    if (contributor.Identifier) {
+                        c.Identifier = contributor.Identifier;
+                    }
+                    if (contributor.Name) {
+                        c.Name = contributor.Name;
+                    }
+                    if (contributor.Role) {
+                        c.Role = contributor.Role;
+                    }
+                    if (contributor.SortAs) {
+                        c.SortAs = contributor.SortAs;
+                    }
+                    publi.Metadata.Artist.push(c);
+                });
+            }
         }
 
         feed.Publications.push(publi);
