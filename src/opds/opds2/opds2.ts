@@ -6,8 +6,8 @@ import {
     OnDeserialized,
 } from "ta-json";
 
-import { Publication } from "../publication";
-import { Link } from "../publication-link";
+import { Publication } from "@models/publication";
+import { Link } from "@models/publication-link";
 import { OPDSFacet } from "./opds2-facet";
 import { OPDSGroup } from "./opds2-group";
 import { OPDSMetadata } from "./opds2-metadata";

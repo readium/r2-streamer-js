@@ -1,7 +1,7 @@
 import * as path from "path";
 
-import { OPDS } from "@parser/opds/opds";
-import { Entry } from "@parser/opds/opds-entry";
+import { OPDS } from "@opds/opds1/opds";
+import { Entry } from "@opds/opds1/opds-entry";
 import { encodeURIComponent_RFC3986, isHTTP } from "@utils/http/UrlUtils";
 import { streamToBufferPromise } from "@utils/stream/BufferUtils";
 import { XML } from "@utils/xml-js-mapper";

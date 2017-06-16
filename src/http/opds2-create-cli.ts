@@ -1,17 +1,16 @@
 import * as fs from "fs";
 import * as path from "path";
 
+import { Publication } from "@models/publication";
+import { Link } from "@models/publication-link";
+import { OPDSFeed } from "@opds/opds2/opds2";
+import { OPDSMetadata } from "@opds/opds2/opds2-metadata";
 import { CbzParsePromise } from "@parser/cbz";
 import { EpubParsePromise } from "@parser/epub";
 import { encodeURIComponent_RFC3986, isHTTP } from "@utils/http/UrlUtils";
 import * as debug_ from "debug";
 import * as moment from "moment";
 import { JSON as TAJSON } from "ta-json";
-
-import { OPDSFeed } from "@models/opds2/opds2";
-import { OPDSMetadata } from "@models/opds2/opds2-metadata";
-import { Publication } from "@models/publication";
-import { Link } from "@models/publication-link";
 
 const debug = debug_("r2:opds2create");
 

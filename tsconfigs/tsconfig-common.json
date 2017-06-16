@@ -19,6 +19,9 @@
       ],
       "@transform/*": [
         "src/transform/*"
+      ],
+      "@opds/*": [
+        "src/opds/*"
       ]
     },
     "strictNullChecks": true,

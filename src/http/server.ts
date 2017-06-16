@@ -4,8 +4,8 @@ import * as fs from "fs";
 import * as http from "http";
 import * as path from "path";
 
-import { OPDSFeed } from "@models/opds2/opds2";
 import { Publication } from "@models/publication";
+import { OPDSFeed } from "@opds/opds2/opds2";
 import { encodeURIComponent_RFC3986, isHTTP } from "@utils/http/UrlUtils";
 import * as css2json from "css2json";
 import * as debug_ from "debug";

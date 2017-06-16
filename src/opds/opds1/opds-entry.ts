@@ -58,6 +58,9 @@ export class Entry {
     @XmlXPathSelector("dcterms:publisher/text()")
     public DcPublisher: string;
 
+    @XmlXPathSelector("dcterms:rights/text()")
+    public DcRights: string;
+
     @XmlXPathSelector("dcterms:issued/text()")
     public DcIssued: string;
 

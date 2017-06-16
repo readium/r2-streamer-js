@@ -3,6 +3,8 @@ import {
     XmlXPathSelector,
 } from "@utils/xml-js-mapper";
 
+import { IndirectAcquisition } from "./opds-indirectAcquisition";
+
 @XmlObject({
     app: "http://www.w3.org/2007/app",
     atom: "http://www.w3.org/2005/Atom",
@@ -27,11 +29,8 @@ export class Link {
     @XmlXPathSelector("opds:price/@currencycode")
     public OpdsPriceCurrencyCode: string;
 
-    @XmlXPathSelector("opds:indirectAcquisition/@type")
-    public OpdsIndirectAcquisitionType: string;
-
-    @XmlXPathSelector("opds:indirectAcquisition/opds:indirectAcquisition/@type")
-    public OpdsIndirectAcquisitionType_: string;
+    @XmlXPathSelector("opds:indirectAcquisition")
+    public OpdsIndirectAcquisitions: IndirectAcquisition[];
 
     @XmlXPathSelector("@type")
     public Type: string;
