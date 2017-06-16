@@ -2,9 +2,11 @@ import * as fs from "fs";
 import * as path from "path";
 
 import { Publication } from "@models/publication";
-import { Link } from "@models/publication-link";
 import { OPDSFeed } from "@opds/opds2/opds2";
+import { OPDSLink } from "@opds/opds2/opds2-link";
 import { OPDSMetadata } from "@opds/opds2/opds2-metadata";
+import { OPDSPublication } from "@opds/opds2/opds2-publication";
+import { OPDSPublicationMetadata } from "@opds/opds2/opds2-publicationMetadata";
 import { CbzParsePromise } from "@parser/cbz";
 import { EpubParsePromise } from "@parser/epub";
 import { encodeURIComponent_RFC3986, isHTTP } from "@utils/http/UrlUtils";
@@ -33,14 +35,14 @@ if (fs.existsSync(opdsJsonFilePath)) {
 
 // tslint:disable-next-line:no-floating-promises
 (async () => {
-    const publications = new OPDSFeed();
-    publications.Context = ["http://opds-spec.org/opds.jsonld"];
-    publications.Metadata = new OPDSMetadata();
-    publications.Metadata.RDFType = "http://schema.org/DataFeed";
-    publications.Metadata.Title = "Readium 2 OPDS 2.0 Feed";
-    publications.Metadata.Modified = moment(Date.now()).toDate();
+    const feed = new OPDSFeed();
+    feed.Context = ["http://opds-spec.org/opds.jsonld"];
+    feed.Metadata = new OPDSMetadata();
+    feed.Metadata.RDFType = "http://schema.org/DataFeed";
+    feed.Metadata.Title = "Readium 2 OPDS 2.0 Feed";
+    feed.Metadata.Modified = moment(Date.now()).toDate();
 
-    publications.Publications = new Array<Publication>();
+    feed.Publications = new Array<OPDSPublication>();
 
     let nPubs = 0;
     for (const pathBase64 of args) {
@@ -67,19 +69,19 @@ if (fs.existsSync(opdsJsonFilePath)) {
         nPubs++;
         const filePathBase64Encoded = encodeURIComponent_RFC3986(pathBase64);
 
-        const publi = new Publication();
-        publi.Links = new Array<Link>();
-        const linkSelf = new Link();
+        const publi = new OPDSPublication();
+        publi.Links = new Array<OPDSLink>();
+        const linkSelf = new OPDSLink();
         linkSelf.Href = filePathBase64Encoded + "/manifest.json";
         linkSelf.TypeLink = "application/webpub+json";
         linkSelf.Rel = new Array<string>();
         linkSelf.Rel.push("self");
         publi.Links.push(linkSelf);
 
-        publi.Images = new Array<Link>();
+        publi.Images = new Array<OPDSLink>();
         const coverLink = publication.GetCover();
         if (coverLink) {
-            const linkCover = new Link();
+            const linkCover = new OPDSLink();
             linkCover.Href = filePathBase64Encoded + "/" + coverLink.Href;
             linkCover.TypeLink = coverLink.TypeLink;
             // linkCover.Rel = new Array<string>();
@@ -93,18 +95,18 @@ if (fs.existsSync(opdsJsonFilePath)) {
             publi.Images.push(linkCover);
         }
 
-        if (publications.Metadata) {
-            // TODO: clone by copy values, not by reference
-            // selective copy? or full metadata
-            publi.Metadata = publication.Metadata;
+        if (feed.Metadata) {
+            // publi.Metadata = publication.Metadata;
+            publi.Metadata = new OPDSPublicationMetadata();
+            // TODO copy
         }
 
-        publications.Publications.push(publi);
+        feed.Publications.push(publi);
     }
 
-    publications.Metadata.NumberOfItems = nPubs;
+    feed.Metadata.NumberOfItems = nPubs;
 
-    const jsonObj = TAJSON.serialize(publications);
+    const jsonObj = TAJSON.serialize(feed);
     const jsonStr = global.JSON.stringify(jsonObj, null, "");
     fs.writeFileSync(opdsJsonFilePath, jsonStr, "utf8");
 

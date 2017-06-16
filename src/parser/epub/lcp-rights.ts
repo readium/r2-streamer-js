@@ -1,11 +1,10 @@
+import { JsonDateConverter } from "@utils/ta-json-date-converter";
 // https://github.com/edcarroll/ta-json
 import {
     JsonConverter,
     JsonObject,
     JsonProperty,
 } from "ta-json";
-
-import { DateConverter } from "@utils/xml-js-mapper";
 
 @JsonObject()
 export class Rights {
@@ -16,10 +15,10 @@ export class Rights {
     public Copy: number;
 
     @JsonProperty("start")
-    @JsonConverter(DateConverter)
+    @JsonConverter(JsonDateConverter)
     public Start: Date;
 
     @JsonProperty("end")
-    @JsonConverter(DateConverter)
+    @JsonConverter(JsonDateConverter)
     public End: Date;
 }

@@ -1,3 +1,4 @@
+import { JsonDateConverter } from "@utils/ta-json-date-converter";
 // https://github.com/edcarroll/ta-json
 import {
     JsonConverter,
@@ -5,8 +6,6 @@ import {
     JsonProperty,
     OnDeserialized,
 } from "ta-json";
-
-import { DateConverter } from "@utils/xml-js-mapper";
 
 @JsonObject()
 export class OPDSMetadata {
@@ -20,8 +19,14 @@ export class OPDSMetadata {
     @JsonProperty("numberOfItems")
     public NumberOfItems: number;
 
+    @JsonProperty("itemsPerPage")
+    public ItemsPerPage: number;
+
+    @JsonProperty("currentPage")
+    public CurrentPage: number;
+
     @JsonProperty("modified")
-    @JsonConverter(DateConverter)
+    @JsonConverter(JsonDateConverter)
     public Modified: Date;
 
     @OnDeserialized()

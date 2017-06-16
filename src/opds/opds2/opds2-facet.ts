@@ -6,7 +6,7 @@ import {
     OnDeserialized,
 } from "ta-json";
 
-import { Link } from "@models/publication-link";
+import { OPDSLink } from "./opds2-link";
 import { OPDSMetadata } from "./opds2-metadata";
 
 @JsonObject()
@@ -16,8 +16,8 @@ export class OPDSFacet {
     public Metadata: OPDSMetadata;
 
     @JsonProperty("links")
-    @JsonElementType(Link)
-    public Links: Link[];
+    @JsonElementType(OPDSLink)
+    public Links: OPDSLink[];
 
     @OnDeserialized()
     // tslint:disable-next-line:no-unused-variable

@@ -6,11 +6,11 @@ import {
     OnDeserialized,
 } from "ta-json";
 
-import { Publication } from "@models/publication";
-import { Link } from "@models/publication-link";
 import { OPDSFacet } from "./opds2-facet";
 import { OPDSGroup } from "./opds2-group";
+import { OPDSLink } from "./opds2-link";
 import { OPDSMetadata } from "./opds2-metadata";
+import { OPDSPublication } from "./opds2-publication";
 
 @JsonObject()
 export class OPDSFeed {
@@ -23,16 +23,16 @@ export class OPDSFeed {
     public Metadata: OPDSMetadata;
 
     @JsonProperty("links")
-    @JsonElementType(Link)
-    public Links: Link[];
+    @JsonElementType(OPDSLink)
+    public Links: OPDSLink[];
 
     @JsonProperty("publications")
-    @JsonElementType(Publication)
-    public Publications: Publication[];
+    @JsonElementType(OPDSPublication)
+    public Publications: OPDSPublication[];
 
     @JsonProperty("navigation")
-    @JsonElementType(Link)
-    public Navigation: Link[];
+    @JsonElementType(OPDSLink)
+    public Navigation: OPDSLink[];
 
     @JsonProperty("facets")
     @JsonElementType(OPDSFacet)
@@ -50,9 +50,6 @@ export class OPDSFeed {
         }
         if (!this.Links) {
             console.log("OPDS2Feed.Links is not set!");
-        }
-        if (!this.Context) {
-            console.log("OPDS2Feed.Context is not set!");
         }
     }
 }

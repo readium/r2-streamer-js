@@ -12,8 +12,9 @@ import {
 import { IInternal } from "./internal";
 import { MediaOverlayNode } from "./media-overlay";
 import { Metadata } from "./metadata";
-import { IPublicationCollection } from "./publication-collection";
 import { Link } from "./publication-link";
+
+// import { IPublicationCollection } from "./publication-collection";
 
 @JsonObject()
 export class Publication {
@@ -70,8 +71,8 @@ export class Publication {
     @JsonElementType(Link)
     public Images: Link[];
 
-    public OtherLinks: Link[];
-    public OtherCollections: IPublicationCollection[];
+    // public OtherLinks: Link[];
+    // public OtherCollections: IPublicationCollection[];
 
     public LCP: LCP;
 

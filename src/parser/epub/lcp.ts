@@ -1,3 +1,4 @@
+import { JsonDateConverter } from "@utils/ta-json-date-converter";
 // https://github.com/edcarroll/ta-json
 import {
     JsonConverter,
@@ -6,7 +7,6 @@ import {
     JsonProperty,
 } from "ta-json";
 
-import { DateConverter } from "@utils/xml-js-mapper";
 import { Encryption } from "./lcp-encryption";
 import { Link } from "./lcp-link";
 import { Rights } from "./lcp-rights";
@@ -22,11 +22,11 @@ export class LCP {
     public Provider: string;
 
     @JsonProperty("issued")
-    @JsonConverter(DateConverter)
+    @JsonConverter(JsonDateConverter)
     public Issued: Date;
 
     @JsonProperty("updated")
-    @JsonConverter(DateConverter)
+    @JsonConverter(JsonDateConverter)
     public Updated: Date;
 
     @JsonProperty("encryption")

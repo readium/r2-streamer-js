@@ -1,6 +1,6 @@
 import * as crypto from "crypto";
 
-import { Link } from "@models/publication-link";
+import { OPDSLink } from "@opds/opds2/opds2-link";
 import { isHTTP } from "@utils/http/UrlUtils";
 import { sortObject } from "@utils/JsonUtils";
 import * as css2json from "css2json";
@@ -65,8 +65,8 @@ export function serverOPDS2(server: Server, topRouter: express.Application) {
                 + req.headers.host;
             const selfURL = rootUrl + "/opds2/publications.json";
 
-            const publications = server.publicationsOPDS();
-            if (!publications) {
+            const feed = server.publicationsOPDS();
+            if (!feed) {
                 const err = "Publications OPDS2 feed not available yet, try again later.";
                 debug(err);
                 res.status(503).send("<html><body><p>Resource temporarily unavailable</p><p>"
@@ -74,15 +74,15 @@ export function serverOPDS2(server: Server, topRouter: express.Application) {
                 return;
             }
 
-            if (!publications.Links || !publications.Links.find((link) => {
+            if (!feed.Links || !feed.Links.find((link) => {
                 return link.Rel && link.Rel.indexOf("self") >= 0;
             })) {
-                publications.Links = Array<Link>();
-                const selfLink = new Link();
+                feed.Links = Array<OPDSLink>();
+                const selfLink = new OPDSLink();
                 selfLink.Href = selfURL;
                 selfLink.TypeLink = "application/opds+json";
                 selfLink.AddRel("self");
-                publications.Links.push(selfLink);
+                feed.Links.push(selfLink);
             }
 
             function absoluteURL(href: string): string {
@@ -107,19 +107,19 @@ export function serverOPDS2(server: Server, topRouter: express.Application) {
                     switch (req.params.jsonPath) {
 
                         case "all": {
-                            objToSerialize = publications;
+                            objToSerialize = feed;
                             break;
                         }
                         case "metadata": {
-                            objToSerialize = publications.Metadata;
+                            objToSerialize = feed.Metadata;
                             break;
                         }
                         case "links": {
-                            objToSerialize = publications.Links;
+                            objToSerialize = feed.Links;
                             break;
                         }
                         case "publications": {
-                            objToSerialize = publications.Publications;
+                            objToSerialize = feed.Publications;
                             break;
                         }
                         default: {
@@ -127,7 +127,7 @@ export function serverOPDS2(server: Server, topRouter: express.Application) {
                         }
                     }
                 } else {
-                    objToSerialize = publications;
+                    objToSerialize = feed;
                 }
 
                 if (!objToSerialize) {
@@ -156,7 +156,7 @@ export function serverOPDS2(server: Server, topRouter: express.Application) {
                 server.setResponseCORS(res);
                 res.set("Content-Type", "application/opds+json; charset=utf-8");
 
-                const publicationsJsonObj = TAJSON.serialize(publications);
+                const publicationsJsonObj = TAJSON.serialize(feed);
 
                 absolutizeURLs(publicationsJsonObj);
 

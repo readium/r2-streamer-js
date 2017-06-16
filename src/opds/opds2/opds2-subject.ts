@@ -6,7 +6,7 @@ import {
 } from "ta-json";
 
 @JsonObject()
-export class Subject {
+export class OPDSSubject {
 
     @JsonProperty("name")
     public Name: string;
@@ -24,7 +24,7 @@ export class Subject {
     // tslint:disable-next-line:no-unused-variable
     private _OnDeserialized() {
         if (!this.Name) {
-            console.log("Subject.Name is not set!");
+            console.log("OPDSSubject.Name is not set!");
         }
     }
 }

@@ -1,3 +1,4 @@
+import { JsonDateConverter } from "@utils/ta-json-date-converter";
 // https://github.com/edcarroll/ta-json
 import {
     JsonConverter,
@@ -7,18 +8,17 @@ import {
     OnDeserialized,
 } from "ta-json";
 
-import { DateConverter } from "@utils/xml-js-mapper";
 import { BelongsTo } from "./metadata-belongsto";
 import { Contributor } from "./metadata-contributor";
 import { IStringMap } from "./metadata-multilang";
 import { Properties } from "./metadata-properties";
 import { Subject } from "./metadata-subject";
 
-export interface IMeta {
-    property: string;
-    value: string;
-    children: IMeta[];
-}
+// export interface IMeta {
+//     property: string;
+//     value: string;
+//     children: IMeta[];
+// }
 
 @JsonObject()
 export class Metadata {
@@ -90,11 +90,11 @@ export class Metadata {
     public Language: string[];
 
     @JsonProperty("modified")
-    @JsonConverter(DateConverter)
+    @JsonConverter(JsonDateConverter)
     public Modified: Date;
 
     @JsonProperty("published")
-    @JsonConverter(DateConverter)
+    @JsonConverter(JsonDateConverter)
     public PublicationDate: Date;
 
     @JsonProperty("description")
@@ -123,7 +123,7 @@ export class Metadata {
     @JsonProperty("belongs_to")
     public BelongsTo: BelongsTo;
 
-    public OtherMetadata: IMeta[];
+    // public OtherMetadata: IMeta[];
 
     @OnDeserialized()
     // tslint:disable-next-line:no-unused-variable

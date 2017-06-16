@@ -7,32 +7,33 @@ import {
 } from "ta-json";
 
 import { OPDSLink } from "./opds2-link";
-import { OPDSMetadata } from "./opds2-metadata";
-import { OPDSPublication } from "./opds2-publication";
+import { OPDSPublicationMetadata } from "./opds2-publicationMetadata";
 
 @JsonObject()
-export class OPDSGroup {
+export class OPDSPublication {
 
     @JsonProperty("metadata")
-    public Metadata: OPDSMetadata;
-
-    @JsonProperty("publications")
-    @JsonElementType(OPDSPublication)
-    public Publications: OPDSPublication[];
+    public Metadata: OPDSPublicationMetadata;
 
     @JsonProperty("links")
     @JsonElementType(OPDSLink)
     public Links: OPDSLink[];
 
-    @JsonProperty("navigation")
+    @JsonProperty("images")
     @JsonElementType(OPDSLink)
-    public Navigation: OPDSLink[];
+    public Images: OPDSLink[];
 
     @OnDeserialized()
     // tslint:disable-next-line:no-unused-variable
     private _OnDeserialized() {
         if (!this.Metadata) {
-            console.log("OPDSGroup.Metadata is not set!");
+            console.log("OPDSPublication.Metadata is not set!");
+        }
+        if (!this.Links) {
+            console.log("OPDSPublication.Links is not set!");
+        }
+        if (!this.Images) {
+            console.log("OPDSPublication.Images is not set!");
         }
     }
 }
