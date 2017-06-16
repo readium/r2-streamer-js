@@ -104,8 +104,8 @@
   ],
   "scripts": {
     "electron": "cross-env DEBUG=r2:* BUILD_ENV=DEV electron dist/es8-es2017/src/electron/main.js",
-    "pregitdist": "npm run build:all",
-    "gitdist": "cp package.json ../r2-streamer-js-dist/ && cp LICENSE ../r2-streamer-js-dist/ && cp README.md ../r2-streamer-js-dist/ && mkdir ../r2-streamer-js-dist/docs/ || echo ok && cp -r docs/ ../r2-streamer-js-dist/docs/ && mkdir ../r2-streamer-js-dist/dist/ || echo ok && cp -r dist/ ../r2-streamer-js-dist/dist/ && cd ../r2-streamer-js-dist && git status || echo status && git commit -a -m\"dist update\" || echo commit && git push || echo push && git status || echo status && cd -",
+    "pregitdistx": "npm run build:all",
+    "gitdist": "cd ../r2-streamer-js-dist/ && git status || echo status && git rm -r * || echo rm && git commit -a -m\"remove previous dist\" || echo commit && cp ../r2-streamer-js/package.json . && cp ../r2-streamer-js/LICENSE . && cp ../r2-streamer-js/README.md . && mkdir ./docs/ || echo ok && cp -r ../r2-streamer-js/docs/ ./docs/ && mkdir ./dist/ || echo ok && cp -r ../r2-streamer-js/dist/ ./dist/ && git add * || echo add && git commit -a -m\"add new dist\" || echo commit && git push || echo push && git status || echo status && cd -",
     "start": "npm run server-debug ./misc/epubs/",
     "prepare_": "npm run build:all && npm test",
     "prepublish_": "npm run prepare_",

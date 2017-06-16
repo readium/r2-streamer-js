@@ -48,14 +48,14 @@
     electron "*"
 
 "@types/express-serve-static-core@*":
-  version "4.0.46"
-  resolved "https://registry.yarnpkg.com/@types/express-serve-static-core/-/express-serve-static-core-4.0.46.tgz#52040d5e37da132296e333be79e3befa1b02b34a"
+  version "4.0.48"
+  resolved "https://registry.yarnpkg.com/@types/express-serve-static-core/-/express-serve-static-core-4.0.48.tgz#b4fa06b0fce282e582b4535ff7fac85cc90173e9"
   dependencies:
     "@types/node" "*"
 
 "@types/express@*", "@types/express@latest":
-  version "4.0.35"
-  resolved "https://registry.yarnpkg.com/@types/express/-/express-4.0.35.tgz#6267c7b60a51fac473467b3c4a02cd1e441805fe"
+  version "4.0.36"
+  resolved "https://registry.yarnpkg.com/@types/express/-/express-4.0.36.tgz#14eb47de7ecb10319f0a2fb1cf971aa8680758c2"
   dependencies:
     "@types/express-serve-static-core" "*"
     "@types/serve-static" "*"
@@ -77,8 +77,8 @@
   resolved "https://registry.yarnpkg.com/@types/mime-types/-/mime-types-2.1.0.tgz#9ca52cda363f699c69466c2a6ccdaad913ea7a73"
 
 "@types/mime@*":
-  version "0.0.29"
-  resolved "https://registry.yarnpkg.com/@types/mime/-/mime-0.0.29.tgz#fbcfd330573b912ef59eeee14602bface630754b"
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@types/mime/-/mime-1.3.0.tgz#d24ffac7d1006fe68517202fb2aeba3dbe48284b"
 
 "@types/morgan@latest":
   version "1.7.32"
@@ -105,8 +105,8 @@
     "@types/request" "*"
 
 "@types/request@*", "@types/request@latest":
-  version "0.0.43"
-  resolved "https://registry.yarnpkg.com/@types/request/-/request-0.0.43.tgz#fcc59cfd88e63034e813c6884a0aade2d0f7e935"
+  version "0.0.44"
+  resolved "https://registry.yarnpkg.com/@types/request/-/request-0.0.44.tgz#77572176765376d2ba98654079311650cf4113af"
   dependencies:
     "@types/form-data" "*"
     "@types/node" "*"
@@ -1853,14 +1853,14 @@ gulp-gitignore@^0.1.0:
     starts-with "^1.0.2"
 
 gulp-reporter@^1.9.0:
-  version "1.9.0"
-  resolved "https://registry.yarnpkg.com/gulp-reporter/-/gulp-reporter-1.9.0.tgz#a00ad389c2477974d626fb13999f37ab05b10482"
+  version "1.9.1"
+  resolved "https://registry.yarnpkg.com/gulp-reporter/-/gulp-reporter-1.9.1.tgz#664f3007edb4c7161c77f6f250db19550c12b43c"
   dependencies:
     anymatch "^1.3.0"
     bufferstreams "^1.1.1"
     emphasize "^1.4.0"
     goo.gl "^0.1.4"
-    gulp-util "^3.0.7"
+    gulp-util "^3.0.8"
     lodash.get "^4.4.2"
     os-locale "^2.0.0"
 
@@ -1880,7 +1880,7 @@ gulp-tap@^1.0.1:
   dependencies:
     through2 "^2.0.3"
 
-gulp-util@^3.0.6, gulp-util@^3.0.7, gulp-util@^3.0.8:
+gulp-util@^3.0.6, gulp-util@^3.0.8:
   version "3.0.8"
   resolved "https://registry.yarnpkg.com/gulp-util/-/gulp-util-3.0.8.tgz#0054e1e744502e27c04c187c3ecc505dd54bbb4f"
   dependencies:
@@ -4183,8 +4183,8 @@ utils-merge@1.0.0:
   resolved "https://registry.yarnpkg.com/utils-merge/-/utils-merge-1.0.0.tgz#0294fb922bb9375153541c4f7096231f287c8af8"
 
 uuid@^3.0.0:
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/uuid/-/uuid-3.0.1.tgz#6544bba2dfda8c1cf17e629a3a305e2bb1fee6c1"
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/uuid/-/uuid-3.1.0.tgz#3dd3d3e790abc24d7b0d3a034ffababe28ebbc04"
 
 vali-date@^1.0.0:
   version "1.0.0"
