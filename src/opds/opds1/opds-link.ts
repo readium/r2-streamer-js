@@ -24,7 +24,7 @@ export class Link {
     // XPATH ROOT: /atom:feed/atom:entry/atom:link
 
     @XmlXPathSelector("opds:price/text()")
-    public OpdsPrice: string;
+    public OpdsPrice: number;
 
     @XmlXPathSelector("opds:price/@currencycode")
     public OpdsPriceCurrencyCode: string;
@@ -38,7 +38,7 @@ export class Link {
     // and .='hqdefault'
     // @XmlXPathSelector("@*[local-name()='count' and namespace-uri()='http://purl.org/syndication/thread/1.0']")
     @XmlXPathSelector("@thr:count")
-    public ThrCount: string;
+    public ThrCount: number;
 
     @XmlXPathSelector("@opds:facetGroup")
     public FacetGroup: string;

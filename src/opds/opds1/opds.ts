@@ -27,10 +27,10 @@ export class OPDS {
     // XPATH ROOT: /atom:feed
 
     @XmlXPathSelector("opensearch:totalResults/text()")
-    public OpensearchTotalResults: string;
+    public OpensearchTotalResults: number;
 
     @XmlXPathSelector("opensearch:itemsPerPage/text()")
-    public OpensearchItemsPerPage: string;
+    public OpensearchItemsPerPage: number;
 
     @XmlXPathSelector("atom:id/text()")
     public Id: string;

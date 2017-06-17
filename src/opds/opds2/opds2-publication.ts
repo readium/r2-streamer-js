@@ -23,6 +23,15 @@ export class OPDSPublication {
     @JsonElementType(OPDSLink)
     public Images: OPDSLink[];
 
+    public findFirstLinkByRel(rel: string): OPDSLink | undefined {
+
+        return this.Links ? this.Links.find((l) => {
+            return l.Rel && typeof l.Rel.find((r) => {
+                return r === rel;
+            }) !== "undefined";
+        }) : undefined;
+    }
+
     @OnDeserialized()
     // tslint:disable-next-line:no-unused-variable
     private _OnDeserialized() {
