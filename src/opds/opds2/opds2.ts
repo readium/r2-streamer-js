@@ -74,6 +74,104 @@ export class OPDSFeed {
         this.Facets.push(facet);
     }
 
+    public AddPublicationInGroup(publication: OPDSPublication, collLink: OPDSLink) {
+
+        if (this.Groups) {
+            const found1 = this.Groups.find((g) => {
+                if (g.Links) {
+                    const found2 = g.Links.find((l) => {
+
+                        if (l.Href === collLink.Href) {
+                            if (!g.Publications) {
+                                g.Publications = [];
+                            }
+                            g.Publications.push(publication);
+                            return true;
+                        }
+                        return false;
+                    });
+                    if (found2) {
+                        return true;
+                    }
+                }
+                return false;
+            });
+
+            if (found1) {
+                return;
+            }
+        }
+
+        const group = new OPDSGroup();
+        group.Metadata = new OPDSMetadata();
+        group.Metadata.Title = collLink.Title;
+
+        group.Publications = [];
+        group.Publications.push(publication);
+
+        const linkSelf = new OPDSLink();
+        linkSelf.Rel = ["self"];
+        linkSelf.Title = collLink.Title;
+        linkSelf.Href = collLink.Href;
+
+        group.Links = [];
+        group.Links.push(linkSelf);
+
+        if (!this.Groups) {
+            this.Groups = [];
+        }
+        this.Groups.push(group);
+    }
+
+    public AddNavigationInGroup(link: OPDSLink, collLink: OPDSLink) {
+
+        if (this.Groups) {
+            const found1 = this.Groups.find((g) => {
+                if (g.Links) {
+                    const found2 = g.Links.find((l) => {
+
+                        if (l.Href === collLink.Href) {
+                            if (!g.Navigation) {
+                                g.Navigation = [];
+                            }
+                            g.Navigation.push(link);
+                            return true;
+                        }
+                        return false;
+                    });
+                    if (found2) {
+                        return true;
+                    }
+                }
+                return false;
+            });
+
+            if (found1) {
+                return;
+            }
+        }
+
+        const group = new OPDSGroup();
+        group.Metadata = new OPDSMetadata();
+        group.Metadata.Title = collLink.Title;
+
+        group.Navigation = [];
+        group.Navigation.push(link);
+
+        const linkSelf = new OPDSLink();
+        linkSelf.Rel = ["self"];
+        linkSelf.Title = collLink.Title;
+        linkSelf.Href = collLink.Href;
+
+        group.Links = [];
+        group.Links.push(link);
+
+        if (!this.Groups) {
+            this.Groups = [];
+        }
+        this.Groups.push(group);
+    }
+
     @OnDeserialized()
     // tslint:disable-next-line:no-unused-variable
     private _OnDeserialized() {
