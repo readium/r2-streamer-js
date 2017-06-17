@@ -47,14 +47,19 @@ export function getInheritanceChain(objectType: object): FunctionType[] {
     return [objectType.constructor].concat(getInheritanceChain(parent));
 }
 
-function getChildObjectTypeDefinitions(parentObjectType: FunctionType): Array<[FunctionType, ObjectDefinition]> {
-    const childDefs = Array<[FunctionType, ObjectDefinition]>();
+interface IFunctionTypeAndObjectDefinition {
+    functionType: FunctionType;
+    objectDefinition: ObjectDefinition;
+}
+
+function getChildObjectTypeDefinitions(parentObjectType: FunctionType): IFunctionTypeAndObjectDefinition[] {
+    const childDefs: IFunctionTypeAndObjectDefinition[] = [];
 
     objectDefinitions.forEach((def, objectType) => {
         const superObjectType = Object.getPrototypeOf(objectType.prototype).constructor;
 
         if (superObjectType === parentObjectType) {
-            childDefs.push([objectType, def]);
+            childDefs.push({ functionType: objectType, objectDefinition: def });
         }
     });
 
@@ -68,7 +73,7 @@ export function getTypedInheritanceChain(
 
     const parentDef = objectDefinitions.get(objectType);
 
-    let childDefs = Array<[FunctionType, ObjectDefinition]>();
+    let childDefs: IFunctionTypeAndObjectDefinition[] = [];
 
     if (objectInstance && parentDef && parentDef.discriminatorProperty) {
         childDefs = childDefs.concat(getChildObjectTypeDefinitions(objectType));
@@ -77,9 +82,9 @@ export function getTypedInheritanceChain(
     let actualObjectType: FunctionType | undefined;
 
     while (childDefs.length !== 0 && !actualObjectType) {
-        const arr = childDefs.shift();
-        const objectType2 = arr ? arr[0] : undefined;
-        const def = arr ? arr[1] : undefined;
+        const ifo = childDefs.shift();
+        const objectType2 = ifo ? ifo.functionType : undefined;
+        const def = ifo ? ifo.objectDefinition : undefined;
 
         if (def && def.hasOwnProperty("discriminatorValue")) {
             if (objectInstance

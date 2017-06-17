@@ -82,7 +82,7 @@ function deserializeRootObject(
 
             if (p.xpathSelectorParsed) {
 
-                const xpathMatched = Array<Node>();
+                const xpathMatched: Node[] = [];
 
                 let currentNodes = [objectInstance];
 
@@ -149,7 +149,7 @@ function deserializeRootObject(
                 // const select = xpath.useNamespaces(p.namespaces || {});
                 // const xPathSelected = select(p.xpathSelector, objectInstance);
                 // if (xPathSelected && xPathSelected.length) {
-                //     const xpathMatchedCheck = Array<Node>();
+                //     const xpathMatchedCheck: Node[] = [];
                 //     if (!(xPathSelected instanceof Array)) {
                 //         xpathMatchedCheck.push(xPathSelected);
                 //     } else {
@@ -179,7 +179,7 @@ function deserializeRootObject(
                 if (xpathMatched && xpathMatched.length) {
 
                     if (p.array || p.set) {
-                        output[key] = Array<IDynamicObject>();
+                        output[key] = []; // Array<IDynamicObject>();
                         xpathMatched.forEach((item) => {
                             output[key].push(deserializeObject(item, p, options));
                         });
@@ -212,7 +212,7 @@ function deserializeRootObject(
                     //     process.exit(1);
                     // }
 
-                    const xpathMatched = Array<Node>();
+                    const xpathMatched: Node[] = [];
 
                     // console.log("XPATH MATCH: " + p.xpathSelector
                     //     + " == " + (xPathSelected instanceof Array)
@@ -228,7 +228,7 @@ function deserializeRootObject(
                     }
 
                     if (p.array || p.set) {
-                        output[key] = Array<IDynamicObject>();
+                        output[key] = []; // Array<IDynamicObject>();
                         xpathMatched.forEach((item) => {
                             output[key].push(deserializeObject(item, p, options));
                         });

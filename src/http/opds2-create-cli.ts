@@ -43,7 +43,7 @@ if (fs.existsSync(opdsJsonFilePath)) {
     feed.Metadata.Title = "Readium 2 OPDS 2.0 Feed";
     feed.Metadata.Modified = moment(Date.now()).toDate();
 
-    feed.Publications = new Array<OPDSPublication>();
+    feed.Publications = [];
 
     let nPubs = 0;
     for (const pathBase64 of args) {
@@ -71,21 +71,21 @@ if (fs.existsSync(opdsJsonFilePath)) {
         const filePathBase64Encoded = encodeURIComponent_RFC3986(pathBase64);
 
         const publi = new OPDSPublication();
-        publi.Links = new Array<OPDSLink>();
+        publi.Links = [];
         const linkSelf = new OPDSLink();
         linkSelf.Href = filePathBase64Encoded + "/manifest.json";
         linkSelf.TypeLink = "application/webpub+json";
-        linkSelf.Rel = new Array<string>();
+        linkSelf.Rel = [];
         linkSelf.Rel.push("self");
         publi.Links.push(linkSelf);
 
-        publi.Images = new Array<OPDSLink>();
+        publi.Images = [];
         const coverLink = publication.GetCover();
         if (coverLink) {
             const linkCover = new OPDSLink();
             linkCover.Href = filePathBase64Encoded + "/" + coverLink.Href;
             linkCover.TypeLink = coverLink.TypeLink;
-            // linkCover.Rel = new Array<string>();
+            // linkCover.Rel = [];
             // linkCover.Rel.push("cover");
 
             if (coverLink.Width && coverLink.Height) {
@@ -102,7 +102,7 @@ if (fs.existsSync(opdsJsonFilePath)) {
             // There must be a more effective and elegant way to do this!!
             // ==> implement shared data model, clone the common parts
             if (publication.Metadata.Artist) {
-                publi.Metadata.Artist = new Array<OPDSContributor>();
+                publi.Metadata.Artist = [];
                 publication.Metadata.Artist.forEach((contributor) => {
                     const c = new OPDSContributor();
                     if (contributor.Identifier) {

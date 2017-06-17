@@ -220,7 +220,7 @@ export class Publication {
 
     public AddToInternal(key: string, value: any) {
         if (!this.Internal) {
-            this.Internal = Array<IInternal>();
+            this.Internal = [];
         }
 
         const internal: IInternal = { Name: key, Value: value };
@@ -324,13 +324,13 @@ export class Publication {
         link.Templated = templated;
 
         if (!this.Links) {
-            this.Links = Array<Link>();
+            this.Links = [];
         }
         this.Links.push(link);
     }
 
     public FindAllMediaOverlay(): MediaOverlayNode[] {
-        const mos = Array<MediaOverlayNode>();
+        const mos: MediaOverlayNode[] = [];
 
         if (this.Spine) {
             this.Spine.forEach((link) => {
@@ -346,7 +346,7 @@ export class Publication {
     }
 
     public FindMediaOverlayByHref(href: string): MediaOverlayNode[] {
-        const mos = Array<MediaOverlayNode>();
+        const mos: MediaOverlayNode[] = [];
 
         if (this.Spine) {
             this.Spine.forEach((link) => {
@@ -362,7 +362,7 @@ export class Publication {
     }
 
     public GetPreFetchResources(): Link[] {
-        const links = Array<Link>();
+        const links: Link[] = [];
 
         if (this.Resources) {
             const mediaTypes = ["text/css", "application/vnd.ms-opentype", "text/javascript"];

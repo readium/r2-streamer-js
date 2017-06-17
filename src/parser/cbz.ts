@@ -56,7 +56,7 @@ export async function CbzParsePromise(filePath: string): Promise<Publication> {
 
         if (link.TypeLink && link.TypeLink.startsWith("image/")) {
             if (!publication.Spine) {
-                publication.Spine = Array<Link>();
+                publication.Spine = [];
             }
             publication.Spine.push(link);
 

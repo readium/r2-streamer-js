@@ -49,7 +49,7 @@ export class OPDSLink {
     public AddRel(rel: string) {
         if (!this.Rel || this.Rel.indexOf(rel) < 0) {
             if (!this.Rel) {
-                this.Rel = Array<string>();
+                this.Rel = [];
             }
             this.Rel.push(rel);
         }

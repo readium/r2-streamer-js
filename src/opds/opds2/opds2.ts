@@ -42,6 +42,38 @@ export class OPDSFeed {
     @JsonElementType(OPDSGroup)
     public Groups: OPDSGroup[];
 
+    public AddFacet(link: OPDSLink, group: string) {
+
+        if (this.Facets) {
+            const found = this.Facets.find((f) => {
+                if (f.Metadata && f.Metadata.Title === group) {
+                    if (!f.Links) {
+                        f.Links = [];
+                    }
+                    f.Links.push(link);
+                    return true;
+                }
+                return false;
+            });
+            if (found) {
+                return;
+            }
+        }
+
+        const facet = new OPDSFacet();
+
+        facet.Metadata = new OPDSMetadata();
+        facet.Metadata.Title = group;
+
+        facet.Links = [];
+        facet.Links.push(link);
+
+        if (!this.Facets) {
+            this.Facets = [];
+        }
+        this.Facets.push(facet);
+    }
+
     @OnDeserialized()
     // tslint:disable-next-line:no-unused-variable
     private _OnDeserialized() {

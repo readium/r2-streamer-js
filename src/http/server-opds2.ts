@@ -77,7 +77,7 @@ export function serverOPDS2(server: Server, topRouter: express.Application) {
             if (!feed.Links || !feed.Links.find((link) => {
                 return link.Rel && link.Rel.indexOf("self") >= 0;
             })) {
-                feed.Links = Array<OPDSLink>();
+                feed.Links = [];
                 const selfLink = new OPDSLink();
                 selfLink.Href = selfURL;
                 selfLink.TypeLink = "application/opds+json";

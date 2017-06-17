@@ -362,7 +362,7 @@ const fillMediaOverlay =
             const mo = new MediaOverlayNode();
             mo.SmilPathInZip = smilFilePath;
 
-            const manItemsHtmlWithSmil = Array<Manifest>();
+            const manItemsHtmlWithSmil: Manifest[] = [];
             opf.Manifest.forEach((manItemHtmlWithSmil) => {
                 if (manItemHtmlWithSmil.MediaOverlay) { // HTML
                     const manItemSmil = opf.Manifest.find((mi) => {
