@@ -4,7 +4,7 @@ import * as path from "path";
 import { CbzParsePromise } from "@parser/cbz";
 import { EpubParsePromise, mediaOverlayURLParam, mediaOverlayURLPath } from "@parser/epub";
 import { encodeURIComponent_RFC3986, isHTTP } from "@utils/http/UrlUtils";
-import { sortObject } from "@utils/JsonUtils";
+import { sortObject, traverseJsonObjects } from "@utils/JsonUtils";
 import * as css2json from "css2json";
 import * as debug_ from "debug";
 import * as express from "express";
@@ -192,22 +192,4 @@ export function serverMediaOverlays(server: Server, routerPathBase64: express.Ro
         });
 
     routerPathBase64.use("/:pathBase64/" + mediaOverlayURLPath, routerMediaOverlays);
-}
-
-function traverseJsonObjects(obj: any, func: (item: any) => void) {
-    func(obj);
-
-    if (obj instanceof Array) {
-        obj.forEach((item) => {
-            if (item) {
-                traverseJsonObjects(item, func);
-            }
-        });
-    } else if (typeof obj === "object") {
-        Object.keys(obj).forEach((key) => {
-            if (obj.hasOwnProperty(key) && obj[key]) {
-                traverseJsonObjects(obj[key], func);
-            }
-        });
-    }
 }

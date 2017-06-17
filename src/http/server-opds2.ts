@@ -2,7 +2,7 @@ import * as crypto from "crypto";
 
 import { OPDSLink } from "@opds/opds2/opds2-link";
 import { isHTTP } from "@utils/http/UrlUtils";
-import { sortObject } from "@utils/JsonUtils";
+import { sortObject, traverseJsonObjects } from "@utils/JsonUtils";
 import * as css2json from "css2json";
 import * as debug_ from "debug";
 import * as express from "express";
@@ -215,22 +215,4 @@ export function serverOPDS2(server: Server, topRouter: express.Application) {
     routerOPDS2_.use("/publications.json", routerOPDS2);
 
     topRouter.use("/opds2", routerOPDS2_);
-}
-
-function traverseJsonObjects(obj: any, func: (item: any) => void) {
-    func(obj);
-
-    if (obj instanceof Array) {
-        obj.forEach((item) => {
-            if (item) {
-                traverseJsonObjects(item, func);
-            }
-        });
-    } else if (typeof obj === "object") {
-        Object.keys(obj).forEach((key) => {
-            if (obj.hasOwnProperty(key) && obj[key]) {
-                traverseJsonObjects(obj[key], func);
-            }
-        });
-    }
 }

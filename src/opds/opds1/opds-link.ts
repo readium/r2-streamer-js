@@ -1,4 +1,5 @@
 import {
+    XmlItemType,
     XmlObject,
     XmlXPathSelector,
 } from "@utils/xml-js-mapper";
@@ -30,6 +31,7 @@ export class Link {
     public OpdsPriceCurrencyCode: string;
 
     @XmlXPathSelector("opds:indirectAcquisition")
+    @XmlItemType(IndirectAcquisition)
     public OpdsIndirectAcquisitions: IndirectAcquisition[];
 
     @XmlXPathSelector("@type")

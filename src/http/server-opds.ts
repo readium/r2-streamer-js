@@ -1,8 +1,6 @@
-import * as path from "path";
-
 import { OPDS } from "@opds/opds1/opds";
 import { Entry } from "@opds/opds1/opds-entry";
-import { encodeURIComponent_RFC3986, isHTTP } from "@utils/http/UrlUtils";
+import { encodeURIComponent_RFC3986, ensureAbsolute } from "@utils/http/UrlUtils";
 import { streamToBufferPromise } from "@utils/stream/BufferUtils";
 import { XML } from "@utils/xml-js-mapper";
 import * as debug_ from "debug";
@@ -16,42 +14,6 @@ import { Server } from "./server";
 import { trailingSlashRedirect } from "./server-trailing-slash-redirect";
 
 const debug = debug_("r2:server:opds");
-
-// TODO: use URI/URL lib to do this?
-function ensureAbsolute(rootUrl: string, linkHref: string) {
-    let url = linkHref;
-    if (!isHTTP(url) && url.indexOf("data:") !== 0) {
-
-        if (url.indexOf("//") === 0) {
-            if (rootUrl.indexOf("https://") === 0) {
-                url = "https:" + url;
-            } else {
-                url = "http:" + url;
-            }
-            return url;
-        }
-
-        if (url[0] === "/") {
-            const j = rootUrl.replace(/:\/\//g, ":__").indexOf("/");
-            const rootUrlOrigin = rootUrl.substr(0, j);
-            url = path.join(rootUrlOrigin, url);
-        } else {
-            const i = rootUrl.indexOf("?");
-            let rootUrlWithoutQuery = rootUrl;
-            if (i >= 0) {
-                rootUrlWithoutQuery = rootUrlWithoutQuery.substr(0, i);
-            }
-
-            if (rootUrlWithoutQuery.substr(-1) === "/") {
-                url = path.join(rootUrlWithoutQuery, url);
-            } else {
-                url = path.join(path.dirname(rootUrlWithoutQuery), url);
-            }
-        }
-        url = url.replace(/\\/g, "/").replace(/^https:\//g, "https:\/\/").replace(/^http:\//g, "http:\/\/");
-    }
-    return url;
-}
 
 export function serverOPDS(_server: Server, topRouter: express.Application) {
 
@@ -76,7 +38,7 @@ export function serverOPDS(_server: Server, topRouter: express.Application) {
             `location.href = url;}</script>`;
         html += "</head>";
 
-        html += "<body><h1>Publication OPDS</h1>";
+        html += "<body><h1>OPDS feed browser</h1>";
 
         html += `<form onsubmit="go();return false;">` +
             `<input type="text" name="url" id="url" size="80">` +

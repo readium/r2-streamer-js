@@ -18,3 +18,21 @@ export function sortObject(obj: any): any {
 
     return newObj;
 }
+
+export function traverseJsonObjects(obj: any, func: (item: any) => void) {
+    func(obj);
+
+    if (obj instanceof Array) {
+        obj.forEach((item) => {
+            if (item) {
+                traverseJsonObjects(item, func);
+            }
+        });
+    } else if (typeof obj === "object") {
+        Object.keys(obj).forEach((key) => {
+            if (obj.hasOwnProperty(key) && obj[key]) {
+                traverseJsonObjects(obj[key], func);
+            }
+        });
+    }
+}

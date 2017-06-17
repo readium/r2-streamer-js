@@ -1,4 +1,5 @@
 import {
+    XmlItemType,
     XmlObject,
     XmlXPathSelector,
 } from "@utils/xml-js-mapper";
@@ -27,5 +28,6 @@ export class IndirectAcquisition {
     public OpdsIndirectAcquisitionType: string;
 
     @XmlXPathSelector("opds:indirectAcquisition")
+    @XmlItemType(IndirectAcquisition)
     public OpdsIndirectAcquisitions: IndirectAcquisition[];
 }

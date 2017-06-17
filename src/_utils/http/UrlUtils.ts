@@ -1,3 +1,4 @@
+import * as path from "path";
 import * as querystring from "querystring";
 
 export function isHTTP(urlOrPath: string): boolean {
@@ -18,4 +19,40 @@ export function encodeURIComponent_RFC5987(str: string): string {
         replace(/\*/g, "%2A").
         // |`^
         replace(/%(?:7C|60|5E)/g, querystring.unescape);
+}
+
+// TODO: use URI/URL lib to do this?
+export function ensureAbsolute(rootUrl: string, linkHref: string) {
+    let url = linkHref;
+    if (!isHTTP(url) && url.indexOf("data:") !== 0) {
+
+        if (url.indexOf("//") === 0) {
+            if (rootUrl.indexOf("https://") === 0) {
+                url = "https:" + url;
+            } else {
+                url = "http:" + url;
+            }
+            return url;
+        }
+
+        if (url[0] === "/") {
+            const j = rootUrl.replace(/:\/\//g, ":__").indexOf("/");
+            const rootUrlOrigin = rootUrl.substr(0, j);
+            url = path.join(rootUrlOrigin, url);
+        } else {
+            const i = rootUrl.indexOf("?");
+            let rootUrlWithoutQuery = rootUrl;
+            if (i >= 0) {
+                rootUrlWithoutQuery = rootUrlWithoutQuery.substr(0, i);
+            }
+
+            if (rootUrlWithoutQuery.substr(-1) === "/") {
+                url = path.join(rootUrlWithoutQuery, url);
+            } else {
+                url = path.join(path.dirname(rootUrlWithoutQuery), url);
+            }
+        }
+        url = url.replace(/\\/g, "/").replace(/^https:\//g, "https:\/\/").replace(/^http:\//g, "http:\/\/");
+    }
+    return url;
 }

@@ -2,13 +2,20 @@ import { JsonDateConverter } from "@utils/ta-json-date-converter";
 // https://github.com/edcarroll/ta-json
 import {
     JsonConverter,
+    JsonElementType,
     JsonObject,
     JsonProperty,
     OnDeserialized,
 } from "ta-json";
 
+import { OPDSContributor } from "./opds2-contributor";
+
 @JsonObject()
 export class OPDSMetadata {
+
+    @JsonProperty("author")
+    @JsonElementType(OPDSContributor)
+    public Author: OPDSContributor[];
 
     @JsonProperty("@type")
     public RDFType: string;

@@ -18,6 +18,7 @@ import { serverAssets } from "./server-assets";
 import { serverManifestJson } from "./server-manifestjson";
 import { serverMediaOverlays } from "./server-mediaoverlays";
 import { serverOPDS } from "./server-opds";
+import { serverOPDS12 } from "./server-opds1-2";
 import { serverOPDS2 } from "./server-opds2";
 import { serverPub } from "./server-pub";
 import { serverUrl } from "./server-url";
@@ -179,6 +180,7 @@ export class Server {
         serverUrl(this, this.expressApp);
         serverOPDS(this, this.expressApp);
         serverOPDS2(this, this.expressApp);
+        serverOPDS12(this, this.expressApp);
 
         const routerPathBase64: express.Router = serverPub(this, this.expressApp);
         serverManifestJson(this, routerPathBase64);
