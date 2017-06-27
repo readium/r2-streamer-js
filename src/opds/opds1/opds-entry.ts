@@ -5,9 +5,11 @@ import {
     XmlObject,
     XmlXPathSelector,
 } from "@utils/xml-js-mapper";
+
 import { Author } from "./opds-author";
 import { Category } from "./opds-category";
 import { Link } from "./opds-link";
+import { Serie } from "./opds-serie";
 
 @XmlObject({
     app: "http://www.w3.org/2007/app",
@@ -92,4 +94,8 @@ export class Entry {
     @XmlXPathSelector("atom:link")
     @XmlItemType(Link)
     public Links: Link[];
+
+    @XmlXPathSelector("schema:Series")
+    @XmlItemType(Serie)
+    public Series: Serie[];
 }

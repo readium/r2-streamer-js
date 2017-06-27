@@ -1,5 +1,7 @@
 import { OPDS } from "./opds1/opds";
 import { OPDSFeed } from "./opds2/opds2";
+import { OPDSBelongsTo } from "./opds2/opds2-belongsTo";
+import { OPDSCollection } from "./opds2/opds2-collection";
 import { OPDSContributor } from "./opds2/opds2-contributor";
 import { OPDSIndirectAcquisition } from "./opds2/opds2-indirectAcquisition";
 import { OPDSLink } from "./opds2/opds2-link";
@@ -10,6 +12,7 @@ import { OPDSPublication } from "./opds2/opds2-publication";
 import { OPDSPublicationMetadata } from "./opds2/opds2-publicationMetadata";
 import { OPDSSubject } from "./opds2/opds2-subject";
 
+// https://github.com/opds-community/opds-revision
 export function convertOpds1ToOpds2(feed: OPDS): OPDSFeed {
     const opds2feed = new OPDSFeed();
 
@@ -66,6 +69,25 @@ export function convertOpds1ToOpds2(feed: OPDS): OPDSFeed {
                 p.Metadata.Modified = entry.Updated;
                 p.Metadata.PublicationDate = entry.Published;
                 p.Metadata.Rights = entry.DcRights;
+                if (entry.Series) {
+                    entry.Series.forEach((s) => {
+                        const coll = new OPDSCollection();
+                        coll.Name = s.Name;
+                        coll.Position = s.Position;
+                        const link = new OPDSLink();
+                        link.Href = s.Url;
+                        coll.Links = [];
+                        coll.Links.push(link);
+
+                        if (!p.Metadata.BelongsTo) {
+                            p.Metadata.BelongsTo = new OPDSBelongsTo();
+                        }
+                        if (!p.Metadata.BelongsTo.Series) {
+                            p.Metadata.BelongsTo.Series = [];
+                        }
+                        p.Metadata.BelongsTo.Series.push(coll);
+                    });
+                }
                 if (entry.DcPublisher) {
                     const c = new OPDSContributor();
                     c.Name = entry.DcPublisher;
