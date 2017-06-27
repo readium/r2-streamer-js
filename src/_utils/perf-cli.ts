@@ -40,7 +40,7 @@ if (!fs.existsSync(filePath)) {
 const fileName = path.basename(filePath);
 const ext = path.extname(fileName).toLowerCase();
 
-if (ext === ".epub" || ext === ".cbz" || ext === ".zip") {
+if (/\.epub[3?]$/.test(ext) || ext === ".cbz" || ext === ".zip") {
     // tslint:disable-next-line:no-floating-promises
     (async () => {
         const time3 = process.hrtime();

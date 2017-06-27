@@ -1,5 +1,4 @@
 import * as fs from "fs";
-import * as path from "path";
 
 import { Publication } from "@models/publication";
 import { OPDSFeed } from "@opds/opds2/opds2";
@@ -8,8 +7,7 @@ import { OPDSLink } from "@opds/opds2/opds2-link";
 import { OPDSMetadata } from "@opds/opds2/opds2-metadata";
 import { OPDSPublication } from "@opds/opds2/opds2-publication";
 import { OPDSPublicationMetadata } from "@opds/opds2/opds2-publicationMetadata";
-import { CbzParsePromise } from "@parser/cbz";
-import { EpubParsePromise } from "@parser/epub";
+import { PublicationParsePromise } from "@parser/publication-parser";
 import { encodeURIComponent_RFC3986, isHTTP } from "@utils/http/UrlUtils";
 import * as debug_ from "debug";
 import * as moment from "moment";
@@ -53,15 +51,13 @@ if (fs.existsSync(opdsJsonFilePath)) {
             continue;
         }
 
-        const fileName = path.basename(pathBase64Str);
-        const ext = path.extname(fileName).toLowerCase();
+        // const fileName = path.basename(pathBase64Str);
+        // const ext = path.extname(fileName).toLowerCase();
 
         debug(`OPDS parsing: ${pathBase64Str}`);
         let publication: Publication | undefined;
         try {
-            publication = ext === ".epub" ?
-                await EpubParsePromise(pathBase64Str) :
-                await CbzParsePromise(pathBase64Str);
+            publication = await PublicationParsePromise(pathBase64Str);
         } catch (err) {
             debug(err);
             continue;

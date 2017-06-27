@@ -1,8 +1,8 @@
 import * as crypto from "crypto";
 import * as path from "path";
 
-import { CbzParsePromise } from "@parser/cbz";
-import { EpubParsePromise, mediaOverlayURLParam, mediaOverlayURLPath } from "@parser/epub";
+import { mediaOverlayURLParam, mediaOverlayURLPath } from "@parser/epub";
+import { PublicationParsePromise } from "@parser/publication-parser";
 import { encodeURIComponent_RFC3986, isHTTP } from "@utils/http/UrlUtils";
 import { sortObject, traverseJsonObjects } from "@utils/JsonUtils";
 import * as css2json from "css2json";
@@ -77,13 +77,11 @@ export function serverMediaOverlays(server: Server, routerPathBase64: express.Ro
             let publication = server.cachedPublication(pathBase64Str);
             if (!publication) {
 
-                const fileName = path.basename(pathBase64Str);
-                const ext = path.extname(fileName).toLowerCase();
+                // const fileName = path.basename(pathBase64Str);
+                // const ext = path.extname(fileName).toLowerCase();
 
                 try {
-                    publication = ext === ".epub" ?
-                        await EpubParsePromise(pathBase64Str) :
-                        await CbzParsePromise(pathBase64Str);
+                    publication = await PublicationParsePromise(pathBase64Str);
                 } catch (err) {
                     debug(err);
                     res.status(500).send("<html><body><p>Internal Server Error</p><p>"

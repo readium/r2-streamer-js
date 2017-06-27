@@ -1,8 +1,7 @@
 import * as path from "path";
 
 import { Link } from "@models/publication-link";
-import { CbzParsePromise } from "@parser/cbz";
-import { EpubParsePromise } from "@parser/epub";
+import { PublicationParsePromise } from "@parser/publication-parser";
 import { Transformers } from "@transform/transformer";
 import { parseRangeHeader } from "@utils/http/RangeUtils";
 import { streamToBufferPromise } from "@utils/stream/BufferUtils";
@@ -46,13 +45,11 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
             let publication = server.cachedPublication(pathBase64Str);
             if (!publication) {
 
-                const fileName = path.basename(pathBase64Str);
-                const ext = path.extname(fileName).toLowerCase();
+                // const fileName = path.basename(pathBase64Str);
+                // const ext = path.extname(fileName).toLowerCase();
 
                 try {
-                    publication = ext === ".epub" ?
-                        await EpubParsePromise(pathBase64Str) :
-                        await CbzParsePromise(pathBase64Str);
+                    publication = await PublicationParsePromise(pathBase64Str);
                 } catch (err) {
                     debug(err);
                     res.status(500).send("<html><body><p>Internal Server Error</p><p>"

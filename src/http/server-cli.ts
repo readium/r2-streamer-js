@@ -69,7 +69,7 @@ if (stats.isDirectory()) {
     // filePaths = filePaths.filter((filep) => {
     //     const fileName = path.basename(filep);
     //     const ext = path.extname(fileName).toLowerCase();
-    //     return (ext === ".epub" || ext === ".cbz") &&
+    //     return (/\.epub[3?]$/.test(ext) || ext === ".cbz") &&
     //         fs.lstatSync(path.join(filePath, filep)).isFile();
     // });
 
