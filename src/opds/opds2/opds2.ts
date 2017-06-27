@@ -42,6 +42,62 @@ export class OPDSFeed {
     @JsonElementType(OPDSGroup)
     public Groups: OPDSGroup[];
 
+    public AddLink(href: string, rel: string, typeLink: string, templated: boolean) {
+        const l = new OPDSLink();
+        l.Href = href;
+        l.Rel = [];
+        l.Rel.push(rel);
+        l.TypeLink = typeLink;
+        if (templated) {
+            l.Templated = true;
+        }
+        if (!this.Links) {
+            this.Links = [];
+        }
+        this.Links.push(l);
+    }
+
+    public AddNavigation(title: string, href: string, rel: string, typeLink: string) {
+        const l = new OPDSLink();
+        l.Href = href;
+        l.TypeLink = typeLink;
+        l.Rel = [];
+        l.Rel.push(rel);
+        if (title) {
+            l.Title = title;
+        }
+        if (!this.Navigation) {
+            this.Navigation = [];
+        }
+        this.Navigation.push(l);
+    }
+
+    public AddPagination(
+        numberItems: number, itemsPerPage: number, currentPage: number,
+        nextLink: string, prevLink: string,
+        firstLink: string, lastLink: string) {
+
+        if (!this.Metadata) {
+            this.Metadata = new OPDSMetadata();
+        }
+        this.Metadata.CurrentPage = currentPage;
+        this.Metadata.ItemsPerPage = itemsPerPage;
+        this.Metadata.NumberOfItems = numberItems;
+
+        if (nextLink) {
+            this.AddLink(nextLink, "next", "application/opds+json", false);
+        }
+        if (prevLink) {
+            this.AddLink(prevLink, "previous", "application/opds+json", false);
+        }
+        if (firstLink) {
+            this.AddLink(firstLink, "first", "application/opds+json", false);
+        }
+        if (lastLink) {
+            this.AddLink(lastLink, "last", "application/opds+json", false);
+        }
+    }
+
     public AddFacet(link: OPDSLink, group: string) {
 
         if (this.Facets) {

@@ -6,6 +6,7 @@ import {
     OnDeserialized,
 } from "ta-json";
 
+import { OPDSContributor } from "./opds2-contributor";
 import { OPDSLink } from "./opds2-link";
 import { OPDSPublicationMetadata } from "./opds2-publicationMetadata";
 
@@ -30,6 +31,74 @@ export class OPDSPublication {
                 return r === rel;
             }) !== "undefined";
         }) : undefined;
+    }
+
+    public AddImage(href: string, typeImage: string, height: number, width: number) {
+        const i = new OPDSLink();
+
+        i.Href = href;
+        i.TypeLink = typeImage;
+        if (height) {
+            i.Height = height;
+        }
+        if (width) {
+            i.Width = width;
+        }
+
+        if (!this.Images) {
+            this.Images = [];
+        }
+        this.Images.push(i);
+    }
+
+    public AddLink(href: string, typeLink: string, rel: string, title: string) {
+        const l = new OPDSLink();
+        l.Href = href;
+        l.TypeLink = typeLink;
+        if (rel) {
+            l.Rel = [];
+            l.Rel.push(rel);
+        }
+        if (title) {
+            l.Title = title;
+        }
+
+        if (!this.Links) {
+            this.Links = [];
+        }
+        this.Links.push(l);
+    }
+
+    public AddAuthor(name: string, identifier: string, sortAs: string, href: string, typeLink: string) {
+        const c = new OPDSContributor();
+        c.Name = name;
+        if (identifier) {
+            c.Identifier = identifier;
+        }
+        if (sortAs) {
+            c.SortAs = sortAs;
+        }
+
+        const l = new OPDSLink();
+        if (href) {
+            l.Href = href;
+        }
+        if (typeLink) {
+            l.TypeLink = typeLink;
+        }
+
+        if (href) {
+            c.Links = [];
+            c.Links.push(l);
+        }
+
+        if (!this.Metadata) {
+            this.Metadata = new OPDSPublicationMetadata();
+        }
+        if (!this.Metadata.Author) {
+            this.Metadata.Author = [];
+        }
+        this.Metadata.Author.push(c);
     }
 
     @OnDeserialized()

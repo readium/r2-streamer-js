@@ -80,7 +80,7 @@ export class OPDSPublicationMetadata {
 
     @JsonProperty("language")
     @JsonElementType(String)
-    public Language: string | string[];
+    public Language: string[];
 
     @JsonProperty("modified")
     @JsonConverter(JsonDateConverter)
