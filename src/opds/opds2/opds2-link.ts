@@ -19,7 +19,7 @@ export class OPDSLink {
 
     @JsonProperty("rel")
     @JsonElementType(String)
-    public Rel: string[];
+    public Rel: string | string[];
 
     @JsonProperty("height")
     public Height: number;
