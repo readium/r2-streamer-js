@@ -346,7 +346,7 @@ export class Server {
             return undefined;
         }
         this.creatingPublicationsOPDS = false;
-        const jsonStr = fs.readFileSync(this.opdsJsonFilePath, "utf8");
+        const jsonStr = fs.readFileSync(this.opdsJsonFilePath, { encoding: "utf8" });
         if (!jsonStr) {
             return undefined;
         }

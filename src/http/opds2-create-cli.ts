@@ -125,7 +125,7 @@ if (fs.existsSync(opdsJsonFilePath)) {
 
     const jsonObj = TAJSON.serialize(feed);
     const jsonStr = global.JSON.stringify(jsonObj, null, "");
-    fs.writeFileSync(opdsJsonFilePath, jsonStr, "utf8");
+    fs.writeFileSync(opdsJsonFilePath, jsonStr, { encoding: "utf8" });
 
     debug("DONE! :)");
     debug(opdsJsonFilePath);
