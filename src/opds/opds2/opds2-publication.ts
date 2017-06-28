@@ -6,6 +6,8 @@ import {
     OnDeserialized,
 } from "ta-json";
 
+import { OPDSBelongsTo } from "./opds2-belongsTo";
+import { OPDSCollection } from "./opds2-collection";
 import { OPDSContributor } from "./opds2-contributor";
 import { OPDSLink } from "./opds2-link";
 import { OPDSPublicationMetadata } from "./opds2-publicationMetadata";
@@ -99,6 +101,64 @@ export class OPDSPublication {
             this.Metadata.Author = [];
         }
         this.Metadata.Author.push(c);
+    }
+
+    public AddSerie(name: string, position: number, href: string, typeLink: string) {
+
+        const c = new OPDSCollection();
+        c.Name = name;
+        c.Position = position;
+
+        const l = new OPDSLink();
+        if (href) {
+            l.Href = href;
+        }
+        if (typeLink) {
+            l.TypeLink = typeLink;
+        }
+
+        if (href) {
+            c.Links = [];
+            c.Links.push(l);
+        }
+
+        if (!this.Metadata) {
+            this.Metadata = new OPDSPublicationMetadata();
+        }
+        if (!this.Metadata.BelongsTo) {
+            this.Metadata.BelongsTo = new OPDSBelongsTo();
+        }
+        if (!this.Metadata.BelongsTo.Series) {
+            this.Metadata.BelongsTo.Series = [];
+        }
+
+        this.Metadata.BelongsTo.Series.push(c);
+    }
+
+    public AddPublisher(name: string, href: string, typeLink: string) {
+        const c = new OPDSContributor();
+        c.Name = name;
+
+        const l = new OPDSLink();
+        if (href) {
+            l.Href = href;
+        }
+        if (typeLink) {
+            l.TypeLink = typeLink;
+        }
+
+        if (href) {
+            c.Links = [];
+            c.Links.push(l);
+        }
+
+        if (!this.Metadata) {
+            this.Metadata = new OPDSPublicationMetadata();
+        }
+        if (!this.Metadata.Publisher) {
+            this.Metadata.Publisher = [];
+        }
+        this.Metadata.Publisher.push(c);
     }
 
     @OnDeserialized()
