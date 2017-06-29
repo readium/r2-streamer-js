@@ -19,20 +19,34 @@ export function sortObject(obj: any): any {
     return newObj;
 }
 
-export function traverseJsonObjects(obj: any, func: (item: any) => void) {
-    func(obj);
+function traverseJsonObjects_(
+    parent: any, keyInParent: any, obj: any,
+    func: (item: any, parent: any, keyInParent: any) => void) {
+
+    func(obj, parent, keyInParent);
 
     if (obj instanceof Array) {
-        obj.forEach((item) => {
-            if (item) {
-                traverseJsonObjects(item, func);
+        for (let index = 0; index < obj.length; index++) {
+            const item = obj[index];
+            if (typeof item !== "undefined") {
+                traverseJsonObjects_(obj, index, item, func);
             }
-        });
+        }
     } else if (typeof obj === "object") {
         Object.keys(obj).forEach((key) => {
-            if (obj.hasOwnProperty(key) && obj[key]) {
-                traverseJsonObjects(obj[key], func);
+            if (obj.hasOwnProperty(key)) {
+                const item = obj[key];
+                if (typeof item !== "undefined") {
+                    traverseJsonObjects_(obj, key, item, func);
+                }
             }
         });
     }
+}
+
+export function traverseJsonObjects(
+    obj: any,
+    func: (item: any, parent: any, keyInParent: any) => void) {
+
+    traverseJsonObjects_(undefined, undefined, obj, func);
 }

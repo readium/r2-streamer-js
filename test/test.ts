@@ -9,6 +9,7 @@ import { Link } from "@models/publication-link";
 import { OPDSFeed } from "@opds/opds2/opds2";
 import { OPDSLink } from "@opds/opds2/opds2-link";
 import { OPDSPublicationMetadata } from "@opds/opds2/opds2-publicationMetadata";
+import { traverseJsonObjects } from "@utils/JsonUtils";
 import { TestContext, test } from "ava";
 import * as debug_ from "debug";
 import { JSON as TAJSON } from "ta-json";
@@ -284,6 +285,32 @@ test("JSON SERIALIZE: Metadata.Imprint => Contributor[]", (t) => {
     t.is(json.imprint[1].role, contRole2);
 });
 
+test("JSON SERIALIZE: Metadata.Imprint => Contributor[1]", (t) => {
+
+    const md = new Metadata();
+    md.Imprint = [cont1];
+    inspect(md);
+
+    const json = TAJSON.serialize(md);
+    // TODO FIXME This is a HACK!
+    // (normalizes single-item array to the item value itself)
+    traverseJsonObjects(json,
+        (obj, parent, keyInParent) => {
+            if (parent && obj instanceof Array && obj.length === 1) {
+                parent[keyInParent] = obj[0];
+            }
+        });
+    logJSON(json);
+
+    checkType_Object(t, json.imprint);
+
+    checkType_String(t, json.imprint.name);
+    checkType_String(t, json.imprint.role);
+
+    t.is(json.imprint.name, contName1);
+    t.is(json.imprint.role, contRole1);
+});
+
 test("JSON SERIALIZE: Metadata.Imprint => Contributor", (t) => {
 
     const md = new Metadata();
@@ -379,6 +406,28 @@ test("JSON SERIALIZE: Publication.Context => string[]", (t) => {
     t.is(json["@context"][1], contextStr2);
 });
 
+test("JSON SERIALIZE: Publication.Context => string[1]", (t) => {
+
+    const pub = new Publication();
+    pub.Context = [contextStr1];
+    inspect(pub);
+
+    const json = TAJSON.serialize(pub);
+    // TODO FIXME This is a HACK!
+    // (normalizes single-item array to the item value itself)
+    traverseJsonObjects(json,
+        (obj, parent, keyInParent) => {
+            if (parent && obj instanceof Array && obj.length === 1) {
+                parent[keyInParent] = obj[0];
+            }
+        });
+    logJSON(json);
+
+    checkType_String(t, json["@context"]);
+
+    t.is(json["@context"], contextStr1);
+});
+
 test("JSON SERIALIZE: Publication.Context => string", (t) => {
 
     const pub = new Publication();
@@ -455,6 +504,28 @@ test("JSON SERIALIZE: OPDSFeed.Context => string[]", (t) => {
 
     t.is(json["@context"][0], contextStr1);
     t.is(json["@context"][1], contextStr2);
+});
+
+test("JSON SERIALIZE: OPDSFeed.Context => string[1]", (t) => {
+
+    const pub = new OPDSFeed();
+    pub.Context = [contextStr1];
+    inspect(pub);
+
+    const json = TAJSON.serialize(pub);
+    // TODO FIXME This is a HACK!
+    // (normalizes single-item array to the item value itself)
+    traverseJsonObjects(json,
+        (obj, parent, keyInParent) => {
+            if (parent && obj instanceof Array && obj.length === 1) {
+                parent[keyInParent] = obj[0];
+            }
+        });
+    logJSON(json);
+
+    checkType_String(t, json["@context"]);
+
+    t.is(json["@context"], contextStr1);
 });
 
 test("JSON SERIALIZE: OPDSFeed.Context => string", (t) => {
