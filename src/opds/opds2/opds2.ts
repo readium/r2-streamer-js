@@ -17,7 +17,7 @@ export class OPDSFeed {
 
     @JsonProperty("@context")
     @JsonElementType(String)
-    public Context: string[];
+    public Context: string | string[];
 
     @JsonProperty("metadata")
     public Metadata: OPDSMetadata;
