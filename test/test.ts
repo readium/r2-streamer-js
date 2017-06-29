@@ -5,6 +5,7 @@ import { Metadata } from "@models/metadata";
 import { Contributor } from "@models/metadata-contributor";
 import { IStringMap } from "@models/metadata-multilang";
 import { Publication } from "@models/publication";
+import { OPDSLink } from "@opds/opds2/opds2-link";
 import { TestContext, test } from "ava";
 import * as debug_ from "debug";
 import { JSON as TAJSON } from "ta-json";
@@ -112,17 +113,6 @@ const titleLangStr2: IStringMap = {};
 titleLangStr2[titleLang1] = titleStr2;
 titleLangStr2[titleLang2] = titleStr1;
 
-const contName1 = "theName1";
-const contRole1 = "theRole1";
-const cont1 = new Contributor();
-cont1.Name = contName1;
-cont1.Role = contRole1;
-const contName2 = "theName2";
-const contRole2 = "theRole2";
-const cont2 = new Contributor();
-cont2.Name = contName2;
-cont2.Role = contRole2;
-
 // ==========================
 
 test("JSON SERIALIZE: Metadata.Title => string", (t) => {
@@ -183,6 +173,19 @@ test("JSON DESERIALIZE: Metadata.Title => string-lang", (t) => {
     t.is((md.Title as IStringMap)[titleLang1], titleStr1);
     t.is((md.Title as IStringMap)[titleLang2], titleStr2);
 });
+
+// ==========================
+
+const contName1 = "theName1";
+const contRole1 = "theRole1";
+const cont1 = new Contributor();
+cont1.Name = contName1;
+cont1.Role = contRole1;
+const contName2 = "theName2";
+const contRole2 = "theRole2";
+const cont2 = new Contributor();
+cont2.Name = contName2;
+cont2.Role = contRole2;
 
 // ==========================
 
@@ -340,6 +343,76 @@ test("JSON DESERIALIZE: Publication.Context => string", (t) => {
 
     checkType_String(t, pub.Context);
     t.is(pub.Context, contextStr1);
+});
+
+// ==========================
+
+const relStr1 = "rel1";
+const relStr2 = "rel2";
+
+// ==========================
+
+test("JSON SERIALIZE: OPDSLink.Rel => string[]", (t) => {
+
+    const link = new OPDSLink();
+    link.AddRel(relStr1);
+    link.AddRel(relStr2);
+    inspect(link);
+
+    const json = TAJSON.serialize(link);
+    logJSON(json);
+
+    checkType_Array(t, json.rel);
+    t.is(json.rel.length, 2);
+
+    checkType_String(t, json.rel[0]);
+
+    t.is(json.rel[0], relStr1);
+    t.is(json.rel[1], relStr2);
+});
+
+test("JSON SERIALIZE: OPDSLink.Rel => string", (t) => {
+
+    const link = new OPDSLink();
+    link.AddRel(relStr1);
+    inspect(link);
+
+    const json = TAJSON.serialize(link);
+    logJSON(json);
+
+    checkType_String(t, json.rel);
+
+    t.is(json.rel, relStr1);
+});
+
+test("JSON DESERIALIZE: OPDSLink.Rel => string[]", (t) => {
+
+    const json: any = {};
+    json.rel = [relStr1, relStr2];
+    logJSON(json);
+    const link: OPDSLink = TAJSON.deserialize<OPDSLink>(json, OPDSLink);
+    inspect(link);
+
+    checkType_Array(t, link.Rel);
+    t.is(link.Rel.length, 2);
+
+    checkType_String(t, link.Rel[0]);
+    t.is(link.Rel[0], relStr1);
+
+    checkType_String(t, link.Rel[1]);
+    t.is(link.Rel[1], relStr2);
+});
+
+test("JSON DESERIALIZE: OPDSLink.Rel => string", (t) => {
+
+    const json: any = {};
+    json.rel = relStr1;
+    logJSON(json);
+    const link: OPDSLink = TAJSON.deserialize<OPDSLink>(json, OPDSLink);
+    inspect(link);
+
+    checkType_String(t, link.Rel);
+    t.is(link.Rel, relStr1);
 });
 
 // ==========================

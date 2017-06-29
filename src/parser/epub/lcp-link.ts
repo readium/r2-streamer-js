@@ -9,9 +9,6 @@ export class Link {
     @JsonProperty("length")
     public Length: number;
 
-    @JsonProperty("rel")
-    public Rel: string;
-
     @JsonProperty("href")
     public Href: string;
 
@@ -29,4 +26,15 @@ export class Link {
 
     @JsonProperty("hash")
     public Hash: string;
+
+    @JsonProperty("rel")
+    public Rel: string;
+
+    public HasRel(rel: string): boolean {
+        return this.Rel === rel;
+    }
+
+    public SetRel(rel: string) {
+        this.Rel = rel;
+    }
 }

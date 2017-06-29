@@ -48,9 +48,17 @@ export class Link {
     @XmlXPathSelector("@href")
     public Href: string;
 
+    @XmlXPathSelector("@title")
+    public Title: string;
+
     @XmlXPathSelector("@rel")
     public Rel: string;
 
-    @XmlXPathSelector("@title")
-    public Title: string;
+    public HasRel(rel: string): boolean {
+        return this.Rel === rel;
+    }
+
+    public SetRel(rel: string) {
+        this.Rel = rel;
+    }
 }

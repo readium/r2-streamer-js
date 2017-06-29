@@ -42,11 +42,17 @@ export class OPDSFeed {
     @JsonElementType(OPDSGroup)
     public Groups: OPDSGroup[];
 
+    public findFirstLinkByRel(rel: string): OPDSLink | undefined {
+
+        return this.Links ? this.Links.find((l) => {
+            return l.HasRel(rel);
+        }) : undefined;
+    }
+
     public AddLink(href: string, rel: string, typeLink: string, templated: boolean) {
         const l = new OPDSLink();
         l.Href = href;
-        l.Rel = [];
-        l.Rel.push(rel);
+        l.AddRel(rel);
         l.TypeLink = typeLink;
         if (templated) {
             l.Templated = true;
@@ -61,8 +67,7 @@ export class OPDSFeed {
         const l = new OPDSLink();
         l.Href = href;
         l.TypeLink = typeLink;
-        l.Rel = [];
-        l.Rel.push(rel);
+        l.AddRel(rel);
         if (title) {
             l.Title = title;
         }
@@ -166,7 +171,7 @@ export class OPDSFeed {
         group.Publications.push(publication);
 
         const linkSelf = new OPDSLink();
-        linkSelf.Rel = ["self"];
+        linkSelf.AddRel("self");
         linkSelf.Title = collLink.Title;
         linkSelf.Href = collLink.Href;
 
@@ -215,7 +220,7 @@ export class OPDSFeed {
         group.Navigation.push(link);
 
         const linkSelf = new OPDSLink();
-        linkSelf.Rel = ["self"];
+        linkSelf.AddRel("self");
         linkSelf.Title = collLink.Title;
         linkSelf.Href = collLink.Href;
 

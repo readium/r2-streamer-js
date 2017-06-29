@@ -45,11 +45,11 @@ export function convertOpds1ToOpds2(feed: OPDS): OPDSFeed {
             if (entry.Links) {
                 entry.Links.forEach((l) => {
 
-                    if (l.Rel && l.Rel.indexOf("http://opds-spec.org/acquisition") >= 0) {
+                    if (l.HasRel("http://opds-spec.org/acquisition")) {
                         isAnNavigation = false;
                     }
-                    if (l.Rel === "collection" || l.Rel === "http://opds-spec.org/group") {
-                        collLink.Rel = ["collection"];
+                    if (l.HasRel("collection") || l.HasRel("http://opds-spec.org/group")) {
+                        collLink.AddRel("collection");
                         collLink.Href = l.Href;
                         collLink.Title = l.Title;
                     }
@@ -133,7 +133,7 @@ export function convertOpds1ToOpds2(feed: OPDS): OPDSFeed {
                         const l = new OPDSLink();
                         l.Href = link.Href;
                         l.TypeLink = link.Type;
-                        l.Rel = [link.Rel];
+                        l.AddRel(link.Rel);
                         l.Title = link.Title;
 
                         if (link.OpdsIndirectAcquisitions && link.OpdsIndirectAcquisitions.length) {
@@ -171,10 +171,10 @@ export function convertOpds1ToOpds2(feed: OPDS): OPDSFeed {
                             l.Properties.Price.Value = link.OpdsPrice;
                         }
 
-                        if (link.Rel === "collection" || link.Rel === "http://opds-spec.org/group") {
+                        if (link.HasRel("collection") || link.HasRel("http://opds-spec.org/group")) {
                             // NOOP
-                        } else if (link.Rel === "http://opds-spec.org/image" ||
-                            link.Rel === "http://opds-spec.org/image/thumbnail") {
+                        } else if (link.HasRel("http://opds-spec.org/image") ||
+                            link.HasRel("http://opds-spec.org/image/thumbnail")) {
                             if (!p.Images) {
                                 p.Images = [];
                             }
@@ -200,7 +200,7 @@ export function convertOpds1ToOpds2(feed: OPDS): OPDSFeed {
                 const linkNav = new OPDSLink();
                 linkNav.Title = entry.Title;
                 if (entry.Links && entry.Links[0]) {
-                    linkNav.Rel = [entry.Links[0].Rel];
+                    linkNav.AddRel(entry.Links[0].Rel);
                     linkNav.TypeLink = entry.Links[0].Type;
                     linkNav.Href = entry.Links[0].Href;
                 }
@@ -222,11 +222,11 @@ export function convertOpds1ToOpds2(feed: OPDS): OPDSFeed {
 
             const linkFeed = new OPDSLink();
             linkFeed.Href = l.Href;
-            linkFeed.Rel = [l.Rel];
+            linkFeed.AddRel(l.Rel);
             linkFeed.TypeLink = l.Type;
             linkFeed.Title = l.Title;
 
-            if (l.Rel === "http://opds-spec.org/facet") {
+            if (l.HasRel("http://opds-spec.org/facet")) {
                 linkFeed.Properties = new OPDSProperties();
                 linkFeed.Properties.NumberOfItems = l.ThrCount;
                 opds2feed.AddFacet(linkFeed, l.FacetGroup);

@@ -17,10 +17,6 @@ export class OPDSLink {
     @JsonProperty("type")
     public TypeLink: string;
 
-    @JsonProperty("rel")
-    @JsonElementType(String)
-    public Rel: string[];
-
     @JsonProperty("height")
     public Height: number;
 
@@ -46,13 +42,52 @@ export class OPDSLink {
     @JsonProperty("bitrate")
     public Bitrate: number;
 
+    @JsonProperty("rel")
+    @JsonElementType(String)
+    public Rel: string | string[];
+
+    public AddRels(rels: string[]) {
+        rels.forEach((rel) => {
+            this.AddRel(rel);
+        });
+    }
+
     public AddRel(rel: string) {
-        if (!this.Rel || this.Rel.indexOf(rel) < 0) {
-            if (!this.Rel) {
-                this.Rel = [];
-            }
-            this.Rel.push(rel);
+        if (this.HasRel(rel)) {
+            return;
         }
+        if (!this.Rel) {
+            // this.Rel = [];
+            // this.Rel.push(rel);
+
+            this.Rel = rel;
+        } else {
+            if (this.Rel instanceof Array) {
+                this.Rel.push(rel);
+            } else {
+                const otherRel = this.Rel;
+
+                this.Rel = [];
+                this.Rel.push(otherRel);
+                this.Rel.push(rel);
+            }
+        }
+    }
+
+    public HasRel(rel: string): boolean {
+
+        if (this.Rel) {
+            if (this.Rel instanceof Array) {
+                if ((this.Rel as string[]).indexOf(rel) >= 0) {
+                    return true;
+                }
+            } else {
+                if ((this.Rel as string) === rel) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @OnDeserialized()

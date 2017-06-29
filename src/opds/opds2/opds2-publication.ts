@@ -29,9 +29,7 @@ export class OPDSPublication {
     public findFirstLinkByRel(rel: string): OPDSLink | undefined {
 
         return this.Links ? this.Links.find((l) => {
-            return l.Rel && typeof l.Rel.find((r) => {
-                return r === rel;
-            }) !== "undefined";
+            return l.HasRel(rel);
         }) : undefined;
     }
 
@@ -58,8 +56,7 @@ export class OPDSPublication {
         l.Href = href;
         l.TypeLink = typeLink;
         if (rel) {
-            l.Rel = [];
-            l.Rel.push(rel);
+            l.AddRel(rel);
         }
         if (title) {
             l.Title = title;

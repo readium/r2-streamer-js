@@ -167,13 +167,13 @@ export function serverOPDS(_server: Server, topRouter: express.Application) {
                         if (link.Type === "application/epub+zip") {
                             epub = link.Href;
                         }
-                        if (link.Rel === "http://opds-spec.org/image"
-                            || link.Rel === "x-stanza-cover-image") {
+                        if (link.HasRel("http://opds-spec.org/image")
+                            || link.HasRel("x-stanza-cover-image")) {
                             image = link.Href;
                         }
-                        if (link.Rel === "http://opds-spec.org/image/thumbnail"
-                            || link.Rel === "http://opds-spec.org/thumbnail"
-                            || link.Rel === "x-stanza-cover-image-thumbnail") {
+                        if (link.HasRel("http://opds-spec.org/image/thumbnail")
+                            || link.HasRel("http://opds-spec.org/thumbnail")
+                            || link.HasRel("x-stanza-cover-image-thumbnail")) {
                             imageThumbnail = link.Href;
                         }
 

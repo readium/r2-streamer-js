@@ -254,18 +254,7 @@ export class Publication {
     public searchLinkByRel(rel: string): Link | undefined {
         if (this.Resources) {
             const ll = this.Resources.find((link) => {
-                if (link.Rel) {
-                    const rr = link.Rel.find((r) => {
-                        if (r === rel) {
-                            return true;
-                        }
-                        return false;
-                    });
-                    if (rr) {
-                        return true;
-                    }
-                }
-                return false;
+                return link.HasRel(rel);
             });
             if (ll) {
                 return ll;
@@ -274,18 +263,7 @@ export class Publication {
 
         if (this.Spine) {
             const ll = this.Spine.find((link) => {
-                if (link.Rel) {
-                    const rr = link.Rel.find((r) => {
-                        if (r === rel) {
-                            return true;
-                        }
-                        return false;
-                    });
-                    if (rr) {
-                        return true;
-                    }
-                }
-                return false;
+                return link.HasRel(rel);
             });
             if (ll) {
                 return ll;
@@ -294,18 +272,7 @@ export class Publication {
 
         if (this.Links) {
             const ll = this.Links.find((link) => {
-                if (link.Rel) {
-                    const rr = link.Rel.find((r) => {
-                        if (r === rel) {
-                            return true;
-                        }
-                        return false;
-                    });
-                    if (rr) {
-                        return true;
-                    }
-                }
-                return false;
+                return link.HasRel(rel);
             });
             if (ll) {
                 return ll;
@@ -317,7 +284,7 @@ export class Publication {
 
     public AddLink(typeLink: string, rel: string[], url: string, templated: boolean) {
         const link = new Link();
-        link.Rel = rel;
+        link.AddRels(rel);
         link.Href = url;
         link.TypeLink = typeLink;
 
