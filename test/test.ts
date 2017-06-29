@@ -5,6 +5,7 @@ import { Metadata } from "@models/metadata";
 import { Contributor } from "@models/metadata-contributor";
 import { IStringMap } from "@models/metadata-multilang";
 import { Publication } from "@models/publication";
+import { Link } from "@models/publication-link";
 import { OPDSLink } from "@opds/opds2/opds2-link";
 import { TestContext, test } from "ava";
 import * as debug_ from "debug";
@@ -409,6 +410,73 @@ test("JSON DESERIALIZE: OPDSLink.Rel => string", (t) => {
     json.rel = relStr1;
     logJSON(json);
     const link: OPDSLink = TAJSON.deserialize<OPDSLink>(json, OPDSLink);
+    inspect(link);
+
+    checkType_String(t, link.Rel);
+    t.is(link.Rel, relStr1);
+});
+
+// ==========================
+
+// ==========================
+
+test("JSON SERIALIZE: Publication Link.Rel => string[]", (t) => {
+
+    const link = new Link();
+    link.AddRel(relStr1);
+    link.AddRel(relStr2);
+    inspect(link);
+
+    const json = TAJSON.serialize(link);
+    logJSON(json);
+
+    checkType_Array(t, json.rel);
+    t.is(json.rel.length, 2);
+
+    checkType_String(t, json.rel[0]);
+
+    t.is(json.rel[0], relStr1);
+    t.is(json.rel[1], relStr2);
+});
+
+test("JSON SERIALIZE: Publication Link.Rel => string", (t) => {
+
+    const link = new Link();
+    link.AddRel(relStr1);
+    inspect(link);
+
+    const json = TAJSON.serialize(link);
+    logJSON(json);
+
+    checkType_String(t, json.rel);
+
+    t.is(json.rel, relStr1);
+});
+
+test("JSON DESERIALIZE: Publication Link.Rel => string[]", (t) => {
+
+    const json: any = {};
+    json.rel = [relStr1, relStr2];
+    logJSON(json);
+    const link: Link = TAJSON.deserialize<Link>(json, Link);
+    inspect(link);
+
+    checkType_Array(t, link.Rel);
+    t.is(link.Rel.length, 2);
+
+    checkType_String(t, link.Rel[0]);
+    t.is(link.Rel[0], relStr1);
+
+    checkType_String(t, link.Rel[1]);
+    t.is(link.Rel[1], relStr2);
+});
+
+test("JSON DESERIALIZE: Publication Link.Rel => string", (t) => {
+
+    const json: any = {};
+    json.rel = relStr1;
+    logJSON(json);
+    const link: Link = TAJSON.deserialize<Link>(json, Link);
     inspect(link);
 
     checkType_String(t, link.Rel);
