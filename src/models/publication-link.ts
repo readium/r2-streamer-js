@@ -96,5 +96,9 @@ export class Link {
         if (!this.Href) {
             console.log("Link.Href is not set!");
         }
+
+        if (this.Rel && this.Rel instanceof Array && this.Rel.length === 1) {
+            this.Rel = this.Rel[0];
+        }
     }
 }

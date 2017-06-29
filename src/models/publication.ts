@@ -358,5 +358,9 @@ export class Publication {
         if (!this.Spine) {
             console.log("Publication.Spine is not set!");
         }
+
+        if (this.Context && this.Context instanceof Array && this.Context.length === 1) {
+            this.Context = this.Context[0];
+        }
     }
 }

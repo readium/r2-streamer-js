@@ -19,8 +19,10 @@ export class OPDSPublicationMetadata {
     public RDFType: string;
 
     @JsonProperty("title")
-    // @JsonConverter(new NotOptional("Title"))
-    public Title: string | IStringMap;
+    // @JsonType(String)
+    // not needed because primitive string union with
+    // simple object type (string keys, string values)
+    public Title: string | IStringMap; // | string[] | IStringMap[]
 
     @JsonProperty("identifier")
     // @JsonConverter(new NotOptional("Identifier"))

@@ -6,7 +6,9 @@ import { Contributor } from "@models/metadata-contributor";
 import { IStringMap } from "@models/metadata-multilang";
 import { Publication } from "@models/publication";
 import { Link } from "@models/publication-link";
+import { OPDSFeed } from "@opds/opds2/opds2";
 import { OPDSLink } from "@opds/opds2/opds2-link";
+import { OPDSPublicationMetadata } from "@opds/opds2/opds2-publicationMetadata";
 import { TestContext, test } from "ava";
 import * as debug_ from "debug";
 import { JSON as TAJSON } from "ta-json";
@@ -113,6 +115,67 @@ titleLangStr1[titleLang2] = titleStr2;
 const titleLangStr2: IStringMap = {};
 titleLangStr2[titleLang1] = titleStr2;
 titleLangStr2[titleLang2] = titleStr1;
+
+// ==========================
+
+test("JSON SERIALIZE: OPDSPublicationMetadata.Title => string", (t) => {
+
+    const md = new OPDSPublicationMetadata();
+    md.Title = titleStr1;
+    inspect(md);
+
+    const json = TAJSON.serialize(md);
+    logJSON(json);
+
+    checkType_String(t, json.title);
+
+    t.is(json.title, titleStr1);
+});
+
+test("JSON SERIALIZE: OPDSPublicationMetadata.Title => string-lang", (t) => {
+
+    const md = new OPDSPublicationMetadata();
+    md.Title = titleLangStr1;
+    inspect(md);
+
+    const json = TAJSON.serialize(md);
+    logJSON(json);
+
+    checkType_Object(t, json.title);
+
+    checkType_String(t, json.title[titleLang1]);
+    checkType_String(t, json.title[titleLang2]);
+
+    t.is(json.title[titleLang1], titleStr1);
+    t.is(json.title[titleLang2], titleStr2);
+});
+
+test("JSON DESERIALIZE: OPDSPublicationMetadata.Title => string", (t) => {
+
+    const json: any = {};
+    json.title = titleStr1;
+    logJSON(json);
+    const md: OPDSPublicationMetadata = TAJSON.deserialize<OPDSPublicationMetadata>(json, OPDSPublicationMetadata);
+    inspect(md);
+
+    checkType_String(t, md.Title);
+
+    t.is(md.Title, titleStr1);
+});
+
+test("JSON DESERIALIZE: OPDSPublicationMetadata.Title => string-lang", (t) => {
+
+    const json: any = {};
+    json.title = titleLangStr1;
+    logJSON(json);
+    const md: OPDSPublicationMetadata = TAJSON.deserialize<OPDSPublicationMetadata>(json, OPDSPublicationMetadata);
+    inspect(md);
+
+    checkType_Object(t, md.Title);
+
+    t.is((md.Title as IStringMap)[titleLang1], titleStr1);
+    t.is((md.Title as IStringMap)[titleLang2], titleStr2);
+});
 
 // ==========================
 
@@ -261,6 +324,20 @@ test("JSON DESERIALIZE: Metadata.Imprint => Contributor[]", (t) => {
     t.is((md.Imprint as Contributor[])[1].Role, contRole2);
 });
 
+test("JSON DESERIALIZE: Metadata.Imprint => Contributor[1]", (t) => {
+
+    const json: any = {};
+    json.imprint = [{ name: contName1, role: contRole1 }];
+    logJSON(json);
+    const md: Metadata = TAJSON.deserialize<Metadata>(json, Metadata);
+    inspect(md);
+
+    checkType(t, md.Imprint, Contributor);
+
+    t.is((md.Imprint as Contributor).Name, contName1);
+    t.is((md.Imprint as Contributor).Role, contRole1);
+});
+
 test("JSON DESERIALIZE: Metadata.Imprint => Contributor", (t) => {
 
     const json: any = {};
@@ -334,12 +411,102 @@ test("JSON DESERIALIZE: Publication.Context => string[]", (t) => {
     t.is(pub.Context[1], contextStr2);
 });
 
+test("JSON DESERIALIZE: Publication.Context => string[1]", (t) => {
+
+    const json: any = {};
+    json["@context"] = [contextStr1];
+    logJSON(json);
+    const pub: Publication = TAJSON.deserialize<Publication>(json, Publication);
+    inspect(pub);
+
+    checkType_String(t, pub.Context);
+    t.is(pub.Context, contextStr1);
+});
+
 test("JSON DESERIALIZE: Publication.Context => string", (t) => {
 
     const json: any = {};
     json["@context"] = contextStr1;
     logJSON(json);
     const pub: Publication = TAJSON.deserialize<Publication>(json, Publication);
+    inspect(pub);
+
+    checkType_String(t, pub.Context);
+    t.is(pub.Context, contextStr1);
+});
+
+// ==========================
+
+test("JSON SERIALIZE: OPDSFeed.Context => string[]", (t) => {
+
+    const pub = new OPDSFeed();
+    pub.Context = [];
+    pub.Context.push(contextStr1);
+    pub.Context.push(contextStr2);
+    inspect(pub);
+
+    const json = TAJSON.serialize(pub);
+    logJSON(json);
+
+    checkType_Array(t, json["@context"]);
+    t.is(json["@context"].length, 2);
+
+    checkType_String(t, json["@context"][0]);
+
+    t.is(json["@context"][0], contextStr1);
+    t.is(json["@context"][1], contextStr2);
+});
+
+test("JSON SERIALIZE: OPDSFeed.Context => string", (t) => {
+
+    const pub = new OPDSFeed();
+    pub.Context = contextStr1;
+    inspect(pub);
+
+    const json = TAJSON.serialize(pub);
+    logJSON(json);
+
+    checkType_String(t, json["@context"]);
+
+    t.is(json["@context"], contextStr1);
+});
+
+test("JSON DESERIALIZE: OPDSFeed.Context => string[]", (t) => {
+
+    const json: any = {};
+    json["@context"] = [contextStr1, contextStr2];
+    logJSON(json);
+    const pub: OPDSFeed = TAJSON.deserialize<OPDSFeed>(json, OPDSFeed);
+    inspect(pub);
+
+    checkType_Array(t, pub.Context);
+    t.is(pub.Context.length, 2);
+
+    checkType_String(t, pub.Context[0]);
+    t.is(pub.Context[0], contextStr1);
+
+    checkType_String(t, pub.Context[1]);
+    t.is(pub.Context[1], contextStr2);
+});
+
+test("JSON DESERIALIZE: OPDSFeed.Context => string[1]", (t) => {
+
+    const json: any = {};
+    json["@context"] = [contextStr1];
+    logJSON(json);
+    const pub: OPDSFeed = TAJSON.deserialize<OPDSFeed>(json, OPDSFeed);
+    inspect(pub);
+
+    checkType_String(t, pub.Context);
+    t.is(pub.Context, contextStr1);
+});
+
+test("JSON DESERIALIZE: OPDSFeed.Context => string", (t) => {
+
+    const json: any = {};
+    json["@context"] = contextStr1;
+    logJSON(json);
+    const pub: OPDSFeed = TAJSON.deserialize<OPDSFeed>(json, OPDSFeed);
     inspect(pub);
 
     checkType_String(t, pub.Context);
@@ -402,6 +569,18 @@ test("JSON DESERIALIZE: OPDSLink.Rel => string[]", (t) => {
 
     checkType_String(t, link.Rel[1]);
     t.is(link.Rel[1], relStr2);
+});
+
+test("JSON DESERIALIZE: OPDSLink.Rel => string[1]", (t) => {
+
+    const json: any = {};
+    json.rel = [relStr1];
+    logJSON(json);
+    const link: OPDSLink = TAJSON.deserialize<OPDSLink>(json, OPDSLink);
+    inspect(link);
+
+    checkType_String(t, link.Rel);
+    t.is(link.Rel, relStr1);
 });
 
 test("JSON DESERIALIZE: OPDSLink.Rel => string", (t) => {
@@ -467,6 +646,18 @@ test("JSON DESERIALIZE: Publication Link.Rel => string[]", (t) => {
 
     checkType_String(t, link.Rel[1]);
     t.is(link.Rel[1], relStr2);
+});
+
+test("JSON DESERIALIZE: Publication Link.Rel => string[1]", (t) => {
+
+    const json: any = {};
+    json.rel = [relStr1];
+    logJSON(json);
+    const link: Link = TAJSON.deserialize<Link>(json, Link);
+    inspect(link);
+
+    checkType_String(t, link.Rel);
+    t.is(link.Rel, relStr1);
 });
 
 test("JSON DESERIALIZE: Publication Link.Rel => string", (t) => {

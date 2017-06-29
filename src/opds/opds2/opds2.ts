@@ -242,5 +242,9 @@ export class OPDSFeed {
         if (!this.Links) {
             console.log("OPDS2Feed.Links is not set!");
         }
+
+        if (this.Context && this.Context instanceof Array && this.Context.length === 1) {
+            this.Context = this.Context[0];
+        }
     }
 }
