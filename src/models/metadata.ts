@@ -26,8 +26,10 @@ export class Metadata {
     public RDFType: string;
 
     @JsonProperty("title")
-    // @JsonConverter(new NotOptional("Title"))
-    public Title: string | IStringMap;
+    // @JsonType(String)
+    // not needed because primitive string union with
+    // simple object type (string keys, string values)
+    public Title: string | IStringMap; // | string[] | IStringMap[]
 
     @JsonProperty("identifier")
     // @JsonConverter(new NotOptional("Identifier"))
@@ -83,7 +85,8 @@ export class Metadata {
 
     @JsonProperty("imprint")
     @JsonElementType(Contributor)
-    public Imprint: Contributor[];
+    // @JsonType(Contributor)
+    public Imprint: Contributor | Contributor[];
 
     @JsonProperty("language")
     @JsonElementType(String)

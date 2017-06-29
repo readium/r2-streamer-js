@@ -148,7 +148,7 @@
     "transpile:typescript:es8-es2017+afterdist": "npm run transpile:typescript:es8-es2017 && npm run afterdist",
     "transpile:typescript:single": "node tools/typescript_compile_single.js",
     "posttranspile:typescript:single": "npm run afterdist",
-    "test": "ava --verbose \"./dist/es8-es2017/test/test.js\"",
+    "test": "cross-env DEBUG=r2:* ava --verbose --fail-fast --serial --color \"./dist/es8-es2017/test/test.js\"",
     "cli": "node \"./dist/es8-es2017/src/_utils/cli.js\"",
     "cli-debug": "cross-env DEBUG=r2:* npm run cli",
     "cli-debug-x": "cross-env DEBUG=* npm run cli",

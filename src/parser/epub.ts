@@ -212,7 +212,8 @@ export async function EpubParsePromise(filePath: string): Promise<Publication> {
     // TODO: this takes a MASSIVE amount of time with large OPF XML data
     // (typically: many manifest items)
     // e.g. BasicTechnicalMathWithCalculus.epub with 2.5MB OPF!
-    // culprit: probably because of XPath? Or reflection/annotations...to be determined
+    // culprit: XPath lib ... so we use our own mini XPath parser/matcher
+    // (=> performance gain in orders of magnitude!)
     const opf = XML.deserialize<OPF>(opfDoc, OPF);
     // tslint:disable-next-line:no-string-literal
     // process.env["OPF_PARSE"] = "false";
