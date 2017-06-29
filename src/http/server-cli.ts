@@ -57,7 +57,7 @@ if (stats.isDirectory()) {
             .discard("node_modules")
             .depth(5)
             .paths(filePath)
-            .ext([".epub", ".cbz"])
+            .ext([".epub", ".epub3", ".cbz"])
             .find();
         const server = new Server();
         server.addPublications(files);
@@ -69,7 +69,7 @@ if (stats.isDirectory()) {
     // filePaths = filePaths.filter((filep) => {
     //     const fileName = path.basename(filep);
     //     const ext = path.extname(fileName).toLowerCase();
-    //     return (/\.epub[3?]$/.test(ext) || ext === ".cbz") &&
+    //     return (/\.epub[3]?$/.test(ext) || ext === ".cbz") &&
     //         fs.lstatSync(path.join(filePath, filep)).isFile();
     // });
 

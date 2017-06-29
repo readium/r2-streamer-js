@@ -8,7 +8,12 @@ export async function PublicationParsePromise(filePath: string): Promise<Publica
 
     const fileName = path.basename(filePath);
     const ext = path.extname(fileName).toLowerCase();
-    return /\.epub[3?]$/.test(ext) ?
+    const check = /\.epub[3]?$/.test(ext);
+    console.log(check);
+    console.log(ext);
+    console.log(fileName);
+    console.log(filePath);
+    return check ?
         EpubParsePromise(filePath) :
         CbzParsePromise(filePath);
 }
