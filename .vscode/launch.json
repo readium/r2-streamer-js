@@ -87,7 +87,8 @@
         "--verbose",
         "--fail-fast",
         "--serial",
-        "${workspaceRoot}/dist/es8-es2017/test/test.js"
+        "${workspaceRoot}/dist/es8-es2017/test/test.js",
+        "${workspaceRoot}/dist/es8-es2017/test/test-JSON.js"
       ],
       "env": {
         "DEBUG": "r2:*",

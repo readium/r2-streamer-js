@@ -21,3 +21,4 @@ declare module "unique-temp-dir";
 declare module "ava/lib/babel-config";
 declare module "ava/lib/caching-precompiler";
 declare module "ava/lib/globals";
+declare module "eval";
