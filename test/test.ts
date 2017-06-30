@@ -129,7 +129,6 @@ test("JSON SERIALIZE: OPDSPublicationMetadata.Title => string", (t) => {
     logJSON(json);
 
     checkType_String(t, json.title);
-
     t.is(json.title, titleStr1);
 });
 
@@ -145,9 +144,9 @@ test("JSON SERIALIZE: OPDSPublicationMetadata.Title => string-lang", (t) => {
     checkType_Object(t, json.title);
 
     checkType_String(t, json.title[titleLang1]);
-    checkType_String(t, json.title[titleLang2]);
-
     t.is(json.title[titleLang1], titleStr1);
+
+    checkType_String(t, json.title[titleLang2]);
     t.is(json.title[titleLang2], titleStr2);
 });
 
@@ -156,11 +155,11 @@ test("JSON DESERIALIZE: OPDSPublicationMetadata.Title => string", (t) => {
     const json: any = {};
     json.title = titleStr1;
     logJSON(json);
+
     const md: OPDSPublicationMetadata = TAJSON.deserialize<OPDSPublicationMetadata>(json, OPDSPublicationMetadata);
     inspect(md);
 
     checkType_String(t, md.Title);
-
     t.is(md.Title, titleStr1);
 });
 
@@ -169,12 +168,16 @@ test("JSON DESERIALIZE: OPDSPublicationMetadata.Title => string-lang", (t) => {
     const json: any = {};
     json.title = titleLangStr1;
     logJSON(json);
+
     const md: OPDSPublicationMetadata = TAJSON.deserialize<OPDSPublicationMetadata>(json, OPDSPublicationMetadata);
     inspect(md);
 
     checkType_Object(t, md.Title);
 
+    checkType_String(t, (md.Title as IStringMap)[titleLang1]);
     t.is((md.Title as IStringMap)[titleLang1], titleStr1);
+
+    checkType_String(t, (md.Title as IStringMap)[titleLang2]);
     t.is((md.Title as IStringMap)[titleLang2], titleStr2);
 });
 
@@ -190,7 +193,6 @@ test("JSON SERIALIZE: Metadata.Title => string", (t) => {
     logJSON(json);
 
     checkType_String(t, json.title);
-
     t.is(json.title, titleStr1);
 });
 
@@ -206,9 +208,9 @@ test("JSON SERIALIZE: Metadata.Title => string-lang", (t) => {
     checkType_Object(t, json.title);
 
     checkType_String(t, json.title[titleLang1]);
-    checkType_String(t, json.title[titleLang2]);
-
     t.is(json.title[titleLang1], titleStr1);
+
+    checkType_String(t, json.title[titleLang2]);
     t.is(json.title[titleLang2], titleStr2);
 });
 
@@ -217,11 +219,11 @@ test("JSON DESERIALIZE: Metadata.Title => string", (t) => {
     const json: any = {};
     json.title = titleStr1;
     logJSON(json);
+
     const md: Metadata = TAJSON.deserialize<Metadata>(json, Metadata);
     inspect(md);
 
     checkType_String(t, md.Title);
-
     t.is(md.Title, titleStr1);
 });
 
@@ -230,12 +232,16 @@ test("JSON DESERIALIZE: Metadata.Title => string-lang", (t) => {
     const json: any = {};
     json.title = titleLangStr1;
     logJSON(json);
+
     const md: Metadata = TAJSON.deserialize<Metadata>(json, Metadata);
     inspect(md);
 
     checkType_Object(t, md.Title);
 
+    checkType_String(t, (md.Title as IStringMap)[titleLang1]);
     t.is((md.Title as IStringMap)[titleLang1], titleStr1);
+
+    checkType_String(t, (md.Title as IStringMap)[titleLang2]);
     t.is((md.Title as IStringMap)[titleLang2], titleStr2);
 });
 
@@ -271,17 +277,17 @@ test("JSON SERIALIZE: Metadata.Imprint => Contributor[]", (t) => {
     checkType_Object(t, json.imprint[0]);
 
     checkType_String(t, json.imprint[0].name);
-    checkType_String(t, json.imprint[0].role);
-
     t.is(json.imprint[0].name, contName1);
+
+    checkType_String(t, json.imprint[0].role);
     t.is(json.imprint[0].role, contRole1);
 
     checkType_Object(t, json.imprint[1]);
 
     checkType_String(t, json.imprint[1].name);
-    checkType_String(t, json.imprint[1].role);
-
     t.is(json.imprint[1].name, contName2);
+
+    checkType_String(t, json.imprint[1].role);
     t.is(json.imprint[1].role, contRole2);
 });
 
@@ -307,9 +313,9 @@ test.failing("JSON SERIALIZE: Metadata.Imprint => Contributor[1]", (t) => {
     checkType_Object(t, json.imprint);
 
     checkType_String(t, json.imprint.name);
-    checkType_String(t, json.imprint.role);
-
     t.is(json.imprint.name, contName1);
+
+    checkType_String(t, json.imprint.role);
     t.is(json.imprint.role, contRole1);
 });
 
@@ -325,9 +331,9 @@ test("JSON SERIALIZE: Metadata.Imprint => Contributor", (t) => {
     checkType_Object(t, json.imprint);
 
     checkType_String(t, json.imprint.name);
-    checkType_String(t, json.imprint.role);
-
     t.is(json.imprint.name, contName1);
+
+    checkType_String(t, json.imprint.role);
     t.is(json.imprint.role, contRole1);
 });
 
@@ -344,12 +350,18 @@ test("JSON DESERIALIZE: Metadata.Imprint => Contributor[]", (t) => {
 
     checkType(t, (md.Imprint as Contributor[])[0], Contributor);
 
+    checkType_String(t, (md.Imprint as Contributor[])[0].Name);
     t.is((md.Imprint as Contributor[])[0].Name, contName1);
+
+    checkType_String(t, (md.Imprint as Contributor[])[0].Role);
     t.is((md.Imprint as Contributor[])[0].Role, contRole1);
 
     checkType(t, (md.Imprint as Contributor[])[1], Contributor);
 
+    checkType_String(t, (md.Imprint as Contributor[])[1].Name);
     t.is((md.Imprint as Contributor[])[1].Name, contName2);
+
+    checkType_String(t, (md.Imprint as Contributor[])[1].Role);
     t.is((md.Imprint as Contributor[])[1].Role, contRole2);
 });
 
@@ -358,12 +370,16 @@ test("JSON DESERIALIZE: Metadata.Imprint => Contributor[1]", (t) => {
     const json: any = {};
     json.imprint = [{ name: contName1, role: contRole1 }];
     logJSON(json);
+
     const md: Metadata = TAJSON.deserialize<Metadata>(json, Metadata);
     inspect(md);
 
     checkType(t, md.Imprint, Contributor);
 
+    checkType_String(t, (md.Imprint as Contributor).Name);
     t.is((md.Imprint as Contributor).Name, contName1);
+
+    checkType_String(t, (md.Imprint as Contributor).Role);
     t.is((md.Imprint as Contributor).Role, contRole1);
 });
 
@@ -372,12 +388,16 @@ test("JSON DESERIALIZE: Metadata.Imprint => Contributor", (t) => {
     const json: any = {};
     json.imprint = { name: contName1, role: contRole1 };
     logJSON(json);
+
     const md: Metadata = TAJSON.deserialize<Metadata>(json, Metadata);
     inspect(md);
 
     checkType(t, md.Imprint, Contributor);
 
+    checkType_String(t, (md.Imprint as Contributor).Name);
     t.is((md.Imprint as Contributor).Name, contName1);
+
+    checkType_String(t, (md.Imprint as Contributor).Role);
     t.is((md.Imprint as Contributor).Role, contRole1);
 });
 
@@ -403,8 +423,9 @@ test("JSON SERIALIZE: Publication.Context => string[]", (t) => {
     t.is(json["@context"].length, 2);
 
     checkType_String(t, json["@context"][0]);
-
     t.is(json["@context"][0], contextStr1);
+
+    checkType_String(t, json["@context"][1]);
     t.is(json["@context"][1], contextStr2);
 });
 
@@ -428,7 +449,6 @@ test.failing("JSON SERIALIZE: Publication.Context => string[1]", (t) => {
     logJSON(json);
 
     checkType_String(t, json["@context"]);
-
     t.is(json["@context"], contextStr1);
 });
 
@@ -442,7 +462,6 @@ test("JSON SERIALIZE: Publication.Context => string", (t) => {
     logJSON(json);
 
     checkType_String(t, json["@context"]);
-
     t.is(json["@context"], contextStr1);
 });
 
@@ -451,6 +470,7 @@ test("JSON DESERIALIZE: Publication.Context => string[]", (t) => {
     const json: any = {};
     json["@context"] = [contextStr1, contextStr2];
     logJSON(json);
+
     const pub: Publication = TAJSON.deserialize<Publication>(json, Publication);
     inspect(pub);
 
@@ -469,6 +489,7 @@ test("JSON DESERIALIZE: Publication.Context => string[1]", (t) => {
     const json: any = {};
     json["@context"] = [contextStr1];
     logJSON(json);
+
     const pub: Publication = TAJSON.deserialize<Publication>(json, Publication);
     inspect(pub);
 
@@ -481,6 +502,7 @@ test("JSON DESERIALIZE: Publication.Context => string", (t) => {
     const json: any = {};
     json["@context"] = contextStr1;
     logJSON(json);
+
     const pub: Publication = TAJSON.deserialize<Publication>(json, Publication);
     inspect(pub);
 
@@ -505,8 +527,9 @@ test("JSON SERIALIZE: OPDSFeed.Context => string[]", (t) => {
     t.is(json["@context"].length, 2);
 
     checkType_String(t, json["@context"][0]);
-
     t.is(json["@context"][0], contextStr1);
+
+    checkType_String(t, json["@context"][1]);
     t.is(json["@context"][1], contextStr2);
 });
 
@@ -530,7 +553,6 @@ test.failing("JSON SERIALIZE: OPDSFeed.Context => string[1]", (t) => {
     logJSON(json);
 
     checkType_String(t, json["@context"]);
-
     t.is(json["@context"], contextStr1);
 });
 
@@ -544,7 +566,6 @@ test("JSON SERIALIZE: OPDSFeed.Context => string", (t) => {
     logJSON(json);
 
     checkType_String(t, json["@context"]);
-
     t.is(json["@context"], contextStr1);
 });
 
@@ -553,6 +574,7 @@ test("JSON DESERIALIZE: OPDSFeed.Context => string[]", (t) => {
     const json: any = {};
     json["@context"] = [contextStr1, contextStr2];
     logJSON(json);
+
     const pub: OPDSFeed = TAJSON.deserialize<OPDSFeed>(json, OPDSFeed);
     inspect(pub);
 
@@ -571,6 +593,7 @@ test("JSON DESERIALIZE: OPDSFeed.Context => string[1]", (t) => {
     const json: any = {};
     json["@context"] = [contextStr1];
     logJSON(json);
+
     const pub: OPDSFeed = TAJSON.deserialize<OPDSFeed>(json, OPDSFeed);
     inspect(pub);
 
@@ -583,6 +606,7 @@ test("JSON DESERIALIZE: OPDSFeed.Context => string", (t) => {
     const json: any = {};
     json["@context"] = contextStr1;
     logJSON(json);
+
     const pub: OPDSFeed = TAJSON.deserialize<OPDSFeed>(json, OPDSFeed);
     inspect(pub);
 
@@ -611,8 +635,9 @@ test("JSON SERIALIZE: OPDSLink.Rel => string[]", (t) => {
     t.is(json.rel.length, 2);
 
     checkType_String(t, json.rel[0]);
-
     t.is(json.rel[0], relStr1);
+
+    checkType_String(t, json.rel[1]);
     t.is(json.rel[1], relStr2);
 });
 
@@ -626,7 +651,6 @@ test("JSON SERIALIZE: OPDSLink.Rel => string", (t) => {
     logJSON(json);
 
     checkType_String(t, json.rel);
-
     t.is(json.rel, relStr1);
 });
 
@@ -635,6 +659,7 @@ test("JSON DESERIALIZE: OPDSLink.Rel => string[]", (t) => {
     const json: any = {};
     json.rel = [relStr1, relStr2];
     logJSON(json);
+
     const link: OPDSLink = TAJSON.deserialize<OPDSLink>(json, OPDSLink);
     inspect(link);
 
@@ -653,6 +678,7 @@ test("JSON DESERIALIZE: OPDSLink.Rel => string[1]", (t) => {
     const json: any = {};
     json.rel = [relStr1];
     logJSON(json);
+
     const link: OPDSLink = TAJSON.deserialize<OPDSLink>(json, OPDSLink);
     inspect(link);
 
@@ -665,6 +691,7 @@ test("JSON DESERIALIZE: OPDSLink.Rel => string", (t) => {
     const json: any = {};
     json.rel = relStr1;
     logJSON(json);
+
     const link: OPDSLink = TAJSON.deserialize<OPDSLink>(json, OPDSLink);
     inspect(link);
 
@@ -688,8 +715,9 @@ test("JSON SERIALIZE: Publication Link.Rel => string[]", (t) => {
     t.is(json.rel.length, 2);
 
     checkType_String(t, json.rel[0]);
-
     t.is(json.rel[0], relStr1);
+
+    checkType_String(t, json.rel[1]);
     t.is(json.rel[1], relStr2);
 });
 
@@ -703,7 +731,6 @@ test("JSON SERIALIZE: Publication Link.Rel => string", (t) => {
     logJSON(json);
 
     checkType_String(t, json.rel);
-
     t.is(json.rel, relStr1);
 });
 
@@ -712,6 +739,7 @@ test("JSON DESERIALIZE: Publication Link.Rel => string[]", (t) => {
     const json: any = {};
     json.rel = [relStr1, relStr2];
     logJSON(json);
+
     const link: Link = TAJSON.deserialize<Link>(json, Link);
     inspect(link);
 
@@ -730,6 +758,7 @@ test("JSON DESERIALIZE: Publication Link.Rel => string[1]", (t) => {
     const json: any = {};
     json.rel = [relStr1];
     logJSON(json);
+
     const link: Link = TAJSON.deserialize<Link>(json, Link);
     inspect(link);
 
@@ -742,6 +771,7 @@ test("JSON DESERIALIZE: Publication Link.Rel => string", (t) => {
     const json: any = {};
     json.rel = relStr1;
     logJSON(json);
+
     const link: Link = TAJSON.deserialize<Link>(json, Link);
     inspect(link);
 
