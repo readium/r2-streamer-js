@@ -62,7 +62,7 @@
     "request": "latest",
     "request-promise-native": "latest",
     "slugify": "latest",
-    "ta-json": "latest",
+    "ta-json": "danielweck/ta-json#dist",
     "tmp": "latest",
     "unzipper": "latest",
     "xmldom": "latest",
