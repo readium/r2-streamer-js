@@ -1,4 +1,4 @@
-import { IPropertyConverter, JsonValue, propertyConverters } from "ta-json";
+import { IPropertyConverter, JsonValue } from "ta-json";
 
 export class JsonDateConverter implements IPropertyConverter {
     public serialize(property: Date): JsonValue {
@@ -9,5 +9,3 @@ export class JsonDateConverter implements IPropertyConverter {
         return new Date(value as string);
     }
 }
-
-propertyConverters.set(Date, new JsonDateConverter());

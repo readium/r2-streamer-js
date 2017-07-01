@@ -1,6 +1,4 @@
 import {
-    DateConverter,
-    XmlConverter,
     XmlItemType,
     XmlObject,
     XmlXPathSelector,
@@ -42,7 +40,6 @@ export class OPDS {
     public SubTitle: string;
 
     @XmlXPathSelector("atom:updated/text()")
-    @XmlConverter(DateConverter)
     public Updated: Date;
 
     @XmlXPathSelector("atom:icon/text()")

@@ -1,4 +1,4 @@
-import { IPropertyConverter, JSON as TAJSON, JsonValue, propertyConverters } from "ta-json";
+import { IPropertyConverter, JSON as TAJSON, JsonValue } from "ta-json";
 
 import { Contributor } from "./metadata-contributor";
 
@@ -26,5 +26,3 @@ export class JsonContributorConverter implements IPropertyConverter {
         }
     }
 }
-
-propertyConverters.set(Contributor, new JsonContributorConverter());

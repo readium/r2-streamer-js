@@ -4,7 +4,10 @@ import * as path from "path";
 import * as debug_ from "debug";
 import * as filehound from "filehound";
 
+import { initGlobals } from "../init-globals";
 import { Server } from "./server";
+
+initGlobals();
 
 const debug = debug_("r2:server:cli");
 

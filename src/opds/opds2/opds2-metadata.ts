@@ -1,7 +1,5 @@
-import { JsonDateConverter } from "@utils/ta-json-date-converter";
 // https://github.com/edcarroll/ta-json
 import {
-    JsonConverter,
     JsonElementType,
     JsonObject,
     JsonProperty,
@@ -33,7 +31,6 @@ export class OPDSMetadata {
     public CurrentPage: number;
 
     @JsonProperty("modified")
-    @JsonConverter(JsonDateConverter)
     public Modified: Date;
 
     @OnDeserialized()

@@ -5,6 +5,10 @@ import * as util from "util";
 import { Publication } from "@models/publication";
 import { PublicationParsePromise } from "@parser/publication-parser";
 
+import { initGlobals } from "../init-globals";
+
+initGlobals();
+
 console.log("process.cwd():");
 console.log(process.cwd());
 

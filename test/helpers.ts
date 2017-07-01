@@ -2,8 +2,6 @@ import * as util from "util";
 
 import { TestContext } from "ava";
 
-console.log("HELPERS.TS");
-
 export function inspect(obj: any) {
     if (!process.env.DEBUG || process.env.DEBUG === "false" || process.env.DEBUG === "0") {
         return;

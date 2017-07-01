@@ -1,6 +1,4 @@
 import {
-    DateConverter,
-    XmlConverter,
     XmlItemType,
     XmlObject,
     XmlXPathSelector,
@@ -84,11 +82,9 @@ export class Entry {
     public ContentType: string;
 
     @XmlXPathSelector("atom:updated/text()")
-    @XmlConverter(DateConverter)
     public Updated: Date;
 
     @XmlXPathSelector("atom:published/text()")
-    @XmlConverter(DateConverter)
     public Published: Date;
 
     @XmlXPathSelector("atom:link")

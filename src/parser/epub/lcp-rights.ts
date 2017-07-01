@@ -1,7 +1,5 @@
-import { JsonDateConverter } from "@utils/ta-json-date-converter";
 // https://github.com/edcarroll/ta-json
 import {
-    JsonConverter,
     JsonObject,
     JsonProperty,
 } from "ta-json";
@@ -15,10 +13,8 @@ export class Rights {
     public Copy: number;
 
     @JsonProperty("start")
-    @JsonConverter(JsonDateConverter)
     public Start: Date;
 
     @JsonProperty("end")
-    @JsonConverter(JsonDateConverter)
     public End: Date;
 }

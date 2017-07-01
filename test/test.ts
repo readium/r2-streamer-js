@@ -4,8 +4,6 @@ import * as debug_ from "debug";
 
 const debug = debug_("r2:test");
 
-console.log("TEST.TS");
-
 // ==========================
 
 async function fn() {

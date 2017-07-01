@@ -7,6 +7,9 @@ import * as filehound from "filehound";
 import * as portfinder from "portfinder";
 
 import { Server } from "../http/server";
+import { initGlobals } from "../init-globals";
+
+initGlobals();
 
 const debug = debug_("r2:electron:main");
 

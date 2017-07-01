@@ -1,16 +1,15 @@
 import { Metadata } from "@models/metadata";
 import { Contributor } from "@models/metadata-contributor";
-import { JsonContributorConverter } from "@models/metadata-contributor-json-converter";
 import { IStringMap } from "@models/metadata-multilang";
 import { Publication } from "@models/publication";
 import { Link } from "@models/publication-link";
 import { OPDSFeed } from "@opds/opds2/opds2";
 import { OPDSLink } from "@opds/opds2/opds2-link";
 import { OPDSPublicationMetadata } from "@opds/opds2/opds2-publicationMetadata";
-import { traverseJsonObjects } from "@utils/JsonUtils";
 import { test } from "ava";
-import { JSON as TAJSON, propertyConverters } from "ta-json";
+import { JSON as TAJSON } from "ta-json";
 
+import { initGlobals } from "../src/init-globals";
 import {
     checkType,
     checkType_Array,
@@ -20,9 +19,7 @@ import {
     logJSON,
 } from "./helpers";
 
-console.log("TEST-JSON.TS");
-
-propertyConverters.set(Contributor, new JsonContributorConverter());
+initGlobals();
 
 // ==========================
 
@@ -218,16 +215,13 @@ test.failing("JSON SERIALIZE: Metadata.Imprint => Contributor[1] collapse-array"
     inspect(md);
 
     const json = TAJSON.serialize(md);
-    // TODO FIXME This is a HACK!
-    // (normalizes single-item array to the item value itself)
-    if (!json) {
-        traverseJsonObjects(json,
-            (obj, parent, keyInParent) => {
-                if (parent && obj instanceof Array && obj.length === 1) {
-                    parent[keyInParent] = obj[0];
-                }
-            });
-    }
+    // // (normalizes single-item array to the item value itself)
+    // traverseJsonObjects(json,
+    //     (obj, parent, keyInParent) => {
+    //         if (parent && obj instanceof Array && obj.length === 1) {
+    //             parent[keyInParent] = obj[0];
+    //         }
+    //     });
     logJSON(json);
 
     checkType_Object(t, json.imprint);
@@ -468,16 +462,13 @@ test.failing("JSON SERIALIZE: Publication.Context => string[1] collapse-array", 
     inspect(pub);
 
     const json = TAJSON.serialize(pub);
-    // TODO FIXME This is a HACK!
-    // (normalizes single-item array to the item value itself)
-    if (!json) {
-        traverseJsonObjects(json,
-            (obj, parent, keyInParent) => {
-                if (parent && obj instanceof Array && obj.length === 1) {
-                    parent[keyInParent] = obj[0];
-                }
-            });
-    }
+    // // (normalizes single-item array to the item value itself)
+    // traverseJsonObjects(json,
+    //     (obj, parent, keyInParent) => {
+    //         if (parent && obj instanceof Array && obj.length === 1) {
+    //             parent[keyInParent] = obj[0];
+    //         }
+    //     });
     logJSON(json);
 
     checkType_String(t, json["@context"]);
@@ -588,16 +579,13 @@ test.failing("JSON SERIALIZE: OPDSFeed.Context => string[1] collapse-array", (t)
     inspect(pub);
 
     const json = TAJSON.serialize(pub);
-    // TODO FIXME This is a HACK!
-    // (normalizes single-item array to the item value itself)
-    if (!json) {
-        traverseJsonObjects(json,
-            (obj, parent, keyInParent) => {
-                if (parent && obj instanceof Array && obj.length === 1) {
-                    parent[keyInParent] = obj[0];
-                }
-            });
-    }
+    // // (normalizes single-item array to the item value itself)
+    // traverseJsonObjects(json,
+    //     (obj, parent, keyInParent) => {
+    //         if (parent && obj instanceof Array && obj.length === 1) {
+    //             parent[keyInParent] = obj[0];
+    //         }
+    //     });
     logJSON(json);
 
     checkType_String(t, json["@context"]);

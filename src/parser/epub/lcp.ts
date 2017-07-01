@@ -1,7 +1,5 @@
-import { JsonDateConverter } from "@utils/ta-json-date-converter";
 // https://github.com/edcarroll/ta-json
 import {
-    JsonConverter,
     JsonElementType,
     JsonObject,
     JsonProperty,
@@ -22,11 +20,9 @@ export class LCP {
     public Provider: string;
 
     @JsonProperty("issued")
-    @JsonConverter(JsonDateConverter)
     public Issued: Date;
 
     @JsonProperty("updated")
-    @JsonConverter(JsonDateConverter)
     public Updated: Date;
 
     @JsonProperty("encryption")

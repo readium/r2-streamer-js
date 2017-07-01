@@ -1,7 +1,5 @@
-import { JsonDateConverter } from "@utils/ta-json-date-converter";
 // https://github.com/edcarroll/ta-json
 import {
-    JsonConverter,
     JsonElementType,
     JsonObject,
     JsonProperty,
@@ -32,7 +30,6 @@ export class Metadata {
     public Title: string | IStringMap; // | string[] | IStringMap[]
 
     @JsonProperty("identifier")
-    // @JsonConverter(new NotOptional("Identifier"))
     public Identifier: string;
 
     @JsonProperty("author")
@@ -92,11 +89,9 @@ export class Metadata {
     public Language: string[];
 
     @JsonProperty("modified")
-    @JsonConverter(JsonDateConverter)
     public Modified: Date;
 
     @JsonProperty("published")
-    @JsonConverter(JsonDateConverter)
     public PublicationDate: Date;
 
     @JsonProperty("description")
