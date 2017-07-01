@@ -81,11 +81,13 @@ export class Metadata {
 
     @JsonProperty("publisher")
     @JsonElementType(Contributor)
+    // @JsonConverter(JsonContributorConverter)
     public Publisher: Contributor[];
 
     @JsonProperty("imprint")
     @JsonElementType(Contributor)
     // @JsonType(Contributor)
+    // @JsonConverter(JsonContributorConverter)
     public Imprint: Contributor | Contributor[];
 
     @JsonProperty("language")

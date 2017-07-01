@@ -1,5 +1,6 @@
 import { Metadata } from "@models/metadata";
 import { Contributor } from "@models/metadata-contributor";
+import { JsonContributorConverter } from "@models/metadata-contributor-json-converter";
 import { IStringMap } from "@models/metadata-multilang";
 import { Publication } from "@models/publication";
 import { Link } from "@models/publication-link";
@@ -8,7 +9,7 @@ import { OPDSLink } from "@opds/opds2/opds2-link";
 import { OPDSPublicationMetadata } from "@opds/opds2/opds2-publicationMetadata";
 import { traverseJsonObjects } from "@utils/JsonUtils";
 import { test } from "ava";
-import { JSON as TAJSON } from "ta-json";
+import { JSON as TAJSON, propertyConverters } from "ta-json";
 
 import {
     checkType,
@@ -20,6 +21,8 @@ import {
 } from "./helpers";
 
 console.log("TEST-JSON.TS");
+
+propertyConverters.set(Contributor, new JsonContributorConverter());
 
 // ==========================
 
@@ -259,6 +262,7 @@ test("JSON DESERIALIZE: Metadata.Imprint => Contributor[]", (t) => {
     const json: any = {};
     json.imprint = [{ name: contName1, role: contRole1 }, { name: contName2, role: contRole2 }];
     logJSON(json);
+
     const md: Metadata = TAJSON.deserialize<Metadata>(json, Metadata);
     inspect(md);
 
@@ -316,6 +320,74 @@ test("JSON DESERIALIZE: Metadata.Imprint => Contributor", (t) => {
 
     checkType_String(t, (md.Imprint as Contributor).Role);
     t.is((md.Imprint as Contributor).Role, contRole1);
+});
+
+test("JSON DESERIALIZE: Metadata.Imprint => ContributorSTR[]", (t) => {
+
+    const json: any = {};
+    json.imprint = [contName1, contName2];
+    logJSON(json);
+
+    const md: Metadata = TAJSON.deserialize<Metadata>(json, Metadata);
+    inspect(md);
+
+    checkType_Array(t, md.Imprint);
+    t.is((md.Imprint as Contributor[]).length, 2);
+
+    checkType(t, (md.Imprint as Contributor[])[0], Contributor);
+
+    checkType_String(t, (md.Imprint as Contributor[])[0].Name);
+    t.is((md.Imprint as Contributor[])[0].Name, contName1);
+
+    checkType(t, (md.Imprint as Contributor[])[1], Contributor);
+
+    checkType_String(t, (md.Imprint as Contributor[])[1].Name);
+    t.is((md.Imprint as Contributor[])[1].Name, contName2);
+});
+
+test("JSON DESERIALIZE: Metadata.Imprint => ContributorSTR[1]", (t) => {
+
+    const json: any = {};
+    json.imprint = [contName1];
+    logJSON(json);
+
+    const md: Metadata = TAJSON.deserialize<Metadata>(json, Metadata);
+    inspect(md);
+
+    checkType(t, md.Imprint, Contributor);
+
+    checkType_String(t, (md.Imprint as Contributor).Name);
+    t.is((md.Imprint as Contributor).Name, contName1);
+});
+
+test("JSON DESERIALIZE: Metadata.Imprint => ContributorSTR", (t) => {
+
+    const json: any = {};
+    json.imprint = contName1;
+    logJSON(json);
+
+    const md: Metadata = TAJSON.deserialize<Metadata>(json, Metadata);
+    inspect(md);
+
+    checkType(t, md.Imprint, Contributor);
+
+    checkType_String(t, (md.Imprint as Contributor).Name);
+    t.is((md.Imprint as Contributor).Name, contName1);
+});
+
+test("JSON DESERIALIZE: Metadata.Publisher => ContributorSTR", (t) => {
+
+    const json: any = {};
+    json.publisher = contName2;
+    logJSON(json);
+
+    const md: Metadata = TAJSON.deserialize<Metadata>(json, Metadata);
+    inspect(md);
+
+    t.is(md.Publisher.length, 1);
+
+    checkType_String(t, md.Publisher[0].Name);
+    t.is(md.Publisher[0].Name, contName2);
 });
 
 // ==========================
