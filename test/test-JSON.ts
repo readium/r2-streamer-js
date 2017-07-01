@@ -287,7 +287,7 @@ test("JSON SERIALIZE: Metadata.Imprint => Contributor[]", (t) => {
     t.is(json.imprint[1].role, contRole2);
 });
 
-test.failing("JSON SERIALIZE: Metadata.Imprint => Contributor[1] collapse-array", (t) => {
+test("JSON SERIALIZE: Metadata.Imprint => Contributor[1] collapse-array", (t) => {
 
     const md = new Metadata();
     md.Imprint = [cont1];
@@ -312,26 +312,27 @@ test.failing("JSON SERIALIZE: Metadata.Imprint => Contributor[1] collapse-array"
     t.is(json.imprint.role, contRole1);
 });
 
-test("JSON SERIALIZE: Metadata.Imprint => Contributor[1] keep-array", (t) => {
+// implemented, see IPropertyConverter.collapseArrayWithSingleItem()
+// test("JSON SERIALIZE: Metadata.Imprint => Contributor[1] keep-array", (t) => {
 
-    const md = new Metadata();
-    md.Imprint = [cont1];
-    inspect(md);
+//     const md = new Metadata();
+//     md.Imprint = [cont1];
+//     inspect(md);
 
-    const json = TAJSON.serialize(md);
-    logJSON(json);
+//     const json = TAJSON.serialize(md);
+//     logJSON(json);
 
-    checkType_Array(t, json.imprint);
-    t.is(json.imprint.length, 1);
+//     checkType_Array(t, json.imprint);
+//     t.is(json.imprint.length, 1);
 
-    checkType_Object(t, json.imprint[0]);
+//     checkType_Object(t, json.imprint[0]);
 
-    checkType_String(t, json.imprint[0].name);
-    t.is(json.imprint[0].name, contName1);
+//     checkType_String(t, json.imprint[0].name);
+//     t.is(json.imprint[0].name, contName1);
 
-    checkType_String(t, json.imprint[0].role);
-    t.is(json.imprint[0].role, contRole1);
-});
+//     checkType_String(t, json.imprint[0].role);
+//     t.is(json.imprint[0].role, contRole1);
+// });
 
 test("JSON DESERIALIZE: Metadata.Imprint => Contributor[]", (t) => {
 
@@ -534,7 +535,7 @@ test("JSON SERIALIZE: Publication.Context => string[]", (t) => {
     t.is(json["@context"][1], contextStr2);
 });
 
-test.failing("JSON SERIALIZE: Publication.Context => string[1] collapse-array", (t) => {
+test("JSON SERIALIZE: Publication.Context => string[1] collapse-array", (t) => {
 
     const pub = new Publication();
     pub.Context = [contextStr1];
@@ -554,34 +555,22 @@ test.failing("JSON SERIALIZE: Publication.Context => string[1] collapse-array", 
     t.is(json["@context"], contextStr1);
 });
 
-test("JSON SERIALIZE: Publication.Context => string[1] keep-array", (t) => {
+// implemented, see IPropertyConverter.collapseArrayWithSingleItem()
+// test("JSON SERIALIZE: Publication.Context => string[1] keep-array", (t) => {
 
-    const pub = new Publication();
-    pub.Context = [contextStr1];
-    inspect(pub);
+//     const pub = new Publication();
+//     pub.Context = [contextStr1];
+//     inspect(pub);
 
-    const json = TAJSON.serialize(pub);
-    logJSON(json);
+//     const json = TAJSON.serialize(pub);
+//     logJSON(json);
 
-    checkType_Array(t, json["@context"]);
-    t.is(json["@context"].length, 1);
+//     checkType_Array(t, json["@context"]);
+//     t.is(json["@context"].length, 1);
 
-    checkType_String(t, json["@context"][0]);
-    t.is(json["@context"][0], contextStr1);
-});
-
-test("JSON SERIALIZE: Publication.Context => string", (t) => {
-
-    const pub = new Publication();
-    pub.Context = contextStr1;
-    inspect(pub);
-
-    const json = TAJSON.serialize(pub);
-    logJSON(json);
-
-    checkType_String(t, json["@context"]);
-    t.is(json["@context"], contextStr1);
-});
+//     checkType_String(t, json["@context"][0]);
+//     t.is(json["@context"][0], contextStr1);
+// });
 
 test("JSON DESERIALIZE: Publication.Context => string[]", (t) => {
 
@@ -611,8 +600,11 @@ test("JSON DESERIALIZE: Publication.Context => string[1]", (t) => {
     const pub: Publication = TAJSON.deserialize<Publication>(json, Publication);
     inspect(pub);
 
-    checkType_String(t, pub.Context);
-    t.is(pub.Context, contextStr1);
+    checkType_Array(t, pub.Context);
+    t.is(pub.Context.length, 1);
+
+    checkType_String(t, pub.Context[0]);
+    t.is(pub.Context[0], contextStr1);
 });
 
 test("JSON DESERIALIZE: Publication.Context => string", (t) => {
@@ -624,8 +616,11 @@ test("JSON DESERIALIZE: Publication.Context => string", (t) => {
     const pub: Publication = TAJSON.deserialize<Publication>(json, Publication);
     inspect(pub);
 
-    checkType_String(t, pub.Context);
-    t.is(pub.Context, contextStr1);
+    checkType_Array(t, pub.Context);
+    t.is(pub.Context.length, 1);
+
+    checkType_String(t, pub.Context[0]);
+    t.is(pub.Context[0], contextStr1);
 });
 
 // ==========================
@@ -651,7 +646,7 @@ test("JSON SERIALIZE: OPDSFeed.Context => string[]", (t) => {
     t.is(json["@context"][1], contextStr2);
 });
 
-test.failing("JSON SERIALIZE: OPDSFeed.Context => string[1] collapse-array", (t) => {
+test("JSON SERIALIZE: OPDSFeed.Context => string[1] collapse-array", (t) => {
 
     const pub = new OPDSFeed();
     pub.Context = [contextStr1];
@@ -671,34 +666,22 @@ test.failing("JSON SERIALIZE: OPDSFeed.Context => string[1] collapse-array", (t)
     t.is(json["@context"], contextStr1);
 });
 
-test("JSON SERIALIZE: OPDSFeed.Context => string[1] keep-array", (t) => {
+// implemented, see IPropertyConverter.collapseArrayWithSingleItem()
+// test("JSON SERIALIZE: OPDSFeed.Context => string[1] keep-array", (t) => {
 
-    const pub = new OPDSFeed();
-    pub.Context = [contextStr1];
-    inspect(pub);
+//     const pub = new OPDSFeed();
+//     pub.Context = [contextStr1];
+//     inspect(pub);
 
-    const json = TAJSON.serialize(pub);
-    logJSON(json);
+//     const json = TAJSON.serialize(pub);
+//     logJSON(json);
 
-    checkType_Array(t, json["@context"]);
-    t.is(json["@context"].length, 1);
+//     checkType_Array(t, json["@context"]);
+//     t.is(json["@context"].length, 1);
 
-    checkType_String(t, json["@context"][0]);
-    t.is(json["@context"][0], contextStr1);
-});
-
-test("JSON SERIALIZE: OPDSFeed.Context => string", (t) => {
-
-    const pub = new OPDSFeed();
-    pub.Context = contextStr1;
-    inspect(pub);
-
-    const json = TAJSON.serialize(pub);
-    logJSON(json);
-
-    checkType_String(t, json["@context"]);
-    t.is(json["@context"], contextStr1);
-});
+//     checkType_String(t, json["@context"][0]);
+//     t.is(json["@context"][0], contextStr1);
+// });
 
 test("JSON DESERIALIZE: OPDSFeed.Context => string[]", (t) => {
 
@@ -728,8 +711,11 @@ test("JSON DESERIALIZE: OPDSFeed.Context => string[1]", (t) => {
     const pub: OPDSFeed = TAJSON.deserialize<OPDSFeed>(json, OPDSFeed);
     inspect(pub);
 
-    checkType_String(t, pub.Context);
-    t.is(pub.Context, contextStr1);
+    checkType_Array(t, pub.Context);
+    t.is(pub.Context.length, 1);
+
+    checkType_String(t, pub.Context[0]);
+    t.is(pub.Context[0], contextStr1);
 });
 
 test("JSON DESERIALIZE: OPDSFeed.Context => string", (t) => {
@@ -741,8 +727,11 @@ test("JSON DESERIALIZE: OPDSFeed.Context => string", (t) => {
     const pub: OPDSFeed = TAJSON.deserialize<OPDSFeed>(json, OPDSFeed);
     inspect(pub);
 
-    checkType_String(t, pub.Context);
-    t.is(pub.Context, contextStr1);
+    checkType_Array(t, pub.Context);
+    t.is(pub.Context.length, 1);
+
+    checkType_String(t, pub.Context[0]);
+    t.is(pub.Context[0], contextStr1);
 });
 
 // ==========================
@@ -906,8 +895,11 @@ test("JSON DESERIALIZE: OPDSLink.Rel => string[1]", (t) => {
     const link: OPDSLink = TAJSON.deserialize<OPDSLink>(json, OPDSLink);
     inspect(link);
 
-    checkType_String(t, link.Rel);
-    t.is(link.Rel, relStr1);
+    checkType_Array(t, link.Rel);
+    t.is(link.Rel.length, 1);
+
+    checkType_String(t, link.Rel[0]);
+    t.is(link.Rel[0], relStr1);
 });
 
 test("JSON DESERIALIZE: OPDSLink.Rel => string", (t) => {
@@ -919,8 +911,11 @@ test("JSON DESERIALIZE: OPDSLink.Rel => string", (t) => {
     const link: OPDSLink = TAJSON.deserialize<OPDSLink>(json, OPDSLink);
     inspect(link);
 
-    checkType_String(t, link.Rel);
-    t.is(link.Rel, relStr1);
+    checkType_Array(t, link.Rel);
+    t.is(link.Rel.length, 1);
+
+    checkType_String(t, link.Rel[0]);
+    t.is(link.Rel[0], relStr1);
 });
 
 test("JSON DESERIALIZE: OPDSLink.Rel => string (recursive children)", (t) => {
@@ -934,14 +929,20 @@ test("JSON DESERIALIZE: OPDSLink.Rel => string (recursive children)", (t) => {
     const link: OPDSLink = TAJSON.deserialize<OPDSLink>(json, OPDSLink);
     inspect(link);
 
-    checkType_String(t, link.Rel);
-    t.is(link.Rel, relStr1);
+    checkType_Array(t, link.Rel);
+    t.is(link.Rel.length, 1);
+
+    checkType_String(t, link.Rel[0]);
+    t.is(link.Rel[0], relStr1);
 
     checkType_Array(t, link.Children);
     t.is(link.Children.length, 1);
 
-    checkType_String(t, link.Children[0].Rel);
-    t.is(link.Children[0].Rel, relStr2);
+    checkType_Array(t, link.Children[0].Rel);
+    t.is(link.Children[0].Rel.length, 1);
+
+    checkType_String(t, link.Children[0].Rel[0]);
+    t.is(link.Children[0].Rel[0], relStr2);
 });
 
 // ==========================
@@ -1007,8 +1008,11 @@ test("JSON DESERIALIZE: Publication Link.Rel => string[1]", (t) => {
     const link: Link = TAJSON.deserialize<Link>(json, Link);
     inspect(link);
 
-    checkType_String(t, link.Rel);
-    t.is(link.Rel, relStr1);
+    checkType_Array(t, link.Rel);
+    t.is(link.Rel.length, 1);
+
+    checkType_String(t, link.Rel[0]);
+    t.is(link.Rel[0], relStr1);
 });
 
 test("JSON DESERIALIZE: Publication Link.Rel => string", (t) => {
@@ -1020,8 +1024,11 @@ test("JSON DESERIALIZE: Publication Link.Rel => string", (t) => {
     const link: Link = TAJSON.deserialize<Link>(json, Link);
     inspect(link);
 
-    checkType_String(t, link.Rel);
-    t.is(link.Rel, relStr1);
+    checkType_Array(t, link.Rel);
+    t.is(link.Rel.length, 1);
+
+    checkType_String(t, link.Rel[0]);
+    t.is(link.Rel[0], relStr1);
 });
 
 // ==========================

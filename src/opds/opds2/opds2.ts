@@ -1,5 +1,7 @@
+import { JsonStringConverter } from "@utils/ta-json-string-converter";
 // https://github.com/edcarroll/ta-json
 import {
+    JsonConverter,
     JsonElementType,
     JsonObject,
     JsonProperty,
@@ -16,8 +18,9 @@ import { OPDSPublication } from "./opds2-publication";
 export class OPDSFeed {
 
     @JsonProperty("@context")
+    @JsonConverter(JsonStringConverter)
     @JsonElementType(String)
-    public Context: string | string[];
+    public Context: string[];
 
     @JsonProperty("metadata")
     public Metadata: OPDSMetadata;
@@ -241,10 +244,6 @@ export class OPDSFeed {
         }
         if (!this.Links) {
             console.log("OPDS2Feed.Links is not set!");
-        }
-
-        if (this.Context && this.Context instanceof Array && this.Context.length === 1) {
-            this.Context = this.Context[0];
         }
     }
 }

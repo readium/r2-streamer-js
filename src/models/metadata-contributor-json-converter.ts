@@ -25,4 +25,8 @@ export class JsonContributorConverter implements IPropertyConverter {
             return TAJSON.deserialize<Contributor>(value, Contributor);
         }
     }
+
+    public collapseArrayWithSingleItem(): boolean {
+        return true;
+    }
 }

@@ -133,23 +133,3 @@ export class Metadata {
         }
     }
 }
-
-// class NotOptional implements IPropertyConverter {
-//     constructor(readonly name: string) {
-//     }
-//     public serialize(property: any): any {
-//         console.log(this.name + " >> " + property);
-//         if (!property) {
-//             console.log("NotOptional! (serialize)");
-//         }
-//         return property;
-//     }
-
-//     public deserialize(value: any): any {
-//         console.log(this.name + " << " + value);
-//         if (!value) {
-//             console.log("NotOptional! (deserialize)");
-//         }
-//         return value;
-//     }
-// }

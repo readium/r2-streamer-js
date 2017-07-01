@@ -1,5 +1,7 @@
+import { JsonStringConverter } from "@utils/ta-json-string-converter";
 // https://github.com/edcarroll/ta-json
 import {
+    JsonConverter,
     JsonElementType,
     JsonObject,
     JsonProperty,
@@ -43,8 +45,9 @@ export class Link {
     public MediaOverlays: MediaOverlayNode[];
 
     @JsonProperty("rel")
+    @JsonConverter(JsonStringConverter)
     @JsonElementType(String)
-    public Rel: string | string[];
+    public Rel: string[];
 
     public AddRels(rels: string[]) {
         rels.forEach((rel) => {
@@ -57,37 +60,14 @@ export class Link {
             return;
         }
         if (!this.Rel) {
-            // this.Rel = [];
-            // this.Rel.push(rel);
-
-            this.Rel = rel;
+            this.Rel = [rel];
         } else {
-            if (this.Rel instanceof Array) {
-                this.Rel.push(rel);
-            } else {
-                const otherRel = this.Rel;
-
-                this.Rel = [];
-                this.Rel.push(otherRel);
-                this.Rel.push(rel);
-            }
+            this.Rel.push(rel);
         }
     }
 
     public HasRel(rel: string): boolean {
-
-        if (this.Rel) {
-            if (this.Rel instanceof Array) {
-                if ((this.Rel as string[]).indexOf(rel) >= 0) {
-                    return true;
-                }
-            } else {
-                if ((this.Rel as string) === rel) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return this.Rel && this.Rel.indexOf(rel) >= 0;
     }
 
     @OnDeserialized()
@@ -95,10 +75,6 @@ export class Link {
     private _OnDeserialized() {
         if (!this.Href) {
             console.log("Link.Href is not set!");
-        }
-
-        if (this.Rel && this.Rel instanceof Array && this.Rel.length === 1) {
-            this.Rel = this.Rel[0];
         }
     }
 }

@@ -20,4 +20,8 @@ export class BufferConverter implements IPropertyConverter {
         // }
         return Buffer.from(value as string, this.encoding);
     }
+
+    public collapseArrayWithSingleItem(): boolean {
+        return false;
+    }
 }

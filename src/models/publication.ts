@@ -1,8 +1,10 @@
 import { LCP } from "@parser/epub/lcp";
+import { JsonStringConverter } from "@utils/ta-json-string-converter";
 import { IZip } from "@utils/zip/zip";
 import * as forge from "node-forge";
 // https://github.com/edcarroll/ta-json
 import {
+    JsonConverter,
     JsonElementType,
     JsonObject,
     JsonProperty,
@@ -20,8 +22,9 @@ import { Link } from "./publication-link";
 export class Publication {
 
     @JsonProperty("@context")
+    @JsonConverter(JsonStringConverter)
     @JsonElementType(String)
-    public Context: string | string[];
+    public Context: string[];
 
     @JsonProperty("metadata")
     public Metadata: Metadata;
@@ -357,10 +360,6 @@ export class Publication {
         }
         if (!this.Spine) {
             console.log("Publication.Spine is not set!");
-        }
-
-        if (this.Context && this.Context instanceof Array && this.Context.length === 1) {
-            this.Context = this.Context[0];
         }
     }
 }

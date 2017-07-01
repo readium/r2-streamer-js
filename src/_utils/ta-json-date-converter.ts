@@ -8,4 +8,8 @@ export class JsonDateConverter implements IPropertyConverter {
     public deserialize(value: JsonValue): Date {
         return new Date(value as string);
     }
+
+    public collapseArrayWithSingleItem(): boolean {
+        return false;
+    }
 }
