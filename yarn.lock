@@ -97,9 +97,9 @@
   version "0.6.9"
   resolved "https://registry.yarnpkg.com/@types/node-forge/-/node-forge-0.6.9.tgz#38e0e00de8e6f3ff0bb1f4cddcad43e7b580733a"
 
-"@types/node@*", "@types/node@^6.0.55":
-  version "6.0.79"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-6.0.79.tgz#5efe7d4a6d8c453c7e9eaf55d931f4a22fac5169"
+"@types/node@*":
+  version "8.0.7"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-8.0.7.tgz#fb0ad04b5b6f6eabe0372a32a8f1fbba5c130cae"
 
 "@types/node@^7.0.18":
   version "7.0.33"
@@ -1429,12 +1429,6 @@ esutils@^2.0.2:
 etag@~1.8.0:
   version "1.8.0"
   resolved "https://registry.yarnpkg.com/etag/-/etag-1.8.0.tgz#6f631aef336d6c46362b51764044ce216be3c051"
-
-eval@latest:
-  version "0.1.2"
-  resolved "https://registry.yarnpkg.com/eval/-/eval-0.1.2.tgz#9f7103284c105a66df4030b2b3273165837013da"
-  dependencies:
-    require-like ">= 0.1.1"
 
 execa@^0.4.0:
   version "0.4.0"
@@ -3404,7 +3398,7 @@ redent@^1.0.0:
     indent-string "^2.1.0"
     strip-indent "^1.0.1"
 
-reflect-metadata@^0.1.9, reflect-metadata@latest:
+reflect-metadata@latest:
   version "0.1.10"
   resolved "https://registry.yarnpkg.com/reflect-metadata/-/reflect-metadata-0.1.10.tgz#b4f83704416acad89988c9b15635d47e03b9344a"
 
@@ -3549,10 +3543,6 @@ request@~2.40.0:
 require-directory@^2.1.1:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/require-directory/-/require-directory-2.1.1.tgz#8c64ad5fd30dab1c976e2344ffe7f792a6a6df42"
-
-"require-like@>= 0.1.1":
-  version "0.1.2"
-  resolved "https://registry.yarnpkg.com/require-like/-/require-like-0.1.2.tgz#ad6f30c13becd797010c468afa775c0c0a6b47fa"
 
 require-main-filename@^1.0.1:
   version "1.0.1"
@@ -3911,12 +3901,11 @@ symbol-observable@^1.0.4:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/symbol-observable/-/symbol-observable-1.0.4.tgz#29bf615d4aa7121bdd898b22d4b3f9bc4e2aa03d"
 
-ta-json@latest:
-  version "2.2.4"
-  resolved "https://registry.yarnpkg.com/ta-json/-/ta-json-2.2.4.tgz#3f658873e0d6aa61a20decd42da7c86a6fc64e8a"
+ta-json@danielweck/ta-json#dist:
+  version "2.2.5"
+  resolved "https://codeload.github.com/danielweck/ta-json/tar.gz/4f23957b834d91e5fa0207cb3840a937d4911354"
   dependencies:
-    "@types/node" "^6.0.55"
-    reflect-metadata "^0.1.9"
+    reflect-metadata latest
 
 tar-pack@^3.4.0:
   version "3.4.0"
