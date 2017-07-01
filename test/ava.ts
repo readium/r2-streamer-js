@@ -198,7 +198,7 @@ babelConfigHelper.build(process.cwd(), cacheDir, conf.babel, true)
 
         events.on("stats", () => {
             setImmediate(() => {
-                process.emit("ava-run", {});
+                (process as any).emit("ava-run", {});
             });
         });
 
