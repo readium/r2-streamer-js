@@ -211,7 +211,7 @@ test("JSON SERIALIZE: Metadata.Imprint => Contributor[]", (t) => {
     t.is(json.imprint[1].role, contRole2);
 });
 
-test.failing("JSON SERIALIZE: Metadata.Imprint => Contributor[1]", (t) => {
+test.failing("JSON SERIALIZE: Metadata.Imprint => Contributor[1] collapse-array", (t) => {
 
     const md = new Metadata();
     md.Imprint = [cont1];
@@ -239,22 +239,25 @@ test.failing("JSON SERIALIZE: Metadata.Imprint => Contributor[1]", (t) => {
     t.is(json.imprint.role, contRole1);
 });
 
-test("JSON SERIALIZE: Metadata.Imprint => Contributor", (t) => {
+test("JSON SERIALIZE: Metadata.Imprint => Contributor[1] keep-array", (t) => {
 
     const md = new Metadata();
-    md.Imprint = cont1;
+    md.Imprint = [cont1];
     inspect(md);
 
     const json = TAJSON.serialize(md);
     logJSON(json);
 
-    checkType_Object(t, json.imprint);
+    checkType_Array(t, json.imprint);
+    t.is(json.imprint.length, 1);
 
-    checkType_String(t, json.imprint.name);
-    t.is(json.imprint.name, contName1);
+    checkType_Object(t, json.imprint[0]);
 
-    checkType_String(t, json.imprint.role);
-    t.is(json.imprint.role, contRole1);
+    checkType_String(t, json.imprint[0].name);
+    t.is(json.imprint[0].name, contName1);
+
+    checkType_String(t, json.imprint[0].role);
+    t.is(json.imprint[0].role, contRole1);
 });
 
 test("JSON DESERIALIZE: Metadata.Imprint => Contributor[]", (t) => {
@@ -267,23 +270,23 @@ test("JSON DESERIALIZE: Metadata.Imprint => Contributor[]", (t) => {
     inspect(md);
 
     checkType_Array(t, md.Imprint);
-    t.is((md.Imprint as Contributor[]).length, 2);
+    t.is(md.Imprint.length, 2);
 
-    checkType(t, (md.Imprint as Contributor[])[0], Contributor);
+    checkType(t, md.Imprint[0], Contributor);
 
-    checkType_String(t, (md.Imprint as Contributor[])[0].Name);
-    t.is((md.Imprint as Contributor[])[0].Name, contName1);
+    checkType_String(t, md.Imprint[0].Name);
+    t.is(md.Imprint[0].Name, contName1);
 
-    checkType_String(t, (md.Imprint as Contributor[])[0].Role);
-    t.is((md.Imprint as Contributor[])[0].Role, contRole1);
+    checkType_String(t, md.Imprint[0].Role);
+    t.is(md.Imprint[0].Role, contRole1);
 
-    checkType(t, (md.Imprint as Contributor[])[1], Contributor);
+    checkType(t, md.Imprint[1], Contributor);
 
-    checkType_String(t, (md.Imprint as Contributor[])[1].Name);
-    t.is((md.Imprint as Contributor[])[1].Name, contName2);
+    checkType_String(t, md.Imprint[1].Name);
+    t.is(md.Imprint[1].Name, contName2);
 
-    checkType_String(t, (md.Imprint as Contributor[])[1].Role);
-    t.is((md.Imprint as Contributor[])[1].Role, contRole2);
+    checkType_String(t, md.Imprint[1].Role);
+    t.is(md.Imprint[1].Role, contRole2);
 });
 
 test("JSON DESERIALIZE: Metadata.Imprint => Contributor[1]", (t) => {
@@ -295,31 +298,37 @@ test("JSON DESERIALIZE: Metadata.Imprint => Contributor[1]", (t) => {
     const md: Metadata = TAJSON.deserialize<Metadata>(json, Metadata);
     inspect(md);
 
-    checkType(t, md.Imprint, Contributor);
+    checkType_Array(t, md.Imprint);
+    t.is(md.Imprint.length, 1);
 
-    checkType_String(t, (md.Imprint as Contributor).Name);
-    t.is((md.Imprint as Contributor).Name, contName1);
+    checkType(t, md.Imprint[0], Contributor);
 
-    checkType_String(t, (md.Imprint as Contributor).Role);
-    t.is((md.Imprint as Contributor).Role, contRole1);
+    checkType_String(t, md.Imprint[0].Name);
+    t.is(md.Imprint[0].Name, contName1);
+
+    checkType_String(t, md.Imprint[0].Role);
+    t.is(md.Imprint[0].Role, contRole1);
 });
 
 test("JSON DESERIALIZE: Metadata.Imprint => Contributor", (t) => {
 
     const json: any = {};
-    json.imprint = { name: contName1, role: contRole1 };
+    json.imprint = { name: contName2, role: contRole2 };
     logJSON(json);
 
     const md: Metadata = TAJSON.deserialize<Metadata>(json, Metadata);
     inspect(md);
 
-    checkType(t, md.Imprint, Contributor);
+    checkType_Array(t, md.Imprint);
+    t.is(md.Imprint.length, 1);
 
-    checkType_String(t, (md.Imprint as Contributor).Name);
-    t.is((md.Imprint as Contributor).Name, contName1);
+    checkType(t, md.Imprint[0], Contributor);
 
-    checkType_String(t, (md.Imprint as Contributor).Role);
-    t.is((md.Imprint as Contributor).Role, contRole1);
+    checkType_String(t, md.Imprint[0].Name);
+    t.is(md.Imprint[0].Name, contName2);
+
+    checkType_String(t, md.Imprint[0].Role);
+    t.is(md.Imprint[0].Role, contRole2);
 });
 
 test("JSON DESERIALIZE: Metadata.Imprint => ContributorSTR[]", (t) => {
@@ -332,17 +341,17 @@ test("JSON DESERIALIZE: Metadata.Imprint => ContributorSTR[]", (t) => {
     inspect(md);
 
     checkType_Array(t, md.Imprint);
-    t.is((md.Imprint as Contributor[]).length, 2);
+    t.is(md.Imprint.length, 2);
 
-    checkType(t, (md.Imprint as Contributor[])[0], Contributor);
+    checkType(t, md.Imprint[0], Contributor);
 
-    checkType_String(t, (md.Imprint as Contributor[])[0].Name);
-    t.is((md.Imprint as Contributor[])[0].Name, contName1);
+    checkType_String(t, md.Imprint[0].Name);
+    t.is(md.Imprint[0].Name, contName1);
 
-    checkType(t, (md.Imprint as Contributor[])[1], Contributor);
+    checkType(t, md.Imprint[1], Contributor);
 
-    checkType_String(t, (md.Imprint as Contributor[])[1].Name);
-    t.is((md.Imprint as Contributor[])[1].Name, contName2);
+    checkType_String(t, md.Imprint[1].Name);
+    t.is(md.Imprint[1].Name, contName2);
 });
 
 test("JSON DESERIALIZE: Metadata.Imprint => ContributorSTR[1]", (t) => {
@@ -354,26 +363,34 @@ test("JSON DESERIALIZE: Metadata.Imprint => ContributorSTR[1]", (t) => {
     const md: Metadata = TAJSON.deserialize<Metadata>(json, Metadata);
     inspect(md);
 
-    checkType(t, md.Imprint, Contributor);
+    checkType_Array(t, md.Imprint);
+    t.is(md.Imprint.length, 1);
 
-    checkType_String(t, (md.Imprint as Contributor).Name);
-    t.is((md.Imprint as Contributor).Name, contName1);
+    checkType(t, md.Imprint[0], Contributor);
+
+    checkType_String(t, md.Imprint[0].Name);
+    t.is(md.Imprint[0].Name, contName1);
 });
 
 test("JSON DESERIALIZE: Metadata.Imprint => ContributorSTR", (t) => {
 
     const json: any = {};
-    json.imprint = contName1;
+    json.imprint = contName2;
     logJSON(json);
 
     const md: Metadata = TAJSON.deserialize<Metadata>(json, Metadata);
     inspect(md);
 
-    checkType(t, md.Imprint, Contributor);
+    checkType_Array(t, md.Imprint);
+    t.is(md.Imprint.length, 1);
 
-    checkType_String(t, (md.Imprint as Contributor).Name);
-    t.is((md.Imprint as Contributor).Name, contName1);
+    checkType(t, md.Imprint[0], Contributor);
+
+    checkType_String(t, md.Imprint[0].Name);
+    t.is(md.Imprint[0].Name, contName2);
 });
+
+// ======
 
 test("JSON DESERIALIZE: Metadata.Publisher => ContributorSTR", (t) => {
 
@@ -384,10 +401,36 @@ test("JSON DESERIALIZE: Metadata.Publisher => ContributorSTR", (t) => {
     const md: Metadata = TAJSON.deserialize<Metadata>(json, Metadata);
     inspect(md);
 
+    checkType_Array(t, md.Publisher);
     t.is(md.Publisher.length, 1);
+
+    checkType(t, md.Publisher[0], Contributor);
 
     checkType_String(t, md.Publisher[0].Name);
     t.is(md.Publisher[0].Name, contName2);
+});
+
+test("JSON DESERIALIZE: Metadata.Publisher => ContributorSTR[]", (t) => {
+
+    const json: any = {};
+    json.publisher = [contName1, contName2];
+    logJSON(json);
+
+    const md: Metadata = TAJSON.deserialize<Metadata>(json, Metadata);
+    inspect(md);
+
+    checkType_Array(t, md.Publisher);
+    t.is(md.Publisher.length, 2);
+
+    checkType(t, md.Publisher[0], Contributor);
+
+    checkType_String(t, md.Publisher[0].Name);
+    t.is(md.Publisher[0].Name, contName1);
+
+    checkType(t, md.Publisher[1], Contributor);
+
+    checkType_String(t, md.Publisher[1].Name);
+    t.is(md.Publisher[1].Name, contName2);
 });
 
 // ==========================
@@ -418,7 +461,7 @@ test("JSON SERIALIZE: Publication.Context => string[]", (t) => {
     t.is(json["@context"][1], contextStr2);
 });
 
-test.failing("JSON SERIALIZE: Publication.Context => string[1]", (t) => {
+test.failing("JSON SERIALIZE: Publication.Context => string[1] collapse-array", (t) => {
 
     const pub = new Publication();
     pub.Context = [contextStr1];
@@ -439,6 +482,22 @@ test.failing("JSON SERIALIZE: Publication.Context => string[1]", (t) => {
 
     checkType_String(t, json["@context"]);
     t.is(json["@context"], contextStr1);
+});
+
+test("JSON SERIALIZE: Publication.Context => string[1] keep-array", (t) => {
+
+    const pub = new Publication();
+    pub.Context = [contextStr1];
+    inspect(pub);
+
+    const json = TAJSON.serialize(pub);
+    logJSON(json);
+
+    checkType_Array(t, json["@context"]);
+    t.is(json["@context"].length, 1);
+
+    checkType_String(t, json["@context"][0]);
+    t.is(json["@context"][0], contextStr1);
 });
 
 test("JSON SERIALIZE: Publication.Context => string", (t) => {
@@ -522,7 +581,7 @@ test("JSON SERIALIZE: OPDSFeed.Context => string[]", (t) => {
     t.is(json["@context"][1], contextStr2);
 });
 
-test.failing("JSON SERIALIZE: OPDSFeed.Context => string[1]", (t) => {
+test.failing("JSON SERIALIZE: OPDSFeed.Context => string[1] collapse-array", (t) => {
 
     const pub = new OPDSFeed();
     pub.Context = [contextStr1];
@@ -543,6 +602,22 @@ test.failing("JSON SERIALIZE: OPDSFeed.Context => string[1]", (t) => {
 
     checkType_String(t, json["@context"]);
     t.is(json["@context"], contextStr1);
+});
+
+test("JSON SERIALIZE: OPDSFeed.Context => string[1] keep-array", (t) => {
+
+    const pub = new OPDSFeed();
+    pub.Context = [contextStr1];
+    inspect(pub);
+
+    const json = TAJSON.serialize(pub);
+    logJSON(json);
+
+    checkType_Array(t, json["@context"]);
+    t.is(json["@context"].length, 1);
+
+    checkType_String(t, json["@context"][0]);
+    t.is(json["@context"][0], contextStr1);
 });
 
 test("JSON SERIALIZE: OPDSFeed.Context => string", (t) => {

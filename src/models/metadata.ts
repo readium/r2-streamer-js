@@ -81,14 +81,11 @@ export class Metadata {
 
     @JsonProperty("publisher")
     @JsonElementType(Contributor)
-    // @JsonConverter(JsonContributorConverter)
     public Publisher: Contributor[];
 
     @JsonProperty("imprint")
     @JsonElementType(Contributor)
-    // @JsonType(Contributor)
-    // @JsonConverter(JsonContributorConverter)
-    public Imprint: Contributor | Contributor[];
+    public Imprint: Contributor[];
 
     @JsonProperty("language")
     @JsonElementType(String)
@@ -138,10 +135,6 @@ export class Metadata {
         }
         if (!this.Identifier) {
             console.log("Metadata.Identifier is not set!");
-        }
-
-        if (this.Imprint && this.Imprint instanceof Array && this.Imprint.length === 1) {
-            this.Imprint = this.Imprint[0];
         }
     }
 }
