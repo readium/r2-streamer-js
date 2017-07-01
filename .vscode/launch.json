@@ -61,7 +61,9 @@
         "--verbose",
         "--fail-fast",
         "--serial",
-        "${workspaceRoot}/dist/es8-es2017/test/test.js"
+        "${workspaceRoot}/dist/es8-es2017/test/test.js",
+        "${workspaceRoot}/dist/es8-es2017/test/test-JSON.js",
+        "${workspaceRoot}/dist/es8-es2017/test/test-JSON-XML-Date.js"
       ],
       "env": {
         "DEBUG": "r2:*",
@@ -88,7 +90,8 @@
         "--fail-fast",
         "--serial",
         "${workspaceRoot}/dist/es8-es2017/test/test.js",
-        "${workspaceRoot}/dist/es8-es2017/test/test-JSON.js"
+        "${workspaceRoot}/dist/es8-es2017/test/test-JSON.js",
+        "${workspaceRoot}/dist/es8-es2017/test/test-JSON-XML-Date.js"
       ],
       "env": {
         "DEBUG": "r2:*",
