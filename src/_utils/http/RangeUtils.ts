@@ -1,6 +1,28 @@
 export interface IRange { begin: number; end: number; }
 
-export function parseRangeHeader(rangeHeader: string): IRange[] {
+export function parseRangeHeader(rangeHeader: undefined | string | string[]): IRange[] {
+    const ranges: IRange[] = [];
+
+    if (!rangeHeader) {
+        return ranges;
+    }
+
+    let rHeader: string[];
+    if (rangeHeader instanceof Array) {
+        rHeader = rangeHeader as string[];
+    } else { // typeof rangeHeader === "string"
+        rHeader = [rangeHeader] as string[];
+    }
+
+    rHeader.forEach((rh) => {
+        const arr = parseRangeHeader_(rh);
+        ranges.concat(arr);
+    });
+
+    return ranges;
+}
+
+function parseRangeHeader_(rangeHeader: string): IRange[] {
     const ranges: IRange[] = [];
     const iEqual = rangeHeader.indexOf("=");
     if (iEqual <= 0) {
