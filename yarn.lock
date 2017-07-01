@@ -3903,7 +3903,7 @@ symbol-observable@^1.0.4:
 
 ta-json@danielweck/ta-json#dist:
   version "2.2.5"
-  resolved "https://codeload.github.com/danielweck/ta-json/tar.gz/4f23957b834d91e5fa0207cb3840a937d4911354"
+  resolved "https://codeload.github.com/danielweck/ta-json/tar.gz/11a0e1da14e074532a02a6f775f3169ef37b7483"
   dependencies:
     reflect-metadata latest
 
