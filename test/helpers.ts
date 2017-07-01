@@ -28,6 +28,13 @@ export function logJSON(json: any) {
 
 // ==========================
 
+export function checkDate(t: TestContext, d1: Date, d2: Date) {
+    t.true(d1.getTime() === d2.getTime());
+    t.true(d1.toString() === d2.toString());
+    t.true(+d1 === +d2);
+    t.true(d1 >= d2 && d1 <= d2);
+}
+
 // import { FunctionType } from "@utils/xml-js-mapper";
 // tslint:disable-next-line:ban-types
 export function checkType(t: TestContext, obj: any, clazz: Function) {
