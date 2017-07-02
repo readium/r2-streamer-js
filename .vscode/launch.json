@@ -65,6 +65,7 @@
         "${workspaceRoot}/dist/es8-es2017/test/test-JSON-Rel.js",
         "${workspaceRoot}/dist/es8-es2017/test/test-JSON-Title.js",
         "${workspaceRoot}/dist/es8-es2017/test/test-JSON-Contributor.js",
+        "${workspaceRoot}/dist/es8-es2017/test/test-JSON-Collection.js",
         "${workspaceRoot}/dist/es8-es2017/test/test-JSON-Context.js",
         "${workspaceRoot}/dist/es8-es2017/test/test-JSON-XML-Date.js"
       ],
@@ -96,6 +97,7 @@
         "${workspaceRoot}/dist/es8-es2017/test/test-JSON-Rel.js",
         "${workspaceRoot}/dist/es8-es2017/test/test-JSON-Title.js",
         "${workspaceRoot}/dist/es8-es2017/test/test-JSON-Contributor.js",
+        "${workspaceRoot}/dist/es8-es2017/test/test-JSON-Collection.js",
         "${workspaceRoot}/dist/es8-es2017/test/test-JSON-Context.js",
         "${workspaceRoot}/dist/es8-es2017/test/test-JSON-XML-Date.js"
       ],
