@@ -98,6 +98,7 @@ const pathMappingsKeys = Object.keys(pathMappings);
                     // console.log(`2 == ${regex2Match[0]} (${regex2Match[1]})`);
 
                     let replacement = path.relative(path.dirname(filePath), path.join(dirPath, path.relative(process.cwd(), path.join(pathMappings[pathMappingsKey], regex2Match[1]))));
+                    replacement = replacement.replace(/\\/g, "/");
                     if (replacement[0] !== ".") {
                         replacement = "./" + replacement;
                     }
