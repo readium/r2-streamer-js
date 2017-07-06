@@ -64,6 +64,7 @@
     "slugify": "latest",
     "ta-json": "danielweck/ta-json#dist",
     "tmp": "latest",
+    "tslib": "latest",
     "unzipper": "latest",
     "xmldom": "latest",
     "xpath": "latest",
