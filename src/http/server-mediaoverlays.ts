@@ -104,8 +104,8 @@ export function serverMediaOverlays(server: Server, routerPathBase64: express.Ro
                 return rootUrl + "/" + href;
             }
 
-            function absolutizeURLs(jsonObj: any) {
-                traverseJsonObjects(jsonObj,
+            function absolutizeURLs(jsonObject: any) {
+                traverseJsonObjects(jsonObject,
                     (obj) => {
                         if (obj.text && typeof obj.text === "string"
                             && !isHTTP(obj.text)) {

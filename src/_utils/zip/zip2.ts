@@ -62,6 +62,10 @@ export class Zip2 extends Zip {
 
     private static async loadPromiseHTTP(filePath: string): Promise<IZip> {
 
+        // No response streaming! :(
+        // https://github.com/request/request-promise/issues/90
+        const needsStreamingResponse = true;
+
         return new Promise<IZip>(async (resolve, reject) => {
 
             const failure = (err: any) => {
@@ -156,9 +160,6 @@ export class Zip2 extends Zip {
                             });
                     };
 
-                    // No response streaming! :(
-                    // https://github.com/request/request-promise/issues/90
-                    const needsStreamingResponse = true;
                     if (needsStreamingResponse) {
                         request.get({
                             headers: {},
@@ -231,9 +232,6 @@ export class Zip2 extends Zip {
                     });
             };
 
-            // No response streaming! :(
-            // https://github.com/request/request-promise/issues/90
-            const needsStreamingResponse = true;
             if (needsStreamingResponse) {
                 request.get({
                     headers: {},
