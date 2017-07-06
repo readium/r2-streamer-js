@@ -1,6 +1,16 @@
 {
+  "languageServiceEnabled": true,
   "compileOnSave": false,
   "compilerOptions": {
+    "plugins": [
+      {
+        "name": "tslint-language-service",
+        "alwaysShowRuleFailuresAsWarnings": false,
+        "ignoreDefinitionFiles": true,
+        "configFile": "./tslint.json",
+        "disableNoUnusedVariableRule": true
+      }
+    ],
     "rootDir": "../",
     "rootDirs": [
       "../src/",
@@ -50,7 +60,7 @@
     "checkJs": false,
     "stripInternal": false,
     "suppressExcessPropertyErrors": false,
-    "suppressImplicitAnyIndexErrors":false,
+    "suppressImplicitAnyIndexErrors": false,
     "charset": "utf8",
     "downlevelIteration": false,
     "emitBOM": false,
