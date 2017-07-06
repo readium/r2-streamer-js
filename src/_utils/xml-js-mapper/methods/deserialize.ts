@@ -4,7 +4,7 @@ import { getTypedInheritanceChain, objectDefinitions } from "../classes/object-d
 import { PropertyDefinition } from "../classes/property-definition";
 import { propertyConverters } from "../converters/converter";
 import { IDynamicObject, IParseOptions } from "../types";
-import { FunctionType, IXPathSelectorItem, IXmlNamespaces } from "../types";
+import { FunctionType, IXPathSelectorItem } from "../types";
 
 export function deserialize(
     objectInstance: Node,
