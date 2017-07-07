@@ -1561,8 +1561,8 @@ file-type@^5.2.0:
   resolved "https://registry.yarnpkg.com/file-type/-/file-type-5.2.0.tgz#2ddbea7c73ffe36368dfae49dc338c058c2b8ad6"
 
 filehound@latest:
-  version "1.16.1"
-  resolved "https://registry.yarnpkg.com/filehound/-/filehound-1.16.1.tgz#15dd5c0f9c90dc3b8a2b9af758fbfd4e0d710696"
+  version "1.16.2"
+  resolved "https://registry.yarnpkg.com/filehound/-/filehound-1.16.2.tgz#e72aefa5587723e2e299075d147e8b6b578c73d0"
   dependencies:
     bluebird "^3.4.1"
     file-js "0.3.0"
