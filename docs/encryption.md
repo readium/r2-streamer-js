@@ -14,12 +14,12 @@ The special URL syntax is `http://domain.com/pub/*-{LCP_PASS}-*{PUB_ID}/` where 
 
 Concrete example with URLs that do *not* provide the LCP pass (note that the cover image is in fact *not* encrypted):
 
-https://readium2.herokuapp.com/pub/L2FwcC93YXN0ZWxhbmQtb3RmLW9iZl9MQ1BfZGFuLmVwdWI%3D/manifest.json/show/all
+https://readium2.herokuapp.com/pub/L2FwcC9taXNjL2VwdWJzL3dhc3RlbGFuZC1vdGYtb2JmX0xDUF9kYW4uZXB1Yg%3D%3D/manifest.json/show/all
 
 Note how the navigation document itself is not encrypted either, but try clicking on navigation links, and see how this fails:
 
-https://readium2.herokuapp.com/pub/L2FwcC93YXN0ZWxhbmQtb3RmLW9iZl9MQ1BfZGFuLmVwdWI%3D/EPUB/wasteland-nav.xhtml
+https://readium2.herokuapp.com/pub/L2FwcC9taXNjL2VwdWJzL3dhc3RlbGFuZC1vdGYtb2JmX0xDUF9kYW4uZXB1Yg%3D%3D/EPUB/wasteland-nav.xhtml
 
 Now let's provide the LCP pass (note how the CSS styles now appear, as they are in fact encrypted):
 
-https://readium2.herokuapp.com/pub/*-ZWM0ZjJkYmIzYjE0MDA5NTU1MGM5YWZiYmI2OWI1ZDZmZDllODE0YjlkYTgyZmFkMGIzNGU5ZmNiZTU2ZjFjYg==-*L2FwcC93YXN0ZWxhbmQtb3RmLW9iZl9MQ1BfZGFuLmVwdWI%3D/EPUB/wasteland-nav.xhtml
+https://readium2.herokuapp.com/pub/*-ZWM0ZjJkYmIzYjE0MDA5NTU1MGM5YWZiYmI2OWI1ZDZmZDllODE0YjlkYTgyZmFkMGIzNGU5ZmNiZTU2ZjFjYg%3D%3D-*L2FwcC9taXNjL2VwdWJzL3dhc3RlbGFuZC1vdGYtb2JmX0xDUF9kYW4uZXB1Yg%3D%3D/EPUB/wasteland-nav.xhtml
