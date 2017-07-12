@@ -54,6 +54,7 @@ function createElectronBrowserWindow() {
 
     if (session.defaultSession) {
         session.defaultSession.clearStorageData({
+            origin: "*",
             quotas: [
                 "temporary",
                 "persistent",
