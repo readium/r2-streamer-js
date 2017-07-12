@@ -120,6 +120,9 @@ export class Metadata {
     @JsonProperty("belongs_to")
     public BelongsTo: BelongsTo;
 
+    @JsonProperty("duration")
+    public Duration: number;
+
     // public OtherMetadata: IMeta[];
 
     @OnDeserialized()
