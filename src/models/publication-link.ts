@@ -35,6 +35,9 @@ export class Link {
     @JsonProperty("duration")
     public Duration: number;
 
+    @JsonProperty("bitrate")
+    public Bitrate: number;
+
     @JsonProperty("templated")
     public Templated: boolean;
 
