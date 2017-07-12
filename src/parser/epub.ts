@@ -102,6 +102,7 @@ export async function EpubParsePromise(filePath: string): Promise<Publication> {
     const publication = new Publication();
     publication.Context = ["http://readium.org/webpub/default.jsonld"];
     publication.Metadata = new Metadata();
+    publication.Metadata.RDFType = "http://schema.org/Book";
     publication.Metadata.Modified = moment(Date.now()).toDate();
 
     publication.AddToInternal("filename", path.basename(filePath));
@@ -298,9 +299,10 @@ export async function EpubParsePromise(filePath: string): Promise<Publication> {
 
     if (opf.Spine && opf.Spine.PageProgression) {
         publication.Metadata.Direction = opf.Spine.PageProgression;
-    } else {
-        publication.Metadata.Direction = "default";
     }
+    // else {
+    //     publication.Metadata.Direction = "default";
+    // }
 
     if (isEpub3OrMore(rootfile, opf)) {
         findContributorInMeta(publication, rootfile, opf);
