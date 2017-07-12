@@ -358,8 +358,5 @@ export class Publication {
         if (!this.Links) {
             console.log("Publication.Links is not set!");
         }
-        if (!this.Spine) {
-            console.log("Publication.Spine is not set!");
-        }
     }
 }
