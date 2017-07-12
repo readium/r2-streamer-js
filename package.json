@@ -48,6 +48,7 @@
   "dependencies": {
     "css2json": "latest",
     "debug": "latest",
+    "electron": "latest",
     "express": "latest",
     "filehound": "latest",
     "image-size": "latest",
@@ -72,7 +73,6 @@
   },
   "devDependencies": {
     "@types/debug": "latest",
-    "@types/electron": "latest",
     "@types/express": "latest",
     "@types/image-size": "latest",
     "@types/mime-types": "latest",
