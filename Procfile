@@ -1,1 +1,1 @@
-web: ls dist && node dist/es8-es2017/src/server.js ./misc/epubs
+web: DEBUG=r2:* node ./dist/es8-es2017/src/http/server-cli.js ./misc/epubs
