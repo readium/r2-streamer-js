@@ -50,74 +50,74 @@ tsconfigCompilerOptionsPaths.forEach((tsconfigCompilerOptionsPath) => {
 const pathMappingsKeys = Object.keys(pathMappings);
 // console.log(pathMappings);
 
-(async () => {
+filehound.create()
+    .depth(0)
+    .paths("./dist/") // relative to process.cwd(), not __dirname
+    .directory()
+    .find().then((dirPaths) => {
 
-    const dirPaths = await filehound.create()
-        .depth(0)
-        .paths("./dist/") // relative to process.cwd(), not __dirname
-        .directory()
-        .find();
-    for (dirPath of dirPaths) {
-        // console.log(`DIST TARGET: ${dirPath}`);
+        for (dirPath of dirPaths) {
+            // console.log(`DIST TARGET: ${dirPath}`);
 
-        const filePaths = await filehound.create()
-            .paths(dirPath) // relative to process.cwd(), not __dirname
-            .ext([".js", ".ts"])
-            .find();
-        dirPath = fs.realpathSync(dirPath);
-        filePaths.forEach((filePath) => {
+            filehound.create()
+                .paths(dirPath) // relative to process.cwd(), not __dirname
+                .ext([".js", ".ts"])
+                .find().then((filePaths) => {
 
-            filePath = fs.realpathSync(filePath);
+                    const dirPath_ = fs.realpathSync(dirPath);
+                    filePaths.forEach((filePath) => {
 
-            // relative to process.cwd(), not __dirname
-            let code = fs.readFileSync(filePath, "utf8");
+                        filePath = fs.realpathSync(filePath);
 
-            const isTypeScript = filePath.endsWith(".ts");
+                        // relative to process.cwd(), not __dirname
+                        let code = fs.readFileSync(filePath, "utf8");
 
-            const regex1 = isTypeScript ?
-                /from[\s]*('|")(.+)('|")/g :
-                /require[\s]*\([\s]*('|")(.+)('|")[\s]*\)/g;
-            let regex1Match = regex1.exec(code);
-            let firstMatch = true;
-            while (regex1Match) {
-                // console.log(`1 == ${regex1Match[0]} (${regex1Match[2]})`);
+                        const isTypeScript = filePath.endsWith(".ts");
 
-                pathMappingsKeys.forEach((pathMappingsKey) => {
+                        const regex1 = isTypeScript ?
+                            /from[\s]*('|")(.+)('|")/g :
+                            /require[\s]*\([\s]*('|")(.+)('|")[\s]*\)/g;
+                        let regex1Match = regex1.exec(code);
+                        let firstMatch = true;
+                        while (regex1Match) {
+                            // console.log(`1 == ${regex1Match[0]} (${regex1Match[2]})`);
 
-                    const regex2 = new RegExp(pathMappingsKey, "g");
-                    let regex2Match = regex2.exec(regex1Match[2]);
-                    if (!regex2Match) {
-                        return; // continue
-                    }
+                            pathMappingsKeys.forEach((pathMappingsKey) => {
 
-                    if (firstMatch) {
-                        // console.log(filePath);
-                        firstMatch = false;
-                    }
+                                const regex2 = new RegExp(pathMappingsKey, "g");
+                                let regex2Match = regex2.exec(regex1Match[2]);
+                                if (!regex2Match) {
+                                    return; // continue
+                                }
 
-                    // console.log(`2 == ${regex2Match[0]} (${regex2Match[1]})`);
+                                if (firstMatch) {
+                                    // console.log(filePath);
+                                    firstMatch = false;
+                                }
 
-                    let replacement = path.relative(path.dirname(filePath), path.join(dirPath, path.relative(process.cwd(), path.join(pathMappings[pathMappingsKey], regex2Match[1]))));
-                    replacement = replacement.replace(/\\/g, "/");
-                    if (replacement[0] !== ".") {
-                        replacement = "./" + replacement;
-                    }
+                                // console.log(`2 == ${regex2Match[0]} (${regex2Match[1]})`);
 
-                    // console.log(`${regex1Match[2]} ==> ${replacement}`);
+                                let replacement = path.relative(path.dirname(filePath), path.join(dirPath_, path.relative(process.cwd(), path.join(pathMappings[pathMappingsKey], regex2Match[1]))));
+                                replacement = replacement.replace(/\\/g, "/");
+                                if (replacement[0] !== ".") {
+                                    replacement = "./" + replacement;
+                                }
 
-                    code = code.replace(regex1Match[0],
-                        (isTypeScript ? "from " : "require(")
-                        + regex1Match[1] + replacement + regex1Match[3]
-                        + (isTypeScript ? "" : ")")
-                    );
+                                // console.log(`${regex1Match[2]} ==> ${replacement}`);
+
+                                code = code.replace(regex1Match[0],
+                                    (isTypeScript ? "from " : "require(")
+                                    + regex1Match[1] + replacement + regex1Match[3]
+                                    + (isTypeScript ? "" : ")")
+                                );
+                            });
+
+                            regex1Match = regex1.exec(code); // loop
+                        }
+
+                        // relative to process.cwd(), not __dirname
+                        fs.writeFileSync(filePath, code, "utf8");
+                    });
                 });
-
-                regex1Match = regex1.exec(code); // loop
-            }
-
-            // relative to process.cwd(), not __dirname
-            fs.writeFileSync(filePath, code, "utf8");
-        });
-    }
-
-})();
+        }
+    });
