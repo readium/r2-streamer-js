@@ -6,11 +6,17 @@ language: node_js
 node_js:
 - '7'
 before_install:
+#-s -- --version 0.27.5
 - 'pwd && ls -als'
+- 'curl -o- -L https://yarnpkg.com/install.sh | bash'
+- 'export PATH="$HOME/.yarn/bin:$PATH"'
+cache:
+  yarn: true
 install:
 - 'pwd && ls -als'
 before_script:
 - 'pwd && ls -als'
+- 'yarn --version'
 - 'yarn install'
 script:
 - 'yarn run build:es8-es2017'
