@@ -1,6 +1,6 @@
 import * as xpath from "xpath";
 
-import { getTypedInheritanceChain, objectDefinitions } from "../classes/object-definition";
+import { ObjectDefinition, getTypedInheritanceChain, objectDefinitions } from "../classes/object-definition";
 import { PropertyDefinition } from "../classes/property-definition";
 import { propertyConverters } from "../converters/converter";
 import { IDynamicObject, IParseOptions } from "../types";
@@ -34,7 +34,9 @@ function deserializeRootObject(
 
     const output = Object.create(objectType2.prototype);
 
-    const definitions = [...superTypes.reverse(), objectType2].map((t) => objectDefinitions.get(t));
+    const definitions = [...superTypes.reverse(), objectType2]
+        .map((t) => objectDefinitions.get(t))
+        .filter((t) => !!t) as ObjectDefinition[];
 
     definitions.forEach((d) => {
         if (!d) {

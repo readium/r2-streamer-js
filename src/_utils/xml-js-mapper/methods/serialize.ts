@@ -4,7 +4,8 @@
 
 // import { FunctionType, IDynamicObject, XmlValue } from "../types";
 
-// import { getInheritanceChain, getTypedInheritanceChain, objectDefinitions } from "../classes/object-definition";
+// import { getInheritanceChain, getTypedInheritanceChain, objectDefinitions, ObjectDefinition }
+// from "../classes/object-definition";
 
 // export function serialize(value: IDynamicObject | IDynamicObject[], objectType?: FunctionType): XmlValue {
 //     if (value.constructor === Array) {
@@ -23,7 +24,8 @@
 //         return objectInstance;
 //     }
 
-//     const definitions = inheritanceChain.map((t) => objectDefinitions.get(t));
+//     const definitions = inheritanceChain.map((t) => objectDefinitions.get(t))
+// .filter((t) => !!t) as ObjectDefinition[];
 
 //     const output: IDynamicObject = {};
 
