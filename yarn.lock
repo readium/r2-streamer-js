@@ -1842,8 +1842,8 @@ gulp-gitignore@^0.1.0:
     starts-with "^1.0.2"
 
 gulp-reporter@^2.2.1:
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/gulp-reporter/-/gulp-reporter-2.2.1.tgz#6d02d7ed3bee5c48d8536c0f7e6ae81956345255"
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/gulp-reporter/-/gulp-reporter-2.3.0.tgz#91469bc7d853e7bb33c09cbe04b3825280b09c55"
   dependencies:
     ansi-escapes "^2.0.0"
     buffered-spawn "^3.3.2"
