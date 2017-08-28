@@ -232,7 +232,9 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
 
                 if (req.params.lcpPass64) {
                     const lcpPass = new Buffer(req.params.lcpPass64, "base64").toString("utf8");
-                    publication.AddToInternal("lcp_content_key", lcpPass);
+                    publication.AddToInternal("lcp_user_pass", lcpPass);
+                } else {
+                    publication.AddToInternal("lcp_user_pass", null);
                 }
 
                 const transformedData = Transformers.try(publication, link, zipData);

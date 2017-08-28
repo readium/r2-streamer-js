@@ -362,6 +362,11 @@ const fillMediaOverlay =
                 continue;
             }
 
+            if (item.Properties && item.Properties.Encrypted) {
+                console.log("ENCRYPTED SMIL MEDIA OVERLAY: " + smilFilePath);
+                continue;
+            }
+
             const mo = new MediaOverlayNode();
             mo.SmilPathInZip = smilFilePath;
 

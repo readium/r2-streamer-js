@@ -179,6 +179,45 @@ export class Server {
                 }
             });
 
+        this.expressApp.get(["/sw.js"],
+            (req: express.Request, res: express.Response) => {
+
+                const swPth = "../../../../src/electron/renderer/service-worker.js";
+                const swFullPath = path.resolve(path.join(__dirname, swPth));
+                if (!fs.existsSync(swFullPath)) {
+
+                    const err = "Missing Service Worker JS! ";
+                    debug(err + swFullPath);
+                    res.status(500).send("<html><body><p>Internal Server Error</p><p>"
+                        + err + "</p></body></html>");
+                    return;
+                }
+
+                const swJS = fs.readFileSync(swFullPath, { encoding: "utf8" });
+                // debug(swJS);
+
+                // this.setResponseCORS(res);
+                res.set("Content-Type", "text/javascript; charset=utf-8");
+
+                const checkSum = crypto.createHash("sha256");
+                checkSum.update(swJS);
+                const hash = checkSum.digest("hex");
+
+                const match = req.header("If-None-Match");
+                if (match === hash) {
+                    debug("service-worker.js cache");
+                    res.status(304); // StatusNotModified
+                    res.end();
+                    return;
+                }
+
+                res.setHeader("ETag", hash);
+
+                // res.setHeader("Cache-Control", "public,max-age=86400");
+
+                res.status(200).send(swJS);
+            });
+
         serverUrl(this, this.expressApp);
         serverOPDS(this, this.expressApp);
         serverOPDS2(this, this.expressApp);
