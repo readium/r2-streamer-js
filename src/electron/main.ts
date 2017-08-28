@@ -29,15 +29,70 @@ initGlobals();
 
 const debug = debug_("r2:electron:main");
 
-let electronBrowserWindow: Electron.BrowserWindow | undefined;
+let _publicationsServer: Server;
+let _publicationsServerPort: number;
+let _publicationsRootUrl: string;
+let _publicationsFilePaths: string[];
+let _publicationsUrls: string[];
+
+let _electronBrowserWindows: Electron.BrowserWindow[];
 
 // protocol.registerStandardSchemes(["epub", "file"], { secure: true });
 
-function createElectronBrowserWindow() {
+function createElectronBrowserWindow(publicationFilePath: string, publicationUrl: string) {
 
-    debug("createElectronBrowserWindow()");
+    debug("createElectronBrowserWindow() " + publicationFilePath + " : " + publicationUrl);
 
-    // const proto = session.defaultSession.protocol;
+    const electronBrowserWindow = new BrowserWindow({
+        height: 600,
+        webPreferences: {
+            allowRunningInsecureContent: false,
+            contextIsolation: false,
+            devTools: true,
+            nodeIntegration: true,
+            nodeIntegrationInWorker: false,
+            sandbox: false,
+            webSecurity: true,
+            // preload: __dirname + "/" + "preload.js",
+        },
+        width: 800,
+    });
+    if (!_electronBrowserWindows) {
+        _electronBrowserWindows = [];
+    }
+    _electronBrowserWindows.push(electronBrowserWindow);
+
+    electronBrowserWindow.webContents.on("dom-ready", () => {
+        debug("electronBrowserWindow dom-ready " + publicationFilePath + " : " + publicationUrl);
+        electronBrowserWindow.webContents.openDevTools();
+    });
+
+    electronBrowserWindow.on("closed", () => {
+        debug("electronBrowserWindow closed " + publicationFilePath + " : " + publicationUrl);
+        const i = _electronBrowserWindows.indexOf(electronBrowserWindow);
+        if (i < 0) {
+            console.log("electronBrowserWindow NOT FOUND?!");
+            return;
+        }
+        _electronBrowserWindows.splice(i, 1);
+    });
+
+    const urlEncoded = encodeURIComponent_RFC3986(publicationUrl);
+    const fullUrl = `file://${process.cwd()}/src/electron/renderer/index.html?pub=${urlEncoded}`;
+    // `file://${__dirname}/../../../../src/electron/renderer/index.html`
+    debug(fullUrl);
+    electronBrowserWindow.webContents.loadURL(fullUrl);
+}
+
+app.on("window-all-closed", () => {
+    debug("app window-all-closed");
+    if (process.platform !== "darwin") {
+        app.quit();
+    }
+});
+
+app.on("ready", () => {
+    debug("app ready");
 
     // protocol.registerServiceWorkerSchemes(["epub"]);
 
@@ -53,6 +108,9 @@ function createElectronBrowserWindow() {
     //     });
 
     if (session.defaultSession) {
+
+        // const proto = session.defaultSession.protocol;
+
         session.defaultSession.clearStorageData({
             origin: "*",
             quotas: [
@@ -74,44 +132,22 @@ function createElectronBrowserWindow() {
     // tslint:disable-next-line:no-floating-promises
     (async () => {
         const dirPath = fs.realpathSync(path.resolve("./misc/epubs/"));
-        const files: string[] = await filehound.create()
+        _publicationsFilePaths = await filehound.create()
             .paths(dirPath)
             .ext([".epub", ".epub3", ".cbz"])
             .find();
+        debug(_publicationsFilePaths);
 
-        const server = new Server();
-        const pubPaths = server.addPublications(files);
+        _publicationsServer = new Server();
+        const pubPaths = _publicationsServer.addPublications(_publicationsFilePaths);
 
-        const port = await portfinder.getPortPromise();
-        const url = server.start(port);
+        _publicationsServerPort = await portfinder.getPortPromise();
+        _publicationsRootUrl = _publicationsServer.start(_publicationsServerPort);
 
-        const pubManifestUrls = pubPaths.map((pubPath) => {
-            return `${url}${pubPath}`;
+        _publicationsUrls = pubPaths.map((pubPath) => {
+            return `${_publicationsRootUrl}${pubPath}`;
         });
-        debug(files);
-        debug(pubManifestUrls);
-
-        electronBrowserWindow = new BrowserWindow({
-            height: 600,
-            webPreferences: {
-                allowRunningInsecureContent: false,
-                contextIsolation: false,
-                devTools: true,
-                nodeIntegration: true,
-                nodeIntegrationInWorker: false,
-                sandbox: false,
-                webSecurity: true,
-                // preload: __dirname + "/" + "preload.js",
-            },
-            width: 800,
-        });
-
-        electronBrowserWindow.webContents.on("dom-ready", () => {
-            debug("electronBrowserWindow dom-ready");
-            if (electronBrowserWindow) {
-                electronBrowserWindow.webContents.openDevTools();
-            }
-        });
+        debug(_publicationsUrls);
 
         const menuTemplate = [
             {
@@ -126,59 +162,29 @@ function createElectronBrowserWindow() {
             },
         ];
 
-        pubManifestUrls.forEach((pubManifestUrl, n) => {
-            console.log("MENU ITEM: " + files[n] + " : " + pubManifestUrl);
+        _publicationsUrls.forEach((pubManifestUrl, n) => {
+            const file = _publicationsFilePaths[n];
+            console.log("MENU ITEM: " + file + " : " + pubManifestUrl);
 
             menuTemplate[0].submenu.push({
                 click: () => {
-                    if (electronBrowserWindow) {
-                        const urlEncoded = encodeURIComponent_RFC3986(pubManifestUrl);
-                        const fullUrl = `file://${process.cwd()}/src/electron/renderer/index.html?pub=${urlEncoded}`;
-                        // `file://${__dirname}/../../../../src/electron/renderer/index.html`
-                        debug(fullUrl);
-                        electronBrowserWindow.webContents.loadURL(fullUrl);
-                    }
+                    createElectronBrowserWindow(file, pubManifestUrl);
                 },
-                label: files[n], // + " : " + pubManifestUrl,
+                label: file, // + " : " + pubManifestUrl,
             } as any);
         });
         const menu = Menu.buildFromTemplate(menuTemplate);
         Menu.setApplicationMenu(menu);
 
-        // menu.items.forEach((menuItem) => {
-        //     console.log(menuItem.label);
-        // });
-
-        // pubManifestUrls.forEach((pubManifestUrl) => {
-        //     console.log("MENU ITEM: " + pubManifestUrl);
-        //     menu.append(new MenuItem({
-        //         label: pubManifestUrl,
-        //     }));
-        // });
-
-        electronBrowserWindow.on("closed", () => {
-            debug("electronBrowserWindow closed");
-            electronBrowserWindow = undefined;
-            server.stop();
-        });
     })();
-}
-
-app.on("window-all-closed", () => {
-    debug("app window-all-closed");
-    if (process.platform !== "darwin") {
-        app.quit();
-    }
-});
-
-app.on("ready", () => {
-    debug("app ready");
-    createElectronBrowserWindow();
 });
 
 app.on("activate", () => {
     debug("app activate");
-    if (!electronBrowserWindow) {
-        createElectronBrowserWindow();
-    }
+});
+
+app.on("quit", () => {
+    debug("app quit");
+
+    _publicationsServer.stop();
 });

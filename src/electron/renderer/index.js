@@ -28,6 +28,9 @@ const getURLQueryParams = function () {
 
 window.addEventListener('DOMContentLoaded', () => {
 
+    const queryParams = getURLQueryParams();
+    const publicationJsonUrl = queryParams["pub"];
+
     const webview1 = document.createElement("webview");
     webview1.addEventListener('dom-ready', () => {
         webview1.openDevTools();
@@ -38,13 +41,22 @@ window.addEventListener('DOMContentLoaded', () => {
         "nodeIntegration=0, nodeIntegrationInWorker=0, sandbox=0, contextIsolation=0, webSecurity=1, allowRunningInsecureContent=0");
     // webview1.setAttribute("preload", "./preload.js");
     // webview.setAttribute("src", "dummy");
+    document.body.appendChild(webview1);
 
     const webview2 = document.createElement("webview");
+    // webview2.addEventListener('did-start-loading', () => {
+    // });
+    // webview2.addEventListener('did-stop-loading', () => {
+    // });
+    // webview2.addEventListener('did-finish-load', () => {
+    // });
+
     webview2.addEventListener('dom-ready', () => {
+
         webview2.openDevTools();
+        // const wc = webview2.getWebContents();
 
         setTimeout(function () {
-
             document.body.setAttribute("style", "background-color: silver; margin: 0; padding: 0;");
 
             const h1 = document.querySelector("html > body > h1");
@@ -84,24 +96,19 @@ window.addEventListener('DOMContentLoaded', () => {
                     console.log(e);
                 }
             })();
-        }, 4000);
+        }, 5000);
     });
     webview2.setAttribute("id", "webview2");
-    webview2.setAttribute("style", "width: 100%; height: 400px; box-sizing: border-box; border: 2px solid black");
+    webview2.setAttribute("style", "display: inline-flex; visibilityx: hidden; width: 100%; height: 50px; box-sizing: border-box; border: 2px solid magenta");
     webview2.setAttribute("webpreferences",
         "nodeIntegration=0, nodeIntegrationInWorker=0, sandbox=0, contextIsolation=0, webSecurity=1, allowRunningInsecureContent=0");
     webview2.setAttribute("preload", "./preload.js");
-    // webview.setAttribute("src", "dummy");
-
-    document.body.appendChild(webview1);
     document.body.appendChild(webview2);
-
-    const queryParams = getURLQueryParams();
-    const publicationJsonUrl = queryParams["pub"];
 
     // const swBootUrl = publicationJsonUrl + "/show/metadata";
     // const swBootUrl = publicationJsonUrl;
     const swBootUrl = publicationJsonUrl + "/../";
     console.log(swBootUrl);
+    webview2StageTwo = false;
     webview2.setAttribute("src", swBootUrl);
 });

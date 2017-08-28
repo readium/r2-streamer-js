@@ -29,12 +29,15 @@ self.addEventListener('fetch', function (event) {
     //     mode = "cors";
     //   }
 
-    if (event.request.url.indexOf("/pub/*-") >= 0) {
-        console.log("LCP PASS ALREADY SET??");
+    if (event.request.url.indexOf("/pub/*-") >= 0
+        || event.request.url.endsWith("manifest.json")
+        || event.request.url.endsWith("/")) {
         const req = event.request.clone();
         var fetchPromise = fetch(req);
         event.respondWith(fetchPromise);
     } else {
+
+        console.log("re-fetching with LCP user pass ...");
         const newUrl = event.request.url.replace("/pub/", "/pub/*-ZWM0ZjJkYmIzYjE0MDA5NTU1MGM5YWZiYmI2OWI1ZDZmZDllODE0YjlkYTgyZmFkMGIzNGU5ZmNiZTU2ZjFjYg==-*");
         var fetchPromise = fetch(newUrl);
         event.respondWith(fetchPromise);
