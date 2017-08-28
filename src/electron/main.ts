@@ -16,7 +16,7 @@ import * as path from "path";
 
 import { encodeURIComponent_RFC3986 } from "@utils/http/UrlUtils";
 import * as debug_ from "debug";
-import { BrowserWindow, Menu, MenuItem, app, session } from "electron";
+import { BrowserWindow, Menu, app, session } from "electron";
 import * as filehound from "filehound";
 import * as portfinder from "portfinder";
 
