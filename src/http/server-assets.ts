@@ -5,6 +5,7 @@ import { PublicationParsePromise } from "@parser/publication-parser";
 import { Transformers } from "@transform/transformer";
 import { parseRangeHeader } from "@utils/http/RangeUtils";
 import { streamToBufferPromise } from "@utils/stream/BufferUtils";
+import { CounterPassThroughStream } from "@utils/stream/CounterPassThroughStream";
 import { IStreamAndLength, IZip } from "@utils/zip/zip";
 import * as debug_ from "debug";
 import * as express from "express";
@@ -15,6 +16,8 @@ import { Server } from "./server";
 const debug = debug_("r2:server:assets");
 
 export function serverAssets(server: Server, routerPathBase64: express.Router) {
+
+    let streamCounter = 0;
 
     const routerAssets = express.Router({ strict: false });
     // routerAssets.use(morgan("combined"));
@@ -151,6 +154,9 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
             // }
 
             const isEncrypted = link && link.Properties && link.Properties.Encrypted;
+            const isObfuscatedFont = isEncrypted && link &&
+                (link.Properties.Encrypted.Algorithm === "http://ns.adobe.com/pdf/enc#RC"
+                    || link.Properties.Encrypted.Algorithm === "http://www.idpf.org/2008/embedding");
 
             const isPartialByteRangeRequest = req.headers &&
                 req.headers.range; // && req.headers.range !== "bytes=0-";
@@ -166,7 +172,9 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
             let partialByteBegin = -1; // inclusive boundaries
             let partialByteEnd = -1;
             if (isPartialByteRangeRequest) {
+                debug(req.headers.range);
                 const ranges = parseRangeHeader(req.headers.range);
+                debug(ranges);
 
                 if (ranges && ranges.length) {
                     if (ranges.length > 1) {
@@ -215,7 +223,12 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                 totalByteLength;
 
             let zipData: Buffer | undefined;
-            if (!isHead && (isEncrypted || (isShow && isText))) {
+            if (!isHead
+                && (
+                    (isEncrypted && (isObfuscatedFont || !server.disableDecryption))
+                    || (isShow && isText)
+                )
+            ) {
                 try {
                     zipData = await streamToBufferPromise(zipStream);
                 } catch (err) {
@@ -228,6 +241,7 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
             }
 
             // TODO: isHead for encrypted Content-Length
+            // zipData null when isEncrypted but (!isObfuscatedFont && server.disableDecryption)
             if (zipData && isEncrypted && link) {
 
                 if (req.params.lcpPass64) {
@@ -263,44 +277,119 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                             "</pre></p>")
                         : "<p>BINARY</p>"
                     ) + "</body></html>");
+
+                return;
+            }
+
+            server.setResponseCORS(res);
+            res.setHeader("Cache-Control", "public,max-age=86400");
+
+            if (mediaType) {
+                res.set("Content-Type", mediaType);
+                // res.type(mediaType);
+            }
+
+            res.setHeader("Accept-Ranges", "bytes");
+
+            if (isPartialByteRangeRequest) {
+                // res.setHeader("Connection", "close");
+                // res.setHeader("Transfer-Encoding", "chunked");
+                res.setHeader("Content-Length", `${partialByteLength}`);
+                const rangeHeader = `bytes ${partialByteBegin}-${partialByteEnd}/${totalByteLength}`;
+                debug("+++> " + rangeHeader + " (( " + partialByteLength);
+                res.setHeader("Content-Range", rangeHeader);
+                res.status(206);
             } else {
-                server.setResponseCORS(res);
-                res.setHeader("Cache-Control", "public,max-age=86400");
+                res.setHeader("Content-Length", `${totalByteLength}`);
+                debug("---> " + totalByteLength);
+                res.status(200);
+            }
 
-                if (mediaType) {
-                    res.set("Content-Type", mediaType);
-                    // res.type(mediaType);
-                }
+            if (isHead) {
+                res.end();
+            } else {
+                if (zipData) {
+                    debug("~~~~~~~~~~~~> BUFFER SEND");
+                    res.send(zipData);
 
-                res.setHeader("Accept-Ranges", "bytes");
-
-                if (isPartialByteRangeRequest) {
-                    // res.setHeader("Connection", "close");
-                    // res.setHeader("Transfer-Encoding", "chunked");
-                    res.setHeader("Content-Length", `${partialByteLength}`);
-                    const rangeHeader = `bytes ${partialByteBegin}-${partialByteEnd}/${totalByteLength}`;
-                    // debug("+++>" + rangeHeader);
-                    res.setHeader("Content-Range", rangeHeader);
-                    res.status(206);
+                    // if (isText) {
+                    //     res.send(zipData.toString("utf8"));
+                    // } else {
+                    //     res.end(zipData, "binary");
+                    // }
                 } else {
-                    res.setHeader("Content-Length", `${totalByteLength}`);
-                    res.status(200);
-                }
+                    debug("===> STREAM PIPE");
 
-                if (isHead) {
-                    res.end();
-                } else {
-                    if (zipData) {
-                        res.send(zipData);
+                    const counterStream = new CounterPassThroughStream(++streamCounter);
 
-                        // if (isText) {
-                        //     res.send(zipData.toString("utf8"));
-                        // } else {
-                        //     res.end(zipData, "binary");
-                        // }
-                    } else {
-                        zipStream.pipe(res);
-                    }
+                    zipStream
+                        .on("finish", () => {
+                            debug("ZIP FINISH " + counterStream.id);
+                        })
+                        .on("end", () => {
+                            debug("ZIP END " + counterStream.id);
+                        })
+                        .on("close", () => {
+                            debug("ZIP CLOSE " + counterStream.id);
+                        })
+                        .on("error", () => {
+                            debug("ZIP ERROR " + counterStream.id);
+                        })
+                        // .on("drain", () => {
+                        //     debug("ZIP DRAIN " + counterStream.id);
+                        // })
+                        .pipe(counterStream)
+                        // .on("progress", function () {
+                        //     debug("CounterPassThroughStream PROGRESS: " +
+                        //         (this as CounterPassThroughStream).id +
+                        //         " -- " + (this as CounterPassThroughStream).bytesReceived);
+                        // })
+                        .on("end", function () {
+                            debug("CounterPassThroughStream END: " +
+                                (this as CounterPassThroughStream).id);
+                        })
+                        .on("close", function () {
+                            debug("CounterPassThroughStream CLOSE: " +
+                                (this as CounterPassThroughStream).id);
+                        })
+                        .once("finish", function () {
+                            debug("CounterPassThroughStream FINISH: " +
+                                (this as CounterPassThroughStream).id +
+                                " -- " + (this as CounterPassThroughStream).bytesReceived);
+                        })
+                        .on("error", function () {
+                            debug("CounterPassThroughStream ERROR: " +
+                                (this as CounterPassThroughStream).id);
+                        })
+                        // .on("drain", function () {
+                        //     debug("CounterPassThroughStream DRAIN: " +
+                        //         (this as CounterPassThroughStream).id);
+                        // })
+                        .pipe(res)
+                        .on("finish", () => {
+                            debug("RES FINISH " + counterStream.id);
+                        })
+                        .on("end", () => {
+                            debug("RES END " + counterStream.id);
+                        })
+                        .on("close", () => {
+                            debug("RES CLOSE " + counterStream.id);
+
+                            res.end();
+                            counterStream.unpipe(res);
+
+                            counterStream.end();
+                            zipStream.unpipe(counterStream);
+
+                            // zipStream.close();
+                        })
+                        .on("error", () => {
+                            debug("RES ERROR " + counterStream.id);
+                        })
+                        // .on("drain", () => {
+                        //     debug("RES DRAIN " + counterStream.id);
+                        // })
+                        ;
                 }
             }
         });

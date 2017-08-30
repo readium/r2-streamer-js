@@ -1,7 +1,7 @@
 export interface IRange { begin: number; end: number; }
 
 export function parseRangeHeader(rangeHeader: undefined | string | string[]): IRange[] {
-    const ranges: IRange[] = [];
+    let ranges: IRange[] = [];
 
     if (!rangeHeader) {
         return ranges;
@@ -16,7 +16,7 @@ export function parseRangeHeader(rangeHeader: undefined | string | string[]): IR
 
     rHeader.forEach((rh) => {
         const arr = parseRangeHeader_(rh);
-        ranges.concat(arr);
+        ranges = ranges.concat(arr);
     });
 
     return ranges;

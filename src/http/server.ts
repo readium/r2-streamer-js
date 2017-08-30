@@ -54,10 +54,12 @@ const jsonStyle = `
 
 export interface IServerOptions {
     disableReaders: boolean;
+    disableDecryption: boolean; /* excludes obfuscated fonts */
 }
 
 export class Server {
     public readonly disableReaders: boolean;
+    public readonly disableDecryption: boolean;
 
     public readonly lcpBeginToken = "*-";
     public readonly lcpEndToken = "-*";
@@ -77,6 +79,7 @@ export class Server {
     constructor(options?: IServerOptions) {
 
         this.disableReaders = options ? options.disableReaders : false;
+        this.disableDecryption = options ? options.disableDecryption : false;
 
         this.publications = [];
         this.pathPublicationMap = {};
