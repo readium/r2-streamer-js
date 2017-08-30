@@ -344,20 +344,20 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                         //         (this as CounterPassThroughStream).id +
                         //         " -- " + (this as CounterPassThroughStream).bytesReceived);
                         // })
-                        .on("end", function () {
+                        .on("end", function() {
                             debug("CounterPassThroughStream END: " +
                                 (this as CounterPassThroughStream).id);
                         })
-                        .on("close", function () {
+                        .on("close", function() {
                             debug("CounterPassThroughStream CLOSE: " +
                                 (this as CounterPassThroughStream).id);
                         })
-                        .once("finish", function () {
+                        .once("finish", function() {
                             debug("CounterPassThroughStream FINISH: " +
                                 (this as CounterPassThroughStream).id +
                                 " -- " + (this as CounterPassThroughStream).bytesReceived);
                         })
-                        .on("error", function () {
+                        .on("error", function() {
                             debug("CounterPassThroughStream ERROR: " +
                                 (this as CounterPassThroughStream).id);
                         })
