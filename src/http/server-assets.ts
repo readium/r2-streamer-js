@@ -171,6 +171,7 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
 
             let partialByteBegin = 0; // inclusive boundaries
             let partialByteEnd = -1;
+            let partialByteLength = 0;
             if (isPartialByteRangeRequest) {
                 debug(req.headers.range);
                 const ranges = parseRangeHeader(req.headers.range);
@@ -193,10 +194,10 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                 }
             }
 
-            if (partialByteBegin === 0 && partialByteEnd < 0) {
-                // TODO: build partial HTTP 206 for "0-" range?
-                // (instead of streaming the entire resource data into the response)
-            }
+            // if (partialByteBegin === 0 && partialByteEnd < 0) {
+            //     // TODO: build partial HTTP 206 for "0-" range?
+            //     // (instead of streaming the entire resource data into the response)
+            // }
 
             // debug(`${pathInZip} >> ${partialByteBegin}-${partialByteEnd}`);
             let zipStream_: IStreamAndLength | undefined;
@@ -213,14 +214,6 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
             let zipStream = zipStream_.stream;
             let totalByteLength = zipStream_.length;
             // debug(`${totalByteLength} total stream bytes`);
-
-            if (partialByteEnd < 0) {
-                partialByteEnd = totalByteLength - 1;
-            }
-
-            const partialByteLength = isPartialByteRangeRequest ?
-                partialByteEnd - partialByteBegin + 1 :
-                totalByteLength;
 
             // let zipData: Buffer | undefined;
             // if (!isHead
@@ -294,6 +287,14 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                     return;
                 }
             }
+
+            if (partialByteEnd < 0) {
+                partialByteEnd = totalByteLength - 1;
+            }
+
+            partialByteLength = isPartialByteRangeRequest ?
+                partialByteEnd - partialByteBegin + 1 :
+                totalByteLength;
 
             if (isShow) {
                 let zipData: Buffer | undefined;
