@@ -222,24 +222,24 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                 partialByteEnd - partialByteBegin + 1 :
                 totalByteLength;
 
-            let zipData: Buffer | undefined;
-            if (!isHead
-                && (
-                    // (isEncrypted && (isObfuscatedFont || !server.disableDecryption))
-                    // ||
-                    (isShow && isText)
-                )
-            ) {
-                try {
-                    zipData = await streamToBufferPromise(zipStream);
-                } catch (err) {
-                    debug(err);
-                    res.status(500).send("<html><body><p>Internal Server Error</p><p>"
-                        + err + "</p></body></html>");
-                    return;
-                }
-                // debug(`${zipData.length} buffer bytes`);
-            }
+            // let zipData: Buffer | undefined;
+            // if (!isHead
+            //     && (
+            //         // (isEncrypted && (isObfuscatedFont || !server.disableDecryption))
+            //         // ||
+            //         (isShow && isText)
+            //     )
+            // ) {
+            //     try {
+            //         zipData = await streamToBufferPromise(zipStream);
+            //     } catch (err) {
+            //         debug(err);
+            //         res.status(500).send("<html><body><p>Internal Server Error</p><p>"
+            //             + err + "</p></body></html>");
+            //         return;
+            //     }
+            //     // debug(`${zipData.length} buffer bytes`);
+            // }
 
             // TODO: isHead for encrypted Content-Length
             // zipData null when isEncrypted but (!isObfuscatedFont && server.disableDecryption)
@@ -256,35 +256,35 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                 }
 
                 let decryptFail = false;
-                if (zipData) {
-                    let transformedBuffer: Buffer | undefined;
-                    try {
-                        transformedBuffer = await Transformers.tryBuffer(publication, link, zipData);
-                    } catch (err) {
-                        debug(err);
-                    }
-                    if (transformedBuffer) {
-                        zipData = transformedBuffer;
-                        totalByteLength = zipData.length;
-                    } else {
-                        decryptFail = true;
-                    }
-                } else {
-                    let transformedStream: IStreamAndLength | undefined;
-                    try {
-                        transformedStream = await Transformers.tryStream(
-                            publication, link,
-                            zipStream, totalByteLength, partialByteBegin, partialByteEnd);
-                    } catch (err) {
-                        debug(err);
-                    }
-                    if (transformedStream) {
-                        zipStream = transformedStream.stream;
-                        totalByteLength = transformedStream.length;
-                    } else {
-                        decryptFail = true;
-                    }
+                // if (zipData) {
+                //     let transformedBuffer: Buffer | undefined;
+                //     try {
+                //         transformedBuffer = await Transformers.tryBuffer(publication, link, zipData);
+                //     } catch (err) {
+                //         debug(err);
+                //     }
+                //     if (transformedBuffer) {
+                //         zipData = transformedBuffer;
+                //         totalByteLength = zipData.length;
+                //     } else {
+                //         decryptFail = true;
+                //     }
+                // } else {
+                let transformedStream: IStreamAndLength | undefined;
+                try {
+                    transformedStream = await Transformers.tryStream(
+                        publication, link,
+                        zipStream, totalByteLength, partialByteBegin, partialByteEnd);
+                } catch (err) {
+                    debug(err);
                 }
+                if (transformedStream) {
+                    zipStream = transformedStream.stream;
+                    totalByteLength = transformedStream.length;
+                } else {
+                    decryptFail = true;
+                }
+                // }
 
                 if (decryptFail) {
                     const err = "Encryption scheme not supported.";
@@ -296,6 +296,15 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
             }
 
             if (isShow) {
+                let zipData: Buffer | undefined;
+                try {
+                    zipData = await streamToBufferPromise(zipStream);
+                } catch (err) {
+                    debug(err);
+                    res.status(500).send("<html><body><p>Internal Server Error</p><p>"
+                        + err + "</p></body></html>");
+                    return;
+                }
                 res.status(200).send("<html><body>" +
                     "<h1>" + path.basename(pathBase64Str) + "</h1>" +
                     "<h2>" + mediaType + "</h2>" +
@@ -340,89 +349,89 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
             if (isHead) {
                 res.end();
             } else {
-                if (zipData) {
-                    debug("~~~~~~~~~~~~> BUFFER SEND");
-                    res.send(zipData);
+                // if (zipData) {
+                //     debug("~~~~~~~~~~~~> BUFFER SEND");
+                //     res.send(zipData);
 
-                    // if (isText) {
-                    //     res.send(zipData.toString("utf8"));
-                    // } else {
-                    //     res.end(zipData, "binary");
-                    // }
-                } else {
-                    debug("===> STREAM PIPE");
+                //     // if (isText) {
+                //     //     res.send(zipData.toString("utf8"));
+                //     // } else {
+                //     //     res.end(zipData, "binary");
+                //     // }
+                // } else {
+                debug("===> STREAM PIPE");
 
-                    const counterStream = new CounterPassThroughStream(++streamCounter);
+                const counterStream = new CounterPassThroughStream(++streamCounter);
 
-                    zipStream
-                        .on("finish", () => {
-                            debug("ZIP FINISH " + counterStream.id);
-                        })
-                        .on("end", () => {
-                            debug("ZIP END " + counterStream.id);
-                        })
-                        .on("close", () => {
-                            debug("ZIP CLOSE " + counterStream.id);
-                        })
-                        .on("error", () => {
-                            debug("ZIP ERROR " + counterStream.id);
-                        })
-                        // .on("drain", () => {
-                        //     debug("ZIP DRAIN " + counterStream.id);
-                        // })
-                        .pipe(counterStream)
-                        .on("progress", function f() {
-                            debug("CounterPassThroughStream PROGRESS: " +
-                                (this as CounterPassThroughStream).id +
-                                " -- " + (this as CounterPassThroughStream).bytesReceived);
-                        })
-                        .on("end", function f() {
-                            debug("CounterPassThroughStream END: " +
-                                (this as CounterPassThroughStream).id);
-                        })
-                        .on("close", function f() {
-                            debug("CounterPassThroughStream CLOSE: " +
-                                (this as CounterPassThroughStream).id);
-                        })
-                        .once("finish", function f() {
-                            debug("CounterPassThroughStream FINISH: " +
-                                (this as CounterPassThroughStream).id +
-                                " -- " + (this as CounterPassThroughStream).bytesReceived);
-                        })
-                        .on("error", function f() {
-                            debug("CounterPassThroughStream ERROR: " +
-                                (this as CounterPassThroughStream).id);
-                        })
-                        // .on("drain", function () {
-                        //     debug("CounterPassThroughStream DRAIN: " +
-                        //         (this as CounterPassThroughStream).id);
-                        // })
-                        .pipe(res)
-                        .on("finish", () => {
-                            debug("RES FINISH " + counterStream.id);
-                        })
-                        .on("end", () => {
-                            debug("RES END " + counterStream.id);
-                        })
-                        .on("close", () => {
-                            debug("RES CLOSE " + counterStream.id);
+                zipStream
+                    .on("finish", () => {
+                        debug("ZIP FINISH " + counterStream.id);
+                    })
+                    .on("end", () => {
+                        debug("ZIP END " + counterStream.id);
+                    })
+                    .on("close", () => {
+                        debug("ZIP CLOSE " + counterStream.id);
+                    })
+                    .on("error", () => {
+                        debug("ZIP ERROR " + counterStream.id);
+                    })
+                    // .on("drain", () => {
+                    //     debug("ZIP DRAIN " + counterStream.id);
+                    // })
+                    .pipe(counterStream)
+                    .on("progress", function f() {
+                        debug("CounterPassThroughStream PROGRESS: " +
+                            (this as CounterPassThroughStream).id +
+                            " -- " + (this as CounterPassThroughStream).bytesReceived);
+                    })
+                    .on("end", function f() {
+                        debug("CounterPassThroughStream END: " +
+                            (this as CounterPassThroughStream).id);
+                    })
+                    .on("close", function f() {
+                        debug("CounterPassThroughStream CLOSE: " +
+                            (this as CounterPassThroughStream).id);
+                    })
+                    .once("finish", function f() {
+                        debug("CounterPassThroughStream FINISH: " +
+                            (this as CounterPassThroughStream).id +
+                            " -- " + (this as CounterPassThroughStream).bytesReceived);
+                    })
+                    .on("error", function f() {
+                        debug("CounterPassThroughStream ERROR: " +
+                            (this as CounterPassThroughStream).id);
+                    })
+                    // .on("drain", function () {
+                    //     debug("CounterPassThroughStream DRAIN: " +
+                    //         (this as CounterPassThroughStream).id);
+                    // })
+                    .pipe(res)
+                    .on("finish", () => {
+                        debug("RES FINISH " + counterStream.id);
+                    })
+                    .on("end", () => {
+                        debug("RES END " + counterStream.id);
+                    })
+                    .on("close", () => {
+                        debug("RES CLOSE " + counterStream.id);
 
-                            res.end();
-                            counterStream.unpipe(res);
+                        res.end();
+                        counterStream.unpipe(res);
 
-                            counterStream.end();
-                            zipStream.unpipe(counterStream);
+                        counterStream.end();
+                        zipStream.unpipe(counterStream);
 
-                            // zipStream.close();
-                        })
-                        .on("error", () => {
-                            debug("RES ERROR " + counterStream.id);
-                        })
-                        // .on("drain", () => {
-                        //     debug("RES DRAIN " + counterStream.id);
-                        // })
-                        ;
-                }
+                        // zipStream.close();
+                    })
+                    .on("error", () => {
+                        debug("RES ERROR " + counterStream.id);
+                    })
+                    // .on("drain", () => {
+                    //     debug("RES DRAIN " + counterStream.id);
+                    // })
+                    ;
+                // }
             }
         });
 
