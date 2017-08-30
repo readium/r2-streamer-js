@@ -169,7 +169,7 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                 return;
             }
 
-            let partialByteBegin = -1; // inclusive boundaries
+            let partialByteBegin = 0; // inclusive boundaries
             let partialByteEnd = -1;
             if (isPartialByteRangeRequest) {
                 debug(req.headers.range);
@@ -201,7 +201,7 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
             // debug(`${pathInZip} >> ${partialByteBegin}-${partialByteEnd}`);
             let zipStream_: IStreamAndLength | undefined;
             try {
-                zipStream_ = isPartialByteRangeRequest ?
+                zipStream_ = isPartialByteRangeRequest && !isEncrypted ?
                     await zip.entryStreamRangePromise(pathInZip, partialByteBegin, partialByteEnd) :
                     await zip.entryStreamPromise(pathInZip);
             } catch (err) {
@@ -210,8 +210,8 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                     + err + "</p></body></html>");
                 return;
             }
-            const zipStream = zipStream_.stream;
-            const totalByteLength = zipStream_.length;
+            let zipStream = zipStream_.stream;
+            let totalByteLength = zipStream_.length;
             // debug(`${totalByteLength} total stream bytes`);
 
             if (partialByteEnd < 0) {
@@ -225,8 +225,9 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
             let zipData: Buffer | undefined;
             if (!isHead
                 && (
-                    (isEncrypted && (isObfuscatedFont || !server.disableDecryption))
-                    || (isShow && isText)
+                    // (isEncrypted && (isObfuscatedFont || !server.disableDecryption))
+                    // ||
+                    (isShow && isText)
                 )
             ) {
                 try {
@@ -242,7 +243,10 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
 
             // TODO: isHead for encrypted Content-Length
             // zipData null when isEncrypted but (!isObfuscatedFont && server.disableDecryption)
-            if (zipData && isEncrypted && link) {
+            if (// zipData &&
+                // isEncrypted &&
+                (isEncrypted && (isObfuscatedFont || !server.disableDecryption)) &&
+                link) {
 
                 if (req.params.lcpPass64) {
                     const lcpPass = new Buffer(req.params.lcpPass64, "base64").toString("utf8");
@@ -251,10 +255,38 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                     publication.AddToInternal("lcp_user_pass", null);
                 }
 
-                const transformedData = Transformers.try(publication, link, zipData);
-                if (transformedData) {
-                    zipData = transformedData;
+                let decryptFail = false;
+                if (zipData) {
+                    let transformedBuffer: Buffer | undefined;
+                    try {
+                        transformedBuffer = await Transformers.tryBuffer(publication, link, zipData);
+                    } catch (err) {
+                        debug(err);
+                    }
+                    if (transformedBuffer) {
+                        zipData = transformedBuffer;
+                        totalByteLength = zipData.length;
+                    } else {
+                        decryptFail = true;
+                    }
                 } else {
+                    let transformedStream: IStreamAndLength | undefined;
+                    try {
+                        transformedStream = await Transformers.tryStream(
+                            publication, link,
+                            zipStream, totalByteLength, partialByteBegin, partialByteEnd);
+                    } catch (err) {
+                        debug(err);
+                    }
+                    if (transformedStream) {
+                        zipStream = transformedStream.stream;
+                        totalByteLength = transformedStream.length;
+                    } else {
+                        decryptFail = true;
+                    }
+                }
+
+                if (decryptFail) {
                     const err = "Encryption scheme not supported.";
                     debug(err);
                     res.status(500).send("<html><body><p>Internal Server Error</p><p>"
@@ -339,25 +371,25 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                         //     debug("ZIP DRAIN " + counterStream.id);
                         // })
                         .pipe(counterStream)
-                        // .on("progress", function () {
-                        //     debug("CounterPassThroughStream PROGRESS: " +
-                        //         (this as CounterPassThroughStream).id +
-                        //         " -- " + (this as CounterPassThroughStream).bytesReceived);
-                        // })
-                        .on("end", function() {
+                        .on("progress", function f() {
+                            debug("CounterPassThroughStream PROGRESS: " +
+                                (this as CounterPassThroughStream).id +
+                                " -- " + (this as CounterPassThroughStream).bytesReceived);
+                        })
+                        .on("end", function f() {
                             debug("CounterPassThroughStream END: " +
                                 (this as CounterPassThroughStream).id);
                         })
-                        .on("close", function() {
+                        .on("close", function f() {
                             debug("CounterPassThroughStream CLOSE: " +
                                 (this as CounterPassThroughStream).id);
                         })
-                        .once("finish", function() {
+                        .once("finish", function f() {
                             debug("CounterPassThroughStream FINISH: " +
                                 (this as CounterPassThroughStream).id +
                                 " -- " + (this as CounterPassThroughStream).bytesReceived);
                         })
-                        .on("error", function() {
+                        .on("error", function f() {
                             debug("CounterPassThroughStream ERROR: " +
                                 (this as CounterPassThroughStream).id);
                         })

@@ -1,5 +1,6 @@
 import { Publication } from "@models/publication";
 import { Link } from "@models/publication-link";
+import { IStreamAndLength } from "@utils/zip/zip";
 
 import { TransformerLCP } from "./transformer-lcp";
 import { TransformerObfAdobe } from "./transformer-obf-adobe";
@@ -7,7 +8,11 @@ import { TransformerObfIDPF } from "./transformer-obf-idpf";
 
 export interface ITransformer {
     supports(publication: Publication, link: Link): boolean;
-    transform(publication: Publication, link: Link, data: Buffer): Buffer;
+    transformBuffer(publication: Publication, link: Link, data: Buffer): Promise<Buffer>;
+    transformStream(
+        publication: Publication, link: Link,
+        stream: NodeJS.ReadableStream, totalByteLength: number,
+        partialByteBegin: number, partialByteEnd: number): Promise<IStreamAndLength>;
 }
 
 export class Transformers {
@@ -16,8 +21,18 @@ export class Transformers {
         return Transformers._instance;
     }
 
-    public static try(publication: Publication, link: Link, data: Buffer): Buffer | undefined {
-        return Transformers.instance()._try(publication, link, data);
+    public static async tryBuffer(publication: Publication, link: Link, data: Buffer): Promise<Buffer> {
+        return Transformers.instance()._tryBuffer(publication, link, data);
+    }
+
+    public static async tryStream(
+        publication: Publication, link: Link,
+        stream: NodeJS.ReadableStream, totalByteLength: number,
+        partialByteBegin: number, partialByteEnd: number): Promise<IStreamAndLength> {
+        return Transformers.instance()._tryStream(
+            publication, link,
+            stream, totalByteLength,
+            partialByteBegin, partialByteEnd);
     }
 
     private static _instance: Transformers = new Transformers();
@@ -34,13 +49,13 @@ export class Transformers {
         }
     }
 
-    private _try(publication: Publication, link: Link, data: Buffer): Buffer | undefined {
-        let transformedData: Buffer | undefined;
+    private async _tryBuffer(publication: Publication, link: Link, data: Buffer): Promise<Buffer> {
+        let transformedData: Promise<Buffer> | undefined;
         const transformer = this.transformers.find((t) => {
             if (!t.supports(publication, link)) {
                 return false;
             }
-            transformedData = t.transform(publication, link, data);
+            transformedData = t.transformBuffer(publication, link, data);
             if (transformedData) {
                 return true;
             }
@@ -49,7 +64,31 @@ export class Transformers {
         if (transformer && transformedData) {
             return transformedData;
         }
-        return undefined;
+        return Promise.reject("transformers fail (buffer)");
+    }
+
+    private async _tryStream(
+        publication: Publication, link: Link,
+        stream: NodeJS.ReadableStream, totalByteLength: number,
+        partialByteBegin: number, partialByteEnd: number): Promise<IStreamAndLength> {
+        let transformedData: Promise<IStreamAndLength> | undefined;
+        const transformer = this.transformers.find((t) => {
+            if (!t.supports(publication, link)) {
+                return false;
+            }
+            transformedData = t.transformStream(
+                publication, link,
+                stream, totalByteLength,
+                partialByteBegin, partialByteEnd);
+            if (transformedData) {
+                return true;
+            }
+            return false;
+        });
+        if (transformer && transformedData) {
+            return transformedData;
+        }
+        return Promise.reject("transformers fail (stream)");
     }
 }
 

@@ -2,6 +2,8 @@ import * as zlib from "zlib";
 
 import { Publication } from "@models/publication";
 import { Link } from "@models/publication-link";
+import { bufferToStream, streamToBufferPromise } from "@utils/stream/BufferUtils";
+import { IStreamAndLength } from "@utils/zip/zip";
 import * as debug_ from "debug";
 import * as forge from "node-forge";
 
@@ -39,7 +41,24 @@ export class TransformerLCP implements ITransformer {
         return true;
     }
 
-    public transform(_publication: Publication, link: Link, data: Buffer): Buffer {
+    public async transformStream(
+        publication: Publication, link: Link,
+        stream: NodeJS.ReadableStream, _totalByteLength: number,
+        _partialByteBegin: number, _partialByteEnd: number): Promise<IStreamAndLength> {
+
+        const data = await streamToBufferPromise(stream);
+        debug("LCP BEFORE: " + data.length);
+        const buff = await this.transformBuffer(publication, link, data);
+        debug("LCP AFTER: " + buff.length);
+
+        const sal: IStreamAndLength = {
+            length: buff.length,
+            stream: bufferToStream(buff),
+        };
+        return Promise.resolve(sal);
+    }
+
+    public async transformBuffer(_publication: Publication, link: Link, data: Buffer): Promise<Buffer> {
 
         const AES_BLOCK_SIZE = 16;
         const iv = data.slice(0, AES_BLOCK_SIZE).toString("binary");
@@ -63,7 +82,7 @@ export class TransformerLCP implements ITransformer {
             debug(`LENGTH NOT MATCH ${link.Properties.Encrypted.OriginalLength} !== ${transformedData.length}`);
         }
 
-        return transformedData;
+        return Promise.resolve(transformedData);
     }
 
     private UpdateLCP(publication: Publication, lcpPassHash: string): string | undefined {

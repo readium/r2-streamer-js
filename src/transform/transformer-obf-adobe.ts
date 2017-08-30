@@ -1,5 +1,7 @@
 import { Publication } from "@models/publication";
 import { Link } from "@models/publication-link";
+import { bufferToStream, streamToBufferPromise } from "@utils/stream/BufferUtils";
+import { IStreamAndLength } from "@utils/zip/zip";
 
 import { ITransformer } from "./transformer";
 
@@ -8,7 +10,22 @@ export class TransformerObfAdobe implements ITransformer {
         return link.Properties.Encrypted.Algorithm === "http://ns.adobe.com/pdf/enc#RC";
     }
 
-    public transform(publication: Publication, _link: Link, data: Buffer): Buffer {
+    public async transformStream(
+        publication: Publication, link: Link,
+        stream: NodeJS.ReadableStream, _totalByteLength: number,
+        _partialByteBegin: number, _partialByteEnd: number): Promise<IStreamAndLength> {
+
+        const data = await streamToBufferPromise(stream);
+        const buff = await this.transformBuffer(publication, link, data);
+
+        const sal: IStreamAndLength = {
+            length: buff.length,
+            stream: bufferToStream(buff),
+        };
+        return Promise.resolve(sal);
+    }
+
+    public async transformBuffer(publication: Publication, _link: Link, data: Buffer): Promise<Buffer> {
 
         let pubID = publication.Metadata.Identifier;
         pubID = pubID.replace("urn:uuid:", "");
@@ -31,6 +48,6 @@ export class TransformerObfAdobe implements ITransformer {
         }
 
         const zipDataRemainder = data.slice(prefixLength);
-        return Buffer.concat([zipDataPrefix, zipDataRemainder]);
+        return Promise.resolve(Buffer.concat([zipDataPrefix, zipDataRemainder]));
     }
 }
