@@ -13,6 +13,11 @@ export interface ITransformer {
         publication: Publication, link: Link,
         stream: NodeJS.ReadableStream, totalByteLength: number,
         partialByteBegin: number, partialByteEnd: number): Promise<IStreamAndLength>;
+
+    getDecryptedSizeStream(
+        publication: Publication, link: Link,
+        stream: NodeJS.ReadableStream, totalByteLength: number): Promise<number>;
+    getDecryptedSizeBuffer(publication: Publication, link: Link, data: Buffer): Promise<number>;
 }
 
 export class Transformers {

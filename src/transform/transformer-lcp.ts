@@ -3,6 +3,7 @@ import * as zlib from "zlib";
 import { Publication } from "@models/publication";
 import { Link } from "@models/publication-link";
 import { bufferToStream, streamToBufferPromise } from "@utils/stream/BufferUtils";
+import { RangeStream } from "@utils/stream/RangeStream";
 import { IStreamAndLength } from "@utils/zip/zip";
 import * as debug_ from "debug";
 import * as forge from "node-forge";
@@ -10,6 +11,8 @@ import * as forge from "node-forge";
 import { ITransformer } from "./transformer";
 
 const debug = debug_("r2:transformer:lcp");
+
+const AES_BLOCK_SIZE = 16;
 
 export class TransformerLCP implements ITransformer {
     private contentKey: string | undefined;
@@ -41,6 +44,52 @@ export class TransformerLCP implements ITransformer {
         return true;
     }
 
+    public async getDecryptedSizeStream(
+        _publication: Publication, _link: Link,
+        stream: NodeJS.ReadableStream, totalByteLength: number): Promise<number> {
+
+        const twoBlocks = 2 * AES_BLOCK_SIZE;
+        if (totalByteLength < twoBlocks) {
+            return 0;
+        }
+        const readPos = totalByteLength - twoBlocks;
+
+        //     stream.pos(readPos); // TODO: ReadableStream is not SEEKABLE!!
+        //     const buff = stream.read(twoBlocks);
+
+        const rangeStream = new RangeStream(readPos, readPos + twoBlocks - 1, totalByteLength);
+        stream.pipe(rangeStream);
+        let buff: Buffer | undefined;
+        try {
+            buff = await streamToBufferPromise(rangeStream);
+        } catch (err) {
+            return 0;
+        }
+
+        const newBuff = this.innerDecrypt(buff);
+
+        const size = totalByteLength - AES_BLOCK_SIZE - ((AES_BLOCK_SIZE - newBuff.length) % AES_BLOCK_SIZE);
+        return Promise.resolve(size);
+    }
+
+    public async getDecryptedSizeBuffer(_publication: Publication, _link: Link, data: Buffer): Promise<number> {
+
+        const totalByteLength = data.length;
+
+        const twoBlocks = 2 * AES_BLOCK_SIZE;
+        if (totalByteLength < twoBlocks) {
+            return 0;
+        }
+        const readPos = totalByteLength - twoBlocks;
+
+        const buff = data.slice(readPos, readPos + twoBlocks);
+
+        const newBuff = this.innerDecrypt(buff);
+
+        const size = totalByteLength - AES_BLOCK_SIZE - ((AES_BLOCK_SIZE - newBuff.length) % AES_BLOCK_SIZE);
+        return size;
+    }
+
     public async transformStream(
         publication: Publication, link: Link,
         stream: NodeJS.ReadableStream, _totalByteLength: number,
@@ -58,9 +107,8 @@ export class TransformerLCP implements ITransformer {
         return Promise.resolve(sal);
     }
 
-    public async transformBuffer(_publication: Publication, link: Link, data: Buffer): Promise<Buffer> {
+    public innerDecrypt(data: Buffer): Buffer {
 
-        const AES_BLOCK_SIZE = 16;
         const iv = data.slice(0, AES_BLOCK_SIZE).toString("binary");
         const toDecrypt =
             forge.util.createBuffer(data.slice(AES_BLOCK_SIZE).toString("binary"), "binary");
@@ -72,7 +120,17 @@ export class TransformerLCP implements ITransformer {
 
         const decryptedZipData = aesCbcDecipher.output.bytes();
 
-        let transformedData = new Buffer(decryptedZipData, "binary");
+        return new Buffer(decryptedZipData, "binary");
+    }
+
+    public async transformBuffer(_publication: Publication, link: Link, data: Buffer): Promise<Buffer> {
+
+        let transformedData = this.innerDecrypt(data);
+
+        debug("LCP BEFORE (no INFLATE): " + transformedData.length);
+        const l = await this.getDecryptedSizeBuffer(_publication, link, data);
+        debug("LCP AFTER (no INFLATE): " + l);
+
         if (link.Properties.Encrypted.Compression === "deflate") {
             transformedData = zlib.inflateRawSync(transformedData);
         }
@@ -135,7 +193,6 @@ export class TransformerLCP implements ITransformer {
 
                 const encryptedLicenseID = keyCheck;
 
-                const AES_BLOCK_SIZE = 16;
                 const iv = encryptedLicenseID.substring(0, AES_BLOCK_SIZE);
 
                 // console.log("=============== LCP ID");

@@ -10,6 +10,30 @@ export class TransformerObfAdobe implements ITransformer {
         return link.Properties.Encrypted.Algorithm === "http://ns.adobe.com/pdf/enc#RC";
     }
 
+    public async getDecryptedSizeStream(
+        publication: Publication, link: Link,
+        stream: NodeJS.ReadableStream, totalByteLength: number): Promise<number> {
+        let sal: IStreamAndLength | undefined;
+        try {
+            sal = await this.transformStream(publication, link, stream, totalByteLength, 0, 0);
+        } catch (err) {
+            console.log(err);
+            return Promise.reject("WTF?");
+        }
+        return Promise.resolve(sal.length);
+    }
+
+    public async getDecryptedSizeBuffer(publication: Publication, link: Link, data: Buffer): Promise<number> {
+        let buff: Buffer | undefined;
+        try {
+            buff = await this.transformBuffer(publication, link, data);
+        } catch (err) {
+            console.log(err);
+            return Promise.reject("WTF?");
+        }
+        return Promise.resolve(buff.length);
+    }
+
     public async transformStream(
         publication: Publication, link: Link,
         stream: NodeJS.ReadableStream, _totalByteLength: number,
