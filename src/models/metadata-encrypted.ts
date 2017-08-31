@@ -21,4 +21,6 @@ export class Encrypted {
 
     @JsonProperty("original-length")
     public OriginalLength: number;
+
+    public DecryptedLengthBeforeInflate: number = -1;
 }

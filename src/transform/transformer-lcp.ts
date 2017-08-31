@@ -63,6 +63,7 @@ export class TransformerLCP implements ITransformer {
         try {
             buff = await streamToBufferPromise(rangeStream);
         } catch (err) {
+            console.log(err);
             return 0;
         }
 
@@ -96,10 +97,121 @@ export class TransformerLCP implements ITransformer {
         isPartialByteRangeRequest: boolean,
         partialByteBegin: number, partialByteEnd: number): Promise<IStreamAndLength> {
 
+        if (!isPartialByteRangeRequest) {
+            return this.transformStream_(
+                publication, link,
+                stream,
+                isPartialByteRangeRequest,
+                partialByteBegin, partialByteEnd);
+        }
+
         debug("LCP transformStream() RAW STREAM LENGTH: " + stream.length);
-        const l = await this.getDecryptedSizeStream(publication, link, stream);
-        debug("LCP getDecryptedSizeStream(): " + l);
-        stream = await stream.reset();
+
+        let plainTextSize = -1;
+        if (link.Properties.Encrypted.DecryptedLengthBeforeInflate > 0) {
+            plainTextSize = link.Properties.Encrypted.DecryptedLengthBeforeInflate;
+        } else {
+            plainTextSize = await this.getDecryptedSizeStream(publication, link, stream);
+            debug("LCP getDecryptedSizeStream(): " + plainTextSize);
+            stream = await stream.reset();
+            // length cached to avoid resetting the stream to zero-position
+            link.Properties.Encrypted.DecryptedLengthBeforeInflate = plainTextSize;
+        }
+        debug("LCP plainTextSize: " + plainTextSize);
+
+        if (partialByteBegin < 0) {
+            partialByteBegin = 0;
+        }
+
+        if (partialByteEnd < 0) {
+            partialByteEnd = plainTextSize;
+            if (link.Properties.Encrypted.OriginalLength) {
+                partialByteEnd = link.Properties.Encrypted.OriginalLength - 1;
+            }
+        }
+
+        const partialByteLength = partialByteEnd - partialByteBegin;
+
+        // Get offset result offset in the block
+        const blockOffset = partialByteBegin % AES_BLOCK_SIZE;
+        // For beginning of the cipher text, IV used for XOR
+        // For cipher text in the middle, previous block used for XOR
+        const readPosition = partialByteBegin - blockOffset;
+
+        // Count blocks to read
+        // First block for IV or previous block to perform XOR
+        let blocksCount = 1;
+        let bytesInFirstBlock = (AES_BLOCK_SIZE - blockOffset) % AES_BLOCK_SIZE;
+        if (partialByteLength < bytesInFirstBlock) {
+            bytesInFirstBlock = 0;
+        }
+        if (bytesInFirstBlock > 0) {
+            blocksCount++;
+        }
+
+        blocksCount += (partialByteLength - bytesInFirstBlock) / AES_BLOCK_SIZE;
+        if ((partialByteLength - bytesInFirstBlock) % AES_BLOCK_SIZE !== 0) {
+            blocksCount++;
+        }
+
+        // Figure out what block padding scheme to use
+        let padding = false; // NO_PADDING
+        const sizeWithoutPaddedBlock = plainTextSize - (plainTextSize % AES_BLOCK_SIZE);
+        if (partialByteEnd > sizeWithoutPaddedBlock) {
+            padding = true; // W3C_PADDING, also PKCS#7
+        }
+
+        const toRead = blocksCount * AES_BLOCK_SIZE;
+        const rangeStream = new RangeStream(readPosition, readPosition + toRead - 1, stream.length);
+        stream.stream.pipe(rangeStream);
+        let buff: Buffer | undefined;
+        try {
+            buff = await streamToBufferPromise(rangeStream);
+        } catch (err) {
+            console.log(err);
+            return Promise.reject("OUCH!");
+        }
+
+        let newBuff = this.innerDecrypt(buff);
+        if (newBuff.length < partialByteLength) {
+            debug("newBuff.length < partialByteLength");
+        }
+        newBuff = newBuff.slice(blockOffset);
+        const bufferStream = bufferToStream(newBuff);
+
+        const sal: IStreamAndLength = {
+            length: newBuff.length,
+            reset: async () => {
+                const resetedStream = await stream.reset();
+                return this.transformStream(
+                    publication, link,
+                    resetedStream,
+                    isPartialByteRangeRequest,
+                    partialByteBegin, partialByteEnd);
+            },
+            stream: bufferStream,
+        };
+        return Promise.resolve(sal);
+    }
+
+    public async transformStream_(
+        publication: Publication, link: Link,
+        stream: IStreamAndLength,
+        isPartialByteRangeRequest: boolean,
+        partialByteBegin: number, partialByteEnd: number): Promise<IStreamAndLength> {
+
+        debug("LCP transformStream() RAW STREAM LENGTH: " + stream.length);
+
+        let l = -1;
+        if (link.Properties.Encrypted.DecryptedLengthBeforeInflate > 0) {
+            l = link.Properties.Encrypted.DecryptedLengthBeforeInflate;
+        } else {
+            l = await this.getDecryptedSizeStream(publication, link, stream);
+            debug("LCP getDecryptedSizeStream(): " + l);
+            stream = await stream.reset();
+            // length cached to avoid resetting the stream to zero-position
+            link.Properties.Encrypted.DecryptedLengthBeforeInflate = l;
+        }
 
         const data = await streamToBufferPromise(stream.stream);
         debug("LCP transformStream() RAW BUFFER LENGTH after reset: " + stream.length);
