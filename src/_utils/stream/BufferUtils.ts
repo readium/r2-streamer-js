@@ -3,12 +3,13 @@ import { PassThrough } from "stream";
 export function bufferToStream(buffer: Buffer): NodeJS.ReadableStream {
     const stream = new PassThrough();
 
-    // stream.write(buffer);
-    // stream.end();
-
     setTimeout(() => {
+
+        // stream.write(buffer);
+        // stream.end();
+
         // const maxBuffLength = 2048; // 2kB
-        const maxBuffLength = 50 * 1024; // 50kB
+        const maxBuffLength = 100 * 1024; // 100kB
 
         let buff = buffer;
         let remaining = buff.length;
