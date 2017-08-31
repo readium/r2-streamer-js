@@ -11,12 +11,12 @@ export interface ITransformer {
     transformBuffer(publication: Publication, link: Link, data: Buffer): Promise<Buffer>;
     transformStream(
         publication: Publication, link: Link,
-        stream: NodeJS.ReadableStream, totalByteLength: number,
+        stream: IStreamAndLength,
         partialByteBegin: number, partialByteEnd: number): Promise<IStreamAndLength>;
 
     getDecryptedSizeStream(
         publication: Publication, link: Link,
-        stream: NodeJS.ReadableStream, totalByteLength: number): Promise<number>;
+        stream: IStreamAndLength): Promise<number>;
     getDecryptedSizeBuffer(publication: Publication, link: Link, data: Buffer): Promise<number>;
 }
 
@@ -32,11 +32,11 @@ export class Transformers {
 
     public static async tryStream(
         publication: Publication, link: Link,
-        stream: NodeJS.ReadableStream, totalByteLength: number,
+        stream: IStreamAndLength,
         partialByteBegin: number, partialByteEnd: number): Promise<IStreamAndLength> {
         return Transformers.instance()._tryStream(
             publication, link,
-            stream, totalByteLength,
+            stream,
             partialByteBegin, partialByteEnd);
     }
 
@@ -74,7 +74,7 @@ export class Transformers {
 
     private async _tryStream(
         publication: Publication, link: Link,
-        stream: NodeJS.ReadableStream, totalByteLength: number,
+        stream: IStreamAndLength,
         partialByteBegin: number, partialByteEnd: number): Promise<IStreamAndLength> {
         let transformedData: Promise<IStreamAndLength> | undefined;
         const transformer = this.transformers.find((t) => {
@@ -83,7 +83,7 @@ export class Transformers {
             }
             transformedData = t.transformStream(
                 publication, link,
-                stream, totalByteLength,
+                stream,
                 partialByteBegin, partialByteEnd);
             if (transformedData) {
                 return true;

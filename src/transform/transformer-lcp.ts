@@ -46,19 +46,19 @@ export class TransformerLCP implements ITransformer {
 
     public async getDecryptedSizeStream(
         _publication: Publication, _link: Link,
-        stream: NodeJS.ReadableStream, totalByteLength: number): Promise<number> {
+        stream: IStreamAndLength): Promise<number> {
 
         const twoBlocks = 2 * AES_BLOCK_SIZE;
-        if (totalByteLength < twoBlocks) {
+        if (stream.length < twoBlocks) {
             return 0;
         }
-        const readPos = totalByteLength - twoBlocks;
+        const readPos = stream.length - twoBlocks;
 
         //     stream.pos(readPos); // TODO: ReadableStream is not SEEKABLE!!
         //     const buff = stream.read(twoBlocks);
 
-        const rangeStream = new RangeStream(readPos, readPos + twoBlocks - 1, totalByteLength);
-        stream.pipe(rangeStream);
+        const rangeStream = new RangeStream(readPos, readPos + twoBlocks - 1, stream.length);
+        stream.stream.pipe(rangeStream);
         let buff: Buffer | undefined;
         try {
             buff = await streamToBufferPromise(rangeStream);
@@ -68,7 +68,7 @@ export class TransformerLCP implements ITransformer {
 
         const newBuff = this.innerDecrypt(buff);
 
-        const size = totalByteLength - AES_BLOCK_SIZE - ((AES_BLOCK_SIZE - newBuff.length) % AES_BLOCK_SIZE);
+        const size = stream.length - AES_BLOCK_SIZE - ((AES_BLOCK_SIZE - newBuff.length) % AES_BLOCK_SIZE);
         return Promise.resolve(size);
     }
 
@@ -92,16 +92,24 @@ export class TransformerLCP implements ITransformer {
 
     public async transformStream(
         publication: Publication, link: Link,
-        stream: NodeJS.ReadableStream, _totalByteLength: number,
+        stream: IStreamAndLength,
         _partialByteBegin: number, _partialByteEnd: number): Promise<IStreamAndLength> {
 
-        const data = await streamToBufferPromise(stream);
-        debug("LCP BEFORE: " + data.length);
+        debug("LCP transformStream() RAW STREAM LENGTH: " + stream.length);
+        const l = await this.getDecryptedSizeStream(publication, link, stream);
+        debug("LCP getDecryptedSizeStream(): " + l);
+        stream = await stream.reset();
+
+        const data = await streamToBufferPromise(stream.stream);
+        debug("LCP transformStream() RAW BUFFER LENGTH after reset: " + stream.length);
         const buff = await this.transformBuffer(publication, link, data);
-        debug("LCP AFTER: " + buff.length);
+        debug("LCP transformStream() DECRYPTED BUFFER LENGTH: " + buff.length);
 
         const sal: IStreamAndLength = {
             length: buff.length,
+            reset: async () => {
+                return Promise.resolve(sal);
+            },
             stream: bufferToStream(buff),
         };
         return Promise.resolve(sal);
@@ -127,13 +135,16 @@ export class TransformerLCP implements ITransformer {
 
         let transformedData = this.innerDecrypt(data);
 
-        debug("LCP BEFORE (no INFLATE): " + transformedData.length);
+        debug("LCP transformBuffer() decrypted buffer length: " + transformedData.length);
+
         const l = await this.getDecryptedSizeBuffer(_publication, link, data);
-        debug("LCP AFTER (no INFLATE): " + l);
+        debug("LCP transformBuffer() decrypted buffer length CHECK: " + l);
 
         if (link.Properties.Encrypted.Compression === "deflate") {
             transformedData = zlib.inflateRawSync(transformedData);
         }
+
+        debug("LCP transformBuffer() decrypted buffer length after INFLATE: " + transformedData.length);
 
         if (link.Properties.Encrypted.OriginalLength
             && link.Properties.Encrypted.OriginalLength !== transformedData.length) {

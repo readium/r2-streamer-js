@@ -12,10 +12,10 @@ export class TransformerObfAdobe implements ITransformer {
 
     public async getDecryptedSizeStream(
         publication: Publication, link: Link,
-        stream: NodeJS.ReadableStream, totalByteLength: number): Promise<number> {
+        stream: IStreamAndLength): Promise<number> {
         let sal: IStreamAndLength | undefined;
         try {
-            sal = await this.transformStream(publication, link, stream, totalByteLength, 0, 0);
+            sal = await this.transformStream(publication, link, stream, 0, 0);
         } catch (err) {
             console.log(err);
             return Promise.reject("WTF?");
@@ -36,14 +36,17 @@ export class TransformerObfAdobe implements ITransformer {
 
     public async transformStream(
         publication: Publication, link: Link,
-        stream: NodeJS.ReadableStream, _totalByteLength: number,
+        stream: IStreamAndLength,
         _partialByteBegin: number, _partialByteEnd: number): Promise<IStreamAndLength> {
 
-        const data = await streamToBufferPromise(stream);
+        const data = await streamToBufferPromise(stream.stream);
         const buff = await this.transformBuffer(publication, link, data);
 
         const sal: IStreamAndLength = {
             length: buff.length,
+            reset: async () => {
+                return Promise.resolve(sal);
+            },
             stream: bufferToStream(buff),
         };
         return Promise.resolve(sal);

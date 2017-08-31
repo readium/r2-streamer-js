@@ -3,6 +3,7 @@ import { RangeStream } from "../stream/RangeStream";
 export interface IStreamAndLength {
     stream: NodeJS.ReadableStream;
     length: number;
+    reset: () => Promise<IStreamAndLength>;
 }
 
 export interface IZip {
@@ -47,6 +48,9 @@ export abstract class Zip implements IZip {
 
         const sal: IStreamAndLength = {
             length: streamAndLength.length,
+            reset: async () => {
+                return this.entryStreamRangePromise(entryPath, begin, end);
+            },
             stream,
         };
         return sal;

@@ -324,6 +324,9 @@ export class Zip2 extends Zip {
                 }
                 const streamAndLength: IStreamAndLength = {
                     length: entry.uncompressedSize as number,
+                    reset: async () => {
+                        return this.entryStreamPromise(entryPath);
+                    },
                     stream,
                 };
                 resolve(streamAndLength);

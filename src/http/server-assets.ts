@@ -161,13 +161,13 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
             const isPartialByteRangeRequest = req.headers &&
                 req.headers.range; // && req.headers.range !== "bytes=0-";
 
-            if (isEncrypted && isPartialByteRangeRequest) {
-                const err = "Encrypted video/audio not supported (HTTP 206 partial request byte range)";
-                debug(err);
-                res.status(500).send("<html><body><p>Internal Server Error</p><p>"
-                    + err + "</p></body></html>");
-                return;
-            }
+            // if (isEncrypted && isPartialByteRangeRequest) {
+            //     const err = "Encrypted video/audio not supported (HTTP 206 partial request byte range)";
+            //     debug(err);
+            //     res.status(500).send("<html><body><p>Internal Server Error</p><p>"
+            //         + err + "</p></body></html>");
+            //     return;
+            // }
 
             let partialByteBegin = 0; // inclusive boundaries
             let partialByteEnd = -1;
@@ -194,11 +194,6 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                 }
             }
 
-            // if (partialByteBegin === 0 && partialByteEnd < 0) {
-            //     // TODO: build partial HTTP 206 for "0-" range?
-            //     // (instead of streaming the entire resource data into the response)
-            // }
-
             // debug(`${pathInZip} >> ${partialByteBegin}-${partialByteEnd}`);
             let zipStream_: IStreamAndLength | undefined;
             try {
@@ -211,34 +206,9 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                     + err + "</p></body></html>");
                 return;
             }
-            let zipStream = zipStream_.stream;
-            let totalByteLength = zipStream_.length;
-            // debug(`${totalByteLength} total stream bytes`);
-
-            // let zipData: Buffer | undefined;
-            // if (!isHead
-            //     && (
-            //         // (isEncrypted && (isObfuscatedFont || !server.disableDecryption))
-            //         // ||
-            //         (isShow && isText)
-            //     )
-            // ) {
-            //     try {
-            //         zipData = await streamToBufferPromise(zipStream);
-            //     } catch (err) {
-            //         debug(err);
-            //         res.status(500).send("<html><body><p>Internal Server Error</p><p>"
-            //             + err + "</p></body></html>");
-            //         return;
-            //     }
-            //     // debug(`${zipData.length} buffer bytes`);
-            // }
 
             // TODO: isHead for encrypted Content-Length
-            // zipData null when isEncrypted but (!isObfuscatedFont && server.disableDecryption)
-            if (// zipData &&
-                // isEncrypted &&
-                (isEncrypted && (isObfuscatedFont || !server.disableDecryption)) &&
+            if ((isEncrypted && (isObfuscatedFont || !server.disableDecryption)) &&
                 link) {
 
                 if (req.params.lcpPass64) {
@@ -249,35 +219,19 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                 }
 
                 let decryptFail = false;
-                // if (zipData) {
-                //     let transformedBuffer: Buffer | undefined;
-                //     try {
-                //         transformedBuffer = await Transformers.tryBuffer(publication, link, zipData);
-                //     } catch (err) {
-                //         debug(err);
-                //     }
-                //     if (transformedBuffer) {
-                //         zipData = transformedBuffer;
-                //         totalByteLength = zipData.length;
-                //     } else {
-                //         decryptFail = true;
-                //     }
-                // } else {
                 let transformedStream: IStreamAndLength | undefined;
                 try {
                     transformedStream = await Transformers.tryStream(
                         publication, link,
-                        zipStream, totalByteLength, partialByteBegin, partialByteEnd);
+                        zipStream_, partialByteBegin, partialByteEnd);
                 } catch (err) {
                     debug(err);
                 }
                 if (transformedStream) {
-                    zipStream = transformedStream.stream;
-                    totalByteLength = transformedStream.length;
+                    zipStream_ = transformedStream;
                 } else {
                     decryptFail = true;
                 }
-                // }
 
                 if (decryptFail) {
                     const err = "Encryption scheme not supported.";
@@ -289,17 +243,17 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
             }
 
             if (partialByteEnd < 0) {
-                partialByteEnd = totalByteLength - 1;
+                partialByteEnd = zipStream_.length - 1;
             }
 
             partialByteLength = isPartialByteRangeRequest ?
                 partialByteEnd - partialByteBegin + 1 :
-                totalByteLength;
+                zipStream_.length;
 
             if (isShow) {
                 let zipData: Buffer | undefined;
                 try {
-                    zipData = await streamToBufferPromise(zipStream);
+                    zipData = await streamToBufferPromise(zipStream_.stream);
                 } catch (err) {
                     debug(err);
                     res.status(500).send("<html><body><p>Internal Server Error</p><p>"
@@ -337,34 +291,24 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                 // res.setHeader("Connection", "close");
                 // res.setHeader("Transfer-Encoding", "chunked");
                 res.setHeader("Content-Length", `${partialByteLength}`);
-                const rangeHeader = `bytes ${partialByteBegin}-${partialByteEnd}/${totalByteLength}`;
+                const rangeHeader = `bytes ${partialByteBegin}-${partialByteEnd}/${zipStream_.length}`;
                 debug("+++> " + rangeHeader + " (( " + partialByteLength);
                 res.setHeader("Content-Range", rangeHeader);
                 res.status(206);
             } else {
-                res.setHeader("Content-Length", `${totalByteLength}`);
-                debug("---> " + totalByteLength);
+                res.setHeader("Content-Length", `${zipStream_.length}`);
+                debug("---> " + zipStream_.length);
                 res.status(200);
             }
 
             if (isHead) {
                 res.end();
             } else {
-                // if (zipData) {
-                //     debug("~~~~~~~~~~~~> BUFFER SEND");
-                //     res.send(zipData);
-
-                //     // if (isText) {
-                //     //     res.send(zipData.toString("utf8"));
-                //     // } else {
-                //     //     res.end(zipData, "binary");
-                //     // }
-                // } else {
                 debug("===> STREAM PIPE");
 
                 const counterStream = new CounterPassThroughStream(++streamCounter);
 
-                zipStream
+                zipStream_.stream
                     .on("finish", () => {
                         debug("ZIP FINISH " + counterStream.id);
                     })
@@ -421,7 +365,9 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                         counterStream.unpipe(res);
 
                         counterStream.end();
-                        zipStream.unpipe(counterStream);
+                        if (zipStream_) {
+                            zipStream_.stream.unpipe(counterStream);
+                        }
 
                         // zipStream.close();
                     })
@@ -432,7 +378,6 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                     //     debug("RES DRAIN " + counterStream.id);
                     // })
                     ;
-                // }
             }
         });
 
