@@ -306,6 +306,21 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
 
             if (isHead) {
                 res.end();
+            // } else if (zipStream_.length === 2) {
+            //     debug("===> BUFFER SEND (short stream)");
+            //     let zipData: Buffer | undefined;
+            //     try {
+            //         zipData = await streamToBufferPromise(zipStream_.stream);
+            //     } catch (err) {
+            //         debug(err);
+            //         res.status(500).send("<html><body><p>Internal Server Error</p><p>"
+            //             + err + "</p></body></html>");
+            //         return;
+            //     }
+            //     if (zipData) {
+            //         debug("CHECK: " + zipStream_.length + " ==> " + zipData.length);
+            //     }
+            //     res.send(zipStream_.stream);
             } else {
                 debug("===> STREAM PIPE");
 

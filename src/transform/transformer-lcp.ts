@@ -121,7 +121,7 @@ export class TransformerLCP implements ITransformer {
             bufferStream.pipe(rangeStream);
 
             const sal: IStreamAndLength = {
-                length: (partialByteEnd + 1) - partialByteBegin,
+                length: buff.length, // (partialByteEnd + 1) - partialByteBegin,
                 reset: async () => {
                     const resetedStream = await stream.reset();
                     return this.transformStream(
