@@ -12,6 +12,7 @@ export interface ITransformer {
     transformStream(
         publication: Publication, link: Link,
         stream: IStreamAndLength,
+        isPartialByteRangeRequest: boolean,
         partialByteBegin: number, partialByteEnd: number): Promise<IStreamAndLength>;
 
     getDecryptedSizeStream(
@@ -33,11 +34,12 @@ export class Transformers {
     public static async tryStream(
         publication: Publication, link: Link,
         stream: IStreamAndLength,
+        isPartialByteRangeRequest: boolean,
         partialByteBegin: number, partialByteEnd: number): Promise<IStreamAndLength> {
         return Transformers.instance()._tryStream(
             publication, link,
             stream,
-            partialByteBegin, partialByteEnd);
+            isPartialByteRangeRequest, partialByteBegin, partialByteEnd);
     }
 
     private static _instance: Transformers = new Transformers();
@@ -75,6 +77,7 @@ export class Transformers {
     private async _tryStream(
         publication: Publication, link: Link,
         stream: IStreamAndLength,
+        isPartialByteRangeRequest: boolean,
         partialByteBegin: number, partialByteEnd: number): Promise<IStreamAndLength> {
         let transformedData: Promise<IStreamAndLength> | undefined;
         const transformer = this.transformers.find((t) => {
@@ -84,7 +87,7 @@ export class Transformers {
             transformedData = t.transformStream(
                 publication, link,
                 stream,
-                partialByteBegin, partialByteEnd);
+                isPartialByteRangeRequest, partialByteBegin, partialByteEnd);
             if (transformedData) {
                 return true;
             }

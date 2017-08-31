@@ -158,8 +158,7 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                 (link.Properties.Encrypted.Algorithm === "http://ns.adobe.com/pdf/enc#RC"
                     || link.Properties.Encrypted.Algorithm === "http://www.idpf.org/2008/embedding");
 
-            const isPartialByteRangeRequest = req.headers &&
-                req.headers.range; // && req.headers.range !== "bytes=0-";
+            const isPartialByteRangeRequest = ((req.headers && req.headers.range) ? true : false);
 
             // if (isEncrypted && isPartialByteRangeRequest) {
             //     const err = "Encrypted video/audio not supported (HTTP 206 partial request byte range)";
@@ -223,7 +222,8 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                 try {
                     transformedStream = await Transformers.tryStream(
                         publication, link,
-                        zipStream_, partialByteBegin, partialByteEnd);
+                        zipStream_,
+                        isPartialByteRangeRequest, partialByteBegin, partialByteEnd);
                 } catch (err) {
                     debug(err);
                 }
@@ -259,6 +259,9 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                     res.status(500).send("<html><body><p>Internal Server Error</p><p>"
                         + err + "</p></body></html>");
                     return;
+                }
+                if (zipData) {
+                    debug("CHECK: " + zipStream_.length + " ==> " + zipData.length);
                 }
                 res.status(200).send("<html><body>" +
                     "<h1>" + path.basename(pathBase64Str) + "</h1>" +

@@ -17,7 +17,7 @@ export class TransformerObfIDPF implements ITransformer {
         stream: IStreamAndLength): Promise<number> {
         let sal: IStreamAndLength | undefined;
         try {
-            sal = await this.transformStream(publication, link, stream, 0, 0);
+            sal = await this.transformStream(publication, link, stream, false, 0, 0);
         } catch (err) {
             console.log(err);
             return Promise.reject("WTF?");
@@ -39,6 +39,7 @@ export class TransformerObfIDPF implements ITransformer {
     public async transformStream(
         publication: Publication, link: Link,
         stream: IStreamAndLength,
+        _isPartialByteRangeRequest: boolean,
         _partialByteBegin: number, _partialByteEnd: number): Promise<IStreamAndLength> {
 
         const data = await streamToBufferPromise(stream.stream);

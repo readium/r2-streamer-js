@@ -93,7 +93,8 @@ export class TransformerLCP implements ITransformer {
     public async transformStream(
         publication: Publication, link: Link,
         stream: IStreamAndLength,
-        _partialByteBegin: number, _partialByteEnd: number): Promise<IStreamAndLength> {
+        isPartialByteRangeRequest: boolean,
+        partialByteBegin: number, partialByteEnd: number): Promise<IStreamAndLength> {
 
         debug("LCP transformStream() RAW STREAM LENGTH: " + stream.length);
         const l = await this.getDecryptedSizeStream(publication, link, stream);
@@ -105,14 +106,45 @@ export class TransformerLCP implements ITransformer {
         const buff = await this.transformBuffer(publication, link, data);
         debug("LCP transformStream() DECRYPTED BUFFER LENGTH: " + buff.length);
 
-        const sal: IStreamAndLength = {
-            length: buff.length,
-            reset: async () => {
-                return Promise.resolve(sal);
-            },
-            stream: bufferToStream(buff),
-        };
-        return Promise.resolve(sal);
+        if (partialByteBegin < 0) {
+            partialByteBegin = 0;
+        }
+        if (partialByteEnd < 0) {
+            partialByteEnd = buff.length - 1;
+        }
+
+        if (isPartialByteRangeRequest) {
+            debug("LCP transformStream() PARTIAL: " + partialByteBegin + " - " + partialByteEnd);
+
+            const rangeStream = new RangeStream(partialByteBegin, partialByteEnd, buff.length);
+            const bufferStream = bufferToStream(buff);
+            bufferStream.pipe(rangeStream);
+
+            const sal: IStreamAndLength = {
+                length: (partialByteEnd + 1) - partialByteBegin,
+                reset: async () => {
+                    const resetedStream = await stream.reset();
+                    return this.transformStream(
+                        publication, link,
+                        resetedStream,
+                        isPartialByteRangeRequest,
+                        partialByteBegin, partialByteEnd);
+                },
+                stream: rangeStream,
+            };
+            return Promise.resolve(sal);
+        } else {
+            debug("LCP transformStream() WHOLE: " + buff.length);
+
+            const sal: IStreamAndLength = {
+                length: buff.length,
+                reset: async () => {
+                    return Promise.resolve(sal);
+                },
+                stream: bufferToStream(buff),
+            };
+            return Promise.resolve(sal);
+        }
     }
 
     public innerDecrypt(data: Buffer): Buffer {
