@@ -92,8 +92,8 @@
   resolved "https://registry.yarnpkg.com/@types/node-forge/-/node-forge-0.6.10.tgz#5d61ba7a411b9c55547792e69dd3278430b04186"
 
 "@types/node@*":
-  version "8.0.26"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-8.0.26.tgz#4d58be925306fd22b1141085535a0268b8beb189"
+  version "8.0.27"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-8.0.27.tgz#13fbe7e92afeecebb843d7cea6c15b521e0000e1"
 
 "@types/node@^7.0.18":
   version "7.0.43"
@@ -685,8 +685,8 @@ beeper@^1.0.0:
   resolved "https://registry.yarnpkg.com/beeper/-/beeper-1.1.1.tgz#e6d5ea8c5dad001304a70b22638447f69cb2f809"
 
 big-integer@^1.6.17:
-  version "1.6.24"
-  resolved "https://registry.yarnpkg.com/big-integer/-/big-integer-1.6.24.tgz#1ed84d018ac3c1c72b307e7f7d94008e8ee20311"
+  version "1.6.25"
+  resolved "https://registry.yarnpkg.com/big-integer/-/big-integer-1.6.25.tgz#1de45a9f57542ac20121c682f8d642220a34e823"
 
 bignumber.js@^2.4.0:
   version "2.4.0"
