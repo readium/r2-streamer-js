@@ -8,17 +8,18 @@ import { TransformerObfIDPF } from "./transformer-obf-idpf";
 
 export interface ITransformer {
     supports(publication: Publication, link: Link): boolean;
-    transformBuffer(publication: Publication, link: Link, data: Buffer): Promise<Buffer>;
+
     transformStream(
         publication: Publication, link: Link,
         stream: IStreamAndLength,
         isPartialByteRangeRequest: boolean,
         partialByteBegin: number, partialByteEnd: number): Promise<IStreamAndLength>;
+    // getDecryptedSizeStream(
+    //     publication: Publication, link: Link,
+    //     stream: IStreamAndLength): Promise<number>;
 
-    getDecryptedSizeStream(
-        publication: Publication, link: Link,
-        stream: IStreamAndLength): Promise<number>;
-    getDecryptedSizeBuffer(publication: Publication, link: Link, data: Buffer): Promise<number>;
+    // transformBuffer(publication: Publication, link: Link, data: Buffer): Promise<Buffer>;
+    // getDecryptedSizeBuffer(publication: Publication, link: Link, data: Buffer): Promise<number>;
 }
 
 export class Transformers {
@@ -27,9 +28,9 @@ export class Transformers {
         return Transformers._instance;
     }
 
-    public static async tryBuffer(publication: Publication, link: Link, data: Buffer): Promise<Buffer> {
-        return Transformers.instance()._tryBuffer(publication, link, data);
-    }
+    // public static async tryBuffer(publication: Publication, link: Link, data: Buffer): Promise<Buffer> {
+    //     return Transformers.instance()._tryBuffer(publication, link, data);
+    // }
 
     public static async tryStream(
         publication: Publication, link: Link,
@@ -56,23 +57,23 @@ export class Transformers {
         }
     }
 
-    private async _tryBuffer(publication: Publication, link: Link, data: Buffer): Promise<Buffer> {
-        let transformedData: Promise<Buffer> | undefined;
-        const transformer = this.transformers.find((t) => {
-            if (!t.supports(publication, link)) {
-                return false;
-            }
-            transformedData = t.transformBuffer(publication, link, data);
-            if (transformedData) {
-                return true;
-            }
-            return false;
-        });
-        if (transformer && transformedData) {
-            return transformedData;
-        }
-        return Promise.reject("transformers fail (buffer)");
-    }
+    // private async _tryBuffer(publication: Publication, link: Link, data: Buffer): Promise<Buffer> {
+    //     let transformedData: Promise<Buffer> | undefined;
+    //     const transformer = this.transformers.find((t) => {
+    //         if (!t.supports(publication, link)) {
+    //             return false;
+    //         }
+    //         transformedData = t.transformBuffer(publication, link, data);
+    //         if (transformedData) {
+    //             return true;
+    //         }
+    //         return false;
+    //     });
+    //     if (transformer && transformedData) {
+    //         return transformedData;
+    //     }
+    //     return Promise.reject("transformers fail (buffer)");
+    // }
 
     private async _tryStream(
         publication: Publication, link: Link,

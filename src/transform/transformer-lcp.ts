@@ -44,53 +44,6 @@ export class TransformerLCP implements ITransformer {
         return true;
     }
 
-    public async getDecryptedSizeStream(
-        _publication: Publication, _link: Link,
-        stream: IStreamAndLength): Promise<number> {
-
-        const twoBlocks = 2 * AES_BLOCK_SIZE;
-        if (stream.length < twoBlocks) {
-            return 0;
-        }
-        const readPos = stream.length - twoBlocks;
-
-        //     stream.pos(readPos); // TODO: ReadableStream is not SEEKABLE!!
-        //     const buff = stream.read(twoBlocks);
-
-        const rangeStream = new RangeStream(readPos, readPos + twoBlocks - 1, stream.length);
-        stream.stream.pipe(rangeStream);
-        let buff: Buffer | undefined;
-        try {
-            buff = await streamToBufferPromise(rangeStream);
-        } catch (err) {
-            console.log(err);
-            return 0;
-        }
-
-        const newBuff = this.innerDecrypt(buff);
-
-        const size = stream.length - AES_BLOCK_SIZE - ((AES_BLOCK_SIZE - newBuff.length) % AES_BLOCK_SIZE);
-        return Promise.resolve(size);
-    }
-
-    public async getDecryptedSizeBuffer(_publication: Publication, _link: Link, data: Buffer): Promise<number> {
-
-        const totalByteLength = data.length;
-
-        const twoBlocks = 2 * AES_BLOCK_SIZE;
-        if (totalByteLength < twoBlocks) {
-            return 0;
-        }
-        const readPos = totalByteLength - twoBlocks;
-
-        const buff = data.slice(readPos, readPos + twoBlocks);
-
-        const newBuff = this.innerDecrypt(buff);
-
-        const size = totalByteLength - AES_BLOCK_SIZE - ((AES_BLOCK_SIZE - newBuff.length) % AES_BLOCK_SIZE);
-        return size;
-    }
-
     public async transformStream(
         publication: Publication, link: Link,
         stream: IStreamAndLength,
@@ -112,36 +65,55 @@ export class TransformerLCP implements ITransformer {
             plainTextSize = link.Properties.Encrypted.DecryptedLengthBeforeInflate;
         } else {
             plainTextSize = await this.getDecryptedSizeStream(publication, link, stream);
-            debug("LCP getDecryptedSizeStream(): " + plainTextSize);
+            debug("LCP transformStream() ---- getDecryptedSizeStream(): " + plainTextSize);
             stream = await stream.reset();
             // length cached to avoid resetting the stream to zero-position
             link.Properties.Encrypted.DecryptedLengthBeforeInflate = plainTextSize;
         }
-        debug("LCP plainTextSize: " + plainTextSize);
+        debug("LCP transformStream() plainTextSize: " + plainTextSize);
 
         if (partialByteBegin < 0) {
             partialByteBegin = 0;
         }
 
         if (partialByteEnd < 0) {
-            partialByteEnd = plainTextSize;
+            partialByteEnd = plainTextSize - 1;
             if (link.Properties.Encrypted.OriginalLength) {
                 partialByteEnd = link.Properties.Encrypted.OriginalLength - 1;
             }
         }
 
-        const partialByteLength = partialByteEnd - partialByteBegin;
+        const partialByteLength = (partialByteEnd + 1) - partialByteBegin;
 
-        // Get offset result offset in the block
+        debug("LCP transformStream() partialByteBegin: " + partialByteBegin);
+        debug("LCP transformStream() partialByteEnd: " + partialByteEnd);
+        debug("LCP transformStream() partialByteLength: " + partialByteLength);
+
+        // block padding scheme
+        let padding = false; // NO_PADDING
+        const sizeWithoutPaddedBlock = plainTextSize - (plainTextSize % AES_BLOCK_SIZE);
+
+        debug("LCP transformStream() sizeWithoutPaddedBlock: " + sizeWithoutPaddedBlock);
+
+        if ((partialByteEnd + 1) > sizeWithoutPaddedBlock) {
+            padding = true; // W3C_PADDING, also PKCS#7
+        }
+
+        // byte offset in first block of the cypher text that contains the range begin
         const blockOffset = partialByteBegin % AES_BLOCK_SIZE;
-        // For beginning of the cipher text, IV used for XOR
-        // For cipher text in the middle, previous block used for XOR
+
+        // we read the entire first block, even if partially used
         const readPosition = partialByteBegin - blockOffset;
 
-        // Count blocks to read
-        // First block for IV or previous block to perform XOR
+        debug("LCP transformStream() blockOffset: " + blockOffset);
+        debug("LCP transformStream() readPosition: " + readPosition);
+
+        // number of blocks to read
         let blocksCount = 1;
         let bytesInFirstBlock = (AES_BLOCK_SIZE - blockOffset) % AES_BLOCK_SIZE;
+
+        debug("LCP transformStream() bytesInFirstBlock: " + bytesInFirstBlock);
+
         if (partialByteLength < bytesInFirstBlock) {
             bytesInFirstBlock = 0;
         }
@@ -149,19 +121,32 @@ export class TransformerLCP implements ITransformer {
             blocksCount++;
         }
 
-        blocksCount += (partialByteLength - bytesInFirstBlock) / AES_BLOCK_SIZE;
-        if ((partialByteLength - bytesInFirstBlock) % AES_BLOCK_SIZE !== 0) {
+        const diff = partialByteLength - bytesInFirstBlock;
+
+        debug("LCP transformStream() diff: " + diff);
+
+        let inc = diff / AES_BLOCK_SIZE;
+        debug("LCP transformStream() inc: " + inc);
+
+        inc = Math.floor(inc);
+        debug("LCP transformStream() inc: " + inc);
+
+        blocksCount += inc;
+
+        const rem = diff % AES_BLOCK_SIZE;
+        debug("LCP transformStream() rem: " + rem);
+
+        if (rem !== 0) {
             blocksCount++;
         }
 
-        // Figure out what block padding scheme to use
-        let padding = false; // NO_PADDING
-        const sizeWithoutPaddedBlock = plainTextSize - (plainTextSize % AES_BLOCK_SIZE);
-        if (partialByteEnd > sizeWithoutPaddedBlock) {
-            padding = true; // W3C_PADDING, also PKCS#7
-        }
+        debug("LCP transformStream() blocksCount: " + blocksCount);
 
+        // number of bytes to read (block aligned)
         const toRead = blocksCount * AES_BLOCK_SIZE;
+
+        debug("LCP transformStream() toRead: " + toRead);
+
         const rangeStream = new RangeStream(readPosition, readPosition + toRead - 1, stream.length);
         stream.stream.pipe(rangeStream);
         let buff: Buffer | undefined;
@@ -172,15 +157,23 @@ export class TransformerLCP implements ITransformer {
             return Promise.reject("OUCH!");
         }
 
-        let newBuff = this.innerDecrypt(buff);
+        debug("LCP transformStream() buff.length: " + buff.length);
+
+        let newBuff = this.innerDecrypt(buff, padding);
+
+        debug("LCP transformStream() newBuff.length: " + newBuff.length);
+
         if (newBuff.length < partialByteLength) {
             debug("newBuff.length < partialByteLength");
         }
         newBuff = newBuff.slice(blockOffset);
+
+        debug("LCP transformStream() newBuff.length (blockOffset): " + newBuff.length);
+
         const bufferStream = bufferToStream(newBuff);
 
         const sal: IStreamAndLength = {
-            length: newBuff.length,
+            length: plainTextSize, // newBuff.length,
             reset: async () => {
                 const resetedStream = await stream.reset();
                 return this.transformStream(
@@ -194,29 +187,114 @@ export class TransformerLCP implements ITransformer {
         return Promise.resolve(sal);
     }
 
-    public async transformStream_(
+    private async getDecryptedSizeStream(
+        _publication: Publication, _link: Link,
+        stream: IStreamAndLength): Promise<number> {
+
+        debug("LCP getDecryptedSizeStream() stream.length: " + stream.length);
+
+        debug("LCP getDecryptedSizeStream() AES_BLOCK_SIZE: " + AES_BLOCK_SIZE);
+
+        // CipherText = IV + PlainText + BLOCK - (PlainText MOD BLOCK)
+        // overflow: (PlainText MOD BLOCK) === PlainText - (floor(PlainText / BLOCK) * BLOCK)
+        // thus: CipherText = IV + BLOCK * (floor(PlainText / BLOCK) + 1)
+
+        // IV = AES_BLOCK_SIZE (first block in cyphertext)
+        // + at least one block
+        // (last one in cyphertext is either full 16-bytes random W3C padding
+        // in case plaintext is exactly multiple of block size,
+        // or partial cypher + padding)
+        const TWO_AES_BLOCK_SIZE = 2 * AES_BLOCK_SIZE;
+        if (stream.length < TWO_AES_BLOCK_SIZE) {
+            return 0;
+        }
+        const readPos = stream.length - TWO_AES_BLOCK_SIZE;
+
+        const rangeStream = new RangeStream(readPos, readPos + TWO_AES_BLOCK_SIZE - 1, stream.length);
+        stream.stream.pipe(rangeStream);
+        let buff: Buffer | undefined;
+        try {
+            buff = await streamToBufferPromise(rangeStream);
+        } catch (err) {
+            console.log(err);
+            return 0;
+        }
+
+        debug("LCP getDecryptedSizeStream() buff.length: " + buff.length);
+
+        // debug(buff.toString("hex"));
+        for (let i = 0; i < buff.length; i++) {
+            const b = buff[i];
+            if (i === AES_BLOCK_SIZE) {
+                debug("____");
+            }
+            debug(b);
+        }
+
+        return this.getDecryptedSizeBuffer_(stream.length, buff);
+    }
+
+    private async getDecryptedSizeBuffer(_publication: Publication, _link: Link, data: Buffer): Promise<number> {
+
+        const totalByteLength = data.length;
+
+        const TWO_AES_BLOCK_SIZE = 2 * AES_BLOCK_SIZE;
+        if (totalByteLength < TWO_AES_BLOCK_SIZE) {
+            return 0;
+        }
+        const readPos = totalByteLength - TWO_AES_BLOCK_SIZE;
+
+        const buff = data.slice(readPos, totalByteLength);
+
+        return this.getDecryptedSizeBuffer_(totalByteLength, buff);
+    }
+
+    private async transformBuffer(_publication: Publication, link: Link, data: Buffer): Promise<Buffer> {
+
+        const l = await this.getDecryptedSizeBuffer(_publication, link, data);
+        debug("LCP transformBuffer() ==== decrypted buffer length CHECK: " + l);
+
+        let transformedData = this.innerDecrypt(data, true);
+
+        debug("LCP transformBuffer() decrypted buffer length before INFLATE: " + transformedData.length);
+
+        if (link.Properties.Encrypted.Compression === "deflate") {
+            transformedData = zlib.inflateRawSync(transformedData);
+        }
+
+        debug("LCP transformBuffer() decrypted buffer length after INFLATE: " + transformedData.length);
+
+        if (link.Properties.Encrypted.OriginalLength
+            && link.Properties.Encrypted.OriginalLength !== transformedData.length) {
+            debug(`LENGTH NOT MATCH ${link.Properties.Encrypted.OriginalLength} !== ${transformedData.length}`);
+        }
+
+        return Promise.resolve(transformedData);
+    }
+
+    private async transformStream_(
         publication: Publication, link: Link,
         stream: IStreamAndLength,
         isPartialByteRangeRequest: boolean,
         partialByteBegin: number, partialByteEnd: number): Promise<IStreamAndLength> {
 
-        debug("LCP transformStream() RAW STREAM LENGTH: " + stream.length);
+        debug("LCP transformStream_() RAW STREAM LENGTH: " + stream.length);
 
         let l = -1;
         if (link.Properties.Encrypted.DecryptedLengthBeforeInflate > 0) {
             l = link.Properties.Encrypted.DecryptedLengthBeforeInflate;
         } else {
             l = await this.getDecryptedSizeStream(publication, link, stream);
-            debug("LCP getDecryptedSizeStream(): " + l);
+            debug("LCP transformStream_() ---- getDecryptedSizeStream(): " + l);
             stream = await stream.reset();
             // length cached to avoid resetting the stream to zero-position
             link.Properties.Encrypted.DecryptedLengthBeforeInflate = l;
         }
 
         const data = await streamToBufferPromise(stream.stream);
-        debug("LCP transformStream() RAW BUFFER LENGTH after reset: " + stream.length);
+        debug("LCP transformStream_() RAW BUFFER LENGTH after reset: " + stream.length);
         const buff = await this.transformBuffer(publication, link, data);
-        debug("LCP transformStream() DECRYPTED BUFFER LENGTH: " + buff.length);
+        debug("LCP transformStream_() DECRYPTED BUFFER LENGTH: " + buff.length);
 
         if (partialByteBegin < 0) {
             partialByteBegin = 0;
@@ -226,7 +304,7 @@ export class TransformerLCP implements ITransformer {
         }
 
         if (isPartialByteRangeRequest) {
-            debug("LCP transformStream() PARTIAL: " + partialByteBegin + " - " + partialByteEnd);
+            debug("LCP transformStream_() PARTIAL: " + partialByteBegin + " - " + partialByteEnd);
 
             const rangeStream = new RangeStream(partialByteBegin, partialByteEnd, buff.length);
             const bufferStream = bufferToStream(buff);
@@ -246,7 +324,7 @@ export class TransformerLCP implements ITransformer {
             };
             return Promise.resolve(sal);
         } else {
-            debug("LCP transformStream() WHOLE: " + buff.length);
+            debug("LCP transformStream_() WHOLE: " + buff.length);
 
             const sal: IStreamAndLength = {
                 length: buff.length,
@@ -259,43 +337,66 @@ export class TransformerLCP implements ITransformer {
         }
     }
 
-    public innerDecrypt(data: Buffer): Buffer {
+    private innerDecrypt(data: Buffer, padding: boolean): Buffer {
+        debug("LCP innerDecrypt() data.length: " + data.length);
+        debug("LCP innerDecrypt() padding: " + padding);
 
-        const iv = data.slice(0, AES_BLOCK_SIZE).toString("binary");
+        const buffIV = data.slice(0, AES_BLOCK_SIZE);
+        debug("LCP innerDecrypt() buffIV.length: " + buffIV.length);
+
+        // TODO: keep buffer to avoid costly string conversion?
+        const iv = buffIV.toString("binary");
+
+        const buffToDecrypt = data.slice(AES_BLOCK_SIZE);
+        debug("LCP innerDecrypt() buffToDecrypt: " + buffToDecrypt.length);
+
+        // TODO: keep buffer to avoid costly string conversion?
+        const strToDecrypt = buffToDecrypt.toString("binary");
         const toDecrypt =
-            forge.util.createBuffer(data.slice(AES_BLOCK_SIZE).toString("binary"), "binary");
-        // const toDecrypt = aesCbcCipher.output;
+            forge.util.createBuffer(strToDecrypt, "binary");
+
         const aesCbcDecipher = (forge as any).cipher.createDecipher("AES-CBC", this.contentKey);
         aesCbcDecipher.start({ iv, additionalData_: "binary-encoded string" });
         aesCbcDecipher.update(toDecrypt);
-        aesCbcDecipher.finish();
+        function unpadFunc() { return false; }
+        const res = aesCbcDecipher.finish(padding ? undefined : unpadFunc);
+
+        debug(res);
 
         const decryptedZipData = aesCbcDecipher.output.bytes();
 
-        return new Buffer(decryptedZipData, "binary");
+        // debug(forge.util.bytesToHex(decryptedZipData));
+        // debug(decryptedZipData.toHex());
+
+        const buff = new Buffer(decryptedZipData, "binary");
+
+        debug("LCP innerDecrypt() buff.length: " + buff.length);
+
+        return buff;
     }
 
-    public async transformBuffer(_publication: Publication, link: Link, data: Buffer): Promise<Buffer> {
+    private async getDecryptedSizeBuffer_(totalByteLength: number, buff: Buffer): Promise<number> {
 
-        let transformedData = this.innerDecrypt(data);
+        debug("LCP getDecryptedSizeBuffer_() totalByteLength: " + totalByteLength);
 
-        debug("LCP transformBuffer() decrypted buffer length: " + transformedData.length);
+        debug("LCP getDecryptedSizeBuffer_() buff.length: " + buff.length);
 
-        const l = await this.getDecryptedSizeBuffer(_publication, link, data);
-        debug("LCP transformBuffer() decrypted buffer length CHECK: " + l);
+        const newBuff = this.innerDecrypt(buff, true);
 
-        if (link.Properties.Encrypted.Compression === "deflate") {
-            transformedData = zlib.inflateRawSync(transformedData);
-        }
+        debug("LCP getDecryptedSizeBuffer_() newBuff.length (innerDecrypt): " + newBuff.length);
 
-        debug("LCP transformBuffer() decrypted buffer length after INFLATE: " + transformedData.length);
+        // newBuff.length === 0
+        // when last second block is all padding,
+        // otherwise newBuff.length === overflow encrypted bytes,
+        // number between [1, AES_BLOCK_SIZE[
+        const nPaddingBytes = AES_BLOCK_SIZE - newBuff.length;
+        debug("LCP getDecryptedSizeBuffer_() nPaddingBytes: " + nPaddingBytes);
 
-        if (link.Properties.Encrypted.OriginalLength
-            && link.Properties.Encrypted.OriginalLength !== transformedData.length) {
-            debug(`LENGTH NOT MATCH ${link.Properties.Encrypted.OriginalLength} !== ${transformedData.length}`);
-        }
+        const size = totalByteLength - AES_BLOCK_SIZE - nPaddingBytes;
 
-        return Promise.resolve(transformedData);
+        debug("LCP getDecryptedSizeBuffer_() size: " + size);
+
+        return Promise.resolve(size);
     }
 
     private UpdateLCP(publication: Publication, lcpPassHash: string): string | undefined {

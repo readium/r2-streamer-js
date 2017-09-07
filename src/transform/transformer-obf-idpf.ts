@@ -12,30 +12,6 @@ export class TransformerObfIDPF implements ITransformer {
         return link.Properties.Encrypted.Algorithm === "http://www.idpf.org/2008/embedding";
     }
 
-    public async getDecryptedSizeStream(
-        publication: Publication, link: Link,
-        stream: IStreamAndLength): Promise<number> {
-        let sal: IStreamAndLength | undefined;
-        try {
-            sal = await this.transformStream(publication, link, stream, false, 0, 0);
-        } catch (err) {
-            console.log(err);
-            return Promise.reject("WTF?");
-        }
-        return Promise.resolve(sal.length);
-    }
-
-    public async getDecryptedSizeBuffer(publication: Publication, link: Link, data: Buffer): Promise<number> {
-        let buff: Buffer | undefined;
-        try {
-            buff = await this.transformBuffer(publication, link, data);
-        } catch (err) {
-            console.log(err);
-            return Promise.reject("WTF?");
-        }
-        return Promise.resolve(buff.length);
-    }
-
     public async transformStream(
         publication: Publication, link: Link,
         stream: IStreamAndLength,
@@ -55,7 +31,7 @@ export class TransformerObfIDPF implements ITransformer {
         return Promise.resolve(sal);
     }
 
-    public async transformBuffer(publication: Publication, _link: Link, data: Buffer): Promise<Buffer> {
+    private async transformBuffer(publication: Publication, _link: Link, data: Buffer): Promise<Buffer> {
 
         let pubID = publication.Metadata.Identifier;
         pubID = pubID.replace(/\s/g, "");
@@ -77,4 +53,28 @@ export class TransformerObfIDPF implements ITransformer {
         const zipDataRemainder = data.slice(prefixLength);
         return Promise.resolve(Buffer.concat([zipDataPrefix, zipDataRemainder]));
     }
+
+    // private async getDecryptedSizeStream(
+    //     publication: Publication, link: Link,
+    //     stream: IStreamAndLength): Promise<number> {
+    //     let sal: IStreamAndLength | undefined;
+    //     try {
+    //         sal = await this.transformStream(publication, link, stream, false, 0, 0);
+    //     } catch (err) {
+    //         console.log(err);
+    //         return Promise.reject("WTF?");
+    //     }
+    //     return Promise.resolve(sal.length);
+    // }
+
+    // public async getDecryptedSizeBuffer(publication: Publication, link: Link, data: Buffer): Promise<number> {
+    //     let buff: Buffer | undefined;
+    //     try {
+    //         buff = await this.transformBuffer(publication, link, data);
+    //     } catch (err) {
+    //         console.log(err);
+    //         return Promise.reject("WTF?");
+    //     }
+    //     return Promise.resolve(buff.length);
+    // }
 }
