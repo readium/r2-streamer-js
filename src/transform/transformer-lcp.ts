@@ -22,7 +22,6 @@ const AES_BLOCK_SIZE = 16;
 // let streamCounter = 0;
 
 export interface ICryptoInfo {
-    iv: Buffer;
     length: number;
     padding: number;
 }
@@ -413,10 +412,9 @@ export class TransformerLCP implements ITransformer {
         // });
 
         let ivBuffer: Buffer | undefined;
-        // if (cryptoInfo) {
-        //     ivBuffer = cryptoInfo.iv;
-        // } else
-        {
+        if (link.Properties.Encrypted.CypherBlockIV) {
+            ivBuffer = Buffer.from(link.Properties.Encrypted.CypherBlockIV, "binary");
+        } else {
             const ivRangeStream = new RangeStream(0, AES_BLOCK_SIZE - 1, stream.length);
             stream.stream.pipe(ivRangeStream);
             try {
@@ -425,11 +423,10 @@ export class TransformerLCP implements ITransformer {
                 console.log(err);
                 return Promise.reject("OUCH!");
             }
-            stream = await stream.reset(); // TODO: can reuse stream?? (unpipe)
-            // stream.stream.unpipe(ivRangeStream);
+            stream = await stream.reset();
+            link.Properties.Encrypted.CypherBlockIV = ivBuffer.toString("binary");
         }
-
-        // debugx("IV: " + ivBuffer.length);
+        // debug("IV: " + forge.util.bytesToHex(ivBuffer));
 
         const cypherRangeStream = new RangeStream(AES_BLOCK_SIZE, stream.length - 1, stream.length);
         stream.stream.pipe(cypherRangeStream);
@@ -439,7 +436,7 @@ export class TransformerLCP implements ITransformer {
         const decryptStream = crypto.createDecipheriv("aes-256-cbc",
             new Buffer(this.contentKey as string, "binary"),
             ivBuffer);
-        decryptStream.setAutoPadding(false); // TODO: MANUALLY REMOVE PADDING?
+        decryptStream.setAutoPadding(false);
         cypherRangeStream.pipe(decryptStream);
 
         let destStream: NodeJS.ReadableStream = decryptStream;
@@ -933,7 +930,6 @@ export class TransformerLCP implements ITransformer {
         // debug("LCP getDecryptedSizeBuffer_() size: " + size);
 
         const res: ICryptoInfo = {
-            iv: buff.slice(0, AES_BLOCK_SIZE),
             length: size,
             padding: nPaddingBytes,
         };
