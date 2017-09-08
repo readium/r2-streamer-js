@@ -11,6 +11,7 @@
     "**/.git": true,
     "**/.DS_Store": true,
     "**/.vscode": false,
+    "**/.history": true,
     "**/.github": true,
     "**/.gitignore": true,
     "**/.gitmodules": true,

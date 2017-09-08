@@ -135,7 +135,7 @@
     "postbuild:es8-es2017": "npm run afterdist",
     "clean": "rimraf ./dist && rimraf ./now && mkdirp ./dist",
     "lint": "npm run lint:all && npm run lint:typescript:full",
-    "lint:all": "eclint check \"**/*\" \"!.git/**/*\" \"!node_modules/**/*\" \"!dist/**/*\" \"!misc/**/*\" \"!now/**/*\" \"!.vscode/**/*\" \"!**/.DS_Store\" \"!**/*.epub\" \"!**/*.cbz\"  \"!**/*.jpg\"  \"!**/*.jpeg\"  \"!**/*.png\"  \"!**/*.log\"",
+    "lint:all": "eclint check \"**/*\" \"!.git/**/*\" \"!node_modules/**/*\" \"!dist/**/*\" \"!misc/**/*\" \"!now/**/*\" \"!.vscode/**/*\" \"!.history/**/*\" \"!**/.DS_Store\" \"!**/*.epub\" \"!**/*.cbz\"  \"!**/*.jpg\"  \"!**/*.jpeg\"  \"!**/*.png\"  \"!**/*.log\"",
     "lint:typescript": "tslint -c \"./tslint.json\" \"./src/**/*.ts\" \"./test/**/*.ts\"",
     "lint:typescript:full": "tslint --type-check --project \"./tsconfig.json\" -c \"./tslint.json\" \"./src/**/*.ts\" \"./test/**/*.ts\"",
     "lintfix": "sed -i \"\" \"s/let normalizedPath = path\\.normalize(documentPath);/let normalizedPath = path.normalize(documentPath).toLowerCase();/g\" ./node_modules/tslint-language-service/out/src/index.js",

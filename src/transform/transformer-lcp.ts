@@ -73,10 +73,12 @@ export class TransformerLCP implements ITransformer {
     // + 19 = 8330688 total cypher-text
 
     public async transformStream(
-        publication: Publication, link: Link,
+        publication: Publication,
+        link: Link,
         stream: IStreamAndLength,
         isPartialByteRangeRequest: boolean,
-        partialByteBegin: number, partialByteEnd: number): Promise<IStreamAndLength> {
+        partialByteBegin: number,
+        partialByteEnd: number): Promise<IStreamAndLength> {
 
         let plainTextSize = -1;
         if (link.Properties.Encrypted.DecryptedLengthBeforeInflate > 0) {
