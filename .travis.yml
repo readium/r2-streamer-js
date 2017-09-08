@@ -17,7 +17,7 @@ install:
 before_script:
 - 'pwd && ls -als'
 - 'yarn --version'
-- 'yarn install'
+- 'yarn install --ignore-engines'
 script:
 - 'yarn run build:es8-es2017'
 - 'yarn test'
