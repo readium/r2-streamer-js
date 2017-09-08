@@ -13,7 +13,7 @@ Public APIs are not stable. The internal logical architecture and physical code 
 ## Prerequisites
 
 1) https://nodejs.org NodeJS >= 6, NPM >= 3 (check with command line `node --version` and `npm --version`)
-2) https://yarnpkg.com Yarn >= 0.23 (check with command line `yarn --version`)
+2) NOW OPTIONAL https://yarnpkg.com Yarn >= 0.23 (check with command line `yarn --version`)
 
 ## GitHub repository
 
@@ -31,9 +31,9 @@ https://www.npmjs.com/package/r2-streamer-js
 
 Command line install:
 
-`yarn add r2-streamer-js`
-
 `npm install r2-streamer-js`
+OR
+`yarn add r2-streamer-js`
 
 ...or manually add in your `package.json`:
 ```json
@@ -67,9 +67,9 @@ import { Publication } from "r2-streamer-js/dist/es5/src/models/publication";
 
 https://david-dm.org/edrlab/r2-streamer-js
 
-A [yarn.lock](https://github.com/edrlab/r2-streamer-js/blob/develop/yarn.lock) file is provided at the root of the source tree, and Yarn is recommended to manage NPM dependencies.
+A [package-lock.json](https://github.com/edrlab/r2-streamer-js/blob/develop/package-lock.json) is provided, now that NPM supports this as an alternative to `npm-shrinkwrap.json`.
 
-A [package-lock.json](https://github.com/edrlab/r2-streamer-js/blob/develop/package-lock.json) is also provided, now that NPM supports this as an alternative to `npm-shrinkwrap.json`.
+A [yarn.lock](https://github.com/edrlab/r2-streamer-js/blob/develop/yarn.lock) file is also provided at the root of the source tree (Yarn is not recommended anymore to manage this project's NPM dependencies, due to several experienced build-breaking bugs).
 
 ## Continuous Integration
 
@@ -113,7 +113,17 @@ https://readium2.now.sh/version
 
 ## Quick start
 
-Command line steps:
+Command line steps (default NPM):
+
+1) `cd r2-streamer-js`
+2) `npm update --global` (sync NPM global packages)
+4) `npm install` (initialize local `node_modules` packages from dependencies declared in `package-lock.json`)
+5) `npm update` (sync local packages)
+6) `npm run build:all` (invoke the main build script: clean, lint, compile)
+7) `npm test` (run the unit tests)
+8) `npm run server-debug {PATH_TO_EPUB_OR_DIR}` (path is relative or absolute)
+
+Command line steps (optional Yarn):
 
 1) `cd r2-streamer-js`
 2) `npm update --global` (sync NPM global packages)

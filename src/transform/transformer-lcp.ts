@@ -82,11 +82,17 @@ export class TransformerLCP implements ITransformer {
         if (link.Properties.Encrypted.DecryptedLengthBeforeInflate > 0) {
             plainTextSize = link.Properties.Encrypted.DecryptedLengthBeforeInflate;
         } else {
+            const timeBegin = process.hrtime();
+
             plainTextSize = await this.getDecryptedSizeStream(publication, link, stream);
             debug("LCP transformStream() ---- getDecryptedSizeStream(): " + plainTextSize);
             stream = await stream.reset();
             // length cached to avoid resetting the stream to zero-position
             link.Properties.Encrypted.DecryptedLengthBeforeInflate = plainTextSize;
+
+            const timeElapsed = process.hrtime(timeBegin);
+            debug(`LCP transformStream() ---- getDecryptedSizeStream():` +
+                `${timeElapsed[0]} seconds + ${timeElapsed[1]} nanoseconds`);
         }
 
         if (partialByteBegin < 0) {
