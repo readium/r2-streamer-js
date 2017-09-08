@@ -8,7 +8,7 @@ node_js:
 before_install:
 #-s -- --version 0.27.5
 - 'pwd && ls -als'
-- 'curl -o- -L https://yarnpkg.com/install.sh | bash'
+- 'curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --nightly'
 - 'export PATH="$HOME/.yarn/bin:$PATH"'
 cache:
   yarn: true
@@ -17,7 +17,7 @@ install:
 before_script:
 - 'pwd && ls -als'
 - 'yarn --version'
-- 'yarn install --network-concurrency 1'
+- 'yarn install'
 script:
 - 'yarn run build:es8-es2017'
 - 'yarn test'
