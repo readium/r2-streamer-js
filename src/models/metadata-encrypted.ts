@@ -23,4 +23,5 @@ export class Encrypted {
     public OriginalLength: number;
 
     public DecryptedLengthBeforeInflate: number = -1;
+    public CypherBlockPadding: number = -1;
 }

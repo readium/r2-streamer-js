@@ -22,7 +22,7 @@ export class RangeStream extends Transform {
     }
 
     public _flush(callback: () => void): void {
-        debug("FLUSH");
+        // debug("FLUSH");
         callback();
     }
 
@@ -58,7 +58,7 @@ export class RangeStream extends Transform {
                 this.push(chunk.slice(chunkBegin, chunkEnd + 1));
 
                 if (this.finished) {
-                    debug("FINISHING...");
+                    // debug("FINISHING...");
                     this.closed = true;
                     this.push(null);
                     this.end();
