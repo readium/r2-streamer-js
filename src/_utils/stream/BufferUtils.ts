@@ -1,45 +1,71 @@
-import { PassThrough } from "stream";
+import { BufferReadableStream } from "@utils/stream/BufferReadableStream";
+// import { PassThrough } from "stream";
 
 export function bufferToStream(buffer: Buffer): NodeJS.ReadableStream {
-    const stream = new PassThrough();
 
-    setTimeout(() => {
+    return new BufferReadableStream(buffer);
 
-        // stream.write(buffer);
-        // stream.end();
+    // const stream = new PassThrough();
 
-        // const maxBuffLength = 2048; // 2kB
-        const maxBuffLength = 100 * 1024; // 100kB
+    // setTimeout(() => {
 
-        let buff = buffer;
-        let remaining = buff.length;
-        let done = 0;
+    //     // stream.write(buffer);
+    //     // stream.end();
 
-        console.log("bufferToStream BEFORE: " + remaining);
+    //     // const maxBuffLength = 2048; // 2kB
+    //     let maxBuffLength = 100 * 1024; // 100kB
 
-        while (remaining > 0) {
+    //     let buff = buffer;
+    //     let remaining = buff.length;
+    //     let done = 0;
 
-            if (done > 0) {
-                buff = buffer.slice(done);
-                // remaining === buff.length
-            }
+    //     console.log("bufferToStream()  BEFORE: " + remaining);
 
-            if (buff.length > maxBuffLength) {
-                buff = buff.slice(0, maxBuffLength);
-            }
+    //     while (remaining > 0) {
 
-            stream.write(buff);
+    //         if (done > 0) {
+    //             buff = buffer.slice(done);
+    //             // remaining === buff.length
+    //         }
 
-            done += buff.length;
-            remaining -= buff.length;
-        }
+    //         if (buff.length > maxBuffLength) {
+    //             buff = buff.slice(0, maxBuffLength);
+    //         }
 
-        console.log("bufferToStream AFTER: " + done);
+    //         const res = stream.write(buff);
+    //         if (!res) {
+    //             console.log("bufferToStream()  highWaterMark");
 
-        stream.end();
-    }, 20);
+    //             // Buffer highWaterMark CHECK
+    //             if ((stream as any)._writableState) {
+    //                 const internalStreamWriteBuffer = (stream as any)._writableState.getBuffer();
+    //                 if (internalStreamWriteBuffer) {
+    //                     console.log("bufferToStream() _writableState.getBuffer().length: "
+    // + internalStreamWriteBuffer.length);
+    //                 }
+    //             }
 
-    return stream;
+    //             // Buffer highWaterMark CHECK
+    //             if ((stream as any)._readableState) {
+    //                 const internalStreamReadBuffer = (stream as any)._readableState.buffer;
+    //                 if (internalStreamReadBuffer) {
+    //                     console.log("bufferToStream() _readableState.buffer.length: "
+    // + internalStreamReadBuffer.length);
+    //                 }
+    //             }
+
+    //         }
+
+    //         done += buff.length;
+    //         remaining -= buff.length;
+    //     }
+
+    //     console.log("bufferToStream()  AFTER: " + done);
+
+    //     stream.end();
+    // }, 20);
+
+    // return stream;
 }
 
 export async function streamToBufferPromise(readStream: NodeJS.ReadableStream): Promise<Buffer> {
@@ -50,17 +76,19 @@ export async function streamToBufferPromise(readStream: NodeJS.ReadableStream): 
 
         readStream.on("error", reject);
 
-        // readStream.on("readable", () => {
-        //     let chunk: Buffer;
-        //     chunk = readStream.read() as Buffer;
-        //     while (chunk) {
-        //         buffers.push(chunk);
-        //         chunk = readStream.read() as Buffer;
-        //     }
-        // });
-        readStream.on("data", (data: Buffer) => {
-            buffers.push(data);
+        readStream.on("readable", () => {
+            let chunk: Buffer;
+            do {
+                chunk = readStream.read() as Buffer;
+                if (chunk) {
+                    buffers.push(chunk);
+                }
+            }
+            while (chunk);
         });
+        // readStream.on("data", (data: Buffer) => {
+        //     buffers.push(data);
+        // });
 
         readStream.on("end", () => {
             resolve(Buffer.concat(buffers));

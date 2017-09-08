@@ -1,6 +1,7 @@
+import * as debug_ from "debug";
 import { Transform } from "stream";
 
-// const debug = debug_("r2:rangeStream");
+const debug = debug_("r2:RangeStream");
 
 export class RangeStream extends Transform {
     private bytesReceived: number;
@@ -13,24 +14,29 @@ export class RangeStream extends Transform {
         this.finished = false;
         this.closed = false;
         this.on("end", () => {
-            // console.log("------ RangeStream END");
+            // debug("------ RangeStream END");
         });
         this.on("finish", () => {
-            // console.log("------ RangeStream FINISH");
+            // debug("------ RangeStream FINISH");
         });
+    }
+
+    public _flush(callback: () => void): void {
+        debug("FLUSH");
+        callback();
     }
 
     public _transform(chunk: Buffer, _encoding: string, callback: () => void): void {
         this.bytesReceived += chunk.length;
-        // console.log(`_transform bytesReceived ${this.bytesReceived}`);
+        // debug(`_transform bytesReceived ${this.bytesReceived}`);
 
         if (this.finished) {
             if (!this.closed) {
-                // console.log("CLOSING...");
+                debug("???? CLOSING...");
                 this.closed = true;
                 this.push(null);
             } else {
-                // console.log("STILL PIPE CALLING _transform ??!");
+                debug("???? STILL PIPE CALLING _transform ??!");
                 this.end();
             }
         } else {
@@ -50,6 +56,13 @@ export class RangeStream extends Transform {
                 }
                 // console.log(`CHUNK: ${chunkBegin}-${chunkEnd}/${chunk.length}`);
                 this.push(chunk.slice(chunkBegin, chunkEnd + 1));
+
+                if (this.finished) {
+                    debug("FINISHING...");
+                    this.closed = true;
+                    this.push(null);
+                    this.end();
+                }
             } else {
                 // NOOP
                 // no call to this.push(), we skip the entire current chunk buffer

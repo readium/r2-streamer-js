@@ -339,6 +339,12 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                     .on("error", () => {
                         debug("ZIP ERROR " + counterStream.id);
                     })
+                    .on("pipe", () => {
+                        debug("ZIP PIPE " + counterStream.id);
+                    })
+                    .on("unpipe", () => {
+                        debug("ZIP UNPIPE " + counterStream.id);
+                    })
                     // .on("drain", () => {
                     //     debug("ZIP DRAIN " + counterStream.id);
                     // })
@@ -363,6 +369,14 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                     })
                     .on("error", function f() {
                         debug("CounterPassThroughStream ERROR: " +
+                            (this as CounterPassThroughStream).id);
+                    })
+                    .on("pipe", function f() {
+                        debug("CounterPassThroughStream PIPE: " +
+                            (this as CounterPassThroughStream).id);
+                    })
+                    .on("unpipe", function f() {
+                        debug("CounterPassThroughStream UNPIPE: " +
                             (this as CounterPassThroughStream).id);
                     })
                     // .on("drain", function () {
@@ -391,6 +405,12 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                     })
                     .on("error", () => {
                         debug("RES ERROR " + counterStream.id);
+                    })
+                    .on("pipe", () => {
+                        debug("RES PIPE " + counterStream.id);
+                    })
+                    .on("unpipe", () => {
+                        debug("RES UNPIPE " + counterStream.id);
                     })
                     // .on("drain", () => {
                     //     debug("RES DRAIN " + counterStream.id);
