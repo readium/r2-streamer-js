@@ -67,7 +67,7 @@ import { Publication } from "r2-streamer-js/dist/es5/src/models/publication";
 
 https://david-dm.org/edrlab/r2-streamer-js
 
-A [package-lock.json](https://github.com/edrlab/r2-streamer-js/blob/develop/package-lock.json) is provided, now that NPM supports this as an alternative to `npm-shrinkwrap.json`.
+A [package-lock.json](https://github.com/edrlab/r2-streamer-js/blob/develop/package-lock.json) is provided (modern NPM alternative to `npm-shrinkwrap.json`).
 
 A [yarn.lock](https://github.com/edrlab/r2-streamer-js/blob/develop/yarn.lock) file is also provided at the root of the source tree (Yarn is not recommended anymore to manage this project's NPM dependencies, due to several experienced build-breaking bugs).
 
