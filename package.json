@@ -23,7 +23,7 @@
   "engines": {
     "node": ">=6",
     "npm": ">=3",
-    "yarn": ">=0.23"
+    "yarn": ">=1.0"
   },
   "repository": {
     "type": "git",
