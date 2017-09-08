@@ -63,7 +63,7 @@
     "request": "latest",
     "request-promise-native": "latest",
     "slugify": "latest",
-    "ta-json": "danielweck/ta-json#dist",
+    "ta-json": "github:danielweck/ta-json#dist",
     "tmp": "latest",
     "tslib": "latest",
     "unzipper": "latest",
