@@ -428,6 +428,24 @@ export class TransformerLCP implements ITransformer {
         }
         // debug("IV: " + forge.util.bytesToHex(ivBuffer));
 
+        // const readStream = async (s: NodeJS.ReadableStream, n: number): Promise<Buffer> => {
+        //     return new Promise<Buffer>((resolve, reject) => {
+        //         s.pause();
+        //         const onReadable = () => {
+        //             const b = s.read(n);
+        //             s.removeListener("readable", onReadable);
+        //             s.removeListener("error", reject);
+        //             s.resume();
+        //             resolve(b as Buffer);
+        //         };
+        //         s.on("readable", onReadable);
+        //         s.on("error", reject);
+        //     });
+        // };
+        // const cypherRangeStream = stream.stream;
+        // const firstBlockIV = await readStream(cypherRangeStream, AES_BLOCK_SIZE);
+        // debug(firstBlockIV.length);
+
         const cypherRangeStream = new RangeStream(AES_BLOCK_SIZE, stream.length - 1, stream.length);
         stream.stream.pipe(cypherRangeStream);
 
