@@ -3,7 +3,6 @@ import * as zlib from "zlib";
 
 import { Publication } from "@models/publication";
 import { Link } from "@models/publication-link";
-import { streamToBufferPromise } from "@utils/stream/BufferUtils";
 import { RangeStream } from "@utils/stream/RangeStream";
 import { IStreamAndLength } from "@utils/zip/zip";
 import * as debug_ from "debug";
@@ -11,6 +10,7 @@ import * as forge from "node-forge";
 
 import { ITransformer } from "./transformer";
 
+// import { streamToBufferPromise } from "@utils/stream/BufferUtils";
 // import { CounterPassThroughStream } from "@utils/stream/CounterPassThroughStream";
 // import { Transform } from "stream";
 
@@ -20,6 +20,31 @@ const debug = debug_("r2:transformer:lcp");
 const AES_BLOCK_SIZE = 16;
 
 // let streamCounter = 0;
+
+const readStream = async (s: NodeJS.ReadableStream, n: number): Promise<Buffer> => {
+    return new Promise<Buffer>((resolve, reject) => {
+        // s.pause();
+        const onReadable = () => {
+            // debug("readStream READABLE");
+            const b = s.read(n);
+            s.removeListener("readable", onReadable);
+            s.removeListener("error", reject);
+            // s.resume();
+            resolve(b as Buffer);
+        };
+        s.on("readable", onReadable);
+        s.on("error", reject);
+        s.on("end", () => {
+            debug("readStream END");
+        });
+        s.on("drain", () => {
+            debug("readStream DRAIN");
+        });
+        s.on("finish", () => {
+            debug("readStream FINISH");
+        });
+    });
+};
 
 export interface ICryptoInfo {
     length: number;
@@ -113,43 +138,48 @@ export class TransformerLCP implements ITransformer {
 
         // const partialByteLength = (partialByteEnd + 1) - partialByteBegin;
 
+        let rawDecryptStream: NodeJS.ReadableStream | undefined;
+
         let ivBuffer: Buffer | undefined;
         if (link.Properties.Encrypted.CypherBlockIV) {
             ivBuffer = Buffer.from(link.Properties.Encrypted.CypherBlockIV, "binary");
+
+            const cypherRangeStream = new RangeStream(AES_BLOCK_SIZE, stream.length - 1, stream.length);
+            stream.stream.pipe(cypherRangeStream);
+            rawDecryptStream = cypherRangeStream;
         } else {
-            const ivRangeStream = new RangeStream(0, AES_BLOCK_SIZE - 1, stream.length);
-            stream.stream.pipe(ivRangeStream);
-            try {
-                ivBuffer = await streamToBufferPromise(ivRangeStream);
-            } catch (err) {
-                console.log(err);
-                return Promise.reject("OUCH!");
-            }
-            stream = await stream.reset();
+            // const ivRangeStream = new RangeStream(0, AES_BLOCK_SIZE - 1, stream.length);
+            // stream.stream.pipe(ivRangeStream);
+            // try {
+            //     ivBuffer = await streamToBufferPromise(ivRangeStream);
+            // } catch (err) {
+            //     console.log(err);
+            //     return Promise.reject("OUCH!");
+            // }
+            // stream = await stream.reset();
+
+            // debug("D1");
+            // debug(ivBuffer.length);
+            // debug(ivBuffer.toString("hex"));
+
+            // ivBuffer = stream.stream.read(AES_BLOCK_SIZE) as Buffer;
+            ivBuffer = await readStream(stream.stream, AES_BLOCK_SIZE);
+
+            // debug("D2");
+            // debug(ivBuffer.length);
+            // debug(ivBuffer.toString("hex"));
+            // b06ca4cec8831eb158f1a317503f5101
+            // === asharedculture_soundtrack.mp3
+            //
+            // 07e6870e5d708f39e98316b5c0a574c5
+            // === shared-culture.mp4
+
             link.Properties.Encrypted.CypherBlockIV = ivBuffer.toString("binary");
+
+            stream.stream.resume();
+            rawDecryptStream = stream.stream;
         }
         // debug("IV: " + forge.util.bytesToHex(ivBuffer));
-
-        // const readStream = async (s: NodeJS.ReadableStream, n: number): Promise<Buffer> => {
-        //     return new Promise<Buffer>((resolve, reject) => {
-        //         s.pause();
-        //         const onReadable = () => {
-        //             const b = s.read(n);
-        //             s.removeListener("readable", onReadable);
-        //             s.removeListener("error", reject);
-        //             s.resume();
-        //             resolve(b as Buffer);
-        //         };
-        //         s.on("readable", onReadable);
-        //         s.on("error", reject);
-        //     });
-        // };
-        // const cypherRangeStream = stream.stream;
-        // const firstBlockIV = await readStream(cypherRangeStream, AES_BLOCK_SIZE);
-        // debug(firstBlockIV.length);
-
-        const cypherRangeStream = new RangeStream(AES_BLOCK_SIZE, stream.length - 1, stream.length);
-        stream.stream.pipe(cypherRangeStream);
 
         // debug(forge.util.bytesToHex(this.contentKey as string));
 
@@ -158,7 +188,7 @@ export class TransformerLCP implements ITransformer {
             new Buffer(this.contentKey as string, "binary"),
             ivBuffer);
         decryptStream.setAutoPadding(false);
-        cypherRangeStream.pipe(decryptStream);
+        rawDecryptStream.pipe(decryptStream);
 
         let destStream: NodeJS.ReadableStream = decryptStream;
 
