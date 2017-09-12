@@ -6,10 +6,10 @@ import { Link } from "@models/publication-link";
 import { RangeStream } from "@utils/stream/RangeStream";
 import { IStreamAndLength } from "@utils/zip/zip";
 import * as debug_ from "debug";
-import * as forge from "node-forge";
 
 import { ITransformer } from "./transformer";
 
+// import * as forge from "node-forge";
 // import { streamToBufferPromise } from "@utils/stream/BufferUtils";
 // import { CounterPassThroughStream } from "@utils/stream/CounterPassThroughStream";
 // import { Transform } from "stream";
@@ -52,7 +52,7 @@ export interface ICryptoInfo {
 }
 
 export class TransformerLCP implements ITransformer {
-    protected contentKey: string | undefined;
+    protected contentKey: Buffer | undefined;
 
     public supports(publication: Publication, link: Link): boolean {
         const check = link.Properties.Encrypted.Scheme === "http://readium.org/2014/01/lcp"
@@ -77,6 +77,10 @@ export class TransformerLCP implements ITransformer {
         }
 
         this.contentKey = this.UpdateLCP(publication, lcpPassHash);
+        if (!this.contentKey) {
+            debug("LCP problem key.");
+            return false;
+        }
 
         return true;
     }
@@ -185,7 +189,7 @@ export class TransformerLCP implements ITransformer {
 
         // https://github.com/nodejs/node/blob/master/lib/crypto.js#L259
         const decryptStream = crypto.createDecipheriv("aes-256-cbc",
-            new Buffer(this.contentKey as string, "binary"),
+        this.contentKey, // new Buffer(this.contentKey as string, "binary"),
             ivBuffer);
         decryptStream.setAutoPadding(false);
         rawDecryptStream.pipe(decryptStream);
@@ -407,7 +411,7 @@ export class TransformerLCP implements ITransformer {
                 // === shared-culture.mp4
 
                 const decryptStream = crypto.createDecipheriv("aes-256-cbc",
-                    new Buffer(this.contentKey as string, "binary"),
+                    this.contentKey, // new Buffer(this.contentKey as string, "binary"),
                     ivBuffer);
                 decryptStream.setAutoPadding(false);
 
@@ -436,7 +440,7 @@ export class TransformerLCP implements ITransformer {
                 // debug(decrypted.toString("hex"));
                 // debug(decrypted.length);
 
-                const nPaddingBytes = decrypted[15];
+                const nPaddingBytes = decrypted[AES_BLOCK_SIZE - 1]; // decrypted.length = 1
                 // debug(nPaddingBytes);
 
                 const size = stream.length - AES_BLOCK_SIZE - nPaddingBytes;
@@ -454,13 +458,14 @@ export class TransformerLCP implements ITransformer {
         });
     }
 
-    protected UpdateLCP(publication: Publication, lcpPassHash: string): string | undefined {
+    protected UpdateLCP(publication: Publication, lcpPassHash: string): Buffer | undefined {
 
         if (!publication.LCP) {
             return undefined;
         }
 
-        const userKey = forge.util.hexToBytes(lcpPassHash);
+        // const userKey = forge.util.hexToBytes(lcpPassHash);
+        const userKey = new Buffer(lcpPassHash, "hex");
 
         // let userKey: string | undefined;
         // const lcpPass = this.Internal.find((i) => {
@@ -493,7 +498,9 @@ export class TransformerLCP implements ITransformer {
                 // publication.AddToInternal("lcp_content_key_algorithm", lcp.Encryption.ContentKey.Algorithm);
                 // publication.AddToInternal("lcp_user_hint", lcp.Encryption.UserKey.TextHint);
 
-                const keyCheck = new Buffer(publication.LCP.Encryption.UserKey.KeyCheck, "base64").toString("binary");
+                const keyCheck = new Buffer(publication.LCP.Encryption.UserKey.KeyCheck, "base64");
+                // .toString("binary");
+
                 // const keyCheck_ = forge.util.decode64(lcp.Encryption.UserKey.KeyCheck);
                 // if (keyCheck !== keyCheck_) {
                 //     console.log(`ERROR LCP.Encryption.UserKey.KeyCheck base64: ${keyCheck} !== ${keyCheck_}`);
@@ -504,7 +511,8 @@ export class TransformerLCP implements ITransformer {
 
                 const encryptedLicenseID = keyCheck;
 
-                const iv = encryptedLicenseID.substring(0, AES_BLOCK_SIZE);
+                // const iv = encryptedLicenseID.substring(0, AES_BLOCK_SIZE);
+                const iv = encryptedLicenseID.slice(0, AES_BLOCK_SIZE);
 
                 // console.log("=============== LCP ID");
                 // console.log(lcp.ID);
@@ -525,40 +533,95 @@ export class TransformerLCP implements ITransformer {
                 // console.log(aesCbcCipher.output.toHex());
                 // // console.log(aesCbcCipher.output.toString());
 
-                const toDecrypt = forge.util.createBuffer(encryptedLicenseID.substring(AES_BLOCK_SIZE), "binary");
-                // const toDecrypt = aesCbcCipher.output;
-                const aesCbcDecipher = (forge as any).cipher.createDecipher("AES-CBC", userKey);
-                aesCbcDecipher.start({ iv, additionalData_: "binary-encoded string" });
-                aesCbcDecipher.update(toDecrypt);
-                aesCbcDecipher.finish();
-                // console.log("=============== LCP DECYPHER");
-                // // breakLength: 100  maxArrayLength: undefined
-                // console.log(util.inspect(aesCbcDecipher.output,
-                //     { showHidden: false, depth: 1000, colors: true, customInspect: false }));
-                // console.log(aesCbcDecipher.output.bytes());
-                // console.log(aesCbcDecipher.output.toHex());
-                // // console.log(aesCbcDecipher.output.toString());
+                const encrypted = encryptedLicenseID.slice(AES_BLOCK_SIZE);
 
-                if (publication.LCP.ID === aesCbcDecipher.output.toString()) {
+                const decrypteds: Buffer[] = [];
+                const decryptStream = crypto.createDecipheriv("aes-256-cbc",
+                    userKey,
+                    iv);
+                decryptStream.setAutoPadding(false);
+                const buff1 = decryptStream.update(encrypted);
+                // debug(buff1.toString("hex"));
+                if (buff1) {
+                    decrypteds.push(buff1);
+                }
+                const buff2 = decryptStream.final();
+                // debug(buff2.toString("hex"));
+                if (buff2) {
+                    decrypteds.push(buff2);
+                }
+                const decrypted = Buffer.concat(decrypteds);
+
+                const nPaddingBytes = decrypted[decrypted.length - 1];
+                const size = encrypted.length - nPaddingBytes;
+
+                const decryptedOut = decrypted.slice(0, size).toString("utf8");
+
+                // const encrypted = encryptedLicenseID.substring(AES_BLOCK_SIZE);
+                // const toDecrypt = forge.util.createBuffer(encrypted, "binary");
+                // // const toDecrypt = aesCbcCipher.output;
+                // const aesCbcDecipher = (forge as any).cipher.createDecipher("AES-CBC", userKey);
+                // aesCbcDecipher.start({ iv, additionalData_: "binary-encoded string" });
+                // aesCbcDecipher.update(toDecrypt);
+                // aesCbcDecipher.finish();
+
+                // // console.log("=============== LCP DECYPHER");
+                // // // breakLength: 100  maxArrayLength: undefined
+                // // console.log(util.inspect(aesCbcDecipher.output,
+                // //     { showHidden: false, depth: 1000, colors: true, customInspect: false }));
+                // // console.log(aesCbcDecipher.output.bytes());
+                // // console.log(aesCbcDecipher.output.toHex());
+                // // // console.log(aesCbcDecipher.output.toString());
+                // const decryptedOut = aesCbcDecipher.output.toString();
+
+                if (publication.LCP.ID === decryptedOut) {
                     const encryptedContentKey =
-                        new Buffer(publication.LCP.Encryption.ContentKey.EncryptedValue, "base64").toString("binary");
+                        new Buffer(publication.LCP.Encryption.ContentKey.EncryptedValue, "base64");
+                    // .toString("binary");
 
-                    const iv2 = encryptedContentKey.substring(0, AES_BLOCK_SIZE);
-                    const toDecrypt2 =
-                        forge.util.createBuffer(encryptedContentKey.substring(AES_BLOCK_SIZE), "binary");
-                    // const toDecrypt = aesCbcCipher.output;
-                    const aesCbcDecipher2 = (forge as any).cipher.createDecipher("AES-CBC", userKey);
-                    aesCbcDecipher2.start({ iv: iv2, additionalData_: "binary-encoded string" });
-                    aesCbcDecipher2.update(toDecrypt2);
-                    aesCbcDecipher2.finish();
+                    // const iv2 = encryptedContentKey.substring(0, AES_BLOCK_SIZE);
+                    const iv2 = encryptedContentKey.slice(0, AES_BLOCK_SIZE);
 
-                    const contentKey = aesCbcDecipher2.output.bytes();
+                    const encrypted2 = encryptedContentKey.slice(AES_BLOCK_SIZE);
+
+                    const decrypteds2: Buffer[] = [];
+                    const decryptStream2 = crypto.createDecipheriv("aes-256-cbc",
+                        userKey,
+                        iv2);
+                    decryptStream2.setAutoPadding(false);
+                    const buff1_ = decryptStream2.update(encrypted2);
+                    // debug(buff1.toString("hex"));
+                    if (buff1_) {
+                        decrypteds2.push(buff1_);
+                    }
+                    const buff2_ = decryptStream2.final();
+                    // debug(buff2.toString("hex"));
+                    if (buff2_) {
+                        decrypteds2.push(buff2_);
+                    }
+                    const decrypted2 = Buffer.concat(decrypteds2);
+
+                    const nPaddingBytes2 = decrypted2[decrypted2.length - 1];
+                    const size2 = encrypted2.length - nPaddingBytes2;
+
+                    const contentKey = decrypted2.slice(0, size2); // .toString("binary");
+
+                    // const encrypted2 = encryptedContentKey.substring(AES_BLOCK_SIZE);
+                    // const toDecrypt2 =
+                    //     forge.util.createBuffer(encrypted2, "binary");
+                    // // const toDecrypt = aesCbcCipher.output;
+                    // const aesCbcDecipher2 = (forge as any).cipher.createDecipher("AES-CBC", userKey);
+                    // aesCbcDecipher2.start({ iv: iv2, additionalData_: "binary-encoded string" });
+                    // aesCbcDecipher2.update(toDecrypt2);
+                    // aesCbcDecipher2.finish();
+                    // const contentKey = new Buffer(aesCbcDecipher2.output.bytes());
+
                     // this.AddToInternal("lcp_content_key", contentKey);
 
                     return contentKey;
                 }
             } catch (err) {
-                console.log("LCP error! " + err);
+                console.log("=============== LCP error! " + err);
             }
         }
 

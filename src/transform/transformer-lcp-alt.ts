@@ -6,7 +6,7 @@ import { IStreamAndLength } from "@utils/zip/zip";
 import * as debug_ from "debug";
 import * as forge from "node-forge";
 
-import { TransformerLCP } from "./transformer-lcp";
+import { ICryptoInfo, TransformerLCP } from "./transformer-lcp";
 
 // import { CounterPassThroughStream } from "@utils/stream/CounterPassThroughStream";
 
@@ -21,11 +21,6 @@ const debugx = debug_("r2:transformer:stream:lcp");
 const AES_BLOCK_SIZE = 16;
 
 // let streamCounter = 0;
-
-export interface ICryptoInfo {
-    length: number;
-    padding: number;
-}
 
 export class TransformerLCPAlt extends TransformerLCP {
 
