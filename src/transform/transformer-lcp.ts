@@ -27,7 +27,7 @@ export interface ICryptoInfo {
 }
 
 export class TransformerLCP implements ITransformer {
-    private contentKey: string | undefined;
+    protected contentKey: string | undefined;
 
     public supports(publication: Publication, link: Link): boolean {
         const check = link.Properties.Encrypted.Scheme === "http://readium.org/2014/01/lcp"
@@ -153,6 +153,7 @@ export class TransformerLCP implements ITransformer {
 
         // debug(forge.util.bytesToHex(this.contentKey as string));
 
+        // https://github.com/nodejs/node/blob/master/lib/crypto.js#L259
         const decryptStream = crypto.createDecipheriv("aes-256-cbc",
             new Buffer(this.contentKey as string, "binary"),
             ivBuffer);
@@ -217,6 +218,8 @@ export class TransformerLCP implements ITransformer {
         // destStream = counterStream2;
 
         if (link.Properties.Encrypted.Compression === "deflate") {
+
+            // https://github.com/nodejs/node/blob/master/lib/zlib.js
             const inflateStream = zlib.createInflateRaw();
             destStream.pipe(inflateStream);
             destStream = inflateStream;
@@ -300,115 +303,125 @@ export class TransformerLCP implements ITransformer {
         _publication: Publication, _link: Link,
         stream: IStreamAndLength): Promise<ICryptoInfo> {
 
-        // debug("LCP getDecryptedSizeStream() stream.length: " + stream.length);
+        return new Promise<ICryptoInfo>((resolve, reject) => {
 
-        // debug("LCP getDecryptedSizeStream() AES_BLOCK_SIZE: " + AES_BLOCK_SIZE);
+            // debug("LCP getDecryptedSizeStream() stream.length: " + stream.length);
 
-        // CipherText = IV + PlainText + BLOCK - (PlainText MOD BLOCK)
-        // overflow: (PlainText MOD BLOCK) === PlainText - (floor(PlainText / BLOCK) * BLOCK)
-        // thus: CipherText = IV + BLOCK * (floor(PlainText / BLOCK) + 1)
+            // debug("LCP getDecryptedSizeStream() AES_BLOCK_SIZE: " + AES_BLOCK_SIZE);
 
-        // IV = AES_BLOCK_SIZE (first block in cyphertext)
-        // + at least one block
-        // (last one in cyphertext is either full 16-bytes random W3C padding
-        // in case plaintext is exactly multiple of block size,
-        // or partial cypher + padding)
-        const TWO_AES_BLOCK_SIZE = 2 * AES_BLOCK_SIZE;
-        if (stream.length < TWO_AES_BLOCK_SIZE) {
-            return Promise.reject("crypto err");
-        }
-        const readPos = stream.length - TWO_AES_BLOCK_SIZE;
+            // CipherText = IV + PlainText + BLOCK - (PlainText MOD BLOCK)
+            // overflow: (PlainText MOD BLOCK) === PlainText - (floor(PlainText / BLOCK) * BLOCK)
+            // thus: CipherText = IV + BLOCK * (floor(PlainText / BLOCK) + 1)
 
-        const rangeStream = new RangeStream(readPos, readPos + TWO_AES_BLOCK_SIZE - 1, stream.length);
-        stream.stream.pipe(rangeStream);
-        let buff: Buffer | undefined;
-        try {
-            buff = await streamToBufferPromise(rangeStream);
-        } catch (err) {
-            console.log(err);
-            return Promise.reject("crypto err");
-        }
+            // IV = AES_BLOCK_SIZE (first block in cyphertext)
+            // + at least one block
+            // (last one in cyphertext is either full 16-bytes random W3C padding
+            // in case plaintext is exactly multiple of block size,
+            // or partial cypher + padding)
+            const TWO_AES_BLOCK_SIZE = 2 * AES_BLOCK_SIZE;
+            if (stream.length < TWO_AES_BLOCK_SIZE) {
+                reject("crypto err");
+                return;
+            }
+            const readPos = stream.length - TWO_AES_BLOCK_SIZE;
 
-        // debug("LCP getDecryptedSizeStream() buff.length: " + buff.length);
+            const cypherRangeStream = new RangeStream(readPos, readPos + TWO_AES_BLOCK_SIZE - 1, stream.length);
+            stream.stream.pipe(cypherRangeStream);
 
-        // // debug(buff.toString("hex"));
-        // for (let i = 0; i < buff.length; i++) {
-        //     const b = buff[i];
-        //     if (i === AES_BLOCK_SIZE) {
-        //         debug("____");
-        //     }
-        //     debug(b);
-        // }
+            // let buff: Buffer | undefined;
+            // try {
+            //     buff = await streamToBufferPromise(cypherRangeStream);
+            // } catch (err) {
+            //     console.log(err);
+            //     reject("crypto err");
+            //     return;
+            // }
 
-        return this.getDecryptedSizeBuffer_(stream.length, buff);
-    }
+            // // debug("LCP getDecryptedSizeStream() buff.length: " + buff.length);
 
-    protected innerDecrypt(data: Buffer, padding: boolean): Buffer {
-        // debug("LCP innerDecrypt() data.length: " + data.length);
-        // debug("LCP innerDecrypt() padding: " + padding);
+            // // // debug(buff.toString("hex"));
+            // // for (let i = 0; i < buff.length; i++) {
+            // //     const b = buff[i];
+            // //     if (i === AES_BLOCK_SIZE) {
+            // //         debug("____");
+            // //     }
+            // //     debug(b);
+            // // }
 
-        const buffIV = data.slice(0, AES_BLOCK_SIZE);
-        // debug("LCP innerDecrypt() buffIV.length: " + buffIV.length);
+            // resolve(this.getDecryptedSizeBuffer_(stream.length, buff));
 
-        // TODO: keep buffer to avoid costly string conversion?
-        const iv = buffIV.toString("binary");
+            const decrypteds: Buffer[] = [];
 
-        const buffToDecrypt = data.slice(AES_BLOCK_SIZE);
-        // debug("LCP innerDecrypt() buffToDecrypt: " + buffToDecrypt.length);
+            cypherRangeStream.on("readable", () => {
+                // debug("readable");
 
-        // TODO: keep buffer to avoid costly string conversion?
-        const strToDecrypt = buffToDecrypt.toString("binary");
-        const toDecrypt =
-            forge.util.createBuffer(strToDecrypt, "binary");
+                const ivBuffer = cypherRangeStream.read(AES_BLOCK_SIZE);
+                if (!ivBuffer) {
+                    // debug("readable null (end)");
+                    return;
+                }
 
-        const aesCbcDecipher = (forge as any).cipher.createDecipher("AES-CBC", this.contentKey);
-        aesCbcDecipher.start({ iv, additionalData_: "binary-encoded string" });
-        aesCbcDecipher.update(toDecrypt);
+                // debug(ivBuffer.toString("hex"));
+                // e10cb2a27aa7b9633f104ccca113d499
+                // === asharedculture_soundtrack.mp3
+                //
+                // 5d290cb97ea83ccc01a67d30a9c7eeaa
+                // === shared-culture.mp4
 
-        function unpadFunc() { return false; }
-        // const res =
-        aesCbcDecipher.finish(padding ? undefined : unpadFunc);
-        // debug(res);
+                const encrypted = cypherRangeStream.read(AES_BLOCK_SIZE);
+                // debug(encrypted.toString("hex"));
+                // 14b46cb1e279d51c12ce13989b3d6cf3
+                // === asharedculture_soundtrack.mp3
+                //
+                // b2924b9b0cd64ab7cd349beef8e4b068
+                // === shared-culture.mp4
 
-        const decryptedZipData = aesCbcDecipher.output.bytes();
+                const decryptStream = crypto.createDecipheriv("aes-256-cbc",
+                    new Buffer(this.contentKey as string, "binary"),
+                    ivBuffer);
+                decryptStream.setAutoPadding(false);
 
-        // debug(forge.util.bytesToHex(decryptedZipData));
-        // debug(decryptedZipData.toHex());
+                const buff1 = decryptStream.update(encrypted);
+                // debug(buff1.toString("hex"));
+                // ecf8848cb3c0c97b9e159ec2daa96810
+                // === asharedculture_soundtrack.mp3
+                //
+                // 004c61766635332e31372e308b6f7004
+                // === shared-culture.mp4
+                if (buff1) {
+                    decrypteds.push(buff1);
+                }
 
-        const buff = new Buffer(decryptedZipData, "binary");
+                const buff2 = decryptStream.final();
+                // debug(buff2.toString("hex"));
+                if (buff2) {
+                    decrypteds.push(buff2);
+                }
+            });
 
-        // debug("LCP innerDecrypt() buff.length: " + buff.length);
+            cypherRangeStream.on("end", () => {
+                // debug("end");
 
-        return buff;
-    }
+                const decrypted = Buffer.concat(decrypteds);
+                // debug(decrypted.toString("hex"));
+                // debug(decrypted.length);
 
-    protected async getDecryptedSizeBuffer_(totalByteLength: number, buff: Buffer): Promise<ICryptoInfo> {
+                const nPaddingBytes = decrypted[15];
+                // debug(nPaddingBytes);
 
-        // debug("LCP getDecryptedSizeBuffer_() totalByteLength: " + totalByteLength);
+                const size = stream.length - AES_BLOCK_SIZE - nPaddingBytes;
 
-        // debug("LCP getDecryptedSizeBuffer_() buff.length: " + buff.length);
+                const res: ICryptoInfo = {
+                    length: size,
+                    padding: nPaddingBytes,
+                };
+                resolve(res);
+            });
 
-        const newBuff = this.innerDecrypt(buff, true);
-
-        // debug("LCP getDecryptedSizeBuffer_() newBuff.length (innerDecrypt): " + newBuff.length);
-
-        // newBuff.length === 0
-        // when last second block is all padding,
-        // otherwise newBuff.length === overflow encrypted bytes,
-        // number between [1, AES_BLOCK_SIZE[
-        const nPaddingBytes = AES_BLOCK_SIZE - newBuff.length;
-        // debugx("LCP getDecryptedSizeBuffer_() nPaddingBytes: " + nPaddingBytes);
-
-        const size = totalByteLength - AES_BLOCK_SIZE - nPaddingBytes;
-
-        // debug("LCP getDecryptedSizeBuffer_() size: " + size);
-
-        const res: ICryptoInfo = {
-            length: size,
-            padding: nPaddingBytes,
-        };
-
-        return Promise.resolve(res);
+            cypherRangeStream.on("error", () => {
+                reject("DECRYPT err");
+            });
+        });
     }
 
     protected UpdateLCP(publication: Publication, lcpPassHash: string): string | undefined {

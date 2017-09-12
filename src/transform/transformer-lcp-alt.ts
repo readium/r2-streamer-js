@@ -4,6 +4,7 @@ import { Publication } from "@models/publication";
 import { Link } from "@models/publication-link";
 import { IStreamAndLength } from "@utils/zip/zip";
 import * as debug_ from "debug";
+import * as forge from "node-forge";
 
 import { TransformerLCP } from "./transformer-lcp";
 
@@ -595,6 +596,75 @@ export class TransformerLCPAlt extends TransformerLCP {
     //     const buff = data.slice(readPos, totalByteLength);
 
     //     return this.getDecryptedSizeBuffer_(totalByteLength, buff);
+    // }
+
+    protected innerDecrypt(data: Buffer, padding: boolean): Buffer {
+        // debug("LCP innerDecrypt() data.length: " + data.length);
+        // debug("LCP innerDecrypt() padding: " + padding);
+
+        const buffIV = data.slice(0, AES_BLOCK_SIZE);
+        // debug("LCP innerDecrypt() buffIV.length: " + buffIV.length);
+
+        // TODO: keep buffer to avoid costly string conversion?
+        const iv = buffIV.toString("binary");
+
+        const buffToDecrypt = data.slice(AES_BLOCK_SIZE);
+        // debug("LCP innerDecrypt() buffToDecrypt: " + buffToDecrypt.length);
+
+        // TODO: keep buffer to avoid costly string conversion?
+        const strToDecrypt = buffToDecrypt.toString("binary");
+        const toDecrypt =
+            forge.util.createBuffer(strToDecrypt, "binary");
+
+        const aesCbcDecipher = (forge as any).cipher.createDecipher("AES-CBC", this.contentKey);
+        aesCbcDecipher.start({ iv, additionalData_: "binary-encoded string" });
+        aesCbcDecipher.update(toDecrypt);
+
+        function unpadFunc() { return false; }
+        // const res =
+        aesCbcDecipher.finish(padding ? undefined : unpadFunc);
+        // debug(res);
+
+        const decryptedZipData = aesCbcDecipher.output.bytes();
+
+        // debug(forge.util.bytesToHex(decryptedZipData));
+        // debug(decryptedZipData.toHex());
+
+        const buff = new Buffer(decryptedZipData, "binary");
+
+        // debug("LCP innerDecrypt() buff.length: " + buff.length);
+
+        return buff;
+    }
+
+    // protected async getDecryptedSizeBuffer_(totalByteLength: number, buff: Buffer): Promise<ICryptoInfo> {
+
+    //     // debug("LCP getDecryptedSizeBuffer_() totalByteLength: " + totalByteLength);
+
+    //     // debug("LCP getDecryptedSizeBuffer_() buff.length: " + buff.length);
+
+    //     const padding = true;
+    //     const newBuff = this.innerDecrypt(buff, padding);
+
+    //     // debug("LCP getDecryptedSizeBuffer_() newBuff.length (innerDecrypt): " + newBuff.length);
+
+    //     // newBuff.length === 0
+    //     // when last second block is all padding,
+    //     // otherwise newBuff.length === overflow encrypted bytes,
+    //     // number between [1, AES_BLOCK_SIZE[
+    //     const nPaddingBytes = padding ? (AES_BLOCK_SIZE - newBuff.length) : newBuff[15];
+    //     // debugx("LCP getDecryptedSizeBuffer_() nPaddingBytes: " + nPaddingBytes);
+
+    //     const size = totalByteLength - AES_BLOCK_SIZE - nPaddingBytes;
+
+    //     // debug("LCP getDecryptedSizeBuffer_() size: " + size);
+
+    //     const res: ICryptoInfo = {
+    //         length: size,
+    //         padding: nPaddingBytes,
+    //     };
+
+    //     return Promise.resolve(res);
     // }
 
     // private async transformBuffer(_publication: Publication, link: Link, data: Buffer): Promise<Buffer> {
