@@ -56,6 +56,7 @@ export class LCP {
     // hexadecimal encoding
     public setUserPassphrase(pass: string): boolean {
         this.userPassphraseHex = pass;
+        this.ContentKey = undefined;
 
         const check = this.Encryption.Profile === "http://readium.org/lcp/basic-profile"
             && this.Encryption.UserKey.Algorithm === "http://www.w3.org/2001/04/xmlenc#sha256"
@@ -64,10 +65,6 @@ export class LCP {
         if (!check) {
             debug("Incorrect LCP fields.");
             return false;
-        }
-
-        if (this.ContentKey) {
-            return true;
         }
 
         // const userKey = forge.util.hexToBytes(passPhrase);
