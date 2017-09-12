@@ -8,6 +8,7 @@ import {
     JsonProperty,
 } from "ta-json";
 
+import { LCPBasicProfileCertificate } from "./lcp-certificate";
 import { Encryption } from "./lcp-encryption";
 import { Link } from "./lcp-link";
 import { Rights } from "./lcp-rights";
@@ -211,5 +212,9 @@ export class LCP {
         // }
 
         return true;
+    }
+
+    public checkCertificate() {
+        debug(LCPBasicProfileCertificate);
     }
 }
