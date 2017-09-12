@@ -52,7 +52,6 @@ export interface ICryptoInfo {
 }
 
 export class TransformerLCP implements ITransformer {
-    protected contentKey: Buffer | undefined;
 
     public supports(publication: Publication, link: Link): boolean {
         const check = link.Properties.Encrypted.Scheme === "http://readium.org/2014/01/lcp"
@@ -76,8 +75,8 @@ export class TransformerLCP implements ITransformer {
             return false;
         }
 
-        this.contentKey = this.UpdateLCP(publication, lcpPassHash);
-        if (!this.contentKey) {
+        const contentKey = this.UpdateLCP(publication, lcpPassHash);
+        if (!contentKey) {
             debug("LCP problem key.");
             return false;
         }
@@ -92,6 +91,17 @@ export class TransformerLCP implements ITransformer {
         isPartialByteRangeRequest: boolean,
         partialByteBegin: number,
         partialByteEnd: number): Promise<IStreamAndLength> {
+
+        const contentKey_ = publication.Internal.find((i) => {
+            if (i.Name === "lcp_content_key") {
+                return true;
+            }
+            return false;
+        });
+        if (!contentKey_) {
+            return Promise.reject("no content key!");
+        }
+        const contentKey = contentKey_.Value;
 
         let cryptoInfo: ICryptoInfo | undefined;
         let plainTextSize = -1;
@@ -185,11 +195,11 @@ export class TransformerLCP implements ITransformer {
         }
         // debug("IV: " + forge.util.bytesToHex(ivBuffer));
 
-        // debug(forge.util.bytesToHex(this.contentKey as string));
+        // debug(forge.util.bytesToHex(contentKey as string));
 
         // https://github.com/nodejs/node/blob/master/lib/crypto.js#L259
         const decryptStream = crypto.createDecipheriv("aes-256-cbc",
-        this.contentKey, // new Buffer(this.contentKey as string, "binary"),
+            contentKey, // new Buffer(contentKey as string, "binary"),
             ivBuffer);
         decryptStream.setAutoPadding(false);
         rawDecryptStream.pipe(decryptStream);
@@ -334,8 +344,19 @@ export class TransformerLCP implements ITransformer {
     }
 
     protected async getDecryptedSizeStream(
-        _publication: Publication, _link: Link,
+        publication: Publication, _link: Link,
         stream: IStreamAndLength): Promise<ICryptoInfo> {
+
+        const contentKey_ = publication.Internal.find((i) => {
+            if (i.Name === "lcp_content_key") {
+                return true;
+            }
+            return false;
+        });
+        if (!contentKey_) {
+            return Promise.reject("no content key!");
+        }
+        const contentKey = contentKey_.Value;
 
         return new Promise<ICryptoInfo>((resolve, reject) => {
 
@@ -411,7 +432,7 @@ export class TransformerLCP implements ITransformer {
                 // === shared-culture.mp4
 
                 const decryptStream = crypto.createDecipheriv("aes-256-cbc",
-                    this.contentKey, // new Buffer(this.contentKey as string, "binary"),
+                    contentKey, // new Buffer(contentKey as string, "binary"),
                     ivBuffer);
                 decryptStream.setAutoPadding(false);
 
@@ -616,7 +637,7 @@ export class TransformerLCP implements ITransformer {
                     // aesCbcDecipher2.finish();
                     // const contentKey = new Buffer(aesCbcDecipher2.output.bytes());
 
-                    // this.AddToInternal("lcp_content_key", contentKey);
+                    publication.AddToInternal("lcp_content_key", contentKey);
 
                     return contentKey;
                 }

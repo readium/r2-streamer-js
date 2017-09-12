@@ -200,6 +200,8 @@ export class TransformerLCPAlt extends TransformerLCP {
 
                 if (toDecrypt) {
                     let newBuff = decryptStreamThis.innerDecrypt(
+                        publication,
+                        link,
                         toDecrypt,
                         padding);
                     if (decryptStreamFirst) {
@@ -320,6 +322,8 @@ export class TransformerLCPAlt extends TransformerLCP {
                             debugx(`CHUNK TO DECRYPT: ${toDecrypt.length}`);
 
                             let newBuff = decryptStreamThis.innerDecrypt(
+                                publication,
+                                link,
                                 toDecrypt,
                                 decryptStreamFinished ? padding : false);
 
@@ -593,9 +597,22 @@ export class TransformerLCPAlt extends TransformerLCP {
     //     return this.getDecryptedSizeBuffer_(totalByteLength, buff);
     // }
 
-    protected innerDecrypt(data: Buffer, padding: boolean): Buffer {
+    protected innerDecrypt(
+        publication: Publication, _link: Link,
+        data: Buffer, padding: boolean): Buffer {
         // debug("LCP innerDecrypt() data.length: " + data.length);
         // debug("LCP innerDecrypt() padding: " + padding);
+
+        const contentKey_ = publication.Internal.find((i) => {
+            if (i.Name === "lcp_content_key") {
+                return true;
+            }
+            return false;
+        });
+        if (!contentKey_) {
+            return new Buffer("!");
+        }
+        const contentKey = contentKey_.Value;
 
         const buffIV = data.slice(0, AES_BLOCK_SIZE);
         // debug("LCP innerDecrypt() buffIV.length: " + buffIV.length);
@@ -611,7 +628,7 @@ export class TransformerLCPAlt extends TransformerLCP {
         const toDecrypt =
             forge.util.createBuffer(strToDecrypt, "binary");
 
-        const aesCbcDecipher = (forge as any).cipher.createDecipher("AES-CBC", this.contentKey);
+        const aesCbcDecipher = (forge as any).cipher.createDecipher("AES-CBC", contentKey);
         aesCbcDecipher.start({ iv, additionalData_: "binary-encoded string" });
         aesCbcDecipher.update(toDecrypt);
 
