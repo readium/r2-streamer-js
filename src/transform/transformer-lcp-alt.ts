@@ -603,16 +603,7 @@ export class TransformerLCPAlt extends TransformerLCP {
         // debug("LCP innerDecrypt() data.length: " + data.length);
         // debug("LCP innerDecrypt() padding: " + padding);
 
-        const contentKey_ = publication.Internal.find((i) => {
-            if (i.Name === "lcp_content_key") {
-                return true;
-            }
-            return false;
-        });
-        if (!contentKey_) {
-            return new Buffer("!");
-        }
-        const contentKey = contentKey_.Value;
+        const contentKey = publication.LCP.ContentKey;
 
         const buffIV = data.slice(0, AES_BLOCK_SIZE);
         // debug("LCP innerDecrypt() buffIV.length: " + buffIV.length);

@@ -42,4 +42,14 @@ export class LCP {
     public Links: Link[];
 
     public ZipPath: string;
+
+    public ContentKey: Buffer | undefined;
+    private userPassphraseHex: string | undefined;
+    public setUserPassphraseHex(pass: string) {
+        this.userPassphraseHex = pass;
+        this.ContentKey = undefined;
+    }
+    public getUserPassphraseHex() {
+        return this.userPassphraseHex;
+    }
 }

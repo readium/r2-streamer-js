@@ -96,6 +96,13 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
             }
             // dumpPublication(publication);
 
+            if (req.params.lcpPass64) {
+                const lcpPass = new Buffer(req.params.lcpPass64, "base64").toString("utf8");
+                if (publication.LCP) {
+                    publication.LCP.setUserPassphraseHex(lcpPass); // hex
+                }
+            }
+
             // console.log(req.url); // path local to this router
             // console.log(req.baseUrl); // path local to above this router
             // console.log(req.originalUrl); // full path (req.baseUrl + req.url)

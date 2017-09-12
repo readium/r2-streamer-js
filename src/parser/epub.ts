@@ -51,41 +51,35 @@ export const mediaOverlayURLPath = "media-overlay.json";
 export const mediaOverlayURLParam = "resource";
 
 export const addCoverDimensions = async (publication: Publication, coverLink: Link): Promise<void> => {
-    if (publication.Internal) {
-        const zipInternal = publication.Internal.find((i) => {
-            if (i.Name === "zip") {
-                return true;
-            }
-            return false;
-        });
-        if (zipInternal) {
-            const zip = zipInternal.Value as IZip;
-            if (zip.hasEntry(coverLink.Href)) {
-                let zipStream: IStreamAndLength | undefined;
+
+    const zipInternal = publication.findFromInternal("zip");
+    if (zipInternal) {
+        const zip = zipInternal.Value as IZip;
+        if (zip.hasEntry(coverLink.Href)) {
+            let zipStream: IStreamAndLength | undefined;
+            try {
+                zipStream = await zip.entryStreamPromise(coverLink.Href);
+
+                let zipData: Buffer | undefined;
                 try {
-                    zipStream = await zip.entryStreamPromise(coverLink.Href);
+                    zipData = await streamToBufferPromise(zipStream.stream);
 
-                    let zipData: Buffer | undefined;
-                    try {
-                        zipData = await streamToBufferPromise(zipStream.stream);
+                    const imageInfo = sizeOf(zipData);
+                    if (imageInfo) {
+                        coverLink.Width = imageInfo.width;
+                        coverLink.Height = imageInfo.height;
 
-                        const imageInfo = sizeOf(zipData);
-                        if (imageInfo) {
-                            coverLink.Width = imageInfo.width;
-                            coverLink.Height = imageInfo.height;
-
-                            if (coverLink.TypeLink &&
-                                coverLink.TypeLink.replace("jpeg", "jpg").replace("+xml", "")
-                                !== ("image/" + imageInfo.type)) {
-                                console.log(`Wrong image type? ${coverLink.TypeLink} -- ${imageInfo.type}`);
-                            }
+                        if (coverLink.TypeLink &&
+                            coverLink.TypeLink.replace("jpeg", "jpg").replace("+xml", "")
+                            !== ("image/" + imageInfo.type)) {
+                            console.log(`Wrong image type? ${coverLink.TypeLink} -- ${imageInfo.type}`);
                         }
-                    } catch (err) {
-                        console.log(err);
                     }
                 } catch (err) {
                     console.log(err);
                 }
+            } catch (err) {
+                console.log(err);
             }
         }
     }

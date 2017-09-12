@@ -78,17 +78,12 @@ export class Publication {
 
     public LCP: LCP;
 
-    public Internal: IInternal[];
+    private Internal: IInternal[];
 
     public freeDestroy() {
         console.log("freeDestroy: Publication");
         if (this.Internal) {
-            const zipInternal = this.Internal.find((i) => {
-                if (i.Name === "zip") {
-                    return true;
-                }
-                return false;
-            });
+            const zipInternal = this.findFromInternal("zip");
             if (zipInternal) {
                 const zip = zipInternal.Value as IZip;
                 zip.freeDestroy();
