@@ -52,7 +52,8 @@ export class LCP {
 
     public ContentKey: Buffer | undefined;
     private userPassphraseHex: string | undefined;
-    public setUserPassphraseHex(pass: string): boolean {
+    // hexadecimal encoding
+    public setUserPassphrase(pass: string): boolean {
         this.userPassphraseHex = pass;
 
         const check = this.Encryption.Profile === "http://readium.org/lcp/basic-profile"
