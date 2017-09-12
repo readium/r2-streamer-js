@@ -56,33 +56,6 @@ export class TransformerLCP implements ITransformer {
         return true;
     }
 
-    // cc-shared-culture/EPUB/audio/asharedculture_soundtrack.mp3
-    // 3265152 bytes
-    // 3 MB
-    // 204072 * 16 BLOCKS (inc IV)
-    // 3265152 MOD 16 = 0
-    // IV 16
-    // PAD 16, full extra block (random)
-    // + 32 = 3265184 total cypher-text
-
-    // cc-shared-culture/EPUB/video/shared-culture.mp4
-    // 21784780 bytes
-    // 21 MB
-    // 1361548.75 * 16 BLOCKS (inc IV)
-    // 21784780 MOD 16 = 12 (0.75 * 16)
-    // IV 16
-    // PAD 4 (12 cypher-text bytes in last block)
-    // + 20 = 21784800 total cypher-text
-
-    // cc-shared-culture/EPUB/video/shared-culture.webm
-    // 8330669 bytes
-    // 8 MB
-    // 520666.8125 * 16 BLOCKS (inc IV)
-    // 8330669 MOD 16 = 13 (0.8125 * 16)
-    // IV 16
-    // PAD 3 (13 cypher-text bytes in last block)
-    // + 19 = 8330688 total cypher-text
-
     public async transformStream(
         publication: Publication,
         link: Link,
@@ -139,277 +112,6 @@ export class TransformerLCP implements ITransformer {
         }
 
         // const partialByteLength = (partialByteEnd + 1) - partialByteBegin;
-
-        // // block padding scheme
-        // let padding = false; // NO_PADDING
-        // const sizeWithoutPaddedBlock = plainTextSize - (plainTextSize % AES_BLOCK_SIZE);
-
-        // // debug("LCP transformStream() sizeWithoutPaddedBlock: " + sizeWithoutPaddedBlock);
-
-        // if ((partialByteEnd + 1) > sizeWithoutPaddedBlock) {
-        //     padding = true; // W3C_PADDING, also PKCS#7
-        // }
-
-        // // byte offset in first block of the cypher text that contains the range begin
-        // const blockOffset = partialByteBegin % AES_BLOCK_SIZE;
-
-        // // we read the entire first block, even if partially used
-        // const readPosition = partialByteBegin - blockOffset;
-
-        // // debug("LCP transformStream() blockOffset: " + blockOffset);
-        // // debug("LCP transformStream() readPosition: " + readPosition);
-
-        // // number of blocks to read
-        // let blocksCount = 1;
-        // let bytesInFirstBlock = (AES_BLOCK_SIZE - blockOffset) % AES_BLOCK_SIZE;
-
-        // // debug("LCP transformStream() bytesInFirstBlock: " + bytesInFirstBlock);
-
-        // if (partialByteLength < bytesInFirstBlock) {
-        //     bytesInFirstBlock = 0;
-        // }
-        // if (bytesInFirstBlock > 0) {
-        //     blocksCount++;
-        // }
-
-        // const diff = partialByteLength - bytesInFirstBlock;
-
-        // // debug("LCP transformStream() diff: " + diff);
-
-        // let inc = diff / AES_BLOCK_SIZE;
-        // // debug("LCP transformStream() inc: " + inc);
-
-        // inc = Math.floor(inc);
-        // // debug("LCP transformStream() inc: " + inc);
-
-        // blocksCount += inc;
-
-        // const rem = diff % AES_BLOCK_SIZE;
-        // // debug("LCP transformStream() rem: " + rem);
-
-        // if (rem !== 0) {
-        //     blocksCount++;
-        // }
-
-        // // debug("LCP transformStream() blocksCount: " + blocksCount);
-
-        // // number of bytes to read (block aligned)
-        // const toRead = blocksCount * AES_BLOCK_SIZE;
-
-        // const readPositionEND = readPosition + toRead - 1;
-
-        // // const rangeStream = new RangeStream(readPosition, readPositionEND, stream.length);
-        // const decryptStreamStreamBegin = readPosition;
-        // const decryptStreamStreamEnd = readPositionEND;
-
-        // const decryptStreamBlockOffset = blockOffset;
-
-        // let decryptStreamBytesReceived = 0;
-        // let decryptStreamBytesSent = 0;
-        // let decryptStreamFinished = false;
-        // let decryptStreamClosed = false;
-        // let decryptStreamFirst = true;
-
-        // const decryptStreamThis = this;
-
-        // let decryptStreamBuffers: Buffer[] = [];
-
-        // const TWO_AES_BLOCK_SIZE = 2 * AES_BLOCK_SIZE;
-
-        // const decryptStream = new Transform({
-        //     flush(callback: () => void): void {
-        //         debugx("LcpDecryptStream FLUSH");
-
-        //         let toDecrypt: Buffer | undefined;
-
-        //         let decryptStreamBuffersTotalLength = 0;
-        //         decryptStreamBuffers.forEach((buff) => {
-        //             decryptStreamBuffersTotalLength += buff.length;
-        //         });
-        //         if (decryptStreamBuffersTotalLength) {
-
-        //             debugx("LcpDecryptStream FLUSH decryptStreamBuffersTotalLength: " +
-        //                 decryptStreamBuffersTotalLength);
-
-        //             const available = decryptStreamBuffersTotalLength;
-
-        //             if (available === TWO_AES_BLOCK_SIZE) {
-        //                 toDecrypt = Buffer.concat(decryptStreamBuffers);
-        //                 decryptStreamBuffers = [];
-        //             } else if (available < TWO_AES_BLOCK_SIZE) {
-        //                 debugx("LcpDecryptStream NOT ENOUGH DATA????");
-        //             } else { // available > TWO_AES_BLOCK_SIZE
-
-        //                 const decryptStreamBuffersConcat = Buffer.concat(decryptStreamBuffers);
-        //                 decryptStreamBuffers = [];
-
-        //                 const nBlocks = Math.floor(decryptStreamBuffersConcat.length / AES_BLOCK_SIZE);
-        //                 const blocksBytes = nBlocks * AES_BLOCK_SIZE;
-
-        //                 // decryptStreamBuffersConcat.length % AES_BLOCK_SIZE === 0
-        //                 if (blocksBytes === decryptStreamBuffersConcat.length) {
-        //                     toDecrypt = decryptStreamBuffersConcat;
-        //                 } else {
-        //                     debugx("LcpDecryptStream OVERFLOW DATA????");
-        //                     // toDecrypt = decryptStreamBuffersConcat.slice(0, blocksBytes);
-        //                     // decryptStreamBuffers.push(decryptStreamBuffersConcat.slice(blocksBytes));
-        //                 }
-        //             }
-        //         }
-
-        //         if (toDecrypt) {
-        //             let newBuff = decryptStreamThis.innerDecrypt(
-        //                 toDecrypt,
-        //                 padding);
-        //             if (decryptStreamFirst) {
-        //                 decryptStreamFirst = false;
-        //                 newBuff = newBuff.slice(decryptStreamBlockOffset);
-        //             }
-        //             decryptStreamBytesSent += newBuff.length;
-        //             debugx("LcpDecryptStream FLUSH decryptStreamBytesSent: " + decryptStreamBytesSent);
-        //             this.push(newBuff);
-        //         }
-
-        //         if (decryptStreamBytesSent !== plainTextSize) {
-
-        //             debugx(`############### ` +
-        //                 `LcpDecryptStream FLUSH  LENGTH NOT MATCH ` +
-        //                 `decryptStreamBytesSent !== plainTextSize:` +
-        //                 `[ ${decryptStreamStreamBegin} (${decryptStreamStreamEnd}) ] ` +
-        //                 `${decryptStreamBytesReceived} (${stream.length}) > ` +
-        //                 `${decryptStreamBytesSent} !== ${plainTextSize}`);
-        //         }
-        //         callback();
-        //     },
-
-        //     transform(chunk: Buffer, _encoding: string, callback: () => void): void {
-        //         decryptStreamBytesReceived += chunk.length;
-
-        //         debugx("TRANSFORM chunk.length: " + chunk.length + " (( " + decryptStreamBytesReceived);
-
-        //         if (decryptStreamFinished) {
-        //             if (!decryptStreamClosed) {
-        //                 debugx("???? LcpDecryptStream CLOSING...");
-        //                 decryptStreamClosed = true;
-        //                 this.push(null);
-        //             } else {
-        //                 debugx("???? LcpDecryptStream STILL PIPE CALLING _transform ??!");
-        //                 this.end();
-        //             }
-        //         } else {
-        //             if (decryptStreamBytesReceived > decryptStreamStreamBegin) {
-
-        //                 let chunkBegin = 0;
-        //                 let chunkEnd = chunk.length - 1;
-
-        //                 chunkBegin = decryptStreamStreamBegin - (decryptStreamBytesReceived - chunk.length);
-        //                 if (chunkBegin < 0) {
-        //                     chunkBegin = 0;
-        //                 }
-
-        //                 if (decryptStreamBytesReceived > decryptStreamStreamEnd) {
-        //                     decryptStreamFinished = true;
-
-        //                     const decr = decryptStreamBytesReceived - decryptStreamStreamEnd;
-
-        //                     debugx("LcpDecryptStream TRANSFORM FINISH decr: " + decr);
-
-        //                     chunkEnd = chunk.length - decr;
-        //                 }
-
-        //                 debugx(`CHUNK: ${chunkBegin}-${chunkEnd}/${chunk.length}`);
-
-        //                 const encryptedChunk = chunk.slice(chunkBegin, chunkEnd + 1);
-
-        //                 let toDecrypt: Buffer | undefined;
-
-        //                 let decryptStreamBuffersTotalLength = 0;
-        //                 decryptStreamBuffers.forEach((buff) => {
-        //                     decryptStreamBuffersTotalLength += buff.length;
-        //                 });
-        //                 if (decryptStreamBuffersTotalLength) {
-        //                     debugx("LcpDecryptStream TRANSFORM decryptStreamBuffersTotalLength: " +
-        //                         decryptStreamBuffersTotalLength);
-
-        //                     const available = decryptStreamBuffersTotalLength + encryptedChunk.length;
-
-        //                     if (available === TWO_AES_BLOCK_SIZE) {
-        //                         decryptStreamBuffers.push(encryptedChunk);
-        //                         toDecrypt = Buffer.concat(decryptStreamBuffers);
-        //                         decryptStreamBuffers = [];
-        //                     } else if (available < TWO_AES_BLOCK_SIZE) {
-        //                         decryptStreamBuffers.push(encryptedChunk);
-        //                     } else { // available > TWO_AES_BLOCK_SIZE
-        //                         decryptStreamBuffers.push(encryptedChunk);
-        //                         const decryptStreamBuffersConcat = Buffer.concat(decryptStreamBuffers);
-        //                         decryptStreamBuffers = [];
-
-        //                         const nBlocks = Math.floor(decryptStreamBuffersConcat.length / AES_BLOCK_SIZE);
-        //                         const blocksBytes = nBlocks * AES_BLOCK_SIZE;
-
-        //                         // decryptStreamBuffersConcat.length % AES_BLOCK_SIZE === 0
-        //                         if (blocksBytes === decryptStreamBuffersConcat.length) {
-        //                             toDecrypt = decryptStreamBuffersConcat;
-        //                         } else {
-        //                             toDecrypt = decryptStreamBuffersConcat.slice(0, blocksBytes);
-        //                             decryptStreamBuffers.push(decryptStreamBuffersConcat.slice(blocksBytes));
-        //                         }
-        //                     }
-        //                 } else {
-        //                     if (encryptedChunk.length === TWO_AES_BLOCK_SIZE) {
-        //                         toDecrypt = encryptedChunk;
-        //                     } else if (encryptedChunk.length < TWO_AES_BLOCK_SIZE) {
-        //                         decryptStreamBuffers.push(encryptedChunk);
-        //                     } else { // encryptedChunk.length > TWO_AES_BLOCK_SIZE
-        //                         const nBlocks = Math.floor(encryptedChunk.length / AES_BLOCK_SIZE);
-        //                         const blocksBytes = nBlocks * AES_BLOCK_SIZE;
-
-        //                         // encryptedChunk.length % AES_BLOCK_SIZE === 0
-        //                         if (blocksBytes === encryptedChunk.length) {
-        //                             toDecrypt = encryptedChunk;
-        //                         } else {
-        //                             toDecrypt = encryptedChunk.slice(0, blocksBytes);
-        //                             decryptStreamBuffers.push(encryptedChunk.slice(blocksBytes));
-        //                         }
-        //                     }
-        //                 }
-
-        //                 if (toDecrypt) {
-
-        //                     debugx(`CHUNK TO DECRYPT: ${toDecrypt.length}`);
-
-        //                     let newBuff = decryptStreamThis.innerDecrypt(
-        //                         toDecrypt,
-        //                         decryptStreamFinished ? padding : false);
-
-        //                     debugx(`CHUNK DECRYPTED: ${newBuff.length}`);
-
-        //                     if (decryptStreamFirst) {
-        //                         decryptStreamFirst = false;
-        //                         debugx("LcpDecryptStream TRANSFORM decryptStreamBlockOffset: " +
-        //                             decryptStreamBlockOffset);
-        //                         newBuff = newBuff.slice(decryptStreamBlockOffset);
-        //                     }
-        //                     decryptStreamBytesSent += newBuff.length;
-        //                     debugx("LcpDecryptStream TRANSFORM decryptStreamBytesSent: " + decryptStreamBytesSent);
-        //                     this.push(newBuff);
-        //                 }
-
-        //                 if (decryptStreamFinished) {
-        //                     debugx("LcpDecryptStream FINISHING...");
-        //                     decryptStreamClosed = true;
-        //                     this.push(null);
-        //                     this.end();
-        //                 }
-        //             } else {
-        //                 // NOOP
-        //                 // no call to this.push(), we skip the entire current chunk buffer
-        //             }
-        //         }
-
-        //         callback();
-        //     },
-        // });
 
         let ivBuffer: Buffer | undefined;
         if (link.Properties.Encrypted.CypherBlockIV) {
@@ -594,150 +296,7 @@ export class TransformerLCP implements ITransformer {
         return Promise.resolve(sal);
     }
 
-    // private async transformStream__(
-    //     publication: Publication, link: Link,
-    //     stream: IStreamAndLength,
-    //     isPartialByteRangeRequest: boolean,
-    //     partialByteBegin: number, partialByteEnd: number): Promise<IStreamAndLength> {
-
-    //     if (!isPartialByteRangeRequest) {
-    //         return this.transformStream_(
-    //             publication, link,
-    //             stream,
-    //             isPartialByteRangeRequest,
-    //             partialByteBegin, partialByteEnd);
-    //     }
-
-    //     debug("LCP transformStream() RAW STREAM LENGTH: " + stream.length);
-
-    //     let plainTextSize = -1;
-    //     if (link.Properties.Encrypted.DecryptedLengthBeforeInflate > 0) {
-    //         plainTextSize = link.Properties.Encrypted.DecryptedLengthBeforeInflate;
-    //     } else {
-    //         plainTextSize = await this.getDecryptedSizeStream(publication, link, stream);
-    //         debug("LCP transformStream() ---- getDecryptedSizeStream(): " + plainTextSize);
-    //         stream = await stream.reset();
-    //         // length cached to avoid resetting the stream to zero-position
-    //         link.Properties.Encrypted.DecryptedLengthBeforeInflate = plainTextSize;
-    //     }
-    //     debug("LCP transformStream() plainTextSize: " + plainTextSize);
-
-    //     if (partialByteBegin < 0) {
-    //         partialByteBegin = 0;
-    //     }
-
-    //     if (partialByteEnd < 0) {
-    //         partialByteEnd = plainTextSize - 1;
-    //         if (link.Properties.Encrypted.OriginalLength) {
-    //             partialByteEnd = link.Properties.Encrypted.OriginalLength - 1;
-    //         }
-    //     }
-
-    //     const partialByteLength = (partialByteEnd + 1) - partialByteBegin;
-
-    //     debug("LCP transformStream() partialByteBegin: " + partialByteBegin);
-    //     debug("LCP transformStream() partialByteEnd: " + partialByteEnd);
-    //     debug("LCP transformStream() partialByteLength: " + partialByteLength);
-
-    //     // block padding scheme
-    //     let padding = false; // NO_PADDING
-    //     const sizeWithoutPaddedBlock = plainTextSize - (plainTextSize % AES_BLOCK_SIZE);
-
-    //     debug("LCP transformStream() sizeWithoutPaddedBlock: " + sizeWithoutPaddedBlock);
-
-    //     if ((partialByteEnd + 1) > sizeWithoutPaddedBlock) {
-    //         padding = true; // W3C_PADDING, also PKCS#7
-    //     }
-
-    //     // byte offset in first block of the cypher text that contains the range begin
-    //     const blockOffset = partialByteBegin % AES_BLOCK_SIZE;
-
-    //     // we read the entire first block, even if partially used
-    //     const readPosition = partialByteBegin - blockOffset;
-
-    //     debug("LCP transformStream() blockOffset: " + blockOffset);
-    //     debug("LCP transformStream() readPosition: " + readPosition);
-
-    //     // number of blocks to read
-    //     let blocksCount = 1;
-    //     let bytesInFirstBlock = (AES_BLOCK_SIZE - blockOffset) % AES_BLOCK_SIZE;
-
-    //     debug("LCP transformStream() bytesInFirstBlock: " + bytesInFirstBlock);
-
-    //     if (partialByteLength < bytesInFirstBlock) {
-    //         bytesInFirstBlock = 0;
-    //     }
-    //     if (bytesInFirstBlock > 0) {
-    //         blocksCount++;
-    //     }
-
-    //     const diff = partialByteLength - bytesInFirstBlock;
-
-    //     debug("LCP transformStream() diff: " + diff);
-
-    //     let inc = diff / AES_BLOCK_SIZE;
-    //     debug("LCP transformStream() inc: " + inc);
-
-    //     inc = Math.floor(inc);
-    //     debug("LCP transformStream() inc: " + inc);
-
-    //     blocksCount += inc;
-
-    //     const rem = diff % AES_BLOCK_SIZE;
-    //     debug("LCP transformStream() rem: " + rem);
-
-    //     if (rem !== 0) {
-    //         blocksCount++;
-    //     }
-
-    //     debug("LCP transformStream() blocksCount: " + blocksCount);
-
-    //     // number of bytes to read (block aligned)
-    //     const toRead = blocksCount * AES_BLOCK_SIZE;
-
-    //     debug("LCP transformStream() toRead: " + toRead);
-
-    //     const rangeStream = new RangeStream(readPosition, readPosition + toRead - 1, stream.length);
-    //     stream.stream.pipe(rangeStream);
-    //     let buff: Buffer | undefined;
-    //     try {
-    //         buff = await streamToBufferPromise(rangeStream);
-    //     } catch (err) {
-    //         console.log(err);
-    //         return Promise.reject("OUCH!");
-    //     }
-
-    //     debug("LCP transformStream() buff.length: " + buff.length);
-
-    //     let newBuff = this.innerDecrypt(buff, padding);
-
-    //     debug("LCP transformStream() newBuff.length: " + newBuff.length);
-
-    //     if (newBuff.length < partialByteLength) {
-    //         debug("newBuff.length < partialByteLength");
-    //     }
-    //     newBuff = newBuff.slice(blockOffset);
-
-    //     debug("LCP transformStream() newBuff.length (blockOffset): " + newBuff.length);
-
-    //     const bufferStream = bufferToStream(newBuff);
-
-    //     const sal: IStreamAndLength = {
-    //         length: plainTextSize, // newBuff.length,
-    //         reset: async () => {
-    //             const resetedStream = await stream.reset();
-    //             return this.transformStream(
-    //                 publication, link,
-    //                 resetedStream,
-    //                 isPartialByteRangeRequest,
-    //                 partialByteBegin, partialByteEnd);
-    //         },
-    //         stream: bufferStream,
-    //     };
-    //     return Promise.resolve(sal);
-    // }
-
-    private async getDecryptedSizeStream(
+    protected async getDecryptedSizeStream(
         _publication: Publication, _link: Link,
         stream: IStreamAndLength): Promise<ICryptoInfo> {
 
@@ -784,110 +343,7 @@ export class TransformerLCP implements ITransformer {
         return this.getDecryptedSizeBuffer_(stream.length, buff);
     }
 
-    // private async getDecryptedSizeBuffer(_publication: Publication, _link: Link, data: Buffer): Promise<number> {
-
-    //     const totalByteLength = data.length;
-
-    //     const TWO_AES_BLOCK_SIZE = 2 * AES_BLOCK_SIZE;
-    //     if (totalByteLength < TWO_AES_BLOCK_SIZE) {
-    //         return 0;
-    //     }
-    //     const readPos = totalByteLength - TWO_AES_BLOCK_SIZE;
-
-    //     const buff = data.slice(readPos, totalByteLength);
-
-    //     return this.getDecryptedSizeBuffer_(totalByteLength, buff);
-    // }
-
-    // private async transformBuffer(_publication: Publication, link: Link, data: Buffer): Promise<Buffer> {
-
-    //     const l = await this.getDecryptedSizeBuffer(_publication, link, data);
-    //     debug("LCP transformBuffer() ==== decrypted buffer length CHECK: " + l);
-
-    //     let transformedData = this.innerDecrypt(data, true);
-
-    //     debug("LCP transformBuffer() decrypted buffer length before INFLATE: " + transformedData.length);
-
-    //     if (link.Properties.Encrypted.Compression === "deflate") {
-    //         transformedData = zlib.inflateRawSync(transformedData);
-    //     }
-
-    //     debug("LCP transformBuffer() decrypted buffer length after INFLATE: " + transformedData.length);
-
-    //     if (link.Properties.Encrypted.OriginalLength
-    //         && link.Properties.Encrypted.OriginalLength !== transformedData.length) {
-    //         debug(`LENGTH NOT MATCH ${link.Properties.Encrypted.OriginalLength} !== ${transformedData.length}`);
-    //     }
-
-    //     return Promise.resolve(transformedData);
-    // }
-
-    // private async transformStream_(
-    //     publication: Publication, link: Link,
-    //     stream: IStreamAndLength,
-    //     isPartialByteRangeRequest: boolean,
-    //     partialByteBegin: number, partialByteEnd: number): Promise<IStreamAndLength> {
-
-    //     debug("LCP transformStream_() RAW STREAM LENGTH: " + stream.length);
-
-    //     let l = -1;
-    //     if (link.Properties.Encrypted.DecryptedLengthBeforeInflate > 0) {
-    //         l = link.Properties.Encrypted.DecryptedLengthBeforeInflate;
-    //     } else {
-    //         l = await this.getDecryptedSizeStream(publication, link, stream);
-    //         debug("LCP transformStream_() ---- getDecryptedSizeStream(): " + l);
-    //         stream = await stream.reset();
-    //         // length cached to avoid resetting the stream to zero-position
-    //         link.Properties.Encrypted.DecryptedLengthBeforeInflate = l;
-    //     }
-
-    //     const data = await streamToBufferPromise(stream.stream);
-    //     debug("LCP transformStream_() RAW BUFFER LENGTH after reset: " + stream.length);
-    //     const buff = await this.transformBuffer(publication, link, data);
-    //     debug("LCP transformStream_() DECRYPTED BUFFER LENGTH: " + buff.length);
-
-    //     if (partialByteBegin < 0) {
-    //         partialByteBegin = 0;
-    //     }
-    //     if (partialByteEnd < 0) {
-    //         partialByteEnd = buff.length - 1;
-    //     }
-
-    //     if (isPartialByteRangeRequest) {
-    //         debug("LCP transformStream_() PARTIAL: " + partialByteBegin + " - " + partialByteEnd);
-
-    //         const rangeStream = new RangeStream(partialByteBegin, partialByteEnd, buff.length);
-    //         const bufferStream = bufferToStream(buff);
-    //         bufferStream.pipe(rangeStream);
-
-    //         const sal: IStreamAndLength = {
-    //             length: buff.length, // (partialByteEnd + 1) - partialByteBegin,
-    //             reset: async () => {
-    //                 const resetedStream = await stream.reset();
-    //                 return this.transformStream(
-    //                     publication, link,
-    //                     resetedStream,
-    //                     isPartialByteRangeRequest,
-    //                     partialByteBegin, partialByteEnd);
-    //             },
-    //             stream: rangeStream,
-    //         };
-    //         return Promise.resolve(sal);
-    //     } else {
-    //         debug("LCP transformStream_() WHOLE: " + buff.length);
-
-    //         const sal: IStreamAndLength = {
-    //             length: buff.length,
-    //             reset: async () => {
-    //                 return Promise.resolve(sal);
-    //             },
-    //             stream: bufferToStream(buff),
-    //         };
-    //         return Promise.resolve(sal);
-    //     }
-    // }
-
-    private innerDecrypt(data: Buffer, padding: boolean): Buffer {
+    protected innerDecrypt(data: Buffer, padding: boolean): Buffer {
         // debug("LCP innerDecrypt() data.length: " + data.length);
         // debug("LCP innerDecrypt() padding: " + padding);
 
@@ -926,7 +382,7 @@ export class TransformerLCP implements ITransformer {
         return buff;
     }
 
-    private async getDecryptedSizeBuffer_(totalByteLength: number, buff: Buffer): Promise<ICryptoInfo> {
+    protected async getDecryptedSizeBuffer_(totalByteLength: number, buff: Buffer): Promise<ICryptoInfo> {
 
         // debug("LCP getDecryptedSizeBuffer_() totalByteLength: " + totalByteLength);
 
@@ -955,7 +411,7 @@ export class TransformerLCP implements ITransformer {
         return Promise.resolve(res);
     }
 
-    private UpdateLCP(publication: Publication, lcpPassHash: string): string | undefined {
+    protected UpdateLCP(publication: Publication, lcpPassHash: string): string | undefined {
 
         if (!publication.LCP) {
             return undefined;
@@ -1066,3 +522,30 @@ export class TransformerLCP implements ITransformer {
         return undefined;
     }
 }
+
+    // cc-shared-culture/EPUB/audio/asharedculture_soundtrack.mp3
+    // 3265152 bytes
+    // 3 MB
+    // 204072 * 16 BLOCKS (inc IV)
+    // 3265152 MOD 16 = 0
+    // IV 16
+    // PAD 16, full extra block (random)
+    // + 32 = 3265184 total cypher-text
+
+    // cc-shared-culture/EPUB/video/shared-culture.mp4
+    // 21784780 bytes
+    // 21 MB
+    // 1361548.75 * 16 BLOCKS (inc IV)
+    // 21784780 MOD 16 = 12 (0.75 * 16)
+    // IV 16
+    // PAD 4 (12 cypher-text bytes in last block)
+    // + 20 = 21784800 total cypher-text
+
+    // cc-shared-culture/EPUB/video/shared-culture.webm
+    // 8330669 bytes
+    // 8 MB
+    // 520666.8125 * 16 BLOCKS (inc IV)
+    // 8330669 MOD 16 = 13 (0.8125 * 16)
+    // IV 16
+    // PAD 3 (13 cypher-text bytes in last block)
+    // + 19 = 8330688 total cypher-text
