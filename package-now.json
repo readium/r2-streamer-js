@@ -9,7 +9,6 @@
   "dependencies": {
     "css2json": "^0.0.4",
     "debug": "^3.1.0",
-    "electron": "^1.8.1",
     "express": "^4.16.1",
     "filehound": "^1.16.2",
     "image-size": "^0.6.1",
