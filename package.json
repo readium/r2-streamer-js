@@ -77,7 +77,7 @@
     "@types/mime-types": "^2.1.0",
     "@types/morgan": "^1.7.33",
     "@types/node-forge": "^0.6.10",
-    "@types/request": "^2.0.3",
+    "@types/request": "^2.0.4",
     "@types/request-promise-native": "^1.0.7",
     "@types/tmp": "^0.0.33",
     "@types/xmldom": "^0.1.29",
