@@ -78,7 +78,8 @@ function createElectronBrowserWindow(publicationFilePath: string, publicationUrl
     });
 
     const urlEncoded = encodeURIComponent_RFC3986(publicationUrl);
-    const fullUrl = `file://${process.cwd()}/src/electron/renderer/index.html?pub=${urlEncoded}`;
+    const fullUrl = `file://${__dirname}/renderer/index.html?pub=${urlEncoded}`;
+    // `file://${process.cwd()}/src/electron/renderer/index.html`;
     // `file://${__dirname}/../../../../src/electron/renderer/index.html`
     debug(fullUrl);
     electronBrowserWindow.webContents.loadURL(fullUrl);

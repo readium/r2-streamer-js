@@ -4,6 +4,11 @@
     "target": "es2017",
     "module": "commonjs",
     "moduleResolution": "node",
-    "outDir": "../dist/es8-es2017/"
+    "outDir": "../dist/es8-es2017/",
+    "lib": [
+      "dom",
+      "es2015",
+      "dom.iterable"
+    ]
   }
 }

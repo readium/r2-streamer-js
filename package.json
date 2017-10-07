@@ -104,7 +104,7 @@
     "dist/**/*"
   ],
   "scripts": {
-    "electron": "cross-env DEBUG=r2:* BUILD_ENV=DEV electron dist/es8-es2017/src/electron/main.js",
+    "electron": "cp ./src/electron/renderer/index.html ./dist/es8-es2017/src/electron/renderer/ && cross-env DEBUG=r2:* BUILD_ENV=DEV electron ./dist/es8-es2017/src/electron/main.js",
     "_pregitdist": "npm run build:all",
     "gitdist": "cd ../r2-streamer-js-dist/ && git status || echo status && rm -r * || echo rm && cp ../r2-streamer-js/package.json . && cp ../r2-streamer-js/package-lock.json . && cp ../r2-streamer-js/LICENSE . && cp ../r2-streamer-js/README.md . && mkdir ./docs/ || echo ok && cp -r ../r2-streamer-js/docs/ ./docs/ && mkdir ./dist/ || echo ok && cp -r ../r2-streamer-js/dist/ ./dist/ && git add * || echo add && git commit -a -m \"add new dist\" || echo commit && git push || echo push && git status || echo status && cd -",
     "start": "cross-env DEBUG=r2:* node \"./dist/es6-es2015/src/http/server-cli.js\" ./misc/epubs/",
