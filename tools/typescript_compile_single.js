@@ -52,6 +52,7 @@ console.log(`path (relative): ${filePathRelative}`);
 
 var filePathRelativeDist = path.join("dist", target, filePathRelative);
 console.log(`path (relative in DIST): ${filePathRelativeDist}`);
+const nBacks = filePathRelativeDist.split("/").length - 1;
 
 var filePathRelativeDist_JS = filePathRelativeDist.replace(".ts", ".js");
 var filePathRelativeDist_JS_MAP = filePathRelativeDist.replace(".ts", ".js.map");
@@ -80,10 +81,17 @@ fs.writeFileSync(tmpTsConfigPath, tsconfigJsonStr, "utf8");
 const distDirFullPath = fs.realpathSync(path.resolve(`./dist/${target}`));
 console.log(`dist target dir path: ${distDirFullPath}`);
 
+var relativePathRealTypeScriptSource = "";
+for (var nBack = 0; nBack < nBacks; nBack++) {
+    relativePathRealTypeScriptSource += "../";
+}
+console.log(`relativePathRealTypeScriptSource: ${relativePathRealTypeScriptSource}`);
+
 cmdLine = `node "node_modules/typescript/bin/tsc" \
 -p "${tmpTsConfigPath}" \
 --rootDir ${distDirFullPath} \
---baseUrl ${distDirFullPath}
+--baseUrl ${distDirFullPath} \
+--sourceRoot ${relativePathRealTypeScriptSource} \
 `;
 cmdlines.push(cmdLine);
 
