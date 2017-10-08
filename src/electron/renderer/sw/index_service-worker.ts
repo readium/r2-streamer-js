@@ -6,11 +6,13 @@ export function startServiceWorkerExperiment(publicationJsonUrl: string) {
     });
     webview1.setAttribute("id", "webview1");
     webview1.setAttribute("style",
-        "width: 100%; height: 400px;" +
+        "display:inline-flex; visibilityx: hidden; width: 100%; height: 400px;" +
         "box-sizing: border-box; border: 2px solid black");
     webview1.setAttribute("webpreferences",
-        "nodeIntegration=0, nodeIntegrationInWorker=0, sandbox=0, " +
+        "nodeIntegration=0, nodeIntegrationInWorker=0, sandbox=0, javascript=1, " +
         "contextIsolation=0, webSecurity=1, allowRunningInsecureContent=0");
+    webview1.setAttribute("partition", "persist:publication");
+    webview1.setAttribute("httpreferrer", publicationJsonUrl);
     // webview1.setAttribute("preload", "./preload.js");
     // webview.setAttribute("src", "dummy");
     document.body.appendChild(webview1);
@@ -53,6 +55,15 @@ export function startServiceWorkerExperiment(publicationJsonUrl: string) {
                 response.headers.forEach((arg0: any, arg1: any) => {
                     console.log(arg0 + " => " + arg1);
                 });
+
+                const cssButton = document.createElement("button");
+                cssButton.setAttribute("id", "cssButton");
+                cssButton.addEventListener("click", (_event) => {
+                    // webview1.getWebContents().
+                });
+                cssButton.appendChild(document.createTextNode("READIUM CSS"));
+                document.body.appendChild(cssButton);
+                document.body.appendChild(document.createElement("hr"));
 
                 const publicationJson = await response.json();
                 console.log(publicationJson);

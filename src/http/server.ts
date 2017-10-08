@@ -53,8 +53,8 @@ const jsonStyle = `
 `;
 
 export interface IServerOptions {
-    disableReaders: boolean;
-    disableDecryption: boolean; /* excludes obfuscated fonts */
+    disableReaders?: boolean;
+    disableDecryption?: boolean; /* excludes obfuscated fonts */
 }
 
 export class Server {
@@ -78,8 +78,8 @@ export class Server {
 
     constructor(options?: IServerOptions) {
 
-        this.disableReaders = options ? options.disableReaders : false;
-        this.disableDecryption = options ? options.disableDecryption : false;
+        this.disableReaders = options && options.disableReaders ? options.disableReaders : false;
+        this.disableDecryption = options && options.disableDecryption ? options.disableDecryption : false;
 
         this.publications = [];
         this.pathPublicationMap = {};
@@ -182,45 +182,6 @@ export class Server {
                 }
             });
 
-        this.expressApp.get(["/sw.js"],
-            (req: express.Request, res: express.Response) => {
-
-                const swPth = "../electron/renderer/sw/service-worker.js";
-                const swFullPath = path.resolve(path.join(__dirname, swPth));
-                if (!fs.existsSync(swFullPath)) {
-
-                    const err = "Missing Service Worker JS! ";
-                    debug(err + swFullPath);
-                    res.status(500).send("<html><body><p>Internal Server Error</p><p>"
-                        + err + "</p></body></html>");
-                    return;
-                }
-
-                const swJS = fs.readFileSync(swFullPath, { encoding: "utf8" });
-                // debug(swJS);
-
-                // this.setResponseCORS(res);
-                res.set("Content-Type", "text/javascript; charset=utf-8");
-
-                const checkSum = crypto.createHash("sha256");
-                checkSum.update(swJS);
-                const hash = checkSum.digest("hex");
-
-                const match = req.header("If-None-Match");
-                if (match === hash) {
-                    debug("service-worker.js cache");
-                    res.status(304); // StatusNotModified
-                    res.end();
-                    return;
-                }
-
-                res.setHeader("ETag", hash);
-
-                // res.setHeader("Cache-Control", "public,max-age=86400");
-
-                res.status(200).send(swJS);
-            });
-
         serverUrl(this, this.expressApp);
         serverOPDS(this, this.expressApp);
         serverOPDS2(this, this.expressApp);
@@ -230,6 +191,14 @@ export class Server {
         serverManifestJson(this, routerPathBase64);
         serverMediaOverlays(this, routerPathBase64);
         serverAssets(this, routerPathBase64);
+    }
+
+    public expressUse(pathf: string, func: express.Handler) {
+        this.expressApp.use(pathf, func);
+    }
+
+    public expressGet(paths: string[], func: express.Handler) {
+        this.expressApp.get(paths, func);
     }
 
     public start(port: number): string {
