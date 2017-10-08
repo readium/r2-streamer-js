@@ -16,7 +16,7 @@
     "**/.gitignore": true,
     "**/.gitmodules": true,
     "**/.idea": true,
-    "**/node_modules": true,
+    "**/node_modules*": true,
     "**/bower_components": true
   },
   "search.exclude": {},

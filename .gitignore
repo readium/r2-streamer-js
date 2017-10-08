@@ -1,5 +1,7 @@
 dist
 now
 node_modules
+node_modules_NPM
+node_modules_YARN
 .DS_Store
 .history
