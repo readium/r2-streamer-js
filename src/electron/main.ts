@@ -206,6 +206,21 @@ app.on("ready", () => {
         debug(_publicationsUrls);
 
         resetMenu();
+
+        process.nextTick(() => {
+            const choice = dialog.showMessageBox({
+                buttons: ["&OK"],
+                cancelId: 0,
+                defaultId: 0,
+                detail: "Note that this is only a developer application (" +
+                    "test framework) for the Readium2 NodeJS 'streamer' and Electron-based 'navigator'.",
+                message: "Use the 'Electron' menu to load publications.",
+                noLink: true,
+                normalizeAccessKeys: true,
+                title: "Readium2 Electron streamer / navigator",
+                type: "info",
+            });
+        });
     })();
 });
 
