@@ -6,18 +6,30 @@ console.log(window.location);
 console.log(document.baseURI);
 console.log(document.URL);
 
+const queryParams = getURLQueryParams();
+
+// tslint:disable-next-line:no-string-literal
+const publicationJsonUrl = queryParams["pub"];
+
+console.log(" (((( publicationJsonUrl )))) " + publicationJsonUrl);
+
 window.onerror = (err) => {
     console.log("Error", err);
 };
 
 window.addEventListener("DOMContentLoaded", () => {
 
-    const queryParams = getURLQueryParams();
+    const buttStart = document.getElementById("buttonStart");
+    if (!buttStart) {
+        return;
+    }
+    buttStart.addEventListener("click", () => {
+        buttStart.setAttribute("disabled", "");
+        startServiceWorkerExperiment();
+    });
+});
 
-    // tslint:disable-next-line:no-string-literal
-    const publicationJsonUrl = queryParams["pub"];
-
-    console.log(" (((( publicationJsonUrl )))) " + publicationJsonUrl);
+function startServiceWorkerExperiment() {
 
     const webview1 = document.createElement("webview");
     webview1.addEventListener("dom-ready", () => {
@@ -116,4 +128,4 @@ window.addEventListener("DOMContentLoaded", () => {
     console.log(swBootUrl);
 
     webview2.setAttribute("src", swBootUrl);
-});
+}
