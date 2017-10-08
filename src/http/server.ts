@@ -185,7 +185,7 @@ export class Server {
         this.expressApp.get(["/sw.js"],
             (req: express.Request, res: express.Response) => {
 
-                const swPth = "../electron/renderer/service-worker.js";
+                const swPth = "../electron/renderer/sw/service-worker.js";
                 const swFullPath = path.resolve(path.join(__dirname, swPth));
                 if (!fs.existsSync(swFullPath)) {
 
