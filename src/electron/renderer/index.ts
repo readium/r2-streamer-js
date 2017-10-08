@@ -119,7 +119,7 @@ function startServiceWorkerExperiment() {
     webview2.setAttribute("webpreferences",
         "nodeIntegration=0, nodeIntegrationInWorker=0, sandbox=0, " +
         "contextIsolation=0, webSecurity=1, allowRunningInsecureContent=0");
-    webview2.setAttribute("preload", "./preload.js");
+    webview2.setAttribute("preload", "./preload_service-worker.js");
     document.body.appendChild(webview2);
 
     // const swBootUrl = publicationJsonUrl + "/show/metadata";
