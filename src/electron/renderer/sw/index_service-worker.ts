@@ -29,7 +29,7 @@ export function startServiceWorkerExperiment(publicationJsonUrl: string) {
     });
     webview1.setAttribute("id", "webview1");
     webview1.setAttribute("style",
-        "display:inline-flex; visibilityx: hidden; width: 100vw; height: 400px; margin: 0; padding: 0;");
+        "display:inline-flex; visibilityx: hidden; width: 100%; height: 400px; margin: 0; padding: 0;");
     webview1.setAttribute("webpreferences",
         "nodeIntegration=0, nodeIntegrationInWorker=0, sandbox=0, javascript=1, " +
         "contextIsolation=0, webSecurity=1, allowRunningInsecureContent=0");
@@ -40,20 +40,23 @@ export function startServiceWorkerExperiment(publicationJsonUrl: string) {
 
     webview1.setAttribute("disableguestresize", "");
     window.addEventListener("resize", debounce(() => {
-        const computedStyle = window.getComputedStyle(webview1);
 
-        // console.log(webview1.style.width);
-        // console.log(computedStyle.width);
+        // webview.offsetWidth == full including borders
+        // webview.scrollWidth == webview.clientWidth == without borders
 
-        // console.log(webview1.style.height);
-        // console.log(computedStyle.height);
+        // const computedStyle = window.getComputedStyle(webview1);
+        // console.log(parseInt(computedStyle.width as string, 10));
+        // console.log(parseInt(computedStyle.height as string, 10));
+
+        const width = webview1.clientWidth;
+        const height = webview1.clientHeight;
 
         const wc = webview1.getWebContents();
-        if (wc && computedStyle.width && computedStyle.height) {
+        if (wc && width && height) {
             wc.setSize({
                 normal: {
-                    height: parseInt(computedStyle.height, 10),
-                    width: parseInt(computedStyle.width, 10),
+                    height,
+                    width,
                 },
             });
         }

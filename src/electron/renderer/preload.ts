@@ -68,6 +68,8 @@ ipcRenderer.on("readium", (event: any, messageString: any) => {
 
         if (typeof messageJson.setCSS === "string" && messageJson.setCSS.indexOf("rollback") >= 0) {
 
+            docElement.style.overflow = "scroll";
+
             const toRemove: string[] = [];
             for (let i = 0; i < docElement.style.length; i++) {
                 const item = docElement.style.item(i);
@@ -79,6 +81,17 @@ ipcRenderer.on("readium", (event: any, messageString: any) => {
                 docElement.style.removeProperty(item);
             });
         } else {
+            docElement.style.overflow = "hidden";
+            // win.document.body.offsetWidth === single column width (takes into account column gap?)
+            // win.document.body.clientWidth === same
+            // win.document.body.scrollWidth === full document width (all columns)
+            //
+            // win.document.body.offsetHeight === full document height (sum of all columns minus trailing blank space?)
+            // win.document.body.clientHeight === same
+            // win.document.body.scrollHeight === visible viewport height
+            //
+            // win.document.body.scrollLeft === positive number for left shift
+
             // readium-darken-on | readium-darken-off
             docElement.style.setProperty("--USER__darkenFilter", "readium-darken-off");
 
@@ -159,6 +172,11 @@ win.addEventListener("DOMContentLoaded", () => {
     //     console.log(element.scrollHeight);
     //     console.log(element.scrollTop);
     // });
+});
+
+win.addEventListener("resize", () => {
+    console.log("webview resize");
+    win.document.body.scrollLeft = 0;
 });
 
 function appendCSS(mod: string) {
