@@ -53,7 +53,7 @@
     "forceConsistentCasingInFileNames": false,
     "noUnusedLocals": false,
     "noUnusedParameters": true,
-    "inlineSources": false,
+    "inlineSources": true,
     "inlineSourceMap": false,
     "isolatedModules": false,
     "allowJs": false,
