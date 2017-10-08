@@ -220,6 +220,9 @@ app.on("ready", () => {
                 title: "Readium2 Electron streamer / navigator",
                 type: "info",
             });
+            if (choice === 0) {
+                debug("ok");
+            }
         });
     })();
 });
