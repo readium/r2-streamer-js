@@ -1,20 +1,64 @@
+import debounce = require("debounce");
+// import * as debounce from "debounce";
+// import { debounce } from "debounce";
+
 export function startServiceWorkerExperiment(publicationJsonUrl: string) {
 
     const webview1 = document.createElement("webview");
+    webview1.addEventListener("ipc-message", (event) => {
+        console.log("webview1 ipc-message");
+        console.log(event.channel);
+        if (event.channel === "readium") {
+            console.log(event.args);
+        }
+    });
     webview1.addEventListener("dom-ready", () => {
         webview1.openDevTools();
+
+        const cssButton1 = document.getElementById("cssButtonInject");
+        if (!cssButton1) {
+            return;
+        }
+        cssButton1.removeAttribute("disabled");
+
+        const cssButton2 = document.getElementById("cssButtonReset");
+        if (!cssButton2) {
+            return;
+        }
+        cssButton2.removeAttribute("disabled");
     });
     webview1.setAttribute("id", "webview1");
     webview1.setAttribute("style",
-        "display:inline-flex; visibilityx: hidden; width: 100%; height: 400px;" +
-        "box-sizing: border-box; border: 2px solid black");
+        "display:inline-flex; visibilityx: hidden; width: 100vw; height: 400px; margin: 0; padding: 0;");
     webview1.setAttribute("webpreferences",
         "nodeIntegration=0, nodeIntegrationInWorker=0, sandbox=0, javascript=1, " +
         "contextIsolation=0, webSecurity=1, allowRunningInsecureContent=0");
     webview1.setAttribute("partition", "persist:publication");
     webview1.setAttribute("httpreferrer", publicationJsonUrl);
-    // webview1.setAttribute("preload", "./preload.js");
+    webview1.setAttribute("preload", "./preload.js");
     // webview.setAttribute("src", "dummy");
+
+    webview1.setAttribute("disableguestresize", "");
+    window.addEventListener("resize", debounce(() => {
+        const computedStyle = window.getComputedStyle(webview1);
+
+        // console.log(webview1.style.width);
+        // console.log(computedStyle.width);
+
+        // console.log(webview1.style.height);
+        // console.log(computedStyle.height);
+
+        const wc = webview1.getWebContents();
+        if (wc && computedStyle.width && computedStyle.height) {
+            wc.setSize({
+                normal: {
+                    height: parseInt(computedStyle.height, 10),
+                    width: parseInt(computedStyle.width, 10),
+                },
+            });
+        }
+    }, 500));
+
     document.body.appendChild(webview1);
 
     const webview2 = document.createElement("webview");
@@ -56,13 +100,26 @@ export function startServiceWorkerExperiment(publicationJsonUrl: string) {
                     console.log(arg0 + " => " + arg1);
                 });
 
-                const cssButton = document.createElement("button");
-                cssButton.setAttribute("id", "cssButton");
-                cssButton.addEventListener("click", (_event) => {
-                    // webview1.getWebContents().
+                const cssButton1 = document.createElement("button");
+                cssButton1.setAttribute("id", "cssButtonInject");
+                cssButton1.addEventListener("click", (_event) => {
+                    const jsonMsg = { injectCSS: "yes", setCSS: "ok" };
+                    webview1.send("readium", JSON.stringify(jsonMsg)); // .getWebContents()
                 });
-                cssButton.appendChild(document.createTextNode("READIUM CSS"));
-                document.body.appendChild(cssButton);
+                cssButton1.appendChild(document.createTextNode("CSS inject"));
+                cssButton1.setAttribute("disabled", "");
+                document.body.appendChild(cssButton1);
+
+                const cssButton2 = document.createElement("button");
+                cssButton2.setAttribute("id", "cssButtonReset");
+                cssButton2.addEventListener("click", (_event) => {
+                    const jsonMsg = { injectCSS: "rollback", setCSS: "rollback" };
+                    webview1.send("readium", JSON.stringify(jsonMsg)); // .getWebContents()
+                });
+                cssButton2.appendChild(document.createTextNode("CSS remove"));
+                cssButton2.setAttribute("disabled", "");
+                document.body.appendChild(cssButton2);
+
                 document.body.appendChild(document.createElement("hr"));
 
                 const publicationJson = await response.json();
@@ -90,7 +147,7 @@ export function startServiceWorkerExperiment(publicationJsonUrl: string) {
             } catch (e) {
                 console.log(e);
             }
-        }, 5000);
+        }, 2000);
     });
     webview2.setAttribute("id", "webview2");
     webview2.setAttribute("style",
