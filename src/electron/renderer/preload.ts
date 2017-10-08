@@ -1,4 +1,4 @@
-console.log("PRELOAD");
+console.log("PRELOAD SERVICE WORKER");
 
 // console.log(process.env);
 
