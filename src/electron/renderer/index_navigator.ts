@@ -124,6 +124,9 @@ export function startNavigatorExperiment(publicationJsonUrl: string) {
     cssButton2.setAttribute("disabled", "");
     if (readerControls) {
         readerControls.appendChild(cssButton2);
+    }
+
+    if (readerControls) {
         readerControls.appendChild(document.createElement("hr"));
     }
 
@@ -168,23 +171,70 @@ export function startNavigatorExperiment(publicationJsonUrl: string) {
         }
         console.log(publicationJson);
 
-        publicationJson.spine.forEach((spineItem: any) => {
-            const spineItemLink = document.createElement("a");
-            const spineItemLinkHref = publicationJsonUrl + "/../" + spineItem.href;
-            spineItemLink.setAttribute("href", spineItemLinkHref);
-            spineItemLink.addEventListener("click", (event) => {
-                event.preventDefault();
+        if (publicationJson.spine) {
+            publicationJson.spine.forEach((spineItem: any) => {
+                const spineItemLink = document.createElement("a");
+                const spineItemLinkHref = publicationJsonUrl + "/../" + spineItem.href;
+                spineItemLink.setAttribute("href", spineItemLinkHref);
+                spineItemLink.addEventListener("click", (event) => {
+                    event.preventDefault();
 
-                webview1.setAttribute("src", spineItemLinkHref);
-                // webview1.getWebContents().loadURL(spineItemLinkHref, { extraHeaders: "pragma: no-cache\n" });
-                // webview1.loadURL(spineItemLinkHref, { extraHeaders: "pragma: no-cache\n" });
+                    webview1.setAttribute("src", spineItemLinkHref);
+                    // webview1.getWebContents().loadURL(spineItemLinkHref, { extraHeaders: "pragma: no-cache\n" });
+                    // webview1.loadURL(spineItemLinkHref, { extraHeaders: "pragma: no-cache\n" });
+                });
+                spineItemLink.appendChild(document.createTextNode(spineItem.href));
+                if (readerControls) {
+                    readerControls.appendChild(spineItemLink);
+                    readerControls.appendChild(document.createElement("br"));
+                }
             });
-            spineItemLink.appendChild(document.createTextNode(spineItem.href));
+        }
+        if (readerControls) {
+            readerControls.appendChild(document.createElement("hr"));
+        }
+        if (readerControls && publicationJson.toc && publicationJson.toc.length) {
+            appendToc(publicationJson.toc, readerControls, publicationJsonUrl, webview1);
             if (readerControls) {
-                readerControls.appendChild(spineItemLink);
-                readerControls.appendChild(document.createElement("br"));
+                readerControls.appendChild(document.createElement("hr"));
             }
-        });
+        }
+        if (readerControls && publicationJson["page-list"] && publicationJson["page-list"].length) {
+            appendToc(publicationJson["page-list"], readerControls, publicationJsonUrl, webview1);
+            if (readerControls) {
+                readerControls.appendChild(document.createElement("hr"));
+            }
+        }
+        if (readerControls && publicationJson.landmarks && publicationJson.landmarks.length) {
+            appendToc(publicationJson.landmarks, readerControls, publicationJsonUrl, webview1);
+            if (readerControls) {
+                readerControls.appendChild(document.createElement("hr"));
+            }
+        }
+        if (readerControls && publicationJson.lot && publicationJson.lot.length) {
+            appendToc(publicationJson.lot, readerControls, publicationJsonUrl, webview1);
+            if (readerControls) {
+                readerControls.appendChild(document.createElement("hr"));
+            }
+        }
+        if (readerControls && publicationJson.loa && publicationJson.loa.length) {
+            appendToc(publicationJson.loa, readerControls, publicationJsonUrl, webview1);
+            if (readerControls) {
+                readerControls.appendChild(document.createElement("hr"));
+            }
+        }
+        if (readerControls && publicationJson.loi && publicationJson.loi.length) {
+            appendToc(publicationJson.loi, readerControls, publicationJsonUrl, webview1);
+            if (readerControls) {
+                readerControls.appendChild(document.createElement("hr"));
+            }
+        }
+        if (readerControls && publicationJson.lov && publicationJson.lov.length) {
+            appendToc(publicationJson.lov, readerControls, publicationJsonUrl, webview1);
+            if (readerControls) {
+                readerControls.appendChild(document.createElement("hr"));
+            }
+        }
     })();
     //     const spineItemUrl = publicationJsonUrl + "/../" + publicationJson.spine[0].href;
     //     console.log(spineItemUrl);
@@ -192,4 +242,50 @@ export function startNavigatorExperiment(publicationJsonUrl: string) {
 
     // const a = document.querySelector("html > body > a");
     // a.click();
+}
+
+function appendToc(json: any, anchor: HTMLElement, publicationJsonUrl: string, webview1: HTMLElement) {
+
+    const ul = document.createElement("ul");
+    json.forEach((tocLinkJson: any) => {
+        const li = document.createElement("li");
+
+        if (!tocLinkJson.title) {
+            tocLinkJson.title = "xxx";
+        }
+
+        if (tocLinkJson.href) {
+            const tocLink = document.createElement("a");
+            const tocLinkHref = publicationJsonUrl + "/../" + tocLinkJson.href;
+            tocLink.setAttribute("href", tocLinkHref);
+            tocLink.addEventListener("click", (event) => {
+                event.preventDefault();
+
+                webview1.setAttribute("src", tocLinkHref);
+                // webview1.getWebContents().loadURL(tocLinkHref, { extraHeaders: "pragma: no-cache\n" });
+                // webview1.loadURL(tocLinkHref, { extraHeaders: "pragma: no-cache\n" });
+            });
+            tocLink.appendChild(document.createTextNode(tocLinkJson.title));
+            li.appendChild(tocLink);
+
+            const br = document.createElement("br");
+            li.appendChild(br);
+
+            const tocHeading = document.createElement("span");
+            tocHeading.appendChild(document.createTextNode(tocLinkJson.href));
+            li.appendChild(tocHeading);
+        } else {
+            const tocHeading = document.createElement("span");
+            tocHeading.appendChild(document.createTextNode(tocLinkJson.title));
+            li.appendChild(tocHeading);
+        }
+
+        ul.appendChild(li);
+
+        if (tocLinkJson.children && tocLinkJson.children.length) {
+            appendToc(tocLinkJson.children, li, publicationJsonUrl, webview1);
+        }
+    });
+
+    anchor.appendChild(ul);
 }
