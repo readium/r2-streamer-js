@@ -2,7 +2,6 @@ import * as crypto from "crypto";
 import * as path from "path";
 
 import { mediaOverlayURLParam, mediaOverlayURLPath } from "@parser/epub";
-import { PublicationParsePromise } from "@parser/publication-parser";
 import { encodeURIComponent_RFC3986, isHTTP } from "@utils/http/UrlUtils";
 import { sortObject, traverseJsonObjects } from "@utils/JsonUtils";
 import * as css2json from "css2json";
@@ -11,6 +10,7 @@ import * as express from "express";
 import * as jsonMarkup from "json-markup";
 import { JSON as TAJSON } from "ta-json";
 
+import { Publication } from "@models/publication";
 import { Server } from "./server";
 
 const debug = debug_("r2:server:mediaoverlays");
@@ -74,23 +74,19 @@ export function serverMediaOverlays(server: Server, routerPathBase64: express.Ro
 
             const pathBase64Str = new Buffer(req.params.pathBase64, "base64").toString("utf8");
 
-            let publication = server.cachedPublication(pathBase64Str);
-            if (!publication) {
+            // const fileName = path.basename(pathBase64Str);
+            // const ext = path.extname(fileName).toLowerCase();
 
-                // const fileName = path.basename(pathBase64Str);
-                // const ext = path.extname(fileName).toLowerCase();
-
-                try {
-                    publication = await PublicationParsePromise(pathBase64Str);
-                } catch (err) {
-                    debug(err);
-                    res.status(500).send("<html><body><p>Internal Server Error</p><p>"
-                        + err + "</p></body></html>");
-                    return;
-                }
-
-                server.cachePublication(pathBase64Str, publication);
+            let publication: Publication | undefined;
+            try {
+                publication = await server.loadOrGetCachedPublication(pathBase64Str);
+            } catch (err) {
+                debug(err);
+                res.status(500).send("<html><body><p>Internal Server Error</p><p>"
+                    + err + "</p></body></html>");
+                return;
             }
+
             // dumpPublication(publication);
 
             const rootUrl = (isSecureHttp ? "https://" : "http://")

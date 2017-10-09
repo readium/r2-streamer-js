@@ -1,7 +1,6 @@
 import * as path from "path";
 
 import { Link } from "@models/publication-link";
-import { PublicationParsePromise } from "@parser/publication-parser";
 import { Transformers } from "@transform/transformer";
 import { parseRangeHeader } from "@utils/http/RangeUtils";
 import { streamToBufferPromise } from "@utils/stream/BufferUtils";
@@ -11,6 +10,7 @@ import * as debug_ from "debug";
 import * as express from "express";
 import * as mime from "mime-types";
 
+import { Publication } from "@models/publication";
 import { Server } from "./server";
 
 const debug = debug_("r2:server:assets");
@@ -45,23 +45,19 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
 
             const pathBase64Str = new Buffer(req.params.pathBase64, "base64").toString("utf8");
 
-            let publication = server.cachedPublication(pathBase64Str);
-            if (!publication) {
+            // const fileName = path.basename(pathBase64Str);
+            // const ext = path.extname(fileName).toLowerCase();
 
-                // const fileName = path.basename(pathBase64Str);
-                // const ext = path.extname(fileName).toLowerCase();
-
-                try {
-                    publication = await PublicationParsePromise(pathBase64Str);
-                } catch (err) {
-                    debug(err);
-                    res.status(500).send("<html><body><p>Internal Server Error</p><p>"
-                        + err + "</p></body></html>");
-                    return;
-                }
-
-                server.cachePublication(pathBase64Str, publication);
+            let publication: Publication | undefined;
+            try {
+                publication = await server.loadOrGetCachedPublication(pathBase64Str);
+            } catch (err) {
+                debug(err);
+                res.status(500).send("<html><body><p>Internal Server Error</p><p>"
+                    + err + "</p></body></html>");
+                return;
             }
+
             // dumpPublication(publication);
 
             const zipInternal = publication.findFromInternal("zip");
@@ -286,21 +282,21 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
 
             if (isHead) {
                 res.end();
-            // } else if (zipStream_.length === 2) {
-            //     debug("===> BUFFER SEND (short stream)");
-            //     let zipData: Buffer | undefined;
-            //     try {
-            //         zipData = await streamToBufferPromise(zipStream_.stream);
-            //     } catch (err) {
-            //         debug(err);
-            //         res.status(500).send("<html><body><p>Internal Server Error</p><p>"
-            //             + err + "</p></body></html>");
-            //         return;
-            //     }
-            //     if (zipData) {
-            //         debug("CHECK: " + zipStream_.length + " ==> " + zipData.length);
-            //     }
-            //     res.send(zipStream_.stream);
+                // } else if (zipStream_.length === 2) {
+                //     debug("===> BUFFER SEND (short stream)");
+                //     let zipData: Buffer | undefined;
+                //     try {
+                //         zipData = await streamToBufferPromise(zipStream_.stream);
+                //     } catch (err) {
+                //         debug(err);
+                //         res.status(500).send("<html><body><p>Internal Server Error</p><p>"
+                //             + err + "</p></body></html>");
+                //         return;
+                //     }
+                //     if (zipData) {
+                //         debug("CHECK: " + zipStream_.length + " ==> " + zipData.length);
+                //     }
+                //     res.send(zipStream_.stream);
             } else {
                 // debug("===> STREAM PIPE");
 
