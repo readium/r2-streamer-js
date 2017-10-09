@@ -1287,13 +1287,14 @@ const fillTOCFromNavDocWithOL = (select: any, olElems: Element[], node: Link[], 
                 const aElems = select("xhtml:a", liElem);
                 if (aElems && aElems.length > 0) {
 
-                    let aHref = select("@href", aElems[0]);
+                    const aHref = select("@href", aElems[0]);
                     if (aHref && aHref.length) {
-                        if (aHref[0][0] === "#") {
-                            aHref = navDocPath + aHref[0];
+                        let val = (aHref[0] as Attr).value;
+                        if (val[0] === "#") {
+                            val = path.basename(navDocPath) + val;
                         }
 
-                        const zipPath = path.join(path.dirname(navDocPath), aHref[0].value)
+                        const zipPath = path.join(path.dirname(navDocPath), val)
                             .replace(/\\/g, "/");
                         link.Href = zipPath;
                     }
