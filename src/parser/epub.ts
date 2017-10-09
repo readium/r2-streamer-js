@@ -1034,7 +1034,10 @@ const fillEncryptionInfo =
         encryption.EncryptedData.forEach((encInfo) => {
             const encrypted = new Encrypted();
             encrypted.Algorithm = encInfo.EncryptionMethod.Algorithm;
-            if (lcp) {
+
+            if (lcp &&
+                encrypted.Algorithm !== "http://www.idpf.org/2008/embedding" &&
+                encrypted.Algorithm !== "http://ns.adobe.com/pdf/enc#RC") {
                 encrypted.Profile = lcp.Encryption.Profile;
                 encrypted.Scheme = "http://readium.org/2014/01/lcp";
             }
