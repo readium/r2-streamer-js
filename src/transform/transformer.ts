@@ -101,6 +101,6 @@ export class Transformers {
     }
 }
 
-Transformers.instance().add(new TransformerLCP());
 Transformers.instance().add(new TransformerObfAdobe());
 Transformers.instance().add(new TransformerObfIDPF());
+Transformers.instance().add(new TransformerLCP());
