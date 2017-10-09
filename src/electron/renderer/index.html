@@ -22,6 +22,65 @@
       align-items: center;
       justify-content: center;
     }
+
+    #reader_chrome {
+      display: block;
+      position: absolute;
+      box-sizing: border-box;
+      left: 10px;
+      right: 10px;
+      top: 40px;
+      bottom: 20px;
+      margin: 0;
+      padding: 0;
+      border: 3px solid orange;
+      background: green;
+    }
+    #publication_viewport {
+      display: block;
+      position: absolute;
+      left: 30px;
+      right: 30px;
+      top: 0;
+      bottom: 0;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      border: 6px solid magenta;
+      background: blue;
+    }
+    #reader_controls {
+      display: block;
+      position: absolute;
+      left: 0;
+      right: 50%;
+      top: 0;
+      bottom: 0;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      border-right: 10px solid black;
+      background: white;
+      overflow: hidden;
+      overflow-y: scroll;
+    }
+    webview {
+      display: flex;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    #webview1 {
+      width: 100%;
+      height: 100%;
+      background: red;
+    }
+    #webview2 {
+      width: 100%;
+      height: 50px;
+      background: yellow;
+      border: 2px solid black;
+    }
   </style>
 
   <script type="application/javascript" src="./browserify_bundle.js">
@@ -29,7 +88,14 @@
 </head>
 
 <body>
-    <h1 style="color: red;">Electron index.html (renderer process) <button id="buttonStart">CLICK TO START</button></h1>
+    <h1 style="color: red;"><span>Electron index.html (renderer process)</span> <button id="buttonStart">CLICK TO START</button></h1>
+
+    <div id="reader_chrome">
+      <div id="publication_viewport">
+      </div>
+      <div id="reader_controls">
+      </div>
+    </div>
 </body>
 
 </html>

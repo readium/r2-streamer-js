@@ -9,11 +9,11 @@ console.log(win.location.origin);
 
 const urlRootReadiumCSS = win.location.origin + "/readium-css/iOS/";
 
-ipcRenderer.on("readium", (event: any, messageString: any) => {
-    console.log("ipcRenderer");
-    console.log(event);
-    console.log(messageString);
-    ipcRenderer.sendToHost("readium", "pong");
+ipcRenderer.on("readium", (_event: any, messageString: any) => {
+    // console.log("ipcRenderer");
+    // console.log(event);
+    // console.log(messageString);
+    // ipcRenderer.sendToHost("readium", "pong");
 
     const messageJson = JSON.parse(messageString);
 
@@ -68,7 +68,7 @@ ipcRenderer.on("readium", (event: any, messageString: any) => {
 
         if (typeof messageJson.setCSS === "string" && messageJson.setCSS.indexOf("rollback") >= 0) {
 
-            docElement.style.overflow = "scroll";
+            docElement.style.overflow = "auto";
 
             const toRemove: string[] = [];
             for (let i = 0; i < docElement.style.length; i++) {
@@ -154,6 +154,19 @@ ipcRenderer.on("readium", (event: any, messageString: any) => {
 
 win.addEventListener("DOMContentLoaded", () => {
     console.log("PRELOAD DOM READY");
+
+    const borderDiv1 = win.document.createElement("div");
+    borderDiv1.setAttribute("id", "ReadiumBorderDIV1");
+    // tslint:disable-next-line:max-line-length
+    borderDiv1.setAttribute("style", "display:block;position:absolute;margin:0;padding:0;box-sizing:border-box;left:3px;right:3px;top:3px;bottom:3px;z-index:1000;background-color:transparent;border:2px solid blue;");
+    win.document.body.appendChild(borderDiv1);
+
+    const borderDiv2 = win.document.createElement("div");
+    borderDiv2.setAttribute("id", "ReadiumBorderDIV2");
+    // tslint:disable-next-line:max-line-length
+    borderDiv2.setAttribute("style", "display:block;position:fixed;margin:0;padding:0;box-sizing:border-box;left:0;top:0;width:100%;height:100%;z-index:900;background-color:transparent;border:2px solid black;");
+    // borderDiv2.appendChild(win.document.createTextNode("TEST"));
+    win.document.body.appendChild(borderDiv2);
 
     // win.addEventListener("scroll", (e) => {
     //     console.log(e);

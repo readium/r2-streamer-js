@@ -70,22 +70,6 @@ function createElectronBrowserWindow(publicationFilePath: string, publicationUrl
     }
     _electronBrowserWindows.push(electronBrowserWindow);
 
-    // electronBrowserWindow.on("resize", () => {
-    //     const [width, height] = electronBrowserWindow.getContentSize();
-
-    //     for (const wc of webContents.getAllWebContents()) {
-    //         if (wc.hostWebContents &&
-    //             wc.hostWebContents.id === electronBrowserWindow.webContents.id) {
-    //             wc.setSize({
-    //                 normal: {
-    //                     height: 400,
-    //                     width,
-    //                 },
-    //             });
-    //         }
-    //     }
-    // });
-
     electronBrowserWindow.webContents.on("dom-ready", () => {
         debug("electronBrowserWindow dom-ready " + publicationFilePath + " : " + publicationUrl);
         electronBrowserWindow.webContents.openDevTools();
