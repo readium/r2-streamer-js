@@ -70,6 +70,9 @@ export class TransformerLCP implements ITransformer {
             ;
         if (!check) {
             debug("Incorrect resource LCP fields.");
+            debug(link.Properties.Encrypted.Scheme);
+            debug(link.Properties.Encrypted.Profile);
+            debug(link.Properties.Encrypted.Algorithm);
             return false;
         }
 
