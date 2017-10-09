@@ -32,7 +32,7 @@ export function startNavigatorExperiment(publicationJsonUrl: string) {
     webview1.setAttribute("webpreferences",
         "nodeIntegration=0, nodeIntegrationInWorker=0, sandbox=0, javascript=1, " +
         "contextIsolation=0, webSecurity=1, allowRunningInsecureContent=0");
-    webview1.setAttribute("partition", "persist:publication");
+    webview1.setAttribute("partition", "persist:publicationwebview");
     webview1.setAttribute("httpreferrer", publicationJsonUrl);
     webview1.setAttribute("preload", "./preload.js");
     // webview.setAttribute("src", "dummy");
@@ -130,16 +130,16 @@ export function startNavigatorExperiment(publicationJsonUrl: string) {
     // tslint:disable-next-line:no-floating-promises
     (async () => {
 
-        try {
-            // hacky :) (just for testing);
-            // (initializes the LCP pass)
-            await fetch(publicationJsonUrl.replace("/pub/",
-                "/pub/*-" +
-                "ZWM0ZjJkYmIzYjE0MDA5NTU1MGM5YWZiYmI2OWI1ZDZmZDllODE0YjlkYTgyZmFkMGIzNGU5ZmNiZTU2ZjFjYg" +
-                "==-*"));
-        } catch (e) {
-            console.log(e);
-        }
+        // try {
+        //     // hacky :) (just for testing);
+        //     // (initializes the LCP pass)
+        //     await fetch(publicationJsonUrl.replace("/pub/",
+        //         "/pub/*-" +
+        //         "ZWM0ZjJkYmIzYjE0MDA5NTU1MGM5YWZiYmI2OWI1ZDZmZDllODE0YjlkYTgyZmFkMGIzNGU5ZmNiZTU2ZjFjYg" +
+        //         "==-*"));
+        // } catch (e) {
+        //     console.log(e);
+        // }
 
         let response: Response | undefined;
         try {
@@ -173,8 +173,11 @@ export function startNavigatorExperiment(publicationJsonUrl: string) {
             const spineItemLinkHref = publicationJsonUrl + "/../" + spineItem.href;
             spineItemLink.setAttribute("href", spineItemLinkHref);
             spineItemLink.addEventListener("click", (event) => {
-                webview1.setAttribute("src", spineItemLinkHref);
                 event.preventDefault();
+
+                webview1.setAttribute("src", spineItemLinkHref);
+                // webview1.getWebContents().loadURL(spineItemLinkHref, { extraHeaders: "pragma: no-cache\n" });
+                // webview1.loadURL(spineItemLinkHref, { extraHeaders: "pragma: no-cache\n" });
             });
             spineItemLink.appendChild(document.createTextNode(spineItem.href));
             if (readerControls) {

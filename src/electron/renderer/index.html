@@ -29,7 +29,7 @@
       box-sizing: border-box;
       left: 10px;
       right: 10px;
-      top: 40px;
+      top: 90px;
       bottom: 20px;
       margin: 0;
       padding: 0;
@@ -105,7 +105,13 @@
 </head>
 
 <body>
-    <h1 style="color: red;"><span>Electron index.html (renderer process)</span> <button id="buttonStart">[ START ]</button> <button id="buttonDebug">TOGGLE DEBUG VIEW</button> <button id="buttonDevTools">OPEN DEV TOOLS</button></h1>
+    <h1 style="color: red;"><span>Electron index.html (renderer process)</span>
+
+      <form style="display: none; margin: 0; padding: 0;" id="lcpPassForm"><input type="text" name="lcpPassInput" id="lcpPassInput" size="40"><input type="submit" value="LCP pass"></form>
+
+      <button id="buttonStart">[ START ]</button>
+      <button id="buttonDebug">TOGGLE DEBUG VIEW</button>
+      <button id="buttonDevTools">OPEN DEV TOOLS</button></h1>
 
     <div id="reader_chrome">
       <div id="publication_viewport">

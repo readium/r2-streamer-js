@@ -24,6 +24,7 @@ import { BrowserWindow, Menu, app, dialog, ipcMain, session, webContents } from 
 import * as filehound from "filehound";
 import * as portfinder from "portfinder";
 
+import { Publication } from "@models/publication";
 import { Server } from "../http/server";
 import { initGlobals } from "../init-globals";
 
@@ -57,9 +58,70 @@ ipcMain.on("devtools", (_event: any, _arg: any) => {
     }
 });
 
-function createElectronBrowserWindow(publicationFilePath: string, publicationUrl: string) {
+ipcMain.on("tryLcpPass", (event: any, publicationFilePath: string, lcpPass: string) => {
+    debug(publicationFilePath);
+    debug(lcpPass);
+    const okay = tryLcpPass(publicationFilePath, lcpPass);
+    if (!okay) {
+        event.sender.send("tryLcpPass", false, "LCP problem! (" + lcpPass + ")");
+    } else {
+        event.sender.send("tryLcpPass", true, "LCP okay. (" + lcpPass + ")");
+    }
+});
+
+function tryLcpPass(publicationFilePath: string, lcpPass: string): boolean {
+    const publication = _publicationsServer.cachedPublication(publicationFilePath);
+    if (!publication) {
+        return false;
+    }
+    // TODO: ask user for plain text passphrase, convert to SHA256 hex format,
+    // or fetch from persistent storage
+    // const lcpPass64 =
+    //     "ZWM0ZjJkYmIzYjE0MDA5NTU1MGM5YWZiYmI2OWI1ZDZmZDllODE0YjlkYTgyZmFkMGIzNGU5ZmNiZTU2ZjFjYg";
+    // (this is "dan")
+    const checkSum = crypto.createHash("sha256");
+    checkSum.update(lcpPass);
+    const lcpPassHex = checkSum.digest("hex");
+    // const lcpPass64 = new Buffer(hash).toString("base64");
+    // const lcpPassHex = new Buffer(lcpPass64, "base64").toString("utf8");
+    const okay = publication.LCP.setUserPassphrase(lcpPassHex); // hex
+    if (!okay) {
+        debug("FAIL publication.LCP.setUserPassphrase()");
+    }
+    return okay;
+}
+
+async function createElectronBrowserWindow(publicationFilePath: string, publicationUrl: string) {
 
     debug("createElectronBrowserWindow() " + publicationFilePath + " : " + publicationUrl);
+
+    // const fileName = path.basename(publicationFilePath);
+    // const ext = path.extname(fileName).toLowerCase();
+
+    let publication: Publication | undefined;
+    try {
+        publication = await _publicationsServer.loadOrGetCachedPublication(publicationFilePath);
+    } catch (err) {
+        debug(err);
+    }
+
+    let lcpHint: string | undefined;
+    if (publication && publication.LCP) {
+        if (publication.LCP.Encryption &&
+            publication.LCP.Encryption.UserKey &&
+            publication.LCP.Encryption.UserKey.TextHint) {
+            lcpHint = publication.LCP.Encryption.UserKey.TextHint;
+        }
+        if (!lcpHint) {
+            lcpHint = "LCP passphrase";
+        }
+        // TODO: passphrase from cache (persistent storage, user settings)
+        // const testLcpPass = "danzzz";
+        // const okay = tryLcpPass(publicationFilePath, testLcpPass);
+        // if (okay) {
+        //     lcpHint = undefined;
+        // }
+    }
 
     const electronBrowserWindow = new BrowserWindow({
         height: 600,
@@ -113,11 +175,14 @@ function createElectronBrowserWindow(publicationFilePath: string, publicationUrl
     });
 
     const urlEncoded = encodeURIComponent_RFC3986(publicationUrl);
-    const fullUrl = `file://${__dirname}/renderer/index.html?pub=${urlEncoded}`;
+    let fullUrl = `file://${__dirname}/renderer/index.html?pub=${urlEncoded}`;
+    if (lcpHint) {
+        fullUrl = fullUrl + "&lcpHint=" + lcpHint;
+    }
     // `file://${process.cwd()}/src/electron/renderer/index.html`;
     // `file://${__dirname}/../../../../src/electron/renderer/index.html`
     debug(fullUrl);
-    electronBrowserWindow.webContents.loadURL(fullUrl);
+    electronBrowserWindow.webContents.loadURL(fullUrl, { extraHeaders: "pragma: no-cache\n" });
 }
 
 app.on("window-all-closed", () => {
@@ -126,6 +191,31 @@ app.on("window-all-closed", () => {
         app.quit();
     }
 });
+
+function clearSession(sess: Electron.Session, str: string) {
+
+    sess.clearCache(() => {
+        debug("ELECTRON CACHE CLEARED - " + str);
+    });
+    sess.clearStorageData({
+        origin: "*",
+        quotas: [
+            "temporary",
+            "persistent",
+            "syncable"],
+        storages: [
+            "appcache",
+            "cookies",
+            "filesystem",
+            "indexdb",
+            "localstorage",
+            "shadercache",
+            "websql",
+            "serviceworkers"],
+    }, () => {
+        debug("ELECTRON STORAGE CLEARED - " + str);
+    });
+}
 
 app.on("ready", () => {
     debug("app ready");
@@ -144,26 +234,21 @@ app.on("ready", () => {
     //     });
 
     if (session.defaultSession) {
-
         // const proto = session.defaultSession.protocol;
-
-        session.defaultSession.clearStorageData({
-            origin: "*",
-            quotas: [
-                "temporary",
-                "persistent",
-                "syncable"],
-            storages: [
-                "appcache",
-                "cookies",
-                "filesystem",
-                "indexdb",
-                "localstorage",
-                "shadercache",
-                "websql",
-                "serviceworkers"],
-        });
+        clearSession(session.defaultSession, "DEFAULT SESSION");
     }
+
+    const sess = session.fromPartition("persist:publicationwebview", { cache: false });
+    if (sess) {
+        clearSession(sess, "SESSION [persist:publicationwebview]");
+    }
+
+    sess.setPermissionRequestHandler((wc, permission, callback) => {
+        console.log("setPermissionRequestHandler");
+        console.log(wc.getURL());
+        console.log(permission);
+        callback(true);
+    });
 
     // tslint:disable-next-line:no-floating-promises
     (async () => {
@@ -184,44 +269,44 @@ app.on("ready", () => {
         };
         _publicationsServer.expressUse("/readium-css", express.static("misc/ReadiumCSS", staticOptions));
 
-        _publicationsServer.expressGet(["/sw.js"],
-            (req: express.Request, res: express.Response) => {
+        // _publicationsServer.expressGet(["/sw.js"],
+        //     (req: express.Request, res: express.Response) => {
 
-                const swPth = "./renderer/sw/service-worker.js";
-                const swFullPath = path.resolve(path.join(__dirname, swPth));
-                if (!fs.existsSync(swFullPath)) {
+        //         const swPth = "./renderer/sw/service-worker.js";
+        //         const swFullPath = path.resolve(path.join(__dirname, swPth));
+        //         if (!fs.existsSync(swFullPath)) {
 
-                    const err = "Missing Service Worker JS! ";
-                    debug(err + swFullPath);
-                    res.status(500).send("<html><body><p>Internal Server Error</p><p>"
-                        + err + "</p></body></html>");
-                    return;
-                }
+        //             const err = "Missing Service Worker JS! ";
+        //             debug(err + swFullPath);
+        //             res.status(500).send("<html><body><p>Internal Server Error</p><p>"
+        //                 + err + "</p></body></html>");
+        //             return;
+        //         }
 
-                const swJS = fs.readFileSync(swFullPath, { encoding: "utf8" });
-                // debug(swJS);
+        //         const swJS = fs.readFileSync(swFullPath, { encoding: "utf8" });
+        //         // debug(swJS);
 
-                // this.setResponseCORS(res);
-                res.set("Content-Type", "text/javascript; charset=utf-8");
+        //         // this.setResponseCORS(res);
+        //         res.set("Content-Type", "text/javascript; charset=utf-8");
 
-                const checkSum = crypto.createHash("sha256");
-                checkSum.update(swJS);
-                const hash = checkSum.digest("hex");
+        //         const checkSum = crypto.createHash("sha256");
+        //         checkSum.update(swJS);
+        //         const hash = checkSum.digest("hex");
 
-                const match = req.header("If-None-Match");
-                if (match === hash) {
-                    debug("service-worker.js cache");
-                    res.status(304); // StatusNotModified
-                    res.end();
-                    return;
-                }
+        //         const match = req.header("If-None-Match");
+        //         if (match === hash) {
+        //             debug("service-worker.js cache");
+        //             res.status(304); // StatusNotModified
+        //             res.end();
+        //             return;
+        //         }
 
-                res.setHeader("ETag", hash);
+        //         res.setHeader("ETag", hash);
 
-                // res.setHeader("Cache-Control", "public,max-age=86400");
+        //         // res.setHeader("Cache-Control", "public,max-age=86400");
 
-                res.status(200).send(swJS);
-            });
+        //         res.status(200).send(swJS);
+        //     });
 
         const pubPaths = _publicationsServer.addPublications(_publicationsFilePaths);
 
@@ -271,7 +356,7 @@ function resetMenu() {
     ];
 
     menuTemplate[0].submenu.push({
-        click: () => {
+        click: async () => {
             const choice = dialog.showOpenDialog({
                 defaultPath: lastBookPath || defaultBookPath,
                 filters: [
@@ -312,7 +397,8 @@ function resetMenu() {
 
             const file = _publicationsFilePaths[n];
             const pubManifestUrl = _publicationsUrls[n];
-            createElectronBrowserWindow(file, pubManifestUrl);
+
+            await createElectronBrowserWindow(file, pubManifestUrl);
         },
         label: "Open file...",
     } as any);
@@ -322,8 +408,8 @@ function resetMenu() {
         debug("MENU ITEM: " + file + " : " + pubManifestUrl);
 
         menuTemplate[0].submenu.push({
-            click: () => {
-                createElectronBrowserWindow(file, pubManifestUrl);
+            click: async () => {
+                await createElectronBrowserWindow(file, pubManifestUrl);
             },
             label: file, // + " : " + pubManifestUrl,
         } as any);
