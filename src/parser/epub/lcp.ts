@@ -64,6 +64,9 @@ export class LCP {
             ;
         if (!check) {
             debug("Incorrect LCP fields.");
+            debug(this.Encryption.Profile);
+            debug(this.Encryption.ContentKey.Algorithm);
+            debug(this.Encryption.UserKey.Algorithm);
             return false;
         }
 
