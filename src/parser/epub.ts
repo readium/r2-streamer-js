@@ -1304,6 +1304,11 @@ const fillTOCFromNavDocWithOL = (select: any, olElems: Element[], node: Link[], 
                         aText = aText.replace(/\s\s+/g, " ");
                         link.Title = aText;
                     }
+                } else {
+                    const liFirstChild = select("xhtml:*[1]", liElem);
+                    if (liFirstChild && liFirstChild.length && liFirstChild[0].textContent) {
+                        link.Title = liFirstChild[0].textContent.trim();
+                    }
                 }
 
                 const olElemsNext = select("xhtml:ol", liElem);
