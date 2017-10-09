@@ -14,6 +14,7 @@ import * as jsonMarkup from "json-markup";
 import { JSON as TAJSON } from "ta-json";
 import { tmpNameSync } from "tmp";
 
+import { PublicationParsePromise } from "@parser/publication-parser";
 import { serverAssets } from "./server-assets";
 import { serverManifestJson } from "./server-manifestjson";
 import { serverMediaOverlays } from "./server-mediaoverlays";
@@ -276,6 +277,29 @@ export class Server {
 
     public getPublications(): string[] {
         return this.publications;
+    }
+
+    public async loadOrGetCachedPublication(filePath: string): Promise<Publication> {
+
+        let publication = this.cachedPublication(filePath);
+        if (!publication) {
+
+            // const fileName = path.basename(pathBase64Str);
+            // const ext = path.extname(fileName).toLowerCase();
+
+            try {
+                publication = await PublicationParsePromise(filePath);
+            } catch (err) {
+                debug(err);
+                // return Promise.reject(err);
+                // return Promise.reject(new Error(err));
+                throw new Error(err);
+            }
+
+            this.cachePublication(filePath, publication);
+        }
+        // return Promise.resolve(publication);
+        return publication;
     }
 
     public isPublicationCached(filePath: string): boolean {
