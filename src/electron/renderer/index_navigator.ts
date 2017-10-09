@@ -21,6 +21,10 @@ export function startNavigatorExperiment(publicationJsonUrl: string) {
         if (readerControls) {
             readerControls.style.display = "block";
         }
+        const hideControlsButt = document.getElementById("hideControlsButton");
+        if (hideControlsButt) {
+            hideControlsButt.style.display = "block ";
+        }
     });
     showControlsButton.appendChild(document.createTextNode("O"));
     if (readerChrome) {
@@ -91,14 +95,19 @@ export function startNavigatorExperiment(publicationJsonUrl: string) {
 
     const hideControlsButton = document.createElement("button");
     hideControlsButton.setAttribute("id", "hideControlsButton");
+    hideControlsButton.setAttribute("style", "position:absolute;top:0;left:0;");
+    hideControlsButton.style.display = "none";
     hideControlsButton.addEventListener("click", (_event) => {
         if (readerControls) {
             readerControls.style.display = "none";
         }
+        hideControlsButton.style.display = "none";
     });
     hideControlsButton.appendChild(document.createTextNode("X"));
+    if (readerChrome) {
+        readerChrome.appendChild(hideControlsButton);
+    }
     if (readerControls) {
-        readerControls.appendChild(hideControlsButton);
         readerControls.appendChild(document.createElement("hr"));
     }
 
