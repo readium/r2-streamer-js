@@ -1,5 +1,7 @@
+import { ipcRenderer } from "electron";
 import { startNavigatorExperiment } from "./index_navigator";
 import { getURLQueryParams } from "./querystring";
+
 // import { startServiceWorkerExperiment } from "./sw/index_service-worker";
 
 console.log("INDEX");
@@ -38,7 +40,28 @@ window.addEventListener("DOMContentLoaded", () => {
     }
     buttStart.addEventListener("click", () => {
         buttStart.setAttribute("disabled", "");
+        buttStart.style.display = "none";
         // startServiceWorkerExperiment(publicationJsonUrl);
         startNavigatorExperiment(publicationJsonUrl);
+    });
+
+    const buttonDebug = document.getElementById("buttonDebug");
+    if (!buttonDebug) {
+        return;
+    }
+    buttonDebug.addEventListener("click", () => {
+        if (document.documentElement.classList.contains("debug")) {
+            document.documentElement.classList.remove("debug");
+        } else {
+            document.documentElement.classList.add("debug");
+        }
+    });
+
+    const buttonDevTools = document.getElementById("buttonDevTools");
+    if (!buttonDevTools) {
+        return;
+    }
+    buttonDevTools.addEventListener("click", () => {
+        ipcRenderer.send("devtools", "test");
     });
 });

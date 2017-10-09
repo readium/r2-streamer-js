@@ -20,7 +20,7 @@ import * as path from "path";
 
 import { encodeURIComponent_RFC3986 } from "@utils/http/UrlUtils";
 import * as debug_ from "debug";
-import { BrowserWindow, Menu, app, dialog, session } from "electron";
+import { BrowserWindow, Menu, app, dialog, ipcMain, session, webContents } from "electron";
 import * as filehound from "filehound";
 import * as portfinder from "portfinder";
 
@@ -46,6 +46,17 @@ let lastBookPath: string | undefined;
 
 // protocol.registerStandardSchemes(["epub", "file"], { secure: true });
 
+ipcMain.on("devtools", (_event: any, _arg: any) => {
+    // event.sender.send('devTooools', 'pong');
+
+    for (const wc of webContents.getAllWebContents()) {
+        // if (wc.hostWebContents &&
+        //     wc.hostWebContents.id === electronBrowserWindow.webContents.id) {
+        // }
+        wc.openDevTools();
+    }
+});
+
 function createElectronBrowserWindow(publicationFilePath: string, publicationUrl: string) {
 
     debug("createElectronBrowserWindow() " + publicationFilePath + " : " + publicationUrl);
@@ -70,9 +81,25 @@ function createElectronBrowserWindow(publicationFilePath: string, publicationUrl
     }
     _electronBrowserWindows.push(electronBrowserWindow);
 
+    // electronBrowserWindow.on("resize", () => {
+    //     const [width, height] = electronBrowserWindow.getContentSize();
+
+    //     for (const wc of webContents.getAllWebContents()) {
+    //         if (wc.hostWebContents &&
+    //             wc.hostWebContents.id === electronBrowserWindow.webContents.id) {
+    //             wc.setSize({
+    //                 normal: {
+    //                     height: 400,
+    //                     width,
+    //                 },
+    //             });
+    //         }
+    //     }
+    // });
+
     electronBrowserWindow.webContents.on("dom-ready", () => {
         debug("electronBrowserWindow dom-ready " + publicationFilePath + " : " + publicationUrl);
-        electronBrowserWindow.webContents.openDevTools();
+        // electronBrowserWindow.webContents.openDevTools();
     });
 
     electronBrowserWindow.on("closed", () => {

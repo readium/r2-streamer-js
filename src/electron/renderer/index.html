@@ -33,6 +33,9 @@
       bottom: 20px;
       margin: 0;
       padding: 0;
+      background: white;
+    }
+    html.debug #reader_chrome {
       border: 3px solid orange;
       background: green;
     }
@@ -46,23 +49,31 @@
       margin: 0;
       padding: 0;
       box-sizing: border-box;
+      background: white;
+    }
+    html.debug #publication_viewport {
       border: 6px solid magenta;
       background: blue;
     }
     #reader_controls {
-      display: block;
+      display: none;
       position: absolute;
       left: 0;
-      right: 50%;
+      right: 70%;
       top: 0;
       bottom: 0;
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      border-right: 10px solid black;
       background: white;
       overflow: hidden;
       overflow-y: scroll;
+      overflow-x: auto;
+      border: 1px solid black;
+    }
+    html.debug #reader_controls {
+      border-right: 10px solid black;
+      border-bottom: 10px solid black;
     }
     webview {
       display: flex;
@@ -73,11 +84,17 @@
     #webview1 {
       width: 100%;
       height: 100%;
+      background: white;
+    }
+    html.debug #webview1 {
       background: red;
     }
     #webview2 {
       width: 100%;
       height: 50px;
+      background: white;
+    }
+    html.debug #webview2 {
       background: yellow;
       border: 2px solid black;
     }
@@ -88,7 +105,7 @@
 </head>
 
 <body>
-    <h1 style="color: red;"><span>Electron index.html (renderer process)</span> <button id="buttonStart">CLICK TO START</button></h1>
+    <h1 style="color: red;"><span>Electron index.html (renderer process)</span> <button id="buttonStart">[ START ]</button> <button id="buttonDebug">TOGGLE DEBUG VIEW</button> <button id="buttonDevTools">OPEN DEV TOOLS</button></h1>
 
     <div id="reader_chrome">
       <div id="publication_viewport">

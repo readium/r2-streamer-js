@@ -155,18 +155,20 @@ ipcRenderer.on("readium", (_event: any, messageString: any) => {
 win.addEventListener("DOMContentLoaded", () => {
     console.log("PRELOAD DOM READY");
 
-    const borderDiv1 = win.document.createElement("div");
-    borderDiv1.setAttribute("id", "ReadiumBorderDIV1");
+    // const borderDiv1 = win.document.createElement("div");
+    // borderDiv1.setAttribute("id", "ReadiumBorderDIV1");
+    // borderDiv1.setAttribute("style",
     // tslint:disable-next-line:max-line-length
-    borderDiv1.setAttribute("style", "display:block;position:absolute;margin:0;padding:0;box-sizing:border-box;left:3px;right:3px;top:3px;bottom:3px;z-index:1000;background-color:transparent;border:2px solid blue;");
-    win.document.body.appendChild(borderDiv1);
+    // "display:block;position:absolute;margin:0;padding:0;box-sizing:border-box;left:3px;right:3px;top:3px;bottom:3px;z-index:1000;background-color:transparent;border:2px solid blue;");
+    // win.document.body.appendChild(borderDiv1);
 
-    const borderDiv2 = win.document.createElement("div");
-    borderDiv2.setAttribute("id", "ReadiumBorderDIV2");
+    // const borderDiv2 = win.document.createElement("div");
+    // borderDiv2.setAttribute("id", "ReadiumBorderDIV2");
+    // borderDiv2.setAttribute("style",
     // tslint:disable-next-line:max-line-length
-    borderDiv2.setAttribute("style", "display:block;position:fixed;margin:0;padding:0;box-sizing:border-box;left:0;top:0;width:100%;height:100%;z-index:900;background-color:transparent;border:2px solid black;");
-    // borderDiv2.appendChild(win.document.createTextNode("TEST"));
-    win.document.body.appendChild(borderDiv2);
+    // "display:block;position:fixed;margin:0;padding:0;box-sizing:border-box;left:0;top:0;width:100%;height:100%;z-index:900;background-color:transparent;border:2px solid black;");
+    // // borderDiv2.appendChild(win.document.createTextNode("TEST"));
+    // win.document.body.appendChild(borderDiv2);
 
     // win.addEventListener("scroll", (e) => {
     //     console.log(e);

@@ -68,7 +68,7 @@ export function startNavigatorExperiment(publicationJsonUrl: string) {
         }
     });
     webview1.addEventListener("dom-ready", () => {
-        webview1.openDevTools();
+        // webview1.openDevTools();
 
         const cssButtonN1 = document.getElementById("cssButtonInject");
         if (!cssButtonN1) {
