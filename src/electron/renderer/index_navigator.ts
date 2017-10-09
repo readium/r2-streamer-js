@@ -11,24 +11,21 @@ export function startNavigatorExperiment(publicationJsonUrl: string) {
         (h1 as HTMLElement).style.color = "green";
     }
 
-    const readerChrome = document.getElementById("reader_chrome");
+    // const readerChrome = document.getElementById("reader_chrome");
     const readerControls = document.getElementById("reader_controls");
 
-    const showControlsButton = document.createElement("button");
-    showControlsButton.setAttribute("id", "showControlsButton");
-    // showControlsButton.setAttribute("style", "position:absolute;top:0;left:0");
-    showControlsButton.addEventListener("click", (_event) => {
-        if (readerControls) {
-            readerControls.style.display = "block";
-        }
-        const hideControlsButt = document.getElementById("hideControlsButton");
-        if (hideControlsButt) {
-            hideControlsButt.style.display = "block ";
-        }
-    });
-    showControlsButton.appendChild(document.createTextNode("O"));
-    if (readerChrome) {
-        readerChrome.appendChild(showControlsButton);
+    const showControlsButton = document.getElementById("showControlsButton");
+    if (showControlsButton) {
+        showControlsButton.style.display = "block";
+        showControlsButton.addEventListener("click", (_event) => {
+            if (readerControls) {
+                readerControls.style.display = "block";
+            }
+            const hideControlsButt = document.getElementById("hideControlsButton");
+            if (hideControlsButt) {
+                hideControlsButt.style.display = "block ";
+            }
+        });
     }
 
     const webview1 = document.createElement("webview");
@@ -93,50 +90,30 @@ export function startNavigatorExperiment(publicationJsonUrl: string) {
         publicationViewport.appendChild(webview1);
     }
 
-    const hideControlsButton = document.createElement("button");
-    hideControlsButton.setAttribute("id", "hideControlsButton");
-    hideControlsButton.setAttribute("style", "position:absolute;top:0;left:0;");
-    hideControlsButton.style.display = "none";
-    hideControlsButton.addEventListener("click", (_event) => {
-        if (readerControls) {
-            readerControls.style.display = "none";
-        }
-        hideControlsButton.style.display = "none";
-    });
-    hideControlsButton.appendChild(document.createTextNode("X"));
-    if (readerChrome) {
-        readerChrome.appendChild(hideControlsButton);
-    }
-    if (readerControls) {
-        readerControls.appendChild(document.createElement("hr"));
+    const hideControlsButton = document.getElementById("hideControlsButton");
+    if (hideControlsButton) {
+        hideControlsButton.addEventListener("click", (_event) => {
+            if (readerControls) {
+                readerControls.style.display = "none";
+            }
+            hideControlsButton.style.display = "none";
+        });
     }
 
-    const cssButton1 = document.createElement("button");
-    cssButton1.setAttribute("id", "cssButtonInject");
-    cssButton1.addEventListener("click", (_event) => {
-        const jsonMsg = { injectCSS: "yes", setCSS: "ok" };
-        webview1.send("readium", JSON.stringify(jsonMsg)); // .getWebContents()
-    });
-    cssButton1.appendChild(document.createTextNode("CSS inject"));
-    cssButton1.setAttribute("disabled", "");
-    if (readerControls) {
-        readerControls.appendChild(cssButton1);
+    const cssButton1 = document.getElementById("cssButtonInject");
+    if (cssButton1) {
+        cssButton1.addEventListener("click", (_event) => {
+            const jsonMsg = { injectCSS: "yes", setCSS: "ok" };
+            webview1.send("readium", JSON.stringify(jsonMsg)); // .getWebContents()
+        });
     }
 
-    const cssButton2 = document.createElement("button");
-    cssButton2.setAttribute("id", "cssButtonReset");
-    cssButton2.addEventListener("click", (_event) => {
-        const jsonMsg = { injectCSS: "rollback", setCSS: "rollback" };
-        webview1.send("readium", JSON.stringify(jsonMsg)); // .getWebContents()
-    });
-    cssButton2.appendChild(document.createTextNode("CSS remove"));
-    cssButton2.setAttribute("disabled", "");
-    if (readerControls) {
-        readerControls.appendChild(cssButton2);
-    }
-
-    if (readerControls) {
-        readerControls.appendChild(document.createElement("hr"));
+    const cssButton2 = document.getElementById("cssButtonReset");
+    if (cssButton2) {
+        cssButton2.addEventListener("click", (_event) => {
+            const jsonMsg = { injectCSS: "rollback", setCSS: "rollback" };
+            webview1.send("readium", JSON.stringify(jsonMsg)); // .getWebContents()
+        });
     }
 
     // tslint:disable-next-line:no-floating-promises
@@ -181,6 +158,7 @@ export function startNavigatorExperiment(publicationJsonUrl: string) {
         console.log(publicationJson);
 
         if (publicationJson.spine) {
+            const readerControlsSpine = document.getElementById("reader_controls_SPINE");
             publicationJson.spine.forEach((spineItem: any) => {
                 const spineItemLink = document.createElement("a");
                 const spineItemLinkHref = publicationJsonUrl + "/../" + spineItem.href;
@@ -193,55 +171,46 @@ export function startNavigatorExperiment(publicationJsonUrl: string) {
                     // webview1.loadURL(spineItemLinkHref, { extraHeaders: "pragma: no-cache\n" });
                 });
                 spineItemLink.appendChild(document.createTextNode(spineItem.href));
-                if (readerControls) {
-                    readerControls.appendChild(spineItemLink);
-                    readerControls.appendChild(document.createElement("br"));
+                if (readerControlsSpine) {
+                    readerControlsSpine.appendChild(spineItemLink);
+                    readerControlsSpine.appendChild(document.createElement("br"));
                 }
             });
         }
-        if (readerControls) {
-            readerControls.appendChild(document.createElement("hr"));
-        }
-        if (readerControls && publicationJson.toc && publicationJson.toc.length) {
-            appendToc(publicationJson.toc, readerControls, publicationJsonUrl, webview1);
-            if (readerControls) {
-                readerControls.appendChild(document.createElement("hr"));
+
+        if (publicationJson.toc && publicationJson.toc.length) {
+            const readerControlsToc = document.getElementById("reader_controls_TOC");
+            if (readerControlsToc) {
+                appendToc(publicationJson.toc, readerControlsToc, publicationJsonUrl, webview1);
             }
         }
-        if (readerControls && publicationJson["page-list"] && publicationJson["page-list"].length) {
-            appendToc(publicationJson["page-list"], readerControls, publicationJsonUrl, webview1);
-            if (readerControls) {
-                readerControls.appendChild(document.createElement("hr"));
+        if (publicationJson["page-list"] && publicationJson["page-list"].length) {
+            const readerControlsPageList = document.getElementById("reader_controls_PAGELIST");
+            if (readerControlsPageList) {
+                appendToc(publicationJson["page-list"], readerControlsPageList, publicationJsonUrl, webview1);
             }
         }
-        if (readerControls && publicationJson.landmarks && publicationJson.landmarks.length) {
-            appendToc(publicationJson.landmarks, readerControls, publicationJsonUrl, webview1);
-            if (readerControls) {
-                readerControls.appendChild(document.createElement("hr"));
+
+        const readerControlsLandmarks = document.getElementById("reader_controls_LANDMARKS");
+        if (readerControlsLandmarks) {
+            if (publicationJson.landmarks && publicationJson.landmarks.length) {
+                appendToc(publicationJson.landmarks, readerControlsLandmarks, publicationJsonUrl, webview1);
             }
-        }
-        if (readerControls && publicationJson.lot && publicationJson.lot.length) {
-            appendToc(publicationJson.lot, readerControls, publicationJsonUrl, webview1);
-            if (readerControls) {
-                readerControls.appendChild(document.createElement("hr"));
+            if (publicationJson.lot && publicationJson.lot.length) {
+                readerControlsLandmarks.appendChild(document.createElement("hr"));
+                appendToc(publicationJson.lot, readerControlsLandmarks, publicationJsonUrl, webview1);
             }
-        }
-        if (readerControls && publicationJson.loa && publicationJson.loa.length) {
-            appendToc(publicationJson.loa, readerControls, publicationJsonUrl, webview1);
-            if (readerControls) {
-                readerControls.appendChild(document.createElement("hr"));
+            if (publicationJson.loa && publicationJson.loa.length) {
+                readerControlsLandmarks.appendChild(document.createElement("hr"));
+                appendToc(publicationJson.loa, readerControlsLandmarks, publicationJsonUrl, webview1);
             }
-        }
-        if (readerControls && publicationJson.loi && publicationJson.loi.length) {
-            appendToc(publicationJson.loi, readerControls, publicationJsonUrl, webview1);
-            if (readerControls) {
-                readerControls.appendChild(document.createElement("hr"));
+            if (publicationJson.loi && publicationJson.loi.length) {
+                readerControlsLandmarks.appendChild(document.createElement("hr"));
+                appendToc(publicationJson.loi, readerControlsLandmarks, publicationJsonUrl, webview1);
             }
-        }
-        if (readerControls && publicationJson.lov && publicationJson.lov.length) {
-            appendToc(publicationJson.lov, readerControls, publicationJsonUrl, webview1);
-            if (readerControls) {
-                readerControls.appendChild(document.createElement("hr"));
+            if (publicationJson.lov && publicationJson.lov.length) {
+                readerControlsLandmarks.appendChild(document.createElement("hr"));
+                appendToc(publicationJson.lov, readerControlsLandmarks, publicationJsonUrl, webview1);
             }
         }
     })();

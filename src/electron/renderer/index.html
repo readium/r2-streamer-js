@@ -98,6 +98,27 @@
       background: yellow;
       border: 2px solid black;
     }
+    form {
+      margin: 0; padding: 0;
+    }
+    form#lcpPassForm {
+      display: none;
+    }
+    #showControlsButton {
+      display:none;
+    }
+    #hideControlsButton {
+      display:none;
+      position:absolute;
+      top:0;
+      left:0;
+    }
+    .sectionTAB {
+      display: none;
+    }
+    #reader_controls_TOOLS {
+      display: block;
+    }
   </style>
 
   <script type="application/javascript" src="./browserify_bundle.js">
@@ -107,7 +128,7 @@
 <body>
     <h1 style="color: red;"><span>Electron index.html (renderer process)</span>
 
-      <form style="display: none; margin: 0; padding: 0;" id="lcpPassForm"><input type="text" name="lcpPassInput" id="lcpPassInput" size="40"><input type="submit" value="LCP pass"></form>
+      <form id="lcpPassForm"><input type="text" name="lcpPassInput" id="lcpPassInput" size="40"><input type="submit" value="LCP pass"></form>
 
       <button id="buttonStart">[ START ]</button>
       <button id="buttonDebug">TOGGLE DEBUG VIEW</button>
@@ -117,7 +138,43 @@
       <div id="publication_viewport">
       </div>
       <div id="reader_controls">
+          <hr>
+          <div id="tabHeaders">
+            <button id="buttonTab_TOOLS"
+            onclick="javascript:[].forEach.call(document.querySelectorAll('.sectionTAB'), (el) => {el.style.display = 'none';});   document.getElementById('reader_controls_TOOLS').style.display = 'block';"
+            >Tools</button>
+            <button id="buttonTab_TOC"
+            onclick="javascript:[].forEach.call(document.querySelectorAll('.sectionTAB'), (el) => {el.style.display = 'none';});   document.getElementById('reader_controls_TOC').style.display = 'block';"
+            >Table Of Contents</button>
+            <button id="buttonTab_SPINE"
+            onclick="javascript:[].forEach.call(document.querySelectorAll('.sectionTAB'), (el) => {el.style.display = 'none';});   document.getElementById('reader_controls_SPINE').style.display = 'block';"
+            >Spine</button>
+            <button id="buttonTab_PAGELIST"
+            onclick="javascript:[].forEach.call(document.querySelectorAll('.sectionTAB'), (el) => {el.style.display = 'none';});   document.getElementById('reader_controls_PAGELIST').style.display = 'block';"
+            >Page list</button>
+            <button id="buttonTab_LANDMARKS"
+            onclick="javascript:[].forEach.call(document.querySelectorAll('.sectionTAB'), (el) => {el.style.display = 'none';});   document.getElementById('reader_controls_LANDMARKS').style.display = 'block';"
+            >Landmarks</button>
+          </div>
+          <hr>
+          <div id="tabContents">
+            <div id="reader_controls_TOOLS" class="sectionTAB">
+              ReadiumCSS:
+              <button id="cssButtonInject" disabled>inject</button>
+              <button id="cssButtonReset" disabled>remove</button>
+            </div>
+            <div id="reader_controls_TOC" class="sectionTAB">
+            </div>
+            <div id="reader_controls_SPINE" class="sectionTAB">
+            </div>
+            <div id="reader_controls_PAGELIST" class="sectionTAB">
+            </div>
+            <div id="reader_controls_LANDMARKS" class="sectionTAB">
+            </div>
+          </div>
       </div>
+      <button id="showControlsButton">O</button>
+      <button id="hideControlsButton">X</button>
     </div>
 </body>
 
