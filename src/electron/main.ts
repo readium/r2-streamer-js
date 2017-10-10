@@ -57,17 +57,17 @@ function openAllDevTools() {
     }
 }
 
-function openTopLevelDevTools() {
-    const bw = BrowserWindow.getFocusedWindow();
-    if (bw) {
-        bw.webContents.openDevTools();
-    } else {
-        const arr = BrowserWindow.getAllWindows();
-        arr.forEach((bww) => {
-            bww.webContents.openDevTools();
-        });
-    }
-}
+// function openTopLevelDevTools() {
+//     const bw = BrowserWindow.getFocusedWindow();
+//     if (bw) {
+//         bw.webContents.openDevTools();
+//     } else {
+//         const arr = BrowserWindow.getAllWindows();
+//         arr.forEach((bww) => {
+//             bww.webContents.openDevTools();
+//         });
+//     }
+// }
 
 ipcMain.on(R2_EVENT_DEVTOOLS, (_event: any, _arg: any) => {
     openAllDevTools();
