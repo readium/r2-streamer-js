@@ -81,12 +81,12 @@
       padding: 0;
       box-sizing: border-box;
     }
-    #webview1 {
+    webview.singleFull {
       width: 100%;
       height: 100%;
       background: white;
     }
-    html.debug #webview1 {
+    html.debug webview {
       background: red;
     }
     #webview2 {
@@ -116,7 +116,7 @@
     .sectionTAB {
       display: none;
     }
-    #reader_controls_TOOLS {
+    #reader_controls_TOC {
       display: block;
     }
   </style>
@@ -148,9 +148,6 @@
       <div id="reader_controls">
           <hr>
           <div id="tabHeaders">
-            <button id="buttonTab_TOOLS"
-            onclick="javascript:[].forEach.call(document.querySelectorAll('.sectionTAB'), (el) => {el.style.display = 'none';});   document.getElementById('reader_controls_TOOLS').style.display = 'block';"
-            >Tools</button>
             <button id="buttonTab_TOC"
             onclick="javascript:[].forEach.call(document.querySelectorAll('.sectionTAB'), (el) => {el.style.display = 'none';});   document.getElementById('reader_controls_TOC').style.display = 'block';"
             >Table Of Contents</button>
@@ -163,14 +160,12 @@
             <button id="buttonTab_LANDMARKS"
             onclick="javascript:[].forEach.call(document.querySelectorAll('.sectionTAB'), (el) => {el.style.display = 'none';});   document.getElementById('reader_controls_LANDMARKS').style.display = 'block';"
             >Landmarks</button>
+            <button id="buttonTab_TOOLS"
+            onclick="javascript:[].forEach.call(document.querySelectorAll('.sectionTAB'), (el) => {el.style.display = 'none';});   document.getElementById('reader_controls_TOOLS').style.display = 'block';"
+            >Tools</button>
           </div>
           <hr>
           <div id="tabContents">
-            <div id="reader_controls_TOOLS" class="sectionTAB">
-              ReadiumCSS:
-              <button id="cssButtonInject" disabled>inject</button>
-              <button id="cssButtonReset" disabled>remove</button>
-            </div>
             <div id="reader_controls_TOC" class="sectionTAB">
             </div>
             <div id="reader_controls_SPINE" class="sectionTAB">
@@ -178,6 +173,11 @@
             <div id="reader_controls_PAGELIST" class="sectionTAB">
             </div>
             <div id="reader_controls_LANDMARKS" class="sectionTAB">
+            </div>
+            <div id="reader_controls_TOOLS" class="sectionTAB">
+              ReadiumCSS:
+              <button id="cssButtonInject" disabled>inject</button>
+              <button id="cssButtonReset" disabled>remove</button>
             </div>
           </div>
       </div>

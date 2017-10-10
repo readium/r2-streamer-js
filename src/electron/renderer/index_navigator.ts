@@ -1,8 +1,82 @@
 import debounce = require("debounce");
 import { R2_EVENT_READIUMCSS } from "../common/events";
+import { R2_SESSION_WEBVIEW } from "../common/sessions";
 
-// import * as debounce from "debounce";
-// import { debounce } from "debounce";
+const _webviews: Electron.WebviewTag[] = [];
+
+function createWebView(publicationJsonUrl: string) {
+    const webview1 = document.createElement("webview");
+    webview1.setAttribute("class", "singleFull");
+    webview1.setAttribute("webpreferences",
+        "nodeIntegration=0, nodeIntegrationInWorker=0, sandbox=0, javascript=1, " +
+        "contextIsolation=0, webSecurity=1, allowRunningInsecureContent=0");
+    webview1.setAttribute("partition", R2_SESSION_WEBVIEW);
+    webview1.setAttribute("httpreferrer", publicationJsonUrl);
+    webview1.setAttribute("preload", "./preload.js");
+    // webview.setAttribute("src", "dummy");
+    // webview1.style.visibility = "hidden";
+    webview1.setAttribute("disableguestresize", "");
+
+    webview1.addEventListener("ipc-message", (event) => {
+        console.log("webview1 ipc-message");
+        console.log(event.channel);
+        if (event.channel === R2_EVENT_READIUMCSS) {
+            console.log(event.args);
+        }
+    });
+
+    webview1.addEventListener("dom-ready", () => {
+        // webview1.openDevTools();
+
+        const cssButtonN1 = document.getElementById("cssButtonInject");
+        if (cssButtonN1) {
+            cssButtonN1.removeAttribute("disabled");
+        }
+
+        const cssButtonN2 = document.getElementById("cssButtonReset");
+        if (cssButtonN2) {
+            cssButtonN2.removeAttribute("disabled");
+        }
+
+        // webview1.style.visibility = "visible";
+    });
+
+    return webview1;
+}
+
+window.addEventListener("resize", debounce(() => {
+
+    _webviews.forEach((wv) => {
+
+        // webview.offsetWidth == full including borders
+        // webview.scrollWidth == webview.clientWidth == without borders
+
+        // const computedStyle = window.getComputedStyle(webview1);
+        // console.log(parseInt(computedStyle.width as string, 10));
+        // console.log(parseInt(computedStyle.height as string, 10));
+
+        const width = wv.clientWidth;
+        const height = wv.clientHeight;
+
+        const wc = wv.getWebContents();
+        if (wc && width && height) {
+            wc.setSize({
+                normal: {
+                    height,
+                    width,
+                },
+            });
+        }
+    });
+}, 200));
+
+function loadLink(hrefFull: string, _hrefPartial: string, _publicationJsonUrl: string) {
+    if (_webviews.length) {
+        _webviews[0].setAttribute("src", hrefFull);
+        // _webviews[0].getWebContents().loadURL(tocLinkHref, { extraHeaders: "pragma: no-cache\n" });
+        // _webviews[0].loadURL(tocLinkHref, { extraHeaders: "pragma: no-cache\n" });
+    }
+}
 
 export function startNavigatorExperiment(publicationJsonUrl: string) {
 
@@ -29,67 +103,12 @@ export function startNavigatorExperiment(publicationJsonUrl: string) {
             }
         });
     }
+    const webviewFull = createWebView(publicationJsonUrl);
+    _webviews.push(webviewFull);
 
-    const webview1 = document.createElement("webview");
-    webview1.setAttribute("id", "webview1");
-    webview1.setAttribute("webpreferences",
-        "nodeIntegration=0, nodeIntegrationInWorker=0, sandbox=0, javascript=1, " +
-        "contextIsolation=0, webSecurity=1, allowRunningInsecureContent=0");
-    webview1.setAttribute("partition", "persist:publicationwebview");
-    webview1.setAttribute("httpreferrer", publicationJsonUrl);
-    webview1.setAttribute("preload", "./preload.js");
-    // webview.setAttribute("src", "dummy");
-    // webview1.style.visibility = "hidden";
-    webview1.setAttribute("disableguestresize", "");
-    window.addEventListener("resize", debounce(() => {
-
-        // webview.offsetWidth == full including borders
-        // webview.scrollWidth == webview.clientWidth == without borders
-
-        // const computedStyle = window.getComputedStyle(webview1);
-        // console.log(parseInt(computedStyle.width as string, 10));
-        // console.log(parseInt(computedStyle.height as string, 10));
-
-        const width = webview1.clientWidth;
-        const height = webview1.clientHeight;
-
-        const wc = webview1.getWebContents();
-        if (wc && width && height) {
-            wc.setSize({
-                normal: {
-                    height,
-                    width,
-                },
-            });
-        }
-    }, 200));
-    webview1.addEventListener("ipc-message", (event) => {
-        console.log("webview1 ipc-message");
-        console.log(event.channel);
-        if (event.channel === R2_EVENT_READIUMCSS) {
-            console.log(event.args);
-        }
-    });
-    webview1.addEventListener("dom-ready", () => {
-        // webview1.openDevTools();
-
-        const cssButtonN1 = document.getElementById("cssButtonInject");
-        if (!cssButtonN1) {
-            return;
-        }
-        cssButtonN1.removeAttribute("disabled");
-
-        const cssButtonN2 = document.getElementById("cssButtonReset");
-        if (!cssButtonN2) {
-            return;
-        }
-        cssButtonN2.removeAttribute("disabled");
-
-        // webview1.style.visibility = "visible";
-    });
     const publicationViewport = document.getElementById("publication_viewport");
     if (publicationViewport) {
-        publicationViewport.appendChild(webview1);
+        publicationViewport.appendChild(webviewFull);
     }
 
     const hideControlsButton = document.getElementById("hideControlsButton");
@@ -106,7 +125,10 @@ export function startNavigatorExperiment(publicationJsonUrl: string) {
     if (cssButton1) {
         cssButton1.addEventListener("click", (_event) => {
             const jsonMsg = { injectCSS: "yes", setCSS: "ok" };
-            webview1.send(R2_EVENT_READIUMCSS, JSON.stringify(jsonMsg)); // .getWebContents()
+
+            _webviews.forEach((wv) => {
+                wv.send(R2_EVENT_READIUMCSS, JSON.stringify(jsonMsg)); // .getWebContents()
+            });
         });
     }
 
@@ -114,7 +136,10 @@ export function startNavigatorExperiment(publicationJsonUrl: string) {
     if (cssButton2) {
         cssButton2.addEventListener("click", (_event) => {
             const jsonMsg = { injectCSS: "rollback", setCSS: "rollback" };
-            webview1.send(R2_EVENT_READIUMCSS, JSON.stringify(jsonMsg)); // .getWebContents()
+
+            _webviews.forEach((wv) => {
+                wv.send(R2_EVENT_READIUMCSS, JSON.stringify(jsonMsg)); // .getWebContents()
+            });
         });
     }
 
@@ -161,16 +186,19 @@ export function startNavigatorExperiment(publicationJsonUrl: string) {
 
         if (publicationJson.spine) {
             const readerControlsSpine = document.getElementById("reader_controls_SPINE");
+            let firstLinear: any | undefined;
             publicationJson.spine.forEach((spineItem: any) => {
+                // in Readium2, spine items are always linear (otherwise just "resource" collection)
+                if (!firstLinear) { // && (!spineItem.linear || spineItem.linear === "yes")) {
+                    firstLinear = spineItem;
+                }
                 const spineItemLink = document.createElement("a");
                 const spineItemLinkHref = publicationJsonUrl + "/../" + spineItem.href;
                 spineItemLink.setAttribute("href", spineItemLinkHref);
+                spineItemLink.setAttribute("data-href", spineItem.href);
                 spineItemLink.addEventListener("click", (event) => {
                     event.preventDefault();
-
-                    webview1.setAttribute("src", spineItemLinkHref);
-                    // webview1.getWebContents().loadURL(spineItemLinkHref, { extraHeaders: "pragma: no-cache\n" });
-                    // webview1.loadURL(spineItemLinkHref, { extraHeaders: "pragma: no-cache\n" });
+                    loadLink(spineItemLinkHref, spineItem.href, publicationJsonUrl);
                 });
                 spineItemLink.appendChild(document.createTextNode(spineItem.href));
                 if (readerControlsSpine) {
@@ -178,41 +206,47 @@ export function startNavigatorExperiment(publicationJsonUrl: string) {
                     readerControlsSpine.appendChild(document.createElement("br"));
                 }
             });
+            if (firstLinear) {
+                setTimeout(() => {
+                    const firstLinearLinkHref = publicationJsonUrl + "/../" + firstLinear.href;
+                    loadLink(firstLinearLinkHref, firstLinear.href, publicationJsonUrl);
+                }, 200);
+            }
         }
 
         if (publicationJson.toc && publicationJson.toc.length) {
             const readerControlsToc = document.getElementById("reader_controls_TOC");
             if (readerControlsToc) {
-                appendToc(publicationJson.toc, readerControlsToc, publicationJsonUrl, webview1);
+                appendToc(publicationJson.toc, readerControlsToc, publicationJsonUrl);
             }
         }
         if (publicationJson["page-list"] && publicationJson["page-list"].length) {
             const readerControlsPageList = document.getElementById("reader_controls_PAGELIST");
             if (readerControlsPageList) {
-                appendToc(publicationJson["page-list"], readerControlsPageList, publicationJsonUrl, webview1);
+                appendToc(publicationJson["page-list"], readerControlsPageList, publicationJsonUrl);
             }
         }
 
         const readerControlsLandmarks = document.getElementById("reader_controls_LANDMARKS");
         if (readerControlsLandmarks) {
             if (publicationJson.landmarks && publicationJson.landmarks.length) {
-                appendToc(publicationJson.landmarks, readerControlsLandmarks, publicationJsonUrl, webview1);
+                appendToc(publicationJson.landmarks, readerControlsLandmarks, publicationJsonUrl);
             }
             if (publicationJson.lot && publicationJson.lot.length) {
                 readerControlsLandmarks.appendChild(document.createElement("hr"));
-                appendToc(publicationJson.lot, readerControlsLandmarks, publicationJsonUrl, webview1);
+                appendToc(publicationJson.lot, readerControlsLandmarks, publicationJsonUrl);
             }
             if (publicationJson.loa && publicationJson.loa.length) {
                 readerControlsLandmarks.appendChild(document.createElement("hr"));
-                appendToc(publicationJson.loa, readerControlsLandmarks, publicationJsonUrl, webview1);
+                appendToc(publicationJson.loa, readerControlsLandmarks, publicationJsonUrl);
             }
             if (publicationJson.loi && publicationJson.loi.length) {
                 readerControlsLandmarks.appendChild(document.createElement("hr"));
-                appendToc(publicationJson.loi, readerControlsLandmarks, publicationJsonUrl, webview1);
+                appendToc(publicationJson.loi, readerControlsLandmarks, publicationJsonUrl);
             }
             if (publicationJson.lov && publicationJson.lov.length) {
                 readerControlsLandmarks.appendChild(document.createElement("hr"));
-                appendToc(publicationJson.lov, readerControlsLandmarks, publicationJsonUrl, webview1);
+                appendToc(publicationJson.lov, readerControlsLandmarks, publicationJsonUrl);
             }
         }
     })();
@@ -224,7 +258,7 @@ export function startNavigatorExperiment(publicationJsonUrl: string) {
     // a.click();
 }
 
-function appendToc(json: any, anchor: HTMLElement, publicationJsonUrl: string, webview1: HTMLElement) {
+function appendToc(json: any, anchor: HTMLElement, publicationJsonUrl: string) {
 
     const ul = document.createElement("ul");
     json.forEach((tocLinkJson: any) => {
@@ -238,12 +272,10 @@ function appendToc(json: any, anchor: HTMLElement, publicationJsonUrl: string, w
             const tocLink = document.createElement("a");
             const tocLinkHref = publicationJsonUrl + "/../" + tocLinkJson.href;
             tocLink.setAttribute("href", tocLinkHref);
+            tocLink.setAttribute("data-href", tocLinkJson.href);
             tocLink.addEventListener("click", (event) => {
                 event.preventDefault();
-
-                webview1.setAttribute("src", tocLinkHref);
-                // webview1.getWebContents().loadURL(tocLinkHref, { extraHeaders: "pragma: no-cache\n" });
-                // webview1.loadURL(tocLinkHref, { extraHeaders: "pragma: no-cache\n" });
+                loadLink(tocLinkHref, tocLinkJson.href, publicationJsonUrl);
             });
             tocLink.appendChild(document.createTextNode(tocLinkJson.title));
             li.appendChild(tocLink);
@@ -263,7 +295,7 @@ function appendToc(json: any, anchor: HTMLElement, publicationJsonUrl: string, w
         ul.appendChild(li);
 
         if (tocLinkJson.children && tocLinkJson.children.length) {
-            appendToc(tocLinkJson.children, li, publicationJsonUrl, webview1);
+            appendToc(tocLinkJson.children, li, publicationJsonUrl);
         }
     });
 
