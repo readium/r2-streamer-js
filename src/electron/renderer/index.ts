@@ -1,6 +1,6 @@
 import { ipcRenderer } from "electron";
-import { R2_EVENT_DEVTOOLS, R2_EVENT_TRY_LCP_PASS } from "../common/events";
-import { startNavigatorExperiment } from "./index_navigator";
+import { R2_EVENT_DEVTOOLS, R2_EVENT_LINK, R2_EVENT_TRY_LCP_PASS, R2_EVENT_TRY_LCP_PASS_RES } from "../common/events";
+import { handleLink, startNavigatorExperiment } from "./index_navigator";
 import { getURLQueryParams } from "./querystring";
 
 // import { startServiceWorkerExperiment } from "./sw/index_service-worker";
@@ -25,7 +25,14 @@ window.onerror = (err) => {
     console.log("Error", err);
 };
 
-ipcRenderer.on(R2_EVENT_TRY_LCP_PASS, (_event: any, okay: boolean, message: string) => {
+ipcRenderer.on(R2_EVENT_LINK, (_event: any, href: string) => {
+    console.log("R2_EVENT_LINK");
+    console.log(href);
+    handleLink(href, publicationJsonUrl);
+});
+
+ipcRenderer.on(R2_EVENT_TRY_LCP_PASS_RES, (_event: any, okay: boolean, message: string) => {
+    console.log("R2_EVENT_TRY_LCP_PASS_RES");
     console.log(okay);
     console.log(message);
 
@@ -51,6 +58,8 @@ window.addEventListener("DOMContentLoaded", () => {
     const pathDecoded = window.atob(pathBase64);
     console.log(pathDecoded);
     const pathFileName = pathDecoded.substr(pathDecoded.lastIndexOf("/") + 1, pathDecoded.length - 1);
+
+    window.document.title = "Readium2 [ " + pathFileName + "]";
 
     const h1 = document.querySelector("html > body > h1 > span");
     if (h1) {

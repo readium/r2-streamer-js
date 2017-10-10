@@ -20,14 +20,14 @@ import * as path from "path";
 
 import { encodeURIComponent_RFC3986 } from "@utils/http/UrlUtils";
 import * as debug_ from "debug";
-import { BrowserWindow, Menu, app, dialog, ipcMain, session, shell, webContents } from "electron";
+import { BrowserWindow, Menu, app, dialog, ipcMain, session, webContents } from "electron";
 import * as filehound from "filehound";
 import * as portfinder from "portfinder";
 
 import { Publication } from "@models/publication";
 import { Server } from "../http/server";
 import { initGlobals } from "../init-globals";
-import { R2_EVENT_DEVTOOLS, R2_EVENT_TRY_LCP_PASS } from "./common/events";
+import { R2_EVENT_DEVTOOLS, R2_EVENT_LINK, R2_EVENT_TRY_LCP_PASS, R2_EVENT_TRY_LCP_PASS_RES } from "./common/events";
 import { R2_SESSION_WEBVIEW } from "./common/sessions";
 
 // import * as mime from "mime-types";
@@ -61,13 +61,14 @@ app.on("web-contents-created", (_evt, wc) => {
             wc.on("will-navigate", (event, url) => {
                 debug("webview.getWebContents().on('will-navigate'");
 
-                debug(event.sender);
-                event.sender.clearHistory();
+                // debug(event.sender);
                 debug(url);
                 const wcUrl = event.sender.getURL();
                 debug(wcUrl);
                 event.preventDefault();
-                shell.openExternal(url);
+
+                // ipcMain.emit
+                win.webContents.send(R2_EVENT_LINK, url);
             });
         }
     });
@@ -102,7 +103,7 @@ ipcMain.on(R2_EVENT_TRY_LCP_PASS, (event: any, publicationFilePath: string, lcpP
     debug(publicationFilePath);
     debug(lcpPass);
     const okay = tryLcpPass(publicationFilePath, lcpPass);
-    event.sender.send(R2_EVENT_TRY_LCP_PASS,
+    event.sender.send(R2_EVENT_TRY_LCP_PASS_RES,
         okay,
         (okay ? "LCP okay. (" + lcpPass + ")" : "LCP problem!? (" + lcpPass + ")"));
 });

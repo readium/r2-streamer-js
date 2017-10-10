@@ -1,8 +1,21 @@
 import debounce = require("debounce");
-import { R2_EVENT_READIUMCSS } from "../common/events";
+import { shell } from "electron";
+
+import { R2_EVENT_LINK, R2_EVENT_READIUMCSS } from "../common/events";
 import { R2_SESSION_WEBVIEW } from "../common/sessions";
+// import { shell } from "electron";
 
 const _webviews: Electron.WebviewTag[] = [];
+
+export function handleLink(href: string, publicationJsonUrl: string) {
+    console.log(publicationJsonUrl);
+    const prefix = publicationJsonUrl.replace("manifest.json", "");
+    if (href.startsWith(prefix)) {
+        loadLink(href, href.replace(prefix, ""), publicationJsonUrl);
+    } else {
+        shell.openExternal(href);
+    }
+}
 
 function createWebView(publicationJsonUrl: string) {
     const webview1 = document.createElement("webview");
@@ -20,13 +33,16 @@ function createWebView(publicationJsonUrl: string) {
     webview1.addEventListener("ipc-message", (event) => {
         console.log("webview1 ipc-message");
         console.log(event.channel);
-        if (event.channel === R2_EVENT_READIUMCSS) {
-            console.log(event.args);
+        if (event.channel === R2_EVENT_LINK) {
+            handleLink(event.args[0], publicationJsonUrl);
         }
     });
 
     webview1.addEventListener("dom-ready", () => {
         // webview1.openDevTools();
+        console.log("WEBVIEW DOM READY: " + _webviews.length);
+
+        webview1.clearHistory();
 
         const cssButtonN1 = document.getElementById("cssButtonInject");
         if (cssButtonN1) {
@@ -39,7 +55,25 @@ function createWebView(publicationJsonUrl: string) {
         }
 
         // webview1.style.visibility = "visible";
+
+        // webview1.getWebContents().on("will-navigate", (evt, url) => {
+        //     console.log("webview1.getWebContents().on('will-navigate'");
+        //     console.log(evt);
+        //     console.log(url);
+        //     evt.preventDefault();
+        //     // webview1.stop();
+        //     shell.openExternal(url);
+        // });
     });
+
+    // webview1.addEventListener("will-navigate", (evt) => {
+    //     console.log("webview1.addEventListener('will-navigate'");
+    //     console.log(evt);
+    //     console.log(evt.url);
+    //     // evt.preventDefault();
+    //     webview1.stop();
+    //     shell.openExternal(evt.url);
+    // });
 
     return webview1;
 }
@@ -184,6 +218,20 @@ export function startNavigatorExperiment(publicationJsonUrl: string) {
         }
         console.log(publicationJson);
 
+        const buttonNavLeft = document.getElementById("buttonNavLeft");
+        if (buttonNavLeft) {
+            buttonNavLeft.addEventListener("click", (_event) => {
+                navLeftOrRight(false, publicationJsonUrl, publicationJson);
+            });
+        }
+
+        const buttonNavRight = document.getElementById("buttonNavRight");
+        if (buttonNavRight) {
+            buttonNavRight.addEventListener("click", (_event) => {
+                navLeftOrRight(true, publicationJsonUrl, publicationJson);
+            });
+        }
+
         if (publicationJson.spine) {
             const readerControlsSpine = document.getElementById("reader_controls_SPINE");
             let firstLinear: any | undefined;
@@ -300,4 +348,8 @@ function appendToc(json: any, anchor: HTMLElement, publicationJsonUrl: string) {
     });
 
     anchor.appendChild(ul);
+}
+
+function navLeftOrRight(_right: boolean, _publicationJsonUrl: string, _publicationJson: any) {
+    // TODO: publication spine + pagination state
 }

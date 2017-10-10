@@ -1,7 +1,7 @@
 <html>
 
 <head>
-  <title>Electron renderer process</title>
+  <title>Readium 2 NodeJS 'streamer' (Electron 'navigator')</title>
 
   <meta charset="UTF-8" />
   <style type="text/css">
@@ -119,6 +119,19 @@
     #reader_controls_TOC {
       display: block;
     }
+    #buttonNavLeft, #buttonNavRight {
+      display: block;
+      position: absolute;
+      top: 40%;
+      bottom: 40%;
+      width: 30px;
+    }
+    #buttonNavLeft {
+      left: 0;
+    }
+    #buttonNavRight {
+      right: 0;
+    }
   </style>
 
 <script type="application/javascript">
@@ -145,6 +158,8 @@
     <div id="reader_chrome">
       <div id="publication_viewport">
       </div>
+      <button id="buttonNavLeft">&lt;</button>
+      <button id="buttonNavRight">&gt;</button>
       <div id="reader_controls">
           <hr>
           <div id="tabHeaders">

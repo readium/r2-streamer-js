@@ -1,6 +1,6 @@
 import { ipcRenderer } from "electron";
 
-import { R2_EVENT_READIUMCSS } from "../common/events";
+import { R2_EVENT_LINK, R2_EVENT_READIUMCSS } from "../common/events";
 
 console.log("PRELOAD");
 
@@ -156,16 +156,19 @@ ipcRenderer.on(R2_EVENT_READIUMCSS, (_event: any, messageString: any) => {
 
 win.addEventListener("DOMContentLoaded", () => {
     console.log("PRELOAD DOM READY");
+
     win.document.addEventListener("click", (e) => {
         const href = (e.target as any).href;
         if (!href) {
             return;
         }
+        console.log("HREF CLICK: " + href);
         e.preventDefault();
         e.stopPropagation();
-        console.log("HREF CLICK: " + href);
+        ipcRenderer.sendToHost(R2_EVENT_LINK, href);
         return false;
     }, true);
+
     // const borderDiv1 = win.document.createElement("div");
     // borderDiv1.setAttribute("id", "ReadiumBorderDIV1");
     // borderDiv1.setAttribute("style",
