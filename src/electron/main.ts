@@ -28,6 +28,7 @@ import { Publication } from "@models/publication";
 import { Server } from "../http/server";
 import { initGlobals } from "../init-globals";
 import { R2_EVENT_DEVTOOLS, R2_EVENT_TRY_LCP_PASS } from "./common/events";
+import { R2_SESSION_WEBVIEW } from "./common/sessions";
 
 // import * as mime from "mime-types";
 
@@ -230,6 +231,22 @@ function clearSession(sess: Electron.Session, str: string) {
     });
 }
 
+function clearSessions() {
+    if (session.defaultSession) {
+        // const proto = session.defaultSession.protocol;
+        clearSession(session.defaultSession, "DEFAULT SESSION");
+    }
+
+    const sess = getWebViewSession();
+    if (sess) {
+        clearSession(sess, "SESSION [persist:publicationwebview]");
+    }
+}
+
+function getWebViewSession() {
+    return session.fromPartition(R2_SESSION_WEBVIEW, { cache: false });
+}
+
 app.on("ready", () => {
     debug("app ready");
 
@@ -246,22 +263,17 @@ app.on("ready", () => {
     //         debug(error);
     //     });
 
-    if (session.defaultSession) {
-        // const proto = session.defaultSession.protocol;
-        clearSession(session.defaultSession, "DEFAULT SESSION");
-    }
+    clearSessions();
 
-    const sess = session.fromPartition("persist:publicationwebview", { cache: false });
+    const sess = getWebViewSession();
     if (sess) {
-        clearSession(sess, "SESSION [persist:publicationwebview]");
+        sess.setPermissionRequestHandler((wc, permission, callback) => {
+            console.log("setPermissionRequestHandler");
+            console.log(wc.getURL());
+            console.log(permission);
+            callback(true);
+        });
     }
-
-    sess.setPermissionRequestHandler((wc, permission, callback) => {
-        console.log("setPermissionRequestHandler");
-        console.log(wc.getURL());
-        console.log(permission);
-        callback(true);
-    });
 
     // tslint:disable-next-line:no-floating-promises
     (async () => {
@@ -455,6 +467,8 @@ app.on("activate", () => {
 
 app.on("quit", () => {
     debug("app quit");
+
+    clearSessions();
 
     _publicationsServer.stop();
 });
