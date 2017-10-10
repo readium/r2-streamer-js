@@ -199,13 +199,6 @@ async function createElectronBrowserWindow(publicationFilePath: string, publicat
     electronBrowserWindow.webContents.loadURL(fullUrl, { extraHeaders: "pragma: no-cache\n" });
 }
 
-app.on("window-all-closed", () => {
-    debug("app window-all-closed");
-    if (process.platform !== "darwin") {
-        app.quit();
-    }
-});
-
 function clearSession(sess: Electron.Session, str: string) {
 
     sess.clearCache(() => {
@@ -465,10 +458,25 @@ app.on("activate", () => {
     debug("app activate");
 });
 
-app.on("quit", () => {
-    debug("app quit");
+app.on("before-quit", () => {
+    debug("app before quit");
+});
+
+app.on("window-all-closed", () => {
+    debug("app window-all-closed");
+    if (process.platform !== "darwin") {
+        app.quit();
+    }
+});
+
+app.on("will-quit", () => {
+    debug("app will quit");
 
     clearSessions();
 
     _publicationsServer.stop();
+});
+
+app.on("quit", () => {
+    debug("app quit");
 });
