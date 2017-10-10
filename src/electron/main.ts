@@ -377,7 +377,8 @@ function resetMenu() {
                 {
                     accelerator: "Command+B",
                     click: () => {
-                        openTopLevelDevTools();
+                        // openTopLevelDevTools();
+                        openAllDevTools();
                     },
                     label: "Open Dev Tools",
                 },
