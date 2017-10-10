@@ -156,7 +156,16 @@ ipcRenderer.on(R2_EVENT_READIUMCSS, (_event: any, messageString: any) => {
 
 win.addEventListener("DOMContentLoaded", () => {
     console.log("PRELOAD DOM READY");
-
+    win.document.addEventListener("click", (e) => {
+        const href = (e.target as any).href;
+        if (!href) {
+            return;
+        }
+        e.preventDefault();
+        e.stopPropagation();
+        console.log("HREF CLICK: " + href);
+        return false;
+    }, true);
     // const borderDiv1 = win.document.createElement("div");
     // borderDiv1.setAttribute("id", "ReadiumBorderDIV1");
     // borderDiv1.setAttribute("style",
