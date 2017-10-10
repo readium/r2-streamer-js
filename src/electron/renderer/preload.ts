@@ -194,6 +194,7 @@ win.addEventListener("DOMContentLoaded", () => {
 win.addEventListener("resize", () => {
     console.log("webview resize");
     win.document.body.scrollLeft = 0;
+    win.document.body.scrollTop = 0;
 });
 
 function appendCSS(mod: string) {
