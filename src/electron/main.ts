@@ -20,7 +20,7 @@ import * as path from "path";
 
 import { encodeURIComponent_RFC3986 } from "@utils/http/UrlUtils";
 import * as debug_ from "debug";
-import { BrowserWindow, Menu, app, dialog, ipcMain, session, webContents } from "electron";
+import { BrowserWindow, Menu, app, dialog, ipcMain, session, shell, webContents } from "electron";
 import * as filehound from "filehound";
 import * as portfinder from "portfinder";
 
@@ -48,6 +48,30 @@ const defaultBookPath = fs.realpathSync(path.resolve("./misc/epubs/"));
 let lastBookPath: string | undefined;
 
 // protocol.registerStandardSchemes(["epub", "file"], { secure: true });
+
+app.on("web-contents-created", (_evt, wc) => {
+    if (!_electronBrowserWindows || !_electronBrowserWindows.length) {
+        return;
+    }
+    _electronBrowserWindows.forEach((win) => {
+        if (wc.hostWebContents &&
+            wc.hostWebContents.id === win.webContents.id) {
+            debug("WEBVIEW web-contents-created");
+
+            wc.on("will-navigate", (event, url) => {
+                debug("webview.getWebContents().on('will-navigate'");
+
+                debug(event.sender);
+                event.sender.clearHistory();
+                debug(url);
+                const wcUrl = event.sender.getURL();
+                debug(wcUrl);
+                event.preventDefault();
+                shell.openExternal(url);
+            });
+        }
+    });
+});
 
 function openAllDevTools() {
     for (const wc of webContents.getAllWebContents()) {
