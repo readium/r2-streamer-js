@@ -27,6 +27,7 @@ import * as portfinder from "portfinder";
 import { Publication } from "@models/publication";
 import { Server } from "../http/server";
 import { initGlobals } from "../init-globals";
+import { R2_EVENT_DEVTOOLS, R2_EVENT_TRY_LCP_PASS } from "./common/events";
 
 // import * as mime from "mime-types";
 
@@ -47,26 +48,38 @@ let lastBookPath: string | undefined;
 
 // protocol.registerStandardSchemes(["epub", "file"], { secure: true });
 
-ipcMain.on("devtools", (_event: any, _arg: any) => {
-    // event.sender.send('devTooools', 'pong');
-
+function openAllDevTools() {
     for (const wc of webContents.getAllWebContents()) {
         // if (wc.hostWebContents &&
         //     wc.hostWebContents.id === electronBrowserWindow.webContents.id) {
         // }
         wc.openDevTools();
     }
+}
+
+function openTopLevelDevTools() {
+    const bw = BrowserWindow.getFocusedWindow();
+    if (bw) {
+        bw.webContents.openDevTools();
+    } else {
+        const arr = BrowserWindow.getAllWindows();
+        arr.forEach((bww) => {
+            bww.webContents.openDevTools();
+        });
+    }
+}
+
+ipcMain.on(R2_EVENT_DEVTOOLS, (_event: any, _arg: any) => {
+    openAllDevTools();
 });
 
-ipcMain.on("tryLcpPass", (event: any, publicationFilePath: string, lcpPass: string) => {
+ipcMain.on(R2_EVENT_TRY_LCP_PASS, (event: any, publicationFilePath: string, lcpPass: string) => {
     debug(publicationFilePath);
     debug(lcpPass);
     const okay = tryLcpPass(publicationFilePath, lcpPass);
-    if (!okay) {
-        event.sender.send("tryLcpPass", false, "LCP problem! (" + lcpPass + ")");
-    } else {
-        event.sender.send("tryLcpPass", true, "LCP okay. (" + lcpPass + ")");
-    }
+    event.sender.send(R2_EVENT_TRY_LCP_PASS,
+        okay,
+        (okay ? "LCP okay. (" + lcpPass + ")" : "LCP problem!? (" + lcpPass + ")"));
 });
 
 function tryLcpPass(publicationFilePath: string, lcpPass: string): boolean {
@@ -344,7 +357,7 @@ function resetMenu() {
 
     const menuTemplate = [
         {
-            label: "Electron R2",
+            label: "Readium2 Electron",
             submenu: [
                 {
                     accelerator: "Command+Q",
@@ -353,9 +366,26 @@ function resetMenu() {
                 },
             ],
         },
+        {
+            label: "Open",
+            submenu: [
+            ],
+        },
+        {
+            label: "Tools",
+            submenu: [
+                {
+                    accelerator: "Command+B",
+                    click: () => {
+                        openTopLevelDevTools();
+                    },
+                    label: "Open Dev Tools",
+                },
+            ],
+        },
     ];
 
-    menuTemplate[0].submenu.push({
+    menuTemplate[1].submenu.push({
         click: async () => {
             const choice = dialog.showOpenDialog({
                 defaultPath: lastBookPath || defaultBookPath,
@@ -400,14 +430,14 @@ function resetMenu() {
 
             await createElectronBrowserWindow(file, pubManifestUrl);
         },
-        label: "Open file...",
+        label: "Load file...",
     } as any);
 
     _publicationsUrls.forEach((pubManifestUrl, n) => {
         const file = _publicationsFilePaths[n];
         debug("MENU ITEM: " + file + " : " + pubManifestUrl);
 
-        menuTemplate[0].submenu.push({
+        menuTemplate[1].submenu.push({
             click: async () => {
                 await createElectronBrowserWindow(file, pubManifestUrl);
             },
