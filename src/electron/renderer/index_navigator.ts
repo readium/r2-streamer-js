@@ -1,4 +1,6 @@
 import debounce = require("debounce");
+import { R2_EVENT_READIUMCSS } from "../common/events";
+
 // import * as debounce from "debounce";
 // import { debounce } from "debounce";
 
@@ -64,7 +66,7 @@ export function startNavigatorExperiment(publicationJsonUrl: string) {
     webview1.addEventListener("ipc-message", (event) => {
         console.log("webview1 ipc-message");
         console.log(event.channel);
-        if (event.channel === "readium") {
+        if (event.channel === R2_EVENT_READIUMCSS) {
             console.log(event.args);
         }
     });
@@ -104,7 +106,7 @@ export function startNavigatorExperiment(publicationJsonUrl: string) {
     if (cssButton1) {
         cssButton1.addEventListener("click", (_event) => {
             const jsonMsg = { injectCSS: "yes", setCSS: "ok" };
-            webview1.send("readium", JSON.stringify(jsonMsg)); // .getWebContents()
+            webview1.send(R2_EVENT_READIUMCSS, JSON.stringify(jsonMsg)); // .getWebContents()
         });
     }
 
@@ -112,7 +114,7 @@ export function startNavigatorExperiment(publicationJsonUrl: string) {
     if (cssButton2) {
         cssButton2.addEventListener("click", (_event) => {
             const jsonMsg = { injectCSS: "rollback", setCSS: "rollback" };
-            webview1.send("readium", JSON.stringify(jsonMsg)); // .getWebContents()
+            webview1.send(R2_EVENT_READIUMCSS, JSON.stringify(jsonMsg)); // .getWebContents()
         });
     }
 

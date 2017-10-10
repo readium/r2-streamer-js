@@ -1,4 +1,5 @@
 import { ipcRenderer } from "electron";
+import { R2_EVENT_DEVTOOLS, R2_EVENT_TRY_LCP_PASS } from "../common/events";
 import { startNavigatorExperiment } from "./index_navigator";
 import { getURLQueryParams } from "./querystring";
 
@@ -24,12 +25,13 @@ window.onerror = (err) => {
     console.log("Error", err);
 };
 
-ipcRenderer.on("tryLcpPass", (_event: any, okay: boolean, message: string) => {
+ipcRenderer.on(R2_EVENT_TRY_LCP_PASS, (_event: any, okay: boolean, message: string) => {
     console.log(okay);
     console.log(message);
 
     const lcpPassInput = document.getElementById("lcpPassInput");
-    if (!lcpPassInput) {
+    const lcpPassForm = document.getElementById("lcpPassForm");
+    if (!lcpPassInput || !lcpPassForm) {
         return;
     }
 
@@ -37,10 +39,6 @@ ipcRenderer.on("tryLcpPass", (_event: any, okay: boolean, message: string) => {
 
     if (okay) {
         setTimeout(() => {
-            const lcpPassForm = document.getElementById("lcpPassForm");
-            if (!lcpPassForm) {
-                return;
-            }
             lcpPassForm.style.display = "none";
         }, 1000);
     }
@@ -59,56 +57,50 @@ window.addEventListener("DOMContentLoaded", () => {
         (h1 as HTMLElement).textContent = pathFileName;
     }
 
-    const lcpPassForm = document.getElementById("lcpPassForm");
-    if (!lcpPassForm) {
-        return;
-    }
-    const lcpPassInput = document.getElementById("lcpPassInput");
-    if (!lcpPassInput) {
-        return;
-    }
     if (lcpHint) {
-        (lcpPassInput as HTMLInputElement).value = lcpHint;
-        lcpPassForm.style.display = "inline-block";
-        // lcpPassForm.onsubmit
-        lcpPassForm.addEventListener("submit", (evt) => {
-            if (evt) {
-                evt.preventDefault();
-            }
-            const lcpPass = (lcpPassInput as HTMLInputElement).value;
-            ipcRenderer.send("tryLcpPass", pathDecoded, lcpPass);
-            return false;
-        });
+        const lcpPassForm = document.getElementById("lcpPassForm");
+        const lcpPassInput = document.getElementById("lcpPassInput");
+        if (lcpPassInput && lcpPassForm) {
+
+            (lcpPassInput as HTMLInputElement).value = lcpHint;
+            lcpPassForm.style.display = "inline-block";
+            // lcpPassForm.onsubmit
+            lcpPassForm.addEventListener("submit", (evt) => {
+                if (evt) {
+                    evt.preventDefault();
+                }
+                const lcpPass = (lcpPassInput as HTMLInputElement).value;
+                ipcRenderer.send(R2_EVENT_TRY_LCP_PASS, pathDecoded, lcpPass);
+                return false;
+            });
+        }
     }
 
     const buttStart = document.getElementById("buttonStart");
-    if (!buttStart) {
-        return;
+    if (buttStart) {
+        buttStart.addEventListener("click", () => {
+            buttStart.setAttribute("disabled", "");
+            buttStart.style.display = "none";
+            // startServiceWorkerExperiment(publicationJsonUrl);
+            startNavigatorExperiment(publicationJsonUrl);
+        });
     }
-    buttStart.addEventListener("click", () => {
-        buttStart.setAttribute("disabled", "");
-        buttStart.style.display = "none";
-        // startServiceWorkerExperiment(publicationJsonUrl);
-        startNavigatorExperiment(publicationJsonUrl);
-    });
 
     const buttonDebug = document.getElementById("buttonDebug");
-    if (!buttonDebug) {
-        return;
+    if (buttonDebug) {
+        buttonDebug.addEventListener("click", () => {
+            if (document.documentElement.classList.contains("debug")) {
+                document.documentElement.classList.remove("debug");
+            } else {
+                document.documentElement.classList.add("debug");
+            }
+        });
     }
-    buttonDebug.addEventListener("click", () => {
-        if (document.documentElement.classList.contains("debug")) {
-            document.documentElement.classList.remove("debug");
-        } else {
-            document.documentElement.classList.add("debug");
-        }
-    });
 
     const buttonDevTools = document.getElementById("buttonDevTools");
-    if (!buttonDevTools) {
-        return;
+    if (buttonDevTools) {
+        buttonDevTools.addEventListener("click", () => {
+            ipcRenderer.send(R2_EVENT_DEVTOOLS, "test");
+        });
     }
-    buttonDevTools.addEventListener("click", () => {
-        ipcRenderer.send("devtools", "test");
-    });
 });

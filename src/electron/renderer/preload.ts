@@ -1,5 +1,7 @@
 import { ipcRenderer } from "electron";
 
+import { R2_EVENT_READIUMCSS } from "../common/events";
+
 console.log("PRELOAD");
 
 const win = (global as any).window as Window;
@@ -9,11 +11,11 @@ console.log(win.location.origin);
 
 const urlRootReadiumCSS = win.location.origin + "/readium-css/iOS/";
 
-ipcRenderer.on("readium", (_event: any, messageString: any) => {
+ipcRenderer.on(R2_EVENT_READIUMCSS, (_event: any, messageString: any) => {
     // console.log("ipcRenderer");
     // console.log(event);
     // console.log(messageString);
-    // ipcRenderer.sendToHost("readium", "pong");
+    // ipcRenderer.sendToHost(R2_EVENT_READIUMCSS, "pong");
 
     const messageJson = JSON.parse(messageString);
 
