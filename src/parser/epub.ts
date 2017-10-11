@@ -115,11 +115,13 @@ export async function EpubParsePromise(filePath: string): Promise<Publication> {
         const lcplJson = global.JSON.parse(lcplStr);
         lcpl = TAJSON.deserialize<LCP>(lcplJson, LCP);
         lcpl.ZipPath = lcplZipPath;
+        lcpl.JsonSource = lcplStr;
 
         // breakLength: 100  maxArrayLength: undefined
         // console.log(util.inspect(lcpl,
         //     { showHidden: false, depth: 1000, colors: true, customInspect: true }));
 
+        lcpl.init();
         publication.LCP = lcpl;
 
         // // breakLength: 100  maxArrayLength: undefined

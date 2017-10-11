@@ -7,6 +7,7 @@ declare module "node-stream-zip";
 declare module "unzipper";
 declare module "yauzl";
 declare module "filehound";
+declare module "bindings";
 
 // See test/ava.ts
 // Also see .vscode/launch.json

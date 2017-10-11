@@ -99,16 +99,22 @@ ipcMain.on(R2_EVENT_DEVTOOLS, (_event: any, _arg: any) => {
     openAllDevTools();
 });
 
-ipcMain.on(R2_EVENT_TRY_LCP_PASS, (event: any, publicationFilePath: string, lcpPass: string) => {
+ipcMain.on(R2_EVENT_TRY_LCP_PASS, async (event: any, publicationFilePath: string, lcpPass: string) => {
     debug(publicationFilePath);
     debug(lcpPass);
-    const okay = tryLcpPass(publicationFilePath, lcpPass);
+    let okay = false;
+    try {
+        okay = await tryLcpPass(publicationFilePath, lcpPass);
+    } catch (err) {
+        debug(err);
+        okay = false;
+    }
     event.sender.send(R2_EVENT_TRY_LCP_PASS_RES,
         okay,
         (okay ? "LCP okay. (" + lcpPass + ")" : "LCP problem!? (" + lcpPass + ")"));
 });
 
-function tryLcpPass(publicationFilePath: string, lcpPass: string): boolean {
+async function tryLcpPass(publicationFilePath: string, lcpPass: string): Promise<boolean> {
     const publication = _publicationsServer.cachedPublication(publicationFilePath);
     if (!publication) {
         return false;
@@ -123,7 +129,7 @@ function tryLcpPass(publicationFilePath: string, lcpPass: string): boolean {
     const lcpPassHex = checkSum.digest("hex");
     // const lcpPass64 = new Buffer(hash).toString("base64");
     // const lcpPassHex = new Buffer(lcpPass64, "base64").toString("utf8");
-    const okay = publication.LCP.setUserPassphrase(lcpPassHex); // hex
+    const okay = await publication.LCP.setUserPassphrase(lcpPassHex); // hex
     if (!okay) {
         debug("FAIL publication.LCP.setUserPassphrase()");
     }
@@ -156,7 +162,7 @@ async function createElectronBrowserWindow(publicationFilePath: string, publicat
         }
         // TODO: passphrase from cache (persistent storage, user settings)
         // const testLcpPass = "danzzz";
-        // const okay = tryLcpPass(publicationFilePath, testLcpPass);
+        // const okay = await tryLcpPass(publicationFilePath, testLcpPass);
         // if (okay) {
         //     lcpHint = undefined;
         // }
@@ -324,7 +330,7 @@ app.on("ready", () => {
 
         process.nextTick(() => {
             const detail = "Note that this is only a developer application (" +
-            "test framework) for the Readium2 NodeJS 'streamer' and Electron-based 'navigator'.";
+                "test framework) for the Readium2 NodeJS 'streamer' and Electron-based 'navigator'.";
             const message = "Use the 'Electron' menu to load publications.";
 
             if (process.platform === "darwin") {

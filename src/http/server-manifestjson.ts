@@ -95,7 +95,13 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
             if (req.params.lcpPass64 && !server.disableDecryption) {
                 const lcpPass = new Buffer(req.params.lcpPass64, "base64").toString("utf8");
                 if (publication.LCP) {
-                    const okay = publication.LCP.setUserPassphrase(lcpPass); // hex
+                    let okay = false;
+                    try {
+                        okay = await publication.LCP.setUserPassphrase(lcpPass); // hex
+                    } catch (err) {
+                        debug(err);
+                        okay = false;
+                    }
                     if (!okay) {
                         const errMsg = "FAIL publication.LCP.setUserPassphrase()";
                         debug(errMsg);
