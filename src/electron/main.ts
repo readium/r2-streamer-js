@@ -323,20 +323,44 @@ app.on("ready", () => {
         resetMenu();
 
         process.nextTick(() => {
-            const choice = dialog.showMessageBox({
-                buttons: ["&OK"],
-                cancelId: 0,
-                defaultId: 0,
-                detail: "Note that this is only a developer application (" +
-                "test framework) for the Readium2 NodeJS 'streamer' and Electron-based 'navigator'.",
-                message: "Use the 'Electron' menu to load publications.",
-                noLink: true,
-                normalizeAccessKeys: true,
-                title: "Readium2 Electron streamer / navigator",
-                type: "info",
-            });
-            if (choice === 0) {
-                debug("ok");
+            const detail = "Note that this is only a developer application (" +
+            "test framework) for the Readium2 NodeJS 'streamer' and Electron-based 'navigator'.";
+            const message = "Use the 'Electron' menu to load publications.";
+
+            if (process.platform === "darwin") {
+                const choice = dialog.showMessageBox({
+                    buttons: ["&OK"],
+                    cancelId: 0,
+                    defaultId: 0,
+                    detail,
+                    message,
+                    noLink: true,
+                    normalizeAccessKeys: true,
+                    title: "Readium2 Electron streamer / navigator",
+                    type: "info",
+                });
+                if (choice === 0) {
+                    debug("ok");
+                }
+            } else {
+                const html = `<html><h2>${message}<hr>${detail}</h2></html>`;
+                const electronBrowserWindow = new BrowserWindow({
+                    height: 300,
+                    webPreferences: {
+                        allowRunningInsecureContent: false,
+                        contextIsolation: false,
+                        devTools: false,
+                        nodeIntegration: false,
+                        nodeIntegrationInWorker: false,
+                        sandbox: false,
+                        webSecurity: true,
+                        webviewTag: false,
+                        // preload: __dirname + "/" + "preload.js",
+                    },
+                    width: 400,
+                });
+
+                electronBrowserWindow.webContents.loadURL("data:text/html," + html);
             }
         });
     })();
