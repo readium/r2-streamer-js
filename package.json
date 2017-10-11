@@ -65,7 +65,7 @@
     "slugify": "^1.2.1",
     "ta-json": "github:danielweck/ta-json#dist",
     "tmp": "^0.0.33",
-    "tslib": "^1.7.1",
+    "tslib": "^1.8.0",
     "unzipper": "^0.8.9",
     "xmldom": "^0.1.27",
     "xpath": "^0.0.24",

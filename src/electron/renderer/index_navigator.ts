@@ -8,7 +8,7 @@ import { R2_SESSION_WEBVIEW } from "../common/sessions";
 const _webviews: Electron.WebviewTag[] = [];
 
 export function handleLink(href: string, publicationJsonUrl: string) {
-    console.log(publicationJsonUrl);
+    console.log(href);
     const prefix = publicationJsonUrl.replace("manifest.json", "");
     if (href.startsWith(prefix)) {
         loadLink(href, href.replace(prefix, ""), publicationJsonUrl);
