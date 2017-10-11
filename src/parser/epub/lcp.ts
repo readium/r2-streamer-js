@@ -67,7 +67,7 @@ export class LCP {
 
     public isNativeNodePlugin() {
         this.init();
-        return _usesNativeNodePlugin;
+        return this._usesNativeNodePlugin;
     }
 
     public init() {
