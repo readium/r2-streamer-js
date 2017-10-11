@@ -88,9 +88,9 @@ export class LCP {
             this._lcpNative = bind({
                 bindings: "lcp.node",
                 try: [[
-                "module_root",
-                "LCP",
-                "bindings",
+                    "module_root",
+                    "LCP",
+                    "bindings",
                 ]],
             });
         } else {
@@ -105,6 +105,10 @@ export class LCP {
         this.init();
 
         this.userPassphraseHex = pass;
+        debug(this.userPassphraseHex);
+        if (!this.userPassphraseHex) {
+            return false;
+        }
 
         const check = this.Encryption.Profile === "http://readium.org/lcp/basic-profile"
             && this.Encryption.UserKey.Algorithm === "http://www.w3.org/2001/04/xmlenc#sha256"
@@ -123,34 +127,69 @@ export class LCP {
         if (this._usesNativeNodePlugin) {
 
             return new Promise<boolean>((resolve, _reject) => {
-                this._lcpNative.createContext(
+
+                this._lcpNative.findOneValidPassphrase(
                     this.JsonSource,
-                    this.userPassphraseHex,
-                    DUMMY_CRL,
-                    (erro: any, context: any) => {
-                        if (erro) {
-                            debug(erro);
+                    [this.userPassphraseHex],
+                    (err: any, validHashedPassphrase: any) => {
+                        if (err) {
+                            debug(err);
                             resolve(false);
-                            return;
-                        }
+                        } else {
+                            debug(validHashedPassphrase);
+                            // resolve(true);
 
-                        debug(context);
+                            this._lcpNative.createContext(
+                                this.JsonSource,
+                                validHashedPassphrase,
+                                DUMMY_CRL,
+                                (erro: any, context: any) => {
+                                    if (erro) {
+                                        debug(erro);
+                                        resolve(false);
+                                        return;
+                                    }
 
-                        this._lcpNative.findOneValidPassphrase(
-                            this.JsonSource,
-                            [this.userPassphraseHex],
-                            (err: any, validHashedPassphrase: any) => {
-                                debug(err, validHashedPassphrase, this.userPassphraseHex);
-                                if (err) {
-                                    resolve(false);
-                                } else {
+                                    const userKey = new Buffer(this.userPassphraseHex as string, "hex");
+                                    const buff = new Buffer(context.encryptedContentKey, "hex");
+
+                                    const iv = buff.slice(0, AES_BLOCK_SIZE);
+                                    const encrypted = buff.slice(AES_BLOCK_SIZE);
+
+                                    const decryptStream = crypto.createDecipheriv("aes-256-cbc",
+                                        userKey,
+                                        iv);
+                                    decryptStream.setAutoPadding(false);
+                                    const decryptedContent = decryptStream.update(encrypted);
+
+                                    const nPadding = decryptedContent[decryptedContent.length - 1];
+                                    const size = decryptedContent.length - nPadding;
+
+                                    this.ContentKey = decryptedContent.slice(0, size); // .toString("binary");
+
+                                    // this._lcpNative.decrypt(
+                                    //     context,
+                                    //     buff,
+                                    //     (er: any, decryptedContent: any) => {
+                                    //         if (er) {
+                                    //             debug(er);
+                                    //             resolve(false);
+                                    //             return;
+                                    //         }
+
+                                    //         const padding = decryptedContent[decryptedContent.length - 1];
+                                    //         this.ContentKey = Buffer.from(
+                                    //             decryptedContent,
+                                    //             0,
+                                    //             decryptedContent.length - padding);
+                                    //         resolve(true);
+                                    //     },
+                                    // );
+
                                     resolve(true);
-                                }
-                            },
-                        );
-
-                        // this._lcpNative.decrypt(context, encryptedContent, (err, decryptedContent) => {
-                        // });
+                                },
+                            );
+                        }
                     },
                 );
             });
