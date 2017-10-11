@@ -86,9 +86,24 @@ export async function streamToBufferPromise(readStream: NodeJS.ReadableStream): 
             }
             while (chunk);
         });
-        // readStream.on("data", (data: Buffer) => {
-        //     buffers.push(data);
-        // });
+
+        readStream.on("end", () => {
+            resolve(Buffer.concat(buffers));
+        });
+    });
+}
+
+export async function streamToBufferPromise2(readStream: NodeJS.ReadableStream): Promise<Buffer> {
+
+    return new Promise<Buffer>((resolve, reject) => {
+
+        const buffers: Buffer[] = [];
+
+        readStream.on("error", reject);
+
+        readStream.on("data", (data: Buffer) => {
+            buffers.push(data);
+        });
 
         readStream.on("end", () => {
             resolve(Buffer.concat(buffers));
