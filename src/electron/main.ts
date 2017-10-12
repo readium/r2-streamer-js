@@ -20,7 +20,7 @@ import * as path from "path";
 import { Publication } from "@models/publication";
 import { LCP } from "@parser/epub/lcp";
 import { encodeURIComponent_RFC3986 } from "@utils/http/UrlUtils";
-import { injectInZip } from "@utils/zip/zipInjector";
+import { injectFileInZip } from "@utils/zip/zipInjector";
 import * as debug_ from "debug";
 import { BrowserWindow, Menu, app, dialog, ipcMain, session, webContents } from "electron";
 import * as express from "express";
@@ -34,6 +34,7 @@ import { Server } from "../http/server";
 import { initGlobals } from "../init-globals";
 import { R2_EVENT_DEVTOOLS, R2_EVENT_LINK, R2_EVENT_TRY_LCP_PASS, R2_EVENT_TRY_LCP_PASS_RES } from "./common/events";
 import { R2_SESSION_WEBVIEW } from "./common/sessions";
+import { IDeviceIDManager, launchStatusDocumentProcessing } from "./lsd";
 
 // import * as mime from "mime-types";
 
@@ -154,6 +155,32 @@ async function createElectronBrowserWindow(publicationFilePath: string, publicat
     } catch (err) {
         debug(err);
     }
+    if (!publication) {
+        return;
+    }
+
+    const deviceIDManager: IDeviceIDManager = {
+
+        checkDeviceID: (_key: string): string => {
+            return "";
+        },
+
+        getDeviceID: (): string => {
+            return "";
+        },
+
+        getDeviceNAME: (): string => {
+            return "";
+        },
+
+        recordDeviceID: (_key: string) => {
+            return;
+        },
+    };
+
+    await launchStatusDocumentProcessing(publication, publicationFilePath, deviceIDManager, () => {
+        debug("launchStatusDocumentProcessing DONE.");
+    });
 
     let lcpHint: string | undefined;
     if (publication && publication.LCP) {
@@ -499,6 +526,10 @@ async function openFileDownload(filePath: string) {
                 };
 
                 const success = async (response: request.RequestResponse) => {
+                    if (response.statusCode && (response.statusCode < 200 || response.statusCode >= 300)) {
+                        failure("HTTP CODE " + response.statusCode);
+                        return;
+                    }
 
                     const destStreamTMP = fs.createWriteStream(destPathTMP);
                     response.pipe(destStreamTMP);
@@ -558,7 +589,7 @@ async function openFileDownload(filePath: string) {
                         };
                         const zipEntryPath = "META-INF/license.lcpl";
 
-                        injectInZip(destPathTMP, destPathFINAL, filePath, zipEntryPath, zipError, doneCallback);
+                        injectFileInZip(destPathTMP, destPathFINAL, filePath, zipEntryPath, zipError, doneCallback);
                     });
 
                     // let responseData: Buffer | undefined;

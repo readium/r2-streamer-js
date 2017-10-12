@@ -74,6 +74,10 @@ export class Zip2 extends Zip {
             };
 
             const success = async (res: request.RequestResponse) => {
+                if (res.statusCode && (res.statusCode < 200 || res.statusCode >= 300)) {
+                    failure("HTTP CODE " + res.statusCode);
+                    return;
+                }
 
                 debug(filePath);
                 debug(res.headers);
@@ -109,6 +113,10 @@ export class Zip2 extends Zip {
                     };
 
                     const success_ = async (ress: request.RequestResponse) => {
+                        if (ress.statusCode && (ress.statusCode < 200 || ress.statusCode >= 300)) {
+                            failure_("HTTP CODE " + ress.statusCode);
+                            return;
+                        }
 
                         // debug(filePath);
                         // debug(res.headers);

@@ -68,7 +68,7 @@ export function bufferToStream(buffer: Buffer): NodeJS.ReadableStream {
     // return stream;
 }
 
-export async function streamToBufferPromise(readStream: NodeJS.ReadableStream): Promise<Buffer> {
+export async function streamToBufferPromise_READABLE(readStream: NodeJS.ReadableStream): Promise<Buffer> {
 
     return new Promise<Buffer>((resolve, reject) => {
 
@@ -93,7 +93,7 @@ export async function streamToBufferPromise(readStream: NodeJS.ReadableStream): 
     });
 }
 
-export async function streamToBufferPromise2(readStream: NodeJS.ReadableStream): Promise<Buffer> {
+export async function streamToBufferPromise(readStream: NodeJS.ReadableStream): Promise<Buffer> {
 
     return new Promise<Buffer>((resolve, reject) => {
 

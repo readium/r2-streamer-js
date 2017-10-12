@@ -6,12 +6,58 @@ import * as yazl from "yazl";
 
 const debug = debug_("r2:zipInjector");
 
-export function injectInZip(
+enum InjectType {
+    FILE,
+    BUFFER,
+    STREAM,
+}
+
+export function injectStreamInZip(
+    destPathTMP: string,
+    destPathFINAL: string,
+    stream: NodeJS.ReadableStream,
+    zipEntryPath: string,
+    zipError: (e: any) => void,
+    doneCallback: () => void) {
+
+    injectObjectInZip(destPathTMP, destPathFINAL,
+        stream, InjectType.STREAM,
+        zipEntryPath, zipError, doneCallback);
+}
+
+export function injectBufferInZip(
+    destPathTMP: string,
+    destPathFINAL: string,
+    buffer: Buffer,
+    zipEntryPath: string,
+    zipError: (e: any) => void,
+    doneCallback: () => void) {
+
+    injectObjectInZip(destPathTMP, destPathFINAL,
+        buffer, InjectType.BUFFER,
+        zipEntryPath, zipError, doneCallback);
+}
+
+export function injectFileInZip(
     destPathTMP: string,
     destPathFINAL: string,
     filePath: string,
     zipEntryPath: string,
-    zipError: any,
+    zipError: (e: any) => void,
+    doneCallback: () => void) {
+
+    injectObjectInZip(destPathTMP, destPathFINAL,
+        filePath, InjectType.FILE,
+        zipEntryPath, zipError, doneCallback);
+}
+
+function injectObjectInZip(
+    destPathTMP: string,
+    destPathFINAL: string,
+    contentsToInject: any,
+    typeOfContentsToInject: InjectType,
+    zipEntryPath: string,
+    zipError: (e: any) => void,
     doneCallback: () => void) {
 
     yauzl.open(destPathTMP, { lazyEntries: true, autoClose: false }, (err: any, zip: any) => {
@@ -33,6 +79,8 @@ export function injectInZip(
             // if (/\/$/.test(entry.fileName)) {
             if (entry.fileName[entry.fileName.length - 1] === "/") {
                 // skip directories / folders
+            } else if (entry.fileName === zipEntryPath) {
+                // skip injected entry
             } else {
                 // debug(entry.fileName);
                 // debug(entry);
@@ -53,7 +101,20 @@ export function injectInZip(
 
         zip.on("end", () => {
             debug("yauzl END");
-            zipfile.addFile(filePath, zipEntryPath);
+
+            if (typeOfContentsToInject === InjectType.FILE) {
+                zipfile.addFile(contentsToInject as string, zipEntryPath);
+
+            } else if (typeOfContentsToInject === InjectType.BUFFER) {
+                zipfile.addBuffer(contentsToInject as Buffer, zipEntryPath);
+
+            } else if (typeOfContentsToInject === InjectType.STREAM) {
+                zipfile.addReadStream(contentsToInject as NodeJS.ReadableStream, zipEntryPath);
+
+            } else {
+                debug("yazl FAIL to inject! (unknown type)");
+            }
+
             zipfile.end();
 
             const destStream2 = fs.createWriteStream(destPathFINAL);

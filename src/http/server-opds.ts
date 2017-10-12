@@ -73,6 +73,10 @@ export function serverOPDS(_server: Server, topRouter: express.Application) {
         };
 
         const success = async (response: request.RequestResponse) => {
+            if (response.statusCode && (response.statusCode < 200 || response.statusCode >= 300)) {
+                failure("HTTP CODE " + response.statusCode);
+                return;
+            }
 
             let responseData: Buffer | undefined;
             try {

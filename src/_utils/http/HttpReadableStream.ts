@@ -46,6 +46,11 @@ export class HttpReadableStream extends Readable {
         };
 
         const success = async (res: request.RequestResponse) => {
+            if (res.statusCode && (res.statusCode < 200 || res.statusCode >= 300)) {
+                failure("HTTP CODE " + res.statusCode);
+                return;
+            }
+
             // debug(res.headers);
             // debug(res.headers["content-type"]);
             // debug(`HTTP response content-range: ${res.headers["content-range"]}`);

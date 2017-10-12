@@ -61,6 +61,10 @@ export class HttpZipReader implements RandomAccessReader {
         };
 
         const success = async (res: request.RequestResponse) => {
+            if (res.statusCode && (res.statusCode < 200 || res.statusCode >= 300)) {
+                failure("HTTP CODE " + res.statusCode);
+                return;
+            }
 
             // debug(res);
 
