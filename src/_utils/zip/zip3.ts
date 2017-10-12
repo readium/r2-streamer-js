@@ -64,7 +64,7 @@ export class Zip3 extends Zip {
     }
 
     public freeDestroy(): void {
-        console.log("freeDestroy: Zip3 -- " + this.filePath);
+        debug("freeDestroy: Zip3 -- " + this.filePath);
         if (this.zip) {
             // TODO?
             // this.zip.close();

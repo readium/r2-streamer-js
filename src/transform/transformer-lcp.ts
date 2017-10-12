@@ -102,11 +102,11 @@ export class TransformerLCP implements ITransformer {
                 return Promise.reject("OUCH!");
             }
 
-            // console.log(fullEncryptedBuffer.length);
+            // debug(fullEncryptedBuffer.length);
 
-            // console.log(fullEncryptedBuffer.slice(0, 32));
+            // debug(fullEncryptedBuffer.slice(0, 32));
 
-            // console.log(fullEncryptedBuffer.slice(fullEncryptedBuffer.length - 32));
+            // debug(fullEncryptedBuffer.slice(fullEncryptedBuffer.length - 32));
 
             let nativelyDecryptedBuffer: Buffer;
             try {
@@ -116,7 +116,7 @@ export class TransformerLCP implements ITransformer {
                 return Promise.reject("OUCH!");
             }
 
-            // console.log(nativelyDecryptedBuffer.length);
+            // debug(nativelyDecryptedBuffer.length);
 
             plainTextSize = nativelyDecryptedBuffer.length;
             link.Properties.Encrypted.DecryptedLengthBeforeInflate = plainTextSize;

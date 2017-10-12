@@ -282,7 +282,7 @@ export class Zip2 extends Zip {
     }
 
     public freeDestroy(): void {
-        console.log("freeDestroy: Zip2 -- " + this.filePath);
+        debug("freeDestroy: Zip2 -- " + this.filePath);
         if (this.zip) {
             this.zip.close();
         }

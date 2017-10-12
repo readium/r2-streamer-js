@@ -40,7 +40,7 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
             // debug(req.method);
             const isHead = req.method.toLowerCase() === "head";
             if (isHead) {
-                console.log("HEAD !!!!!!!!!!!!!!!!!!!");
+                debug("HEAD !!!!!!!!!!!!!!!!!!!");
             }
 
             const pathBase64Str = new Buffer(req.params.pathBase64, "base64").toString("utf8");

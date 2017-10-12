@@ -283,9 +283,9 @@ app.on("ready", () => {
     const sess = getWebViewSession();
     if (sess) {
         sess.setPermissionRequestHandler((wc, permission, callback) => {
-            console.log("setPermissionRequestHandler");
-            console.log(wc.getURL());
-            console.log(permission);
+            debug("setPermissionRequestHandler");
+            debug(wc.getURL());
+            debug(permission);
             callback(true);
         });
     }

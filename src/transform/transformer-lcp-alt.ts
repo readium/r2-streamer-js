@@ -483,7 +483,7 @@ export class TransformerLCPAlt extends TransformerLCP {
     //     try {
     //         buff = await streamToBufferPromise(rangeStream);
     //     } catch (err) {
-    //         console.log(err);
+    //         debug(err);
     //         return Promise.reject("OUCH!");
     //     }
 

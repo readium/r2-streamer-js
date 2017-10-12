@@ -16,6 +16,7 @@ import { streamToBufferPromise } from "@utils/stream/BufferUtils";
 import { XML } from "@utils/xml-js-mapper";
 import { IStreamAndLength, IZip } from "@utils/zip/zip";
 import { zipLoadPromise } from "@utils/zip/zipFactory";
+import * as debug_ from "debug";
 import * as sizeOf from "image-size";
 import * as moment from "moment";
 import { JSON as TAJSON } from "ta-json";
@@ -37,6 +38,8 @@ import { SMIL } from "./epub/smil";
 import { Par } from "./epub/smil-par";
 import { Seq } from "./epub/smil-seq";
 import { SeqOrPar } from "./epub/smil-seq-or-par";
+
+const debug = debug_("r2:epub");
 
 const epub3 = "3.0";
 const epub301 = "3.0.1";
@@ -72,14 +75,14 @@ export const addCoverDimensions = async (publication: Publication, coverLink: Li
                         if (coverLink.TypeLink &&
                             coverLink.TypeLink.replace("jpeg", "jpg").replace("+xml", "")
                             !== ("image/" + imageInfo.type)) {
-                            console.log(`Wrong image type? ${coverLink.TypeLink} -- ${imageInfo.type}`);
+                                debug(`Wrong image type? ${coverLink.TypeLink} -- ${imageInfo.type}`);
                         }
                     }
                 } catch (err) {
-                    console.log(err);
+                    debug(err);
                 }
             } catch (err) {
-                console.log(err);
+                debug(err);
             }
         }
     }
@@ -113,6 +116,7 @@ export async function EpubParsePromise(filePath: string): Promise<Publication> {
 
         const lcplStr = lcplZipData.toString("utf8");
         const lcplJson = global.JSON.parse(lcplStr);
+        debug(lcplJson);
         lcpl = TAJSON.deserialize<LCP>(lcplJson, LCP);
         lcpl.ZipPath = lcplZipPath;
         lcpl.JsonSource = lcplStr;
@@ -156,10 +160,10 @@ export async function EpubParsePromise(filePath: string): Promise<Publication> {
     const containerXmlStr = containerXmlZipData.toString("utf8");
     const containerXmlDoc = new xmldom.DOMParser().parseFromString(containerXmlStr);
 
-    // console.log(containerXmlDoc);
-    // console.log(containerXmlStr);
+    // debug(containerXmlDoc);
+    // debug(containerXmlStr);
     // const containerXmlRootElement = xpath.select1("/", containerXmlDoc);
-    // console.log(containerXmlRootElement.toString());
+    // debug(containerXmlRootElement.toString());
 
     const container = XML.deserialize<Container>(containerXmlDoc, Container);
     container.ZipPath = containerZipPath;
@@ -169,7 +173,7 @@ export async function EpubParsePromise(filePath: string): Promise<Publication> {
 
     const rootfile = container.Rootfile[0];
 
-    // console.log(`${rootfile.Path}:`);
+    // debug(`${rootfile.Path}:`);
 
     // let timeBegin = process.hrtime();
 
@@ -177,21 +181,21 @@ export async function EpubParsePromise(filePath: string): Promise<Publication> {
     const opfZipStream = opfZipStream_.stream;
 
     // const timeElapsed1 = process.hrtime(timeBegin);
-    // console.log(`1) ${timeElapsed1[0]} seconds + ${timeElapsed1[1]} nanoseconds`);
+    // debug(`1) ${timeElapsed1[0]} seconds + ${timeElapsed1[1]} nanoseconds`);
     // timeBegin = process.hrtime();
 
     const opfZipData = await streamToBufferPromise(opfZipStream);
 
-    // console.log(`${opfZipData.length} bytes`);
+    // debug(`${opfZipData.length} bytes`);
 
     // const timeElapsed2 = process.hrtime(timeBegin);
-    // console.log(`2) ${timeElapsed2[0]} seconds + ${timeElapsed2[1]} nanoseconds`);
+    // debug(`2) ${timeElapsed2[0]} seconds + ${timeElapsed2[1]} nanoseconds`);
     // timeBegin = process.hrtime();
 
     const opfStr = opfZipData.toString("utf8");
 
     // const timeElapsed3 = process.hrtime(timeBegin);
-    // console.log(`3) ${timeElapsed3[0]} seconds + ${timeElapsed3[1]} nanoseconds`);
+    // debug(`3) ${timeElapsed3[0]} seconds + ${timeElapsed3[1]} nanoseconds`);
     // timeBegin = process.hrtime();
 
     // TODO: this takes some time with large OPF XML data
@@ -201,7 +205,7 @@ export async function EpubParsePromise(filePath: string): Promise<Publication> {
     const opfDoc = new xmldom.DOMParser().parseFromString(opfStr);
 
     // const timeElapsed4 = process.hrtime(timeBegin);
-    // console.log(`4) ${timeElapsed4[0]} seconds + ${timeElapsed4[1]} nanoseconds`);
+    // debug(`4) ${timeElapsed4[0]} seconds + ${timeElapsed4[1]} nanoseconds`);
     // const timeBegin = process.hrtime();
 
     // tslint:disable-next-line:no-string-literal
@@ -216,7 +220,7 @@ export async function EpubParsePromise(filePath: string): Promise<Publication> {
     // process.env["OPF_PARSE"] = "false";
 
     // const timeElapsed5 = process.hrtime(timeBegin);
-    // console.log(`5) ${timeElapsed5[0]} seconds + ${timeElapsed5[1]} nanoseconds`);
+    // debug(`5) ${timeElapsed5[0]} seconds + ${timeElapsed5[1]} nanoseconds`);
 
     opf.ZipPath = rootfile.Path;
 
@@ -234,7 +238,7 @@ export async function EpubParsePromise(filePath: string): Promise<Publication> {
         if (ncxManItem) {
             const ncxFilePath = path.join(path.dirname(opf.ZipPath), ncxManItem.Href)
                 .replace(/\\/g, "/");
-            // console.log("########## NCX: "
+            // debug("########## NCX: "
             //     + opf.ZipPath
             //     + " == "
             //     + ncxManItem.Href
@@ -359,7 +363,7 @@ const fillMediaOverlay =
             }
 
             if (item.Properties && item.Properties.Encrypted) {
-                console.log("ENCRYPTED SMIL MEDIA OVERLAY: " + smilFilePath);
+                debug("ENCRYPTED SMIL MEDIA OVERLAY: " + smilFilePath);
                 continue;
             }
 
@@ -991,7 +995,7 @@ const fillSpineAndResource = async (publication: Publication, rootfile: Rootfile
                 try {
                     linkItem = await findInManifestByID(publication, rootfile, opf, item.IDref);
                 } catch (err) {
-                    console.log(err);
+                    debug(err);
                 }
 
                 if (linkItem && linkItem.Href) {
@@ -1346,7 +1350,7 @@ const addCoverRel = async (publication: Publication, rootfile: Rootfile, opf: OP
         try {
             manifestInfo = await findInManifestByID(publication, rootfile, opf, coverID);
         } catch (err) {
-            console.log(err);
+            debug(err);
         }
         if (manifestInfo && manifestInfo.Href && publication.Resources && publication.Resources.length) {
 

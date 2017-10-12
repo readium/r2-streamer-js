@@ -53,7 +53,7 @@ export class Zip1 extends Zip {
     }
 
     public freeDestroy(): void {
-        console.log("freeDestroy: Zip1 -- " + this.filePath);
+        debug("freeDestroy: Zip1 -- " + this.filePath);
         if (this.zip) {
             this.zip.close();
         }

@@ -372,10 +372,10 @@ export class Server {
                     // .unref()
                     ;
                 child.stdout.on("data", (data) => {
-                    console.log(data.toString());
+                    debug(data.toString());
                 });
                 child.stderr.on("data", (data) => {
-                    console.log(data.toString());
+                    debug(data.toString());
                 });
             }
             return undefined;

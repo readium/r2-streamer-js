@@ -60,7 +60,7 @@ export function serverMediaOverlays(server: Server, routerPathBase64: express.Ro
             // debug(req.method);
             const isHead = req.method.toLowerCase() === "head";
             if (isHead) {
-                console.log("HEAD !!!!!!!!!!!!!!!!!!!");
+                debug("HEAD !!!!!!!!!!!!!!!!!!!");
             }
 
             const isCanonical = req.query.canonical && req.query.canonical === "true";

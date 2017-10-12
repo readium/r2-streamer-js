@@ -63,7 +63,7 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
             // debug(req.method);
             const isHead = req.method.toLowerCase() === "head";
             if (isHead) {
-                console.log("HEAD !!!!!!!!!!!!!!!!!!!");
+                debug("HEAD !!!!!!!!!!!!!!!!!!!");
             }
 
             const isCanonical = req.query.canonical && req.query.canonical === "true";
@@ -112,9 +112,9 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
                 }
             }
 
-            // console.log(req.url); // path local to this router
-            // console.log(req.baseUrl); // path local to above this router
-            // console.log(req.originalUrl); // full path (req.baseUrl + req.url)
+            // debug(req.url); // path local to this router
+            // debug(req.baseUrl); // path local to above this router
+            // debug(req.originalUrl); // full path (req.baseUrl + req.url)
             // url.parse(req.originalUrl, false).host
             // req.headers.host has port, not req.hostname
 

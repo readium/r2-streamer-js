@@ -239,10 +239,10 @@ export class LCP {
 
             // const keyCheck_ = forge.util.decode64(lcp.Encryption.UserKey.KeyCheck);
             // if (keyCheck !== keyCheck_) {
-            //     console.log(`ERROR LCP.Encryption.UserKey.KeyCheck base64: ${keyCheck} !== ${keyCheck_}`);
+            //     debug(`ERROR LCP.Encryption.UserKey.KeyCheck base64: ${keyCheck} !== ${keyCheck_}`);
             // }
             // publication.AddToInternal("lcp_user_key_check", keyCheck);
-            // console.log("---LCP Encryption.UserKey.KeyCheck BASE64 decoded (forge BYTES TO HEX): "
+            // debug("---LCP Encryption.UserKey.KeyCheck BASE64 decoded (forge BYTES TO HEX): "
             //     + forge.util.bytesToHex(keyCheck));
 
             const encryptedLicenseID = keyCheck;
@@ -250,24 +250,24 @@ export class LCP {
             // const iv = encryptedLicenseID.substring(0, AES_BLOCK_SIZE);
             const iv = encryptedLicenseID.slice(0, AES_BLOCK_SIZE);
 
-            // console.log("=============== LCP ID");
-            // console.log(lcp.ID);
+            // debug("=============== LCP ID");
+            // debug(lcp.ID);
             // const lcpIDbuff = forge.util.createBuffer(lcp.ID, "utf8");
-            // console.log(lcpIDbuff.toHex());
-            // console.log(lcpIDbuff.toString());
-            // console.log(lcpIDbuff.bytes());
+            // debug(lcpIDbuff.toHex());
+            // debug(lcpIDbuff.toString());
+            // debug(lcpIDbuff.bytes());
 
             // const aesCbcCipher = (forge as any).cipher.createCipher("AES-CBC", userKey);
             // aesCbcCipher.start({ iv, additionalData_: "binary-encoded string" });
             // aesCbcCipher.update(lcpIDbuff);
             // aesCbcCipher.finish();
-            // console.log("=============== LCP CYPHER");
+            // debug("=============== LCP CYPHER");
             // // breakLength: 100  maxArrayLength: undefined
             // console.log(util.inspect(aesCbcCipher.output,
             //     { showHidden: false, depth: 1000, colors: true, customInspect: false }));
-            // console.log(aesCbcCipher.output.bytes());
-            // console.log(aesCbcCipher.output.toHex());
-            // // console.log(aesCbcCipher.output.toString());
+            // debug(aesCbcCipher.output.bytes());
+            // debug(aesCbcCipher.output.toHex());
+            // // debug(aesCbcCipher.output.toString());
 
             const encrypted = encryptedLicenseID.slice(AES_BLOCK_SIZE);
 
@@ -301,13 +301,13 @@ export class LCP {
             // aesCbcDecipher.update(toDecrypt);
             // aesCbcDecipher.finish();
 
-            // // console.log("=============== LCP DECYPHER");
+            // // debug("=============== LCP DECYPHER");
             // // // breakLength: 100  maxArrayLength: undefined
             // // console.log(util.inspect(aesCbcDecipher.output,
             // //     { showHidden: false, depth: 1000, colors: true, customInspect: false }));
-            // // console.log(aesCbcDecipher.output.bytes());
-            // // console.log(aesCbcDecipher.output.toHex());
-            // // // console.log(aesCbcDecipher.output.toString());
+            // // debug(aesCbcDecipher.output.bytes());
+            // // debug(aesCbcDecipher.output.toHex());
+            // // // debug(aesCbcDecipher.output.toString());
             // const decryptedOut = aesCbcDecipher.output.toString();
 
             if (this.ID !== decryptedOut) {
@@ -370,7 +370,7 @@ export class LCP {
             //     const digest = sha256.digest();
             //     userKey = digest.bytes(); // 32 bytes => AES-256 key
             //     // publication.AddToInternal("lcp_user_key", userKey);
-            //     // console.log("---LCP user key == passphrase + SHA256 digest HEX: "
+            //     // debug("---LCP user key == passphrase + SHA256 digest HEX: "
             //     //     + digest.toHex() + " // " + userKey.length);
             // }
         }
