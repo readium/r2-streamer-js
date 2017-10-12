@@ -5,6 +5,7 @@ declare module "css2json";
 declare module "json-markup";
 declare module "node-stream-zip";
 declare module "unzipper";
+declare module "yazl";
 declare module "yauzl";
 declare module "filehound";
 declare module "bindings";

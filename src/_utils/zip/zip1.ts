@@ -19,7 +19,7 @@ export class Zip1 extends Zip {
             });
 
             zip.on("error", (err: any) => {
-                debug("--ZIP error:");
+                debug("--ZIP error: " + filePath);
                 debug(err);
 
                 reject(err);

@@ -14,21 +14,28 @@
 // https://github.com/electron/electron/blob/master/docs/api/ipc-renderer.md
 
 import * as crypto from "crypto";
-import * as express from "express";
 import * as fs from "fs";
 import * as path from "path";
 
+import { Publication } from "@models/publication";
+import { LCP } from "@parser/epub/lcp";
 import { encodeURIComponent_RFC3986 } from "@utils/http/UrlUtils";
 import * as debug_ from "debug";
 import { BrowserWindow, Menu, app, dialog, ipcMain, session, webContents } from "electron";
+import * as express from "express";
 import * as filehound from "filehound";
 import * as portfinder from "portfinder";
+import * as request from "request";
+import * as requestPromise from "request-promise-native";
+import { JSON as TAJSON } from "ta-json";
 
-import { Publication } from "@models/publication";
 import { Server } from "../http/server";
 import { initGlobals } from "../init-globals";
 import { R2_EVENT_DEVTOOLS, R2_EVENT_LINK, R2_EVENT_TRY_LCP_PASS, R2_EVENT_TRY_LCP_PASS_RES } from "./common/events";
 import { R2_SESSION_WEBVIEW } from "./common/sessions";
+
+import * as yauzl from "yauzl";
+import * as yazl from "yazl";
 
 // import * as mime from "mime-types";
 
@@ -44,8 +51,8 @@ let _publicationsUrls: string[];
 
 let _electronBrowserWindows: Electron.BrowserWindow[];
 
-const defaultBookPath = fs.realpathSync(path.resolve("./misc/epubs/"));
-let lastBookPath: string | undefined;
+const DEFAULT_BOOK_PATH = fs.realpathSync(path.resolve("./misc/epubs/"));
+let _lastBookPath: string | undefined;
 
 // protocol.registerStandardSchemes(["epub", "file"], { secure: true });
 
@@ -261,8 +268,8 @@ app.on("ready", () => {
     // tslint:disable-next-line:no-floating-promises
     (async () => {
         _publicationsFilePaths = await filehound.create()
-            .paths(defaultBookPath)
-            .ext([".epub", ".epub3", ".cbz"])
+            .paths(DEFAULT_BOOK_PATH)
+            .ext([".epub", ".epub3", ".cbz", ".lcpl"])
             .find();
         debug(_publicationsFilePaths);
 
@@ -408,9 +415,10 @@ function resetMenu() {
     menuTemplate[1].submenu.push({
         click: async () => {
             const choice = dialog.showOpenDialog({
-                defaultPath: lastBookPath || defaultBookPath,
+                defaultPath: _lastBookPath || DEFAULT_BOOK_PATH,
                 filters: [
                     { name: "EPUB publication", extensions: ["epub", "epub3"] },
+                    { name: "LCP license", extensions: ["lcpl"] },
                     { name: "Comic book", extensions: ["cbz"] },
                     // {name: "Zip archive", extensions: ["zip"]},
                     // {name: "Any file", extensions: ["*"]},
@@ -422,50 +430,254 @@ function resetMenu() {
             if (!choice || !choice.length) {
                 return;
             }
-            debug(choice[0]);
-
-            lastBookPath = path.dirname(choice[0]);
-            debug(lastBookPath);
-
-            let n = _publicationsFilePaths.indexOf(choice[0]);
-            if (n < 0) {
-                const publicationPaths = _publicationsServer.addPublications(choice);
-                debug(publicationPaths);
-
-                _publicationsFilePaths.push(choice[0]);
-                debug(_publicationsFilePaths);
-
-                _publicationsUrls.push(`${_publicationsRootUrl}${publicationPaths[0]}`);
-                debug(_publicationsUrls);
-
-                n = _publicationsFilePaths.length - 1; // === _publicationsUrls.length - 1
-
-                process.nextTick(() => {
-                    resetMenu();
-                });
-            }
-
-            const file = _publicationsFilePaths[n];
-            const pubManifestUrl = _publicationsUrls[n];
-
-            await createElectronBrowserWindow(file, pubManifestUrl);
+            const filePath = choice[0];
+            debug(filePath);
+            await openFileDownload(filePath);
         },
         label: "Load file...",
     } as any);
 
     _publicationsUrls.forEach((pubManifestUrl, n) => {
-        const file = _publicationsFilePaths[n];
-        debug("MENU ITEM: " + file + " : " + pubManifestUrl);
+        const filePath = _publicationsFilePaths[n];
+        debug("MENU ITEM: " + filePath + " : " + pubManifestUrl);
 
         menuTemplate[1].submenu.push({
             click: async () => {
-                await createElectronBrowserWindow(file, pubManifestUrl);
+                debug(filePath);
+                await openFileDownload(filePath);
             },
-            label: file, // + " : " + pubManifestUrl,
+            label: filePath, // + " : " + pubManifestUrl,
         } as any);
     });
     const menu = Menu.buildFromTemplate(menuTemplate);
     Menu.setApplicationMenu(menu);
+}
+
+async function openFileDownload(filePath: string) {
+    const dir = path.dirname(filePath);
+    _lastBookPath = dir;
+    debug(_lastBookPath);
+
+    const ext = path.extname(filePath);
+    const filename = path.basename(filePath);
+    const destFileName = filename + ".epub";
+    if (ext === ".lcpl") {
+        const lcplStr = fs.readFileSync(filePath, { encoding: "utf8" });
+        // debug(lcplStr);
+        const lcplJson = global.JSON.parse(lcplStr);
+        const lcpl = TAJSON.deserialize<LCP>(lcplJson, LCP);
+        if (lcpl.Links) {
+            const pubLink = lcpl.Links.find((link) => {
+                return link.Rel === "publication";
+            });
+            if (pubLink) {
+
+                const destPathTMP = path.join(dir, destFileName + ".tmp");
+                const destPathFINAL = path.join(dir, destFileName);
+
+                const failure = (err: any) => {
+                    debug(err);
+
+                    process.nextTick(() => {
+                        const detail = err;
+                        const message = "LCP EPUB download fail! [" + pubLink.Href + "]";
+                        const res = dialog.showMessageBox({
+                            buttons: ["&OK"],
+                            cancelId: 0,
+                            defaultId: 0,
+                            detail,
+                            message,
+                            noLink: true,
+                            normalizeAccessKeys: true,
+                            title: "Readium2 Electron streamer / navigator",
+                            type: "info",
+                        });
+                        if (res === 0) {
+                            debug("ok");
+                        }
+                    });
+                };
+
+                const success = async (response: request.RequestResponse) => {
+
+                    const destStreamTMP = fs.createWriteStream(destPathTMP);
+                    response.pipe(destStreamTMP);
+                    // response.on("end", () => {
+                    // });
+                    destStreamTMP.on("finish", () => {
+
+                        const zipError = (err: any) => {
+                            debug(err);
+                            process.nextTick(() => {
+                                const detail = err;
+                                const message = "LCP EPUB zip error! [" + destPathTMP + "]";
+                                const res = dialog.showMessageBox({
+                                    buttons: ["&OK"],
+                                    cancelId: 0,
+                                    defaultId: 0,
+                                    detail,
+                                    message,
+                                    noLink: true,
+                                    normalizeAccessKeys: true,
+                                    title: "Readium2 Electron streamer / navigator",
+                                    type: "info",
+                                });
+                                if (res === 0) {
+                                    debug("ok");
+                                }
+                            });
+                        };
+                        yauzl.open(destPathTMP, { lazyEntries: true, autoClose: false }, (err: any, zip: any) => {
+                            if (err) {
+                                debug("yauzl init ERROR");
+                                zipError(err);
+                                return;
+                            }
+
+                            const zipfile = new yazl.ZipFile();
+
+                            zip.on("error", (erro: any) => {
+                                debug("yauzl ERROR");
+                                zipError(erro);
+                            });
+
+                            zip.readEntry(); // next (lazyEntries)
+                            zip.on("entry", (entry: any) => {
+                                // if (/\/$/.test(entry.fileName)) {
+                                if (entry.fileName[entry.fileName.length - 1] === "/") {
+                                    // skip directories / folders
+                                } else {
+                                    // debug(entry.fileName);
+                                    // debug(entry);
+                                    zip.openReadStream(entry, (errz: any, stream: NodeJS.ReadableStream) => {
+                                        if (err) {
+                                            debug("yauzl openReadStream ERROR");
+                                            debug(errz);
+                                            zipError(errz);
+                                            return;
+                                        }
+                                        // entry.uncompressedSize
+                                        const compress = entry.fileName !== "mimetype";
+                                        zipfile.addReadStream(stream, entry.fileName, { compress });
+                                    });
+                                }
+                                zip.readEntry(); // next (lazyEntries)
+                            });
+
+                            zip.on("end", () => {
+                                debug("yauzl END");
+                                zipfile.addFile(filePath, "META-INF/license.lcpl");
+                                zipfile.end();
+
+                                const destStream2 = fs.createWriteStream(destPathFINAL);
+                                zipfile.outputStream.pipe(destStream2);
+                                // response.on("end", () => {
+                                // });
+                                destStream2.on("finish", () => {
+
+                                    setTimeout(() => {
+                                        fs.unlinkSync(destPathTMP);
+                                    }, 1000);
+
+                                    process.nextTick(async () => {
+                                        const detail = destPathFINAL + " ---- [" + pubLink.Href + "]";
+                                        const message = "LCP EPUB file download success [" + destFileName + "]";
+                                        const res = dialog.showMessageBox({
+                                            buttons: ["&OK"],
+                                            cancelId: 0,
+                                            defaultId: 0,
+                                            detail,
+                                            message,
+                                            noLink: true,
+                                            normalizeAccessKeys: true,
+                                            title: "Readium2 Electron streamer / navigator",
+                                            type: "info",
+                                        });
+                                        if (res === 0) {
+                                            debug("ok");
+                                        }
+
+                                        await openFile(destPathFINAL);
+                                    });
+                                });
+                            });
+
+                            zip.on("close", () => {
+                                debug("yauzl CLOSE");
+                            });
+                        });
+                    });
+
+                    // let responseData: Buffer | undefined;
+                    // try {
+                    //     responseData = await streamToBufferPromise(response);
+                    // } catch (err) {
+                    //     debug(err);
+                    //     return;
+                    // }
+                    // const responseStr = responseData.toString("utf8");
+                };
+
+                // No response streaming! :(
+                // https://github.com/request/request-promise/issues/90
+                const needsStreamingResponse = true;
+                if (needsStreamingResponse) {
+                    request.get({
+                        headers: {},
+                        method: "GET",
+                        uri: pubLink.Href,
+                    })
+                        .on("response", success)
+                        .on("error", failure);
+                } else {
+                    let response: requestPromise.FullResponse | undefined;
+                    try {
+                        // tslint:disable-next-line:await-promise no-floating-promises
+                        response = await requestPromise({
+                            headers: {},
+                            method: "GET",
+                            resolveWithFullResponse: true,
+                            uri: pubLink.Href,
+                        });
+                    } catch (err) {
+                        failure(err);
+                        return;
+                    }
+
+                    // To please the TypeScript compiler :(
+                    response = response as requestPromise.FullResponse;
+                    await success(response);
+                }
+            }
+        }
+    } else {
+        await openFile(filePath);
+    }
+}
+
+async function openFile(filePath: string) {
+    let n = _publicationsFilePaths.indexOf(filePath);
+    if (n < 0) {
+        const publicationPaths = _publicationsServer.addPublications([filePath]);
+        debug(publicationPaths);
+
+        _publicationsFilePaths.push(filePath);
+        debug(_publicationsFilePaths);
+
+        _publicationsUrls.push(`${_publicationsRootUrl}${publicationPaths[0]}`);
+        debug(_publicationsUrls);
+
+        n = _publicationsFilePaths.length - 1; // === _publicationsUrls.length - 1
+
+        process.nextTick(() => {
+            resetMenu();
+        });
+    }
+
+    const file = _publicationsFilePaths[n];
+    const pubManifestUrl = _publicationsUrls[n];
+
+    await createElectronBrowserWindow(file, pubManifestUrl);
 }
 
 app.on("activate", () => {
