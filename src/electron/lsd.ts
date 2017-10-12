@@ -75,7 +75,7 @@ export async function launchStatusDocumentProcessing(
         debug(responseJson);
 
         // debug(responseJson.id);
-        // debug(responseJson.status);
+        // debug(responseJson.status); // revoked, returned, cancelled, expired
         // debug(responseJson.message);
         // if (responseJson.updated) {
         //     debug(responseJson.updated.license);

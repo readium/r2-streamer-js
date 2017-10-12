@@ -113,6 +113,7 @@
     "dist/**/*"
   ],
   "scripts": {
+    "prebrowserify:all": "npm run prebrowserify:es5 && npm run prebrowserify:es6-es2015 && npm run prebrowserify:es7-es2016 && npm run prebrowserify:es8-es2017",
     "browserify:all": "echo \"Browserify skipped.\"",
     "prebrowserify:es5": "cpy ./src/electron/renderer/index.html ./dist/es5/src/electron/renderer/",
     "browserify:es5": "echo \"Browserify skipped.\"",
