@@ -477,7 +477,9 @@ async function openFileDownload(filePath: string) {
                     debug(err);
 
                     process.nextTick(() => {
-                        const detail = err;
+                        const detail = (typeof err === "string") ?
+                            err :
+                            (err.toString ? err.toString() : "ERROR!?");
                         const message = "LCP EPUB download fail! [" + pubLink.Href + "]";
                         const res = dialog.showMessageBox({
                             buttons: ["&OK"],
@@ -507,7 +509,9 @@ async function openFileDownload(filePath: string) {
                         const zipError = (err: any) => {
                             debug(err);
                             process.nextTick(() => {
-                                const detail = err;
+                                const detail = (typeof err === "string") ?
+                                    err :
+                                    (err.toString ? err.toString() : "ERROR!?");
                                 const message = "LCP EPUB zip error! [" + destPathTMP + "]";
                                 const res = dialog.showMessageBox({
                                     buttons: ["&OK"],
