@@ -20,6 +20,7 @@ import * as path from "path";
 import { Publication } from "@models/publication";
 import { LCP } from "@parser/epub/lcp";
 import { encodeURIComponent_RFC3986 } from "@utils/http/UrlUtils";
+import { injectInZip } from "@utils/zip/zipInjector";
 import * as debug_ from "debug";
 import { BrowserWindow, Menu, app, dialog, ipcMain, session, webContents } from "electron";
 import * as express from "express";
@@ -33,9 +34,6 @@ import { Server } from "../http/server";
 import { initGlobals } from "../init-globals";
 import { R2_EVENT_DEVTOOLS, R2_EVENT_LINK, R2_EVENT_TRY_LCP_PASS, R2_EVENT_TRY_LCP_PASS_RES } from "./common/events";
 import { R2_SESSION_WEBVIEW } from "./common/sessions";
-
-import * as yauzl from "yauzl";
-import * as yazl from "yazl";
 
 // import * as mime from "mime-types";
 
@@ -527,85 +525,36 @@ async function openFileDownload(filePath: string) {
                                 }
                             });
                         };
-                        yauzl.open(destPathTMP, { lazyEntries: true, autoClose: false }, (err: any, zip: any) => {
-                            if (err) {
-                                debug("yauzl init ERROR");
-                                zipError(err);
-                                return;
-                            }
 
-                            const zipfile = new yazl.ZipFile();
+                        const doneCallback = () => {
+                            setTimeout(() => {
+                                fs.unlinkSync(destPathTMP);
+                            }, 1000);
 
-                            zip.on("error", (erro: any) => {
-                                debug("yauzl ERROR");
-                                zipError(erro);
-                            });
-
-                            zip.readEntry(); // next (lazyEntries)
-                            zip.on("entry", (entry: any) => {
-                                // if (/\/$/.test(entry.fileName)) {
-                                if (entry.fileName[entry.fileName.length - 1] === "/") {
-                                    // skip directories / folders
-                                } else {
-                                    // debug(entry.fileName);
-                                    // debug(entry);
-                                    zip.openReadStream(entry, (errz: any, stream: NodeJS.ReadableStream) => {
-                                        if (err) {
-                                            debug("yauzl openReadStream ERROR");
-                                            debug(errz);
-                                            zipError(errz);
-                                            return;
-                                        }
-                                        // entry.uncompressedSize
-                                        const compress = entry.fileName !== "mimetype";
-                                        zipfile.addReadStream(stream, entry.fileName, { compress });
-                                    });
-                                }
-                                zip.readEntry(); // next (lazyEntries)
-                            });
-
-                            zip.on("end", () => {
-                                debug("yauzl END");
-                                zipfile.addFile(filePath, "META-INF/license.lcpl");
-                                zipfile.end();
-
-                                const destStream2 = fs.createWriteStream(destPathFINAL);
-                                zipfile.outputStream.pipe(destStream2);
-                                // response.on("end", () => {
-                                // });
-                                destStream2.on("finish", () => {
-
-                                    setTimeout(() => {
-                                        fs.unlinkSync(destPathTMP);
-                                    }, 1000);
-
-                                    process.nextTick(async () => {
-                                        const detail = destPathFINAL + " ---- [" + pubLink.Href + "]";
-                                        const message = "LCP EPUB file download success [" + destFileName + "]";
-                                        const res = dialog.showMessageBox({
-                                            buttons: ["&OK"],
-                                            cancelId: 0,
-                                            defaultId: 0,
-                                            detail,
-                                            message,
-                                            noLink: true,
-                                            normalizeAccessKeys: true,
-                                            title: "Readium2 Electron streamer / navigator",
-                                            type: "info",
-                                        });
-                                        if (res === 0) {
-                                            debug("ok");
-                                        }
-
-                                        await openFile(destPathFINAL);
-                                    });
+                            process.nextTick(async () => {
+                                const detail = destPathFINAL + " ---- [" + pubLink.Href + "]";
+                                const message = "LCP EPUB file download success [" + destFileName + "]";
+                                const res = dialog.showMessageBox({
+                                    buttons: ["&OK"],
+                                    cancelId: 0,
+                                    defaultId: 0,
+                                    detail,
+                                    message,
+                                    noLink: true,
+                                    normalizeAccessKeys: true,
+                                    title: "Readium2 Electron streamer / navigator",
+                                    type: "info",
                                 });
-                            });
+                                if (res === 0) {
+                                    debug("ok");
+                                }
 
-                            zip.on("close", () => {
-                                debug("yauzl CLOSE");
+                                await openFile(destPathFINAL);
                             });
-                        });
+                        };
+                        const zipEntryPath = "META-INF/license.lcpl";
+
+                        injectInZip(destPathTMP, destPathFINAL, filePath, zipEntryPath, zipError, doneCallback);
                     });
 
                     // let responseData: Buffer | undefined;
