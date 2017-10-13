@@ -57,7 +57,7 @@ window.addEventListener("DOMContentLoaded", () => {
     console.log(pathBase64);
     const pathDecoded = window.atob(pathBase64);
     console.log(pathDecoded);
-    const pathFileName = pathDecoded.substr(pathDecoded.lastIndexOf("/") + 1, pathDecoded.length - 1);
+    const pathFileName = pathDecoded.substr(pathDecoded.replace("\\", "/").lastIndexOf("/") + 1, pathDecoded.length - 1);
 
     window.document.title = "Readium2 [ " + pathFileName + "]";
 
