@@ -126,6 +126,119 @@ export async function launchStatusDocumentProcessing(
             }
         }
         onStatusDocumentProcessingComplete();
+
+        // private void registerDevice(final DoneCallback doneCallback_registerDevice) {
+
+        //             String deviceID = m_deviceIDManager.getDeviceID();
+        //             String deviceNAME = m_deviceIDManager.getDeviceNAME();
+
+        //             boolean doRegister = false;
+        //             if (m_statusDocument_LINK_REGISTER == null) {
+        //                 doRegister = false;
+        //             } else if (m_statusDocument_STATUS.equals("ready")) {
+        //                 doRegister = true;
+        //             } else if (m_statusDocument_STATUS.equals("active")) {
+
+        //                 String deviceIDForStatusDoc = m_deviceIDManager.checkDeviceID(m_statusDocument_ID);
+
+        //                 if (deviceIDForStatusDoc == null) {
+        //                     doRegister = true;
+        //                 } else if (!deviceIDForStatusDoc.equals(deviceID)) {
+            // // this should really never happen ... but let's ensure anyway.
+        //                     doRegister = true;
+        //                 }
+        //             }
+
+        //             if (!doRegister) {
+        //                 doneCallback_registerDevice.Done(false);
+        //                 return;
+        //             }
+        //             String url = m_statusDocument_LINK_REGISTER.m_href;
+        //             if (m_statusDocument_LINK_REGISTER.m_templated.equals("true")) {
+
+        //     // URLEncoder.encode() doesn't generate %20 for space character (instead: '+')
+        //     // So we use android.net.Uri's appendQueryParameter() instead (see below)
+        //     //        try {
+        //     //            deviceID = URLEncoder.encode(deviceID, "UTF-8");
+        //     //            deviceNAME = URLEncoder.encode(deviceNAME, "UTF-8");
+        //     //        } catch (Exception ex) {
+        //     //            // noop
+        //     //        }
+        //     //        url = url.replace("{?id,name}", "?id=" + deviceID + "&name=" + deviceNAME);
+
+        //                 url = url.replace("{?id,name}", ""); // TODO: smarter regexp?
+        //                 url = Uri.parse(url).buildUpon()
+        //                         .appendQueryParameter("id", deviceID)
+        //                         .appendQueryParameter("name", deviceNAME)
+        //                         .build().toString();
+        //             }
+
+        //             Locale currentLocale = getCurrentLocale();
+        //             String langCode = currentLocale.toString().replace('_', '-');
+        //             langCode = langCode + ",en-US;q=0.7,en;q=0.5";
+
+        //             Future<Response<InputStream>> request = Ion.with(m_context)
+        //                     .load("POST", url)
+        //                     .setLogging("Readium Ion", Log.VERBOSE)
+
+        //                     //.setTimeout(AsyncHttpRequest.DEFAULT_TIMEOUT) //30000
+        //                     .setTimeout(6000)
+
+        //                     // TODO: comment this in production! (this is only for testing a local HTTP server)
+        //                     //.setHeader("X-Add-Delay", "2s")
+
+        //                     // LCP / LSD server with message localization
+        //                     .setHeader("Accept-Language", langCode)
+
+        //     // QUERY params (templated URI)
+        //     //                        .setBodyParameter("id", dID)
+        //     //                        .setBodyParameter("name", dNAME)
+
+        //                     .asInputStream()
+        //                     .withResponse()
+
+        //                     // UI thread
+        //                     .setCallback(new FutureCallback<Response<InputStream>>() {
+        //                         @Override
+        //                         public void onCompleted(Exception e, Response<InputStream> response) {
+
+        //                             InputStream inputStream = response != null ? response.getResult() : null;
+        //                             int httpResponseCode = response != null ? response.getHeaders().code() : 0;
+        //                             if (e != null || inputStream == null
+        //                                     || httpResponseCode < 200 || httpResponseCode >= 300) {
+
+        //                                 doneCallback_registerDevice.Done(false);
+        //                                 return;
+        //                             }
+
+        //                             try {
+
+        //                                 StringWriter writer = new StringWriter();
+        //                                 IOUtils.copy(inputStream, writer, "UTF-8");
+        //                                 String json = writer.toString().trim();
+
+        //                                 boolean okay = parseStatusDocumentJson(json);
+
+        //                                 if (okay && m_statusDocument_STATUS.equals("active")) {
+        //                                     m_deviceIDManager.recordDeviceID(m_statusDocument_ID);
+        //                                 }
+
+        //                                 doneCallback_registerDevice.Done(true);
+
+        //                             } catch (Exception ex) {
+        //                                 ex.printStackTrace();
+        //                                 doneCallback_registerDevice.Done(false);
+        //                             } finally {
+        //                                 try {
+        //                                     inputStream.close();
+        //                                 } catch (IOException ex) {
+        //                                     ex.printStackTrace();
+        //                                     // ignore
+        //                                 }
+        //                             }
+        //                         }
+        //                     });
+        //         }
     };
 
     const headers = {

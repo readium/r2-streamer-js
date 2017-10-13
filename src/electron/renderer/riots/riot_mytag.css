@@ -1,0 +1,9 @@
+riot-mytag  {
+  color: magenta;
+  background: red;
+  border: 3px solid green;
+}
+riot-mytag h2 {
+  color: white;
+  background: yellow;
+}

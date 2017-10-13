@@ -1,149 +1,29 @@
+<!DOCTYPE html>
 <html>
 
 <head>
   <title>Readium 2 NodeJS 'streamer' (Electron 'navigator')</title>
-
   <meta charset="UTF-8" />
-  <style type="text/css">
-    html, body {
-      height: 100%;
-      width: 100%;
-      min-height: 100%;
-      min-width: 100%;
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
 
-    body.flex {
-      display: flex;
-      height: 100vh;
-      width: 100%;
-      align-items: center;
-      justify-content: center;
-    }
+  <link type="text/css" href="./index.css" rel="stylesheet" />
+  <!-- <style type="riot"> </style>
+  <link type="text/css" href="./riots/riot_mytag.css" rel="stylesheet" />
 
-    #reader_chrome {
-      display: block;
-      position: absolute;
-      box-sizing: border-box;
-      left: 10px;
-      right: 10px;
-      top: 90px;
-      bottom: 20px;
-      margin: 0;
-      padding: 0;
-      background: white;
-    }
-    html.debug #reader_chrome {
-      border: 3px solid orange;
-      background: green;
-    }
-    #publication_viewport {
-      display: block;
-      position: absolute;
-      left: 30px;
-      right: 30px;
-      top: 0;
-      bottom: 0;
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      background: white;
-    }
-    html.debug #publication_viewport {
-      border: 6px solid magenta;
-      background: blue;
-    }
-    #reader_controls {
-      display: none;
-      position: absolute;
-      left: 0;
-      right: 70%;
-      top: 0;
-      bottom: 0;
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      background: white;
-      overflow: hidden;
-      overflow-y: scroll;
-      overflow-x: auto;
-      border: 1px solid black;
-    }
-    html.debug #reader_controls {
-      border-right: 10px solid black;
-      border-bottom: 10px solid black;
-    }
-    webview {
-      display: flex;
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    webview.singleFull {
-      width: 100%;
-      height: 100%;
-      background: white;
-    }
-    html.debug webview {
-      background: red;
-    }
-    #webview2 {
-      width: 100%;
-      height: 50px;
-      background: white;
-    }
-    html.debug #webview2 {
-      background: yellow;
-      border: 2px solid black;
-    }
-    form {
-      margin: 0; padding: 0;
-    }
-    form#lcpPassForm {
-      display: none;
-    }
-    #showControlsButton {
-      display:none;
-    }
-    #hideControlsButton {
-      display:none;
-      position:absolute;
-      top:0;
-      left:0;
-    }
-    .sectionTAB {
-      display: none;
-    }
-    #reader_controls_TOC {
-      display: block;
-    }
-    #buttonNavLeft, #buttonNavRight {
-      display: block;
-      position: absolute;
-      top: 40%;
-      bottom: 40%;
-      width: 30px;
-    }
-    #buttonNavLeft {
-      left: 0;
-    }
-    #buttonNavRight {
-      right: 0;
-    }
-  </style>
+  <script type="application/javascript" src="./riot.min.js"> </script>
 
-<script type="application/javascript">
-  var exports = {};
-</script>
-<script type="application/javascript" src="./index.js">
-</script>
+  <script type="application/javascript" src="./riots/riot_mytag_.js"> </script>
+  <script type="application/javascript" src="./riots/riot_mytag.js"> </script> -->
+
   <!-- <script type="application/javascript">
+    var exports = {};
+  </script>
+  <script type="application/javascript" src="./index.js"> </script> -->
+  <script type="application/javascript">
     require("./index.js");
-  </script> -->
+  </script>
   <!-- <script type="application/javascript" src="./index_browserify_bundle.js">
   </script> -->
+
 </head>
 
 <body>
@@ -154,6 +34,8 @@
       <button id="buttonStart">[ START ]</button>
       <button id="buttonDebug">TOGGLE DEBUG VIEW</button>
       <button id="buttonDevTools">OPEN DEV TOOLS</button></h1>
+
+      <riot-mytag></riot-mytag>
 
     <div id="reader_chrome">
       <div id="publication_viewport">
@@ -199,6 +81,11 @@
       <button id="showControlsButton">O</button>
       <button id="hideControlsButton">X</button>
     </div>
+
+    <!-- <script type="application/javascript">
+      // riot.mount("*");
+      riot.mount("riot-mytag", { opt1: "val1" });
+    </script> -->
 </body>
 
 </html>
