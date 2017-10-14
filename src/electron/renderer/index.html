@@ -6,23 +6,28 @@
   <meta charset="UTF-8" />
 
   <link type="text/css" href="./index.css" rel="stylesheet" />
-  <!-- <style type="riot"> </style>
+
   <link type="text/css" href="./riots/riot_mytag.css" rel="stylesheet" />
+  <style type="riot"> </style>
 
   <script type="application/javascript" src="./riot.min.js"> </script>
 
-  <script type="application/javascript" src="./riots/riot_mytag_.js"> </script>
-  <script type="application/javascript" src="./riots/riot_mytag.js"> </script> -->
-
   <!-- <script type="application/javascript">
     var exports = {};
+  </script> -->
+
+  <script type="application/javascript">
+    require("./riots/riot_mytag_.js");
   </script>
-  <script type="application/javascript" src="./index.js"> </script> -->
+  <!-- <script type="application/javascript" src="./riots/riot_mytag_.js"> </script> -->
+
+  <script type="application/javascript" src="./riots/riot_mytag.js"> </script>
+
+  <!-- <script type="application/javascript" src="./index.js"> </script> -->
   <script type="application/javascript">
     require("./index.js");
   </script>
-  <!-- <script type="application/javascript" src="./index_browserify_bundle.js">
-  </script> -->
+  <!-- <script type="application/javascript" src="./index_browserify_bundle.js"> </script> -->
 
 </head>
 
@@ -35,7 +40,9 @@
       <button id="buttonDebug">TOGGLE DEBUG VIEW</button>
       <button id="buttonDevTools">OPEN DEV TOOLS</button></h1>
 
-      <riot-mytag></riot-mytag>
+      <riot-mytag>
+          <b>{ prop1 }</b>
+      </riot-mytag>
 
     <div id="reader_chrome">
       <div id="publication_viewport">
@@ -82,10 +89,12 @@
       <button id="hideControlsButton">X</button>
     </div>
 
-    <!-- <script type="application/javascript">
+    <script type="application/javascript">
       // riot.mount("*");
-      riot.mount("riot-mytag", { opt1: "val1" });
-    </script> -->
+      const tag = riot.mount("riot-mytag", { opt1: "val1" });
+      console.log(tag);
+      console.log(tag[0].getOpts());
+    </script>
 </body>
 
 </html>
