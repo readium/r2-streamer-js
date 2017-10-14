@@ -1,3 +1,5 @@
+// http://riotjs.com/guide/
+// http://riotjs.com/api/
 import { riot_mixin_EventTracer } from "./riot_mixin_EventTracer";
 
 (window as any).riot_mytag = function(opts: any) {
@@ -9,6 +11,10 @@ import { riot_mixin_EventTracer } from "./riot_mixin_EventTracer";
     this.prop1 = "val1";
     this.applyClazz = false;
 
+    // ev.currentTarget (where event handler is attached)
+    // ev.target (originating element)
+    // ev.which (keyboard)
+    // ev.item (loop)
     this.onclickButton = (ev: any) => {
         console.log("CLICK button");
         // applyClazz will not be taken into account immediately (no automatic call to update()

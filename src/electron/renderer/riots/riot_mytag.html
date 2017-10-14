@@ -3,6 +3,19 @@
   <h2 class="{ clazz: applyClazz }" onclick="{ onclickHeading }">{ opts.opt1 } { prop1 }</h2>
   <span ref="testSpan">span <yield/></span>
   <button disabled="{ !applyClazz }" onclick="{ onclickButton }">butt</button>
+  <span hide="{ applyClazz }">applyClazz</span>
+
+  <!-- <ul>
+    <li each={ items }>
+    </li>
+  </ul> -->
+  <!-- <dl>
+    <virtual each={item in items}>
+      <dt>{item.key}</dt>
+      <dd>{item.value}</dd>
+    </virtual>
+  </dl> -->
+  <!-- <ul data-is="my-list"></ul> -->
 
   <style>
     :scope.clazz, .clazz { border: 6px solid rgb(196, 49, 98); }
