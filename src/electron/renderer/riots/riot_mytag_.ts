@@ -2,6 +2,12 @@
 // http://riotjs.com/api/
 import { riot_mixin_EventTracer } from "./riot_mixin_EventTracer";
 
+export const riotMountMyTag = (opts: any) => {
+    const tag = riot.mount("riot-mytag", opts);
+    console.log(tag); // RiotTag[]
+    console.log((tag[0] as any).getOpts()); // see RiotMixinWithOpts
+};
+
 (window as any).riot_mytag = function(opts: any) {
     console.log(opts);
     console.log(this);

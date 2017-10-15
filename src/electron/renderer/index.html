@@ -10,7 +10,7 @@
   <link type="text/css" href="./riots/riot_mytag.css" rel="stylesheet" />
   <style type="riot"> </style>
 
-  <script type="application/javascript" src="./riot.min.js"> </script>
+  <script type="application/javascript" src="./riot.js"> </script>
 
   <!-- <script type="application/javascript">
     var exports = {};
@@ -20,8 +20,9 @@
     require("./riots/riot_mytag_.js");
   </script> -->
   <!-- <script type="application/javascript" src="./riots/riot_mytag_.js"> </script> -->
+  <!-- <script type="application/javascript" src="./riots/riot_mytag.js"> </script> -->
 
-  <script type="application/javascript" src="./riots/riot_mytag.js"> </script>
+  <script type="application/javascript" src="./riots/riot_spinelist.js"> </script>
 
   <!-- <script type="application/javascript" src="./index.js"> </script> -->
   <script type="application/javascript">
@@ -40,9 +41,9 @@
       <button id="buttonDebug">TOGGLE DEBUG VIEW</button>
       <button id="buttonDevTools">OPEN DEV TOOLS</button></h1>
 
-      <riot-mytag>
+      <!-- <riot-mytag>
           <b>{ prop1 }</b>
-      </riot-mytag>
+      </riot-mytag> -->
 
     <div id="reader_chrome">
       <div id="publication_viewport">
@@ -53,26 +54,28 @@
           <hr>
           <div id="tabHeaders">
             <button id="buttonTab_TOC"
-            onclick="javascript:[].forEach.call(document.querySelectorAll('.sectionTAB'), (el) => {el.style.display = 'none';});   document.getElementById('reader_controls_TOC').style.display = 'block';"
+            onclick="javascript:[].forEach.call(document.querySelectorAll('.sectionTAB'), (el) => el.style.display = 'none');   document.getElementById('reader_controls_TOC').style.display = 'block';"
             >Table Of Contents</button>
             <button id="buttonTab_SPINE"
-            onclick="javascript:[].forEach.call(document.querySelectorAll('.sectionTAB'), (el) => {el.style.display = 'none';});   document.getElementById('reader_controls_SPINE').style.display = 'block';"
+            onclick="javascript:[].forEach.call(document.querySelectorAll('.sectionTAB'), (el) => el.style.display = 'none');   document.getElementById('reader_controls_SPINE').style.display = 'block';"
             >Spine</button>
             <button id="buttonTab_PAGELIST"
-            onclick="javascript:[].forEach.call(document.querySelectorAll('.sectionTAB'), (el) => {el.style.display = 'none';});   document.getElementById('reader_controls_PAGELIST').style.display = 'block';"
+            onclick="javascript:[].forEach.call(document.querySelectorAll('.sectionTAB'), (el) => el.style.display = 'none');   document.getElementById('reader_controls_PAGELIST').style.display = 'block';"
             >Page list</button>
             <button id="buttonTab_LANDMARKS"
-            onclick="javascript:[].forEach.call(document.querySelectorAll('.sectionTAB'), (el) => {el.style.display = 'none';});   document.getElementById('reader_controls_LANDMARKS').style.display = 'block';"
+            onclick="javascript:[].forEach.call(document.querySelectorAll('.sectionTAB'), (el) => el.style.display = 'none');   document.getElementById('reader_controls_LANDMARKS').style.display = 'block';"
             >Landmarks</button>
             <button id="buttonTab_TOOLS"
-            onclick="javascript:[].forEach.call(document.querySelectorAll('.sectionTAB'), (el) => {el.style.display = 'none';});   document.getElementById('reader_controls_TOOLS').style.display = 'block';"
+            onclick="javascript:[].forEach.call(document.querySelectorAll('.sectionTAB'), (el) => el.style.display = 'none');   document.getElementById('reader_controls_TOOLS').style.display = 'block';"
             >Tools</button>
           </div>
           <hr>
           <div id="tabContents">
             <div id="reader_controls_TOC" class="sectionTAB">
             </div>
-            <div id="reader_controls_SPINE" class="sectionTAB">
+            <div id="reader_controls_SPINE" class="sectionTAB" data-is="riot-spinelist">
+              <!-- <riot-spinelist> </riot-spinelist> -->
+              <!-- <virtual data-is="riot-spinelist"> </virtual> -->
             </div>
             <div id="reader_controls_PAGELIST" class="sectionTAB">
             </div>

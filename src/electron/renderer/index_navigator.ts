@@ -3,6 +3,8 @@ import { shell } from "electron";
 
 import { R2_EVENT_LINK, R2_EVENT_READIUMCSS } from "../common/events";
 import { R2_SESSION_WEBVIEW } from "../common/sessions";
+import { riotMountSpineList } from "./riots/riot_spinelist_";
+
 // import { shell } from "electron";
 
 const _webviews: Electron.WebviewTag[] = [];
@@ -233,33 +235,36 @@ export function startNavigatorExperiment(publicationJsonUrl: string) {
         }
 
         if (publicationJson.spine) {
-            const readerControlsSpine = document.getElementById("reader_controls_SPINE");
-            let firstLinear: any | undefined;
-            publicationJson.spine.forEach((spineItem: any) => {
-                // in Readium2, spine items are always linear (otherwise just "resource" collection)
-                if (!firstLinear) { // && (!spineItem.linear || spineItem.linear === "yes")) {
-                    firstLinear = spineItem;
-                }
-                const spineItemLink = document.createElement("a");
-                const spineItemLinkHref = publicationJsonUrl + "/../" + spineItem.href;
-                spineItemLink.setAttribute("href", spineItemLinkHref);
-                spineItemLink.setAttribute("data-href", spineItem.href);
-                spineItemLink.addEventListener("click", (event) => {
-                    event.preventDefault();
-                    loadLink(spineItemLinkHref, spineItem.href, publicationJsonUrl);
-                });
-                spineItemLink.appendChild(document.createTextNode(spineItem.href));
-                if (readerControlsSpine) {
-                    readerControlsSpine.appendChild(spineItemLink);
-                    readerControlsSpine.appendChild(document.createElement("br"));
-                }
-            });
-            if (firstLinear) {
-                setTimeout(() => {
-                    const firstLinearLinkHref = publicationJsonUrl + "/../" + firstLinear.href;
-                    loadLink(firstLinearLinkHref, firstLinear.href, publicationJsonUrl);
-                }, 200);
-            }
+
+            riotMountSpineList({ spine: publicationJson.spine, pubUrl: publicationJsonUrl });
+
+            // const readerControlsSpine = document.getElementById("reader_controls_SPINE");
+            // let firstLinear: any | undefined;
+            // publicationJson.spine.forEach((spineItem: any) => {
+            //     // in Readium2, spine items are always linear (otherwise just "resource" collection)
+            //     if (!firstLinear) { // && (!spineItem.linear || spineItem.linear === "yes")) {
+            //         firstLinear = spineItem;
+            //     }
+            //     const spineItemLink = document.createElement("a");
+            //     const spineItemLinkHref = publicationJsonUrl + "/../" + spineItem.href;
+            //     spineItemLink.setAttribute("href", spineItemLinkHref);
+            //     spineItemLink.setAttribute("data-href", spineItem.href);
+            //     spineItemLink.addEventListener("click", (event) => {
+            //         event.preventDefault();
+            //         loadLink(spineItemLinkHref, spineItem.href, publicationJsonUrl);
+            //     });
+            //     spineItemLink.appendChild(document.createTextNode(spineItem.href));
+            //     if (readerControlsSpine) {
+            //         readerControlsSpine.appendChild(spineItemLink);
+            //         readerControlsSpine.appendChild(document.createElement("br"));
+            //     }
+            // });
+            // if (firstLinear) {
+            //     setTimeout(() => {
+            //         const firstLinearLinkHref = publicationJsonUrl + "/../" + firstLinear.href;
+            //         loadLink(firstLinearLinkHref, firstLinear.href, publicationJsonUrl);
+            //     }, 200);
+            // }
         }
 
         if (publicationJson.toc && publicationJson.toc.length) {
