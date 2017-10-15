@@ -28,22 +28,4 @@ export const riotMountSpineList = (opts: any) => {
             handleLink(href, this.pubUrl);
         }
     };
-
-    this.on("mount", () => {
-
-        // let firstLinear: any | undefined;
-        // opts.spine.forEach((spineItem: any) => {
-        //     // in Readium2, spine items are always linear (otherwise just "resource" collection)
-        //     if (!firstLinear) { // && (!spineItem.linear || spineItem.linear === "yes")) {
-        //         firstLinear = spineItem;
-        //     }
-        // });
-        const firstLinear = this.spine.length ? this.spine[0] : undefined;
-        if (firstLinear) {
-            setTimeout(() => {
-                const firstLinearLinkHref = this.pubUrl + "/../" + firstLinear.href;
-                handleLink(firstLinearLinkHref, this.pubUrl);
-            }, 200);
-        }
-    });
 };

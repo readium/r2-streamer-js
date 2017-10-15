@@ -1,11 +1,11 @@
 <riot-spinelist>
-  <ul if="{ spine.length }">
+  <ul if="{ spine && spine.length }">
     <li each="{ spine }">
       <a href="{ pubUrl + '/../' + href }" data-href="{ href }" onclick="{ parent.onclick }">{ href }</a>
     </li>
   </ul>
 
-  <p if="{ !spine.length }">NO SPINE!</p>
+  <p if="{ !spine || !spine.length }">NO SPINE!?</p>
 
   <script>window.riot_spinelist.call(this, this.opts);</script>
 </riot-spinelist>

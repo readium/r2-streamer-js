@@ -3,11 +3,20 @@
 
 <head>
   <title>Readium 2 NodeJS 'streamer' (Electron 'navigator')</title>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8" >
 
-  <link type="text/css" href="./index.css" rel="stylesheet" />
+  <link rel="stylesheet" href="./material-components-web.css" >
+  <style type="text/css">
+    :root {
+      --mdc-theme-primary: #0e4ead;
+    }
+  </style>
 
-  <!-- <link type="text/css" href="./riots/mytag/index.css" rel="stylesheet" /> -->
+  <script  type="application/javascript" src="./material-components-web.js"> </script>
+
+  <link type="text/css" href="./index.css" rel="stylesheet" >
+
+  <!-- <link type="text/css" href="./riots/mytag/index.css" rel="stylesheet" > -->
   <style type="riot"> </style>
 
   <script type="application/javascript" src="./riot.js"> </script>
@@ -28,17 +37,14 @@
 </head>
 
 <body>
-    <h1 style="color: red;"><span>Electron index.html (renderer process)</span>
+    <!-- <h1 style="color: red;"><span>Electron index.html (renderer process)</span></h1> -->
 
-      <form id="lcpPassForm"><input type="text" name="lcpPassInput" id="lcpPassInput" size="40"><input type="submit" value="LCP pass"></form>
+    <!-- <button id="buttonStart" class="mdc-button mdc-button--raised">[ START ]</button> -->
+    <!-- <button id="buttonDevTools" class="mdc-button">OPEN DEV TOOLS</button> -->
 
-      <button id="buttonStart">[ START ]</button>
-      <button id="buttonDebug">TOGGLE DEBUG VIEW</button>
-      <button id="buttonDevTools">OPEN DEV TOOLS</button></h1>
-
-      <!-- <riot-mytag>
-          <b>{ prop1 }</b>
-      </riot-mytag> -->
+    <!-- <riot-mytag>
+        <b>{ prop1 }</b>
+    </riot-mytag> -->
 
     <div id="reader_chrome">
       <div id="publication_viewport">
@@ -80,12 +86,56 @@
               ReadiumCSS:
               <button id="cssButtonInject" disabled>inject</button>
               <button id="cssButtonReset" disabled>remove</button>
+              <hr>
+              <button id="buttonDebug" class="mdc-button mdc-button--raised mdc-ripple-surface" data-mdc-auto-init="MDCRipple">TOGGLE DEBUG VIEW</button>
             </div>
           </div>
       </div>
       <button id="showControlsButton">O</button>
       <button id="hideControlsButton">X</button>
     </div>
+
+
+    <aside id="lcpDialog"
+      class="mdc-dialog"
+      role="alertdialog"
+      aria-hidden="true"
+      aria-labelledby="mdc-dialog-default-label"
+      aria-describedby="mdc-dialog-default-description">
+
+      <div class="mdc-dialog__surface">
+        <header class="mdc-dialog__header">
+          <h2 id="mdc-dialog-default-label" class="mdc-dialog__header__title">
+            Please enter the publication's passphrase:
+          </h2>
+        </header>
+
+        <section id="mdc-dialog-default-description" class="mdc-dialog__body">
+
+          <!-- <form id="lcpPassForm" action="#"> -->
+            <div class="mdc-form-field">
+              <div class="mdc-textfield" data-mdc-auto-init="MDCTextfield">
+                <input type="password" name="lcpPassInput" id="lcpPassInput" size="40" class="mdc-textfield__input">
+                <label for="lcpPassInput" class="mdc-textfield__label" id="lcpPassInputLabel">passphrase</label>
+                <span id="lcpPassMessage" style="color: red; margin-left: 1em;"> </span>
+              </div>
+            </div>
+            <!-- <button type="submit" class="mdc-button mdc-button--raised mdc-button--dense mdc-ripple-surface" data-mdc-auto-init="MDCRipple">Submit</button> -->
+            <p><strong>Hint: </strong><span id="lcpPassHint">-</span></p>
+          <!-- </form> -->
+
+        </section>
+
+        <footer class="mdc-dialog__footer">
+          <!-- <button type="button" class="mdc-button mdc-dialog__footer__button mdc-dialog__footer__button--cancel">Decline</button> -->
+          <button type="button" id="lcpDialogAcceptButton" class="mdc-button mdc-dialog__footer__button mdc-dialog__footer__button--accept">OK</button>
+        </footer>
+      </div>
+
+      <div class="mdc-dialog__backdrop"></div>
+    </aside>
+
+
 </body>
 
 </html>

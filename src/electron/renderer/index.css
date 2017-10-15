@@ -7,7 +7,9 @@ html, body {
   padding: 0;
   box-sizing: border-box;
 }
-
+html.debug body {
+  background: silver;
+}
 body.flex {
   display: flex;
   height: 100vh;
@@ -20,10 +22,10 @@ body.flex {
   display: block;
   position: absolute;
   box-sizing: border-box;
-  left: 10px;
-  right: 10px;
-  top: 90px;
-  bottom: 20px;
+  left: 0px;
+  right: 0px;
+  top: 0px;
+  bottom: 0px;
   margin: 0;
   padding: 0;
   background: white;
@@ -94,9 +96,18 @@ html.debug #webview2 {
 form {
   margin: 0; padding: 0;
 }
-form#lcpPassForm {
+/* form#lcpPassForm {
+  box-sizing: border-box;
+  border: 3px solid black;
+  background: silver;
+  color: black;
   display: none;
-}
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 50%;
+  height: 25%;
+} */
 #showControlsButton {
   display:none;
 }

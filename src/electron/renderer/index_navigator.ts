@@ -116,12 +116,12 @@ function loadLink(hrefFull: string, _hrefPartial: string, _publicationJsonUrl: s
 
 export function startNavigatorExperiment(publicationJsonUrl: string) {
 
-    document.body.style.backgroundColor = "silver";
+    // document.body.style.backgroundColor = "silver";
 
-    const h1 = document.querySelector("html > body > h1");
-    if (h1) {
-        (h1 as HTMLElement).style.color = "green";
-    }
+    // const h1 = document.querySelector("html > body > h1");
+    // if (h1) {
+    //     (h1 as HTMLElement).style.color = "green";
+    // }
 
     // const readerChrome = document.getElementById("reader_chrome");
     const readerControls = document.getElementById("reader_controls");
@@ -237,6 +237,14 @@ export function startNavigatorExperiment(publicationJsonUrl: string) {
         if (publicationJson.spine) {
 
             riotMountSpineList({ spine: publicationJson.spine, pubUrl: publicationJsonUrl });
+
+            const firstLinear = publicationJson.spine.length ? publicationJson.spine[0] : undefined;
+            if (firstLinear) {
+                setTimeout(() => {
+                    const firstLinearLinkHref = publicationJsonUrl + "/../" + firstLinear.href;
+                    handleLink(firstLinearLinkHref, publicationJsonUrl);
+                }, 200);
+            }
 
             // const readerControlsSpine = document.getElementById("reader_controls_SPINE");
             // let firstLinear: any | undefined;
