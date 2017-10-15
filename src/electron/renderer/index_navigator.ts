@@ -3,7 +3,7 @@ import { shell } from "electron";
 
 import { R2_EVENT_LINK, R2_EVENT_READIUMCSS } from "../common/events";
 import { R2_SESSION_WEBVIEW } from "../common/sessions";
-import { riotMountSpineList } from "./riots/riot_spinelist_";
+import { riotMountSpineList } from "./riots/spinelist/index_";
 
 // import { shell } from "electron";
 

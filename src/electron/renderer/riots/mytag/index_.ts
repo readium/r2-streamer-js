@@ -1,6 +1,6 @@
 // http://riotjs.com/guide/
 // http://riotjs.com/api/
-import { riot_mixin_EventTracer } from "./riot_mixin_EventTracer";
+import { riot_mixin_EventTracer } from "../riot_mixin_EventTracer";
 
 export const riotMountMyTag = (opts: any) => {
     const tag = riot.mount("riot-mytag", opts);

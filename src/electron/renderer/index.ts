@@ -3,7 +3,7 @@ import { R2_EVENT_DEVTOOLS, R2_EVENT_LINK, R2_EVENT_TRY_LCP_PASS, R2_EVENT_TRY_L
 import { handleLink, startNavigatorExperiment } from "./index_navigator";
 import { getURLQueryParams } from "./querystring";
 
-// import { riotMountMyTag } from "./riots/riot_mytag_";
+// import { riotMountMyTag } from "./riots/mytag/index_";
 // import { RiotMixinWithOpts } from "./riots/riot_mixin_EventTracer";
 // import { startServiceWorkerExperiment } from "./sw/index_service-worker";
 

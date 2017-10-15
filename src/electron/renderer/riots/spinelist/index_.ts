@@ -1,7 +1,7 @@
 // http://riotjs.com/guide/
 // http://riotjs.com/api/
-import { handleLink} from "../index_navigator";
-import { riot_mixin_EventTracer } from "./riot_mixin_EventTracer";
+import { handleLink} from "../../index_navigator";
+import { riot_mixin_EventTracer } from "../riot_mixin_EventTracer";
 
 export const riotMountSpineList = (opts: any) => {
     const tag = riot.mount("riot-spinelist", opts);
