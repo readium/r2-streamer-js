@@ -220,6 +220,13 @@ export function startNavigatorExperiment(publicationJsonUrl: string) {
         }
         console.log(publicationJson);
 
+        if (publicationJson.metadata && publicationJson.metadata.title) {
+            const h1 = document.getElementById("pubTitle");
+            if (h1) {
+                (h1 as HTMLElement).textContent = publicationJson.metadata.title;
+            }
+        }
+
         const buttonNavLeft = document.getElementById("buttonNavLeft");
         if (buttonNavLeft) {
             buttonNavLeft.addEventListener("click", (_event) => {

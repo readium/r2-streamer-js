@@ -1,3 +1,6 @@
+:root {
+  --R2__specialDimension: 36px;
+}
 html, body {
   height: 100%;
   width: 100%;
@@ -17,18 +20,27 @@ body.flex {
   align-items: center;
   justify-content: center;
 }
-
-#reader_chrome {
-  display: block;
-  position: absolute;
+#pubTitle {
+  text-align: center;
+  width: 100%;
   box-sizing: border-box;
-  left: 0px;
-  right: 0px;
-  top: 0px;
-  bottom: 0px;
   margin: 0;
   padding: 0;
+  height: var(--R2__specialDimension);
+  line-height: var(--R2__specialDimension);
+}
+#reader_chrome {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  display: block;
+  position: absolute;
+  left: 0px;
+  right: 0px;
+  top: var(--R2__specialDimension);
+  bottom: 0px;
   background: white;
+  border-top: 1px solid silver;
 }
 html.debug #reader_chrome {
   border: 3px solid orange;
@@ -37,8 +49,8 @@ html.debug #reader_chrome {
 #publication_viewport {
   display: block;
   position: absolute;
-  left: 30px;
-  right: 30px;
+  left: var(--R2__specialDimension);
+  right: var(--R2__specialDimension);
   top: 0;
   bottom: 0;
   margin: 0;
@@ -108,6 +120,22 @@ form {
   width: 50%;
   height: 25%;
 } */
+#drawerButton {
+  box-sizing: border-box;
+  display:block;
+  position:absolute;
+  top:0;
+  left:0;
+  margin: 0;
+  padding: 0;
+  width: var(--R2__specialDimension);
+  height: var(--R2__specialDimension);
+  min-width: var(--R2__specialDimension);
+  min-height: var(--R2__specialDimension);
+}
+#drawerButton i {
+  vertical-align: middle;
+}
 #showControlsButton {
   display:none;
 }
@@ -128,11 +156,37 @@ form {
   position: absolute;
   top: 40%;
   bottom: 40%;
-  width: 30px;
+  margin: 0;
+  padding: 0;
+  width: var(--R2__specialDimension);
+  height: auto;
+  min-width: var(--R2__specialDimension);
+  min-height: auto;
 }
 #buttonNavLeft {
   left: 0;
 }
 #buttonNavRight {
   right: 0;
+}
+#buttonNavLeft i, #buttonNavRight i {
+  vertical-align: middle;
+  font-size: 36px;
+}
+.tabPanel {
+  display: none;
+}
+.tabPanel.active {
+  display: block;
+}
+#nav-select {
+  width: 100% !important;
+  margin-bottom: 1em;
+  background-position-x: 96%;
+}
+#nav-select-menu {
+  width: 100% !important;
+}
+#nav-select-text {
+  padding-left: 1em;
 }

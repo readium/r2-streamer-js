@@ -5,6 +5,32 @@
   <title>Readium 2 NodeJS 'streamer' (Electron 'navigator')</title>
   <meta charset="UTF-8" >
 
+  <style type="text/css">
+    @font-face {
+      font-family: 'Material Icons';
+      font-style: normal;
+      font-weight: 400;
+      src: local('Material Icons'),
+        local('MaterialIcons-Regular'),
+        url(./MaterialIcons-Regular.woff2) format('woff2');
+    }
+    .material-icons {
+      font-family: 'Material Icons';
+      font-weight: normal;
+      font-style: normal;
+      font-size: 24px;  /* Preferred icon size */
+      display: inline-block;
+      line-height: 1;
+      text-transform: none;
+      letter-spacing: normal;
+      word-wrap: normal;
+      white-space: nowrap;
+      direction: ltr;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+  </style>
+
   <link rel="stylesheet" href="./material-components-web.css" >
   <style type="text/css">
     :root {
@@ -36,8 +62,10 @@
 
 </head>
 
-<body>
+<body class="mdc-typography">
     <!-- <h1 style="color: red;"><span>Electron index.html (renderer process)</span></h1> -->
+    <!-- <h1 class="mdc-typography--headline">TITLE</h1> -->
+    <h3 class="mdc-typography--subheading1" id="pubTitle">TITLE</h3>
 
     <!-- <button id="buttonStart" class="mdc-button mdc-button--raised">[ START ]</button> -->
     <!-- <button id="buttonDevTools" class="mdc-button">OPEN DEV TOOLS</button> -->
@@ -46,11 +74,110 @@
         <b>{ prop1 }</b>
     </riot-mytag> -->
 
-    <div id="reader_chrome">
+    <button id="drawerButton" class="mdc-button mdc-ripple-surface" data-mdc-auto-init="MDCRipple"><i class="material-icons md-36">menu</i></button>
+
+    <aside id="drawer" class="mdc-temporary-drawer">
+      <nav class="mdc-temporary-drawer__drawer">
+
+          <div id="nav-select" class="mdc-select" role="listbox" tabindex="0" style="width: 100% !important;">
+            <span id="nav-select-text" class="mdc-select__selected-text">Table of contents</span>
+            <div id="nav-select-menu" class="mdc-simple-menu mdc-select__menu">
+              <ul class="mdc-list mdc-simple-menu__items">
+                  <li class="mdc-list-item" role="option" id="selectTOC" tabindex="0" aria-selected>
+                    Table of contents
+                  </li>
+                  <li class="mdc-list-item" role="option" id="selectSpine" tabindex="0">
+                    Publication spine
+                  </li>
+                  <li class="mdc-list-item" role="option" id="selectPageList" tabindex="0">
+                    Page list
+                  </li>
+                  <li class="mdc-list-item" role="option" id="selectLandmarks" tabindex="0">
+                    Landmarks
+                  </li>
+                  <li class="mdc-list-divider" role="presentation" disabled> </li>
+                  <li class="mdc-list-item" role="option" id="selectTools" tabindex="0">
+                    Tools
+                  </li>
+              </ul>
+            </div>
+          </div>
+
+          <div id="tabsPanels">
+              <div class="tabPanel active">PANEL 1</div>
+              <div class="tabPanel">PANEL 2</div>
+              <div class="tabPanel">PANEL 3</div>
+              <div class="tabPanel">PANEL 4</div>
+              <div class="tabPanel">PANEL 5</div>
+          </div>
+          <!-- <div id="tabs" class="mdc-tab-bar-scroller">
+            <div class="mdc-tab-bar-scroller__indicator mdc-tab-bar-scroller__indicator--back">
+              <a class="mdc-tab-bar-scroller__indicator__inner material-icons" href="#" aria-label="scroll back button">
+                navigate_before
+              </a>
+            </div>
+            <div class="mdc-tab-bar-scroller__scroll-frame">
+              <nav id="tabsScroll" class="mdc-tab-bar mdc-tab-bar-scroller__scroll-frame__tabs">
+                <a class="mdc-tab mdc-tab--active" href="#">Table Of Contents</a>
+                <a class="mdc-tab" href="#">Spine</a>
+                <a class="mdc-tab" href="#">Page list</a>
+                <a class="mdc-tab" href="#">Landmarks</a>
+                <a class="mdc-tab" href="#">Tools</a>
+                <span class="mdc-tab-bar__indicator"></span>
+              </nav>
+            </div>
+            <div class="mdc-tab-bar-scroller__indicator mdc-tab-bar-scroller__indicator--forward">
+              <a class="mdc-tab-bar-scroller__indicator__inner material-icons" href="#" aria-label="scroll forward button">
+                navigate_next
+              </a>
+            </div>
+          </div> -->
+        <!-- <header class="mdc-temporary-drawer__header">
+          <div class="mdc-temporary-drawer__header-content mdc-theme--primary-bg mdc-theme--text-primary-on-primary">
+            Header here
+          </div>
+        </header> -->
+        <!-- <nav class="mdc-temporary-drawer__content mdc-list-group">
+          <div id="icon-with-text-demo" class="mdc-list">
+            <a class="mdc-list-item mdc-temporary-drawer--selected" href="#">
+              <i class="material-icons mdc-list-item__start-detail" aria-hidden="true">inbox</i>Inbox
+            </a>
+            <a class="mdc-list-item" href="#">
+              <i class="material-icons mdc-list-item__start-detail" aria-hidden="true">star</i>Star
+            </a>
+            <a class="mdc-list-item" href="#">
+              <i class="material-icons mdc-list-item__start-detail" aria-hidden="true">send</i>Sent Mail
+            </a>
+            <a class="mdc-list-item" href="#">
+              <i class="material-icons mdc-list-item__start-detail" aria-hidden="true">drafts</i>Drafts
+            </a>
+          </div>
+
+          <hr class="mdc-list-divider">
+
+          <div class="mdc-list">
+            <a class="mdc-list-item" href="#">
+              <i class="material-icons mdc-list-item__start-detail" aria-hidden="true">email</i>All Mail
+            </a>
+            <a class="mdc-list-item" href="#">
+              <i class="material-icons mdc-list-item__start-detail" aria-hidden="true">delete</i>Trash
+            </a>
+            <a class="mdc-list-item" href="#">
+              <i class="material-icons mdc-list-item__start-detail" aria-hidden="true">report</i>Spam
+            </a>
+          </div>
+        </nav> -->
+      </nav>
+    </aside>
+
+    <main id="reader_chrome">
+
       <div id="publication_viewport">
       </div>
-      <button id="buttonNavLeft">&lt;</button>
-      <button id="buttonNavRight">&gt;</button>
+
+      <button id="buttonNavLeft" class="mdc-button mdc-ripple-surface" data-mdc-auto-init="MDCRipple"><i class="material-icons md-36">keyboard_arrow_left</i></button>
+      <button id="buttonNavRight" class="mdc-button mdc-ripple-surface" data-mdc-auto-init="MDCRipple"><i class="material-icons md-36">keyboard_arrow_right</i></button>
+
       <div id="reader_controls">
           <hr>
           <div id="tabHeaders">
@@ -88,12 +215,13 @@
               <button id="cssButtonReset" disabled>remove</button>
               <hr>
               <button id="buttonDebug" class="mdc-button mdc-button--raised mdc-ripple-surface" data-mdc-auto-init="MDCRipple">TOGGLE DEBUG VIEW</button>
+              <button id="buttonDark" class="mdc-button mdc-button--raised mdc-ripple-surface" data-mdc-auto-init="MDCRipple">TOGGLE DARK THEME</button>
             </div>
           </div>
       </div>
       <button id="showControlsButton">O</button>
       <button id="hideControlsButton">X</button>
-    </div>
+    </main>
 
 
     <aside id="lcpDialog"
@@ -135,6 +263,16 @@
       <div class="mdc-dialog__backdrop"></div>
     </aside>
 
+    <div id="snackbar"
+      class="mdc-snackbar"
+      aria-live="assertive"
+      aria-atomic="true"
+      aria-hidden="true">
+      <div class="mdc-snackbar__text"></div>
+      <div class="mdc-snackbar__action-wrapper">
+        <button type="button" class="mdc-snackbar__action-button"></button>
+      </div>
+    </div>
 
 </body>
 

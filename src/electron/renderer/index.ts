@@ -41,16 +41,28 @@ ipcRenderer.on(R2_EVENT_LINK, (_event: any, href: string) => {
     handleLink(href, publicationJsonUrl);
 });
 
-ipcRenderer.on(R2_EVENT_TRY_LCP_PASS_RES, (_event: any, okay: boolean, message: string) => {
+ipcRenderer.on(R2_EVENT_TRY_LCP_PASS_RES, (_event: any, okay: boolean, msg: string) => {
     console.log("R2_EVENT_TRY_LCP_PASS_RES");
     console.log(okay);
-    console.log(message);
+    console.log(msg);
 
     if (!okay) {
-        showLcpDialog(message);
+        showLcpDialog(msg);
         return;
     }
 
+    const message = "Correct publication passphrase.";
+    const data = {
+        actionHandler: () => {
+            console.log("SnackBar OK");
+        },
+        actionOnBottom: false,
+        actionText: "OK",
+        message,
+        multiline: false,
+        timeout: 2000,
+    };
+    snackBar.show(data);
     startNavigatorExperiment(publicationJsonUrl);
 
     // const lcpPassMessage = document.getElementById("lcpPassMessage");
@@ -92,6 +104,8 @@ function showLcpDialog(message?: string) {
     }, 200);
 }
 
+let snackBar: any;
+
 window.addEventListener("DOMContentLoaded", () => {
 
     // material-components-web
@@ -102,10 +116,67 @@ window.addEventListener("DOMContentLoaded", () => {
 
     window.document.title = "Readium2 [ " + pathFileName + "]";
 
-    // const h1 = document.querySelector("html > body > h1 > span");
-    // if (h1) {
-    //     (h1 as HTMLElement).textContent = pathFileName;
-    // }
+    const h1 = document.getElementById("pubTitle");
+    if (h1) {
+        (h1 as HTMLElement).textContent = pathFileName;
+    }
+
+    const snackBarElem = document.getElementById("snackbar");
+    snackBar = new (window as any).mdc.snackbar.MDCSnackbar(snackBarElem);
+    snackBar.dismissesOnAction = true;
+
+    const drawerElement = document.getElementById("drawer");
+    const drawer = new (window as any).mdc.drawer.MDCTemporaryDrawer(drawerElement);
+    const drawerButton = document.getElementById("drawerButton");
+    if (drawerButton) {
+        drawerButton.addEventListener("click", () => {
+            drawer.open = true;
+        });
+    }
+    if (drawerElement) {
+        drawerElement.addEventListener("MDCTemporaryDrawer:open", () => {
+            console.log("MDCTemporaryDrawer:open");
+        });
+        drawerElement.addEventListener("MDCTemporaryDrawer:close", () => {
+            console.log("MDCTemporaryDrawer:close");
+        });
+    }
+
+    const selectElement = document.getElementById("nav-select");
+    const navSelector = new (window as any).mdc.select.MDCSelect(selectElement);
+    navSelector.listen("MDCSelect:change", (ev: any) => {
+        console.log("MDCSelect:change");
+        console.log(ev);
+        console.log(navSelector.selectedOptions[0].textContent);
+        console.log(navSelector.selectedIndex);
+        console.log(navSelector.value);
+
+        const activePanel = document.querySelector(".tabPanel.active");
+        if (activePanel) {
+            activePanel.classList.remove("active");
+        }
+        const newActivePanel = document.querySelector(".tabPanel:nth-child(" + (navSelector.selectedIndex + 1) + ")");
+        if (newActivePanel) {
+            newActivePanel.classList.add("active");
+        }
+    });
+
+    // const tabsElement = document.getElementById("tabs");
+    // const tabs = new (window as any).mdc.tabs.MDCTabBarScroller(tabsElement);
+    // // tabs.tabBar.layout();
+    // tabs.tabBar.preventDefaultOnClick = true;
+    // tabs.tabBar.listen("MDCTabBar:change", (ev: any) => {
+    //     console.log("MDCTabBar:change");
+    //     console.log(ev.detail.activeTabIndex);
+    //     const activePanel = document.querySelector(".tabPanel.active");
+    //     if (activePanel) {
+    //         activePanel.classList.remove("active");
+    //     }
+    //     const newActivePanel = document.querySelector(".tabPanel:nth-child(" + (ev.detail.activeTabIndex + 1) + ")");
+    //     if (newActivePanel) {
+    //         newActivePanel.classList.add("active");
+    //     }
+    // });
 
     const diagElem = document.querySelector("#lcpDialog");
     const lcpPassInput = document.getElementById("lcpPassInput");
@@ -160,6 +231,17 @@ window.addEventListener("DOMContentLoaded", () => {
                 document.documentElement.classList.remove("debug");
             } else {
                 document.documentElement.classList.add("debug");
+            }
+        });
+    }
+
+    const buttonDark = document.getElementById("buttonDark");
+    if (buttonDark) {
+        buttonDark.addEventListener("click", () => {
+            if (document.body.classList.contains("mdc-theme--dark")) {
+                document.body.classList.remove("mdc-theme--dark");
+            } else {
+                document.body.classList.add("mdc-theme--dark");
             }
         });
     }
