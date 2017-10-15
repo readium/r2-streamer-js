@@ -1,44 +1,52 @@
+export interface RiotMixinWithOpts extends RiotMixin {
+    getOpts(): any;
+    setOpts(opts: any, update: boolean): RiotTag;
+}
 // tslint:disable-next-line:variable-name
-export const riot_mixin_EventTracer = {
+export const riot_mixin_EventTracer: RiotMixinWithOpts = {
     init(opts: any) {
         console.log(opts);
         console.log(this);
 
-        this.on("*", (evName: string) => {
+        const that = this as RiotTag;
+
+        that.on("*", (evName: string) => {
             console.log("EVENT => " + evName);
         });
 
-        this.on("before-mount", () => {
+        that.on("before-mount", () => {
             console.log("EVENT before-mount");
         });
-        this.on("mount", () => {
+        that.on("mount", () => {
             console.log("EVENT mount");
         });
 
-        this.on("update", () => {
+        that.on("update", () => {
             console.log("EVENT update");
         });
-        this.on("updated", () => {
+        that.on("updated", () => {
             console.log("EVENT updated");
         });
 
-        this.on("before-unmount", () => {
+        that.on("before-unmount", () => {
             console.log("EVENT before-unmount");
         });
-        this.on("unmount", () => {
+        that.on("unmount", () => {
             console.log("EVENT mount");
         });
     },
 
-    getOpts() {
-        return this.opts;
+    getOpts(): any {
+        const that = this as RiotTag;
+        return that.opts;
     },
 
-    setOpts(opts: any, update: boolean): any {
-        this.opts = opts;
+    setOpts(opts: any, update: boolean): RiotTag {
+        const that = this as RiotTag;
+        that.opts = opts;
         if (update) {
-            this.update();
+            that.update();
         }
-        return this;
+        return that;
     },
 };

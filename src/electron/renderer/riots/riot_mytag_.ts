@@ -6,7 +6,9 @@ import { riot_mixin_EventTracer } from "./riot_mixin_EventTracer";
     console.log(opts);
     console.log(this);
 
-    this.mixin(riot_mixin_EventTracer);
+    const that = this as RiotTag;
+
+    that.mixin(riot_mixin_EventTracer);
 
     this.prop1 = "val1";
     this.applyClazz = false;
@@ -15,33 +17,27 @@ import { riot_mixin_EventTracer } from "./riot_mixin_EventTracer";
     // ev.target (originating element)
     // ev.which (keyboard)
     // ev.item (loop)
-    this.onclickButton = (ev: any) => {
+    this.onclickButton = (ev: RiotEvent) => {
         console.log("CLICK button");
         // applyClazz will not be taken into account immediately (no automatic call to update()
         ev.preventUpdate = true;
         this.applyClazz = false;
-        this.refs.testSpan.style.fontSize = "100%";
+        (that.refs.testSpan as HTMLElement).style.fontSize = "100%";
         setTimeout(() => {
             // (window as any).riot.update();
-            this.update();
+            that.update();
         }, 1000);
     };
-    this.onclickHeading = (ev: any) => {
+    this.onclickHeading = (ev: RiotEvent) => {
         console.log("CLICK heading");
         this.applyClazz = true;
-        this.refs.testSpan.style.fontSize = "200%";
+        (that.refs.testSpan as HTMLElement).style.fontSize = "200%";
         ev.preventDefault();
     };
 
-    const self = this;
-    function onMount(tag: any) {
-        console.log(tag.root.id);
-        console.log(self.root.id);
-        console.log(this.root.id);
-        console.log(document.getElementById("myRiotTagID"));
-        console.log(tag.root.querySelectorAll("button")[0]);
-    }
     this.on("mount", () => {
-        onMount.bind(this)(this);
+        console.log(that.root.id);
+        console.log(document.getElementById("myRiotTagID"));
+        console.log(that.root.querySelectorAll("button")[0]);
     });
 };

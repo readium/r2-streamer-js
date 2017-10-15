@@ -96,6 +96,7 @@
     "git-rev-sync": "^1.9.1",
     "mkdirp": "^0.5.1",
     "rimraf": "^2.6.2",
+    "riot-typed": "github:danielweck/riot-typed#master",
     "sorcery": "^0.10.0",
     "tslint": "^5.7.0",
     "tslint-language-service": "^0.9.6",

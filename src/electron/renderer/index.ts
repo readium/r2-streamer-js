@@ -2,7 +2,9 @@ import { ipcRenderer } from "electron";
 import { R2_EVENT_DEVTOOLS, R2_EVENT_LINK, R2_EVENT_TRY_LCP_PASS, R2_EVENT_TRY_LCP_PASS_RES } from "../common/events";
 import { handleLink, startNavigatorExperiment } from "./index_navigator";
 import { getURLQueryParams } from "./querystring";
+import "./riots/riot_mytag_";
 
+// import { RiotMixinWithOpts } from "./riots/riot_mixin_EventTracer";
 // import { startServiceWorkerExperiment } from "./sw/index_service-worker";
 
 console.log("INDEX");
@@ -52,6 +54,11 @@ ipcRenderer.on(R2_EVENT_TRY_LCP_PASS_RES, (_event: any, okay: boolean, message: 
 });
 
 window.addEventListener("DOMContentLoaded", () => {
+
+    // riot.mount("*");
+    const tag = riot.mount("riot-mytag", { opt1: "val1" });
+    console.log(tag); // RiotTag[]
+    console.log((tag[0] as any).getOpts()); // see RiotMixinWithOpts
 
     const pathBase64 = publicationJsonUrl.replace(/.*\/pub\/(.*)\/manifest.json/, "$1");
     console.log(pathBase64);
