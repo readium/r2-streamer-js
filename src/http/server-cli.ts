@@ -17,21 +17,21 @@ debug(`__dirname: ${__dirname}`);
 const args = process.argv.slice(2);
 debug("process.argv.slice(2): %o", args);
 
-let filePath = args[0];
-if (!filePath) {
+if (!args[0]) {
     debug("FILEPATH ARGUMENT IS MISSING.");
     process.exit(1);
 }
 
-filePath = filePath.trim();
+const argPath = args[0].trim();
+let filePath = argPath;
 debug(`path: ${filePath}`);
 
 if (!fs.existsSync(filePath)) {
-    filePath = path.join(__dirname, filePath);
+    filePath = path.join(__dirname, argPath);
     debug(`path: ${filePath}`);
 
     if (!fs.existsSync(filePath)) {
-        filePath = path.join(process.cwd(), filePath);
+        filePath = path.join(process.cwd(), argPath);
         debug(`path: ${filePath}`);
 
         if (!fs.existsSync(filePath)) {
