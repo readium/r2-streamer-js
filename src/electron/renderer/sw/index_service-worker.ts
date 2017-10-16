@@ -1,4 +1,4 @@
-import { startNavigatorExperiment } from "../index_navigator";
+// import { startNavigatorExperiment } from "../index_navigator";
 
 export function startServiceWorkerExperiment(publicationJsonUrl: string) {
 
@@ -24,7 +24,7 @@ export function startServiceWorkerExperiment(publicationJsonUrl: string) {
         // const wc = webview2.getWebContents();
 
         setTimeout(async () => {
-            startNavigatorExperiment(publicationJsonUrl);
+            // startNavigatorExperiment(publicationJsonUrl);
         }, 2000);
     });
     // const swBootUrl = publicationJsonUrl + "/show/metadata";

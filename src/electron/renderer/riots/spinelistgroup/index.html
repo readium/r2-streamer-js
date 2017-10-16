@@ -3,7 +3,7 @@
   <div if="{ spinegroup && spinegroup.length }" class="mdc-list-group">
     <virtual each="{ spinegroup }">
       <h2 class="mdc-list-group__subheader">{ label }</h2>
-      <virtual data-is="riot-spinelist" spine="{ spine }" url="{ url }"> </virtual>
+      <virtual data-is="riot-spinelist" spine="{ spine }" url="{ url }" basic="{ basic }"> </virtual>
       <hr class="mdc-list-divider">
     </virtual>
   </div>

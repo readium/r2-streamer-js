@@ -203,3 +203,48 @@ form {
   overflow: auto;
   width: 100%;
 }
+#reader_controls_TOC a {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+#reader_controls_TOC li {
+  margin-top: 1em;
+}
+#reader_controls_TOC ul {
+  list-style: none;
+  padding-left: 1em;
+  border-left: 1px solid #DDDDDD;
+}
+.mdc-theme--dark #reader_controls_TOC ul {
+  border-left: 1px solid #000000;
+}
+
+#reader_controls_TOC a, .mdc-list-item {
+  padding-left: 3px;
+  border-left: 3px solid var(--mdc-theme-background, white);
+}
+.mdc-theme--dark #reader_controls_TOC a, .mdc-theme--dark .mdc-list-item {
+  padding-left: 3px;
+  border-left: 3px solid #303030;
+}
+#reader_controls_TOC a:hover, .mdc-list-item:hover {
+  border-left: 3px solid var(--mdc-theme-primary-light, blue);
+}
+
+#reader_controls_TOC a:hover > span,
+.mdc-list-item:hover > span,
+#reader_controls_TOC a:hover > span > span,
+.mdc-list-item:hover > span > span,
+#reader_controls_TOC a:hover > span,
+.mdc-list-item:hover > span {
+  color: var(--mdc-theme-primary, blue);
+}
+.mdc-theme--dark #reader_controls_TOC a:hover > span,
+.mdc-theme--dark .mdc-list-item:hover > span,
+.mdc-theme--dark #reader_controls_TOC a:hover > span > span,
+.mdc-theme--dark .mdc-list-item:hover > span > span,
+.mdc-theme--dark #reader_controls_TOC a:hover > span,
+.mdc-theme--dark .mdc-list-item:hover > span {
+  color: var(--mdc-theme-primary-light, blue);
+}

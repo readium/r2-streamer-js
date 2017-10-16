@@ -17,4 +17,5 @@ export const riotMountSpineListGroup = (selector: string, opts: any) => {
 
     this.spinegroup = opts.spinegroup;
     this.url = opts.url;
+    this.basic = opts.basic ? true : false;
 };

@@ -5,7 +5,7 @@
 
       <span if="{ title }" class="mdc-list-item__text">
         { title }
-        <span class="mdc-list-item__text__secondary">{ href }</span>
+        <span if="{ !basic }" class="mdc-list-item__text__secondary">{ href }</span>
       </span>
 
       <span if="{ !title }" class="mdc-list-item__text">
