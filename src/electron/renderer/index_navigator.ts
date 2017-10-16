@@ -245,7 +245,7 @@ export function startNavigatorExperiment(publicationJsonUrl: string) {
         if (publicationJson.spine) {
 
             riotMountSpineList("#reader_controls_SPINE",
-                { spine: publicationJson.spine, url: publicationJsonUrl });
+                { spine: publicationJson.spine, url: publicationJsonUrl, basic: true });
 
             const firstLinear = publicationJson.spine.length ? publicationJson.spine[0] : undefined;
             if (firstLinear) {

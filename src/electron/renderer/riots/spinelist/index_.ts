@@ -18,6 +18,7 @@ export const riotMountSpineList = (selector: string, opts: any) => {
 
     this.spine = opts.spine;
     this.url = opts.url;
+    this.basic = opts.basic ? true : false;
 
     this.onclick = (ev: RiotEvent) => {
         ev.preventUpdate = true;
