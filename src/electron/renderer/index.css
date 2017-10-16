@@ -136,7 +136,7 @@ form {
 #drawerButton i {
   vertical-align: middle;
 }
-#showControlsButton {
+/* #showControlsButton {
   display:none;
 }
 #hideControlsButton {
@@ -144,13 +144,13 @@ form {
   position:absolute;
   top:0;
   left:0;
-}
+} */
 .sectionTAB {
   display: none;
 }
-#reader_controls_TOC {
+/* #reader_controls_TOC {
   display: block;
-}
+} */
 #buttonNavLeft, #buttonNavRight {
   display: block;
   position: absolute;
@@ -181,7 +181,6 @@ form {
 }
 #nav-select {
   width: 100% !important;
-  margin-bottom: 1em;
   background-position-x: 96%;
 }
 #nav-select-menu {
@@ -189,4 +188,18 @@ form {
 }
 #nav-select-text {
   padding-left: 1em;
+}
+#drawerNav {
+  height: 100%;
+}
+#tabsPanels {
+  height: 100%;
+  overflow: hidden;
+  borderxx: 2px solid red;
+  box-sizing: border-box;
+  display: inline-flex;
+}
+.tabPanel {
+  overflow: auto;
+  width: 100%;
 }

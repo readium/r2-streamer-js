@@ -1,11 +1,26 @@
 <riot-spinelist>
-  <ul if="{ spine && spine.length }">
-    <li each="{ spine }">
-      <a href="{ pubUrl + '/../' + href }" data-href="{ href }" onclick="{ parent.onclick }">{ href }</a>
-    </li>
-  </ul>
+  <nav if="{ spine && spine.length }" class="mdc-list mdc-list--two-line mdc-list--dense">
+    <a each="{ spine }" href="{ parent.url + '/../' + href }" data-href="{ href }" title="{ href }" onclick="{ parent.onclick }" class="mdc-list-item mdc-ripple-surfacexx"
+      data-mdc-auto-initxx="MDCRipple">
+
+      <span if="{ title }" class="mdc-list-item__text">
+        { title }
+        <span class="mdc-list-item__text__secondary">{ href }</span>
+      </span>
+
+      <span if="{ !title }" class="mdc-list-item__text">
+        { href }
+        <span class="mdc-list-item__text__secondary"> </span>
+      </span>
+    </a>
+  </nav>
 
   <p if="{ !spine || !spine.length }">NO SPINE!?</p>
+
+  <style>
+    .mdc-list-item { overflow-x: hidden; }
+    .mdc-list-item__text, .mdc-list-item__text__secondary { white-space: nowrap; text-overflowxxx: clip; }
+  </style>
 
   <script>window.riot_spinelist.call(this, this.opts);</script>
 </riot-spinelist>

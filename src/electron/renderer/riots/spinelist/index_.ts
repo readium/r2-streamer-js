@@ -3,8 +3,8 @@
 import { handleLink} from "../../index_navigator";
 import { riot_mixin_EventTracer } from "../riot_mixin_EventTracer";
 
-export const riotMountSpineList = (opts: any) => {
-    const tag = riot.mount("riot-spinelist", opts);
+export const riotMountSpineList = (selector: string, opts: any) => {
+    const tag = riot.mount(selector, opts);
     console.log(tag); // RiotTag[]
 };
 
@@ -17,7 +17,7 @@ export const riotMountSpineList = (opts: any) => {
     that.mixin(riot_mixin_EventTracer);
 
     this.spine = opts.spine;
-    this.pubUrl = opts.pubUrl;
+    this.url = opts.url;
 
     this.onclick = (ev: RiotEvent) => {
         ev.preventUpdate = true;
@@ -25,7 +25,7 @@ export const riotMountSpineList = (opts: any) => {
         console.log((ev.currentTarget as HTMLElement).getAttribute("data-href"));
         const href = (ev.currentTarget as HTMLElement).getAttribute("href");
         if (href) {
-            handleLink(href, this.pubUrl);
+            handleLink(href, this.url);
         }
     };
 };

@@ -4,6 +4,7 @@ import { shell } from "electron";
 import { R2_EVENT_LINK, R2_EVENT_READIUMCSS } from "../common/events";
 import { R2_SESSION_WEBVIEW } from "../common/sessions";
 import { riotMountSpineList } from "./riots/spinelist/index_";
+import { riotMountSpineListGroup } from "./riots/spinelistgroup/index_";
 
 // import { shell } from "electron";
 
@@ -124,21 +125,21 @@ export function startNavigatorExperiment(publicationJsonUrl: string) {
     // }
 
     // const readerChrome = document.getElementById("reader_chrome");
-    const readerControls = document.getElementById("reader_controls");
+    // const readerControls = document.getElementById("reader_controls");
 
-    const showControlsButton = document.getElementById("showControlsButton");
-    if (showControlsButton) {
-        showControlsButton.style.display = "block";
-        showControlsButton.addEventListener("click", (_event) => {
-            if (readerControls) {
-                readerControls.style.display = "block";
-            }
-            const hideControlsButt = document.getElementById("hideControlsButton");
-            if (hideControlsButt) {
-                hideControlsButt.style.display = "block ";
-            }
-        });
-    }
+    // const showControlsButton = document.getElementById("showControlsButton");
+    // if (showControlsButton) {
+    //     showControlsButton.style.display = "block";
+    //     showControlsButton.addEventListener("click", (_event) => {
+    //         if (readerControls) {
+    //             readerControls.style.display = "block";
+    //         }
+    //         const hideControlsButt = document.getElementById("hideControlsButton");
+    //         if (hideControlsButt) {
+    //             hideControlsButt.style.display = "block ";
+    //         }
+    //     });
+    // }
     const webviewFull = createWebView(publicationJsonUrl);
     _webviews.push(webviewFull);
 
@@ -147,15 +148,15 @@ export function startNavigatorExperiment(publicationJsonUrl: string) {
         publicationViewport.appendChild(webviewFull);
     }
 
-    const hideControlsButton = document.getElementById("hideControlsButton");
-    if (hideControlsButton) {
-        hideControlsButton.addEventListener("click", (_event) => {
-            if (readerControls) {
-                readerControls.style.display = "none";
-            }
-            hideControlsButton.style.display = "none";
-        });
-    }
+    // const hideControlsButton = document.getElementById("hideControlsButton");
+    // if (hideControlsButton) {
+    //     hideControlsButton.addEventListener("click", (_event) => {
+    //         if (readerControls) {
+    //             readerControls.style.display = "none";
+    //         }
+    //         hideControlsButton.style.display = "none";
+    //     });
+    // }
 
     const cssButton1 = document.getElementById("cssButtonInject");
     if (cssButton1) {
@@ -243,7 +244,8 @@ export function startNavigatorExperiment(publicationJsonUrl: string) {
 
         if (publicationJson.spine) {
 
-            riotMountSpineList({ spine: publicationJson.spine, pubUrl: publicationJsonUrl });
+            riotMountSpineList("#reader_controls_SPINE",
+                { spine: publicationJson.spine, url: publicationJsonUrl });
 
             const firstLinear = publicationJson.spine.length ? publicationJson.spine[0] : undefined;
             if (firstLinear) {
@@ -289,34 +291,84 @@ export function startNavigatorExperiment(publicationJsonUrl: string) {
             }
         }
         if (publicationJson["page-list"] && publicationJson["page-list"].length) {
-            const readerControlsPageList = document.getElementById("reader_controls_PAGELIST");
-            if (readerControlsPageList) {
-                appendToc(publicationJson["page-list"], readerControlsPageList, publicationJsonUrl);
-            }
+
+            riotMountSpineList("#reader_controls_PAGELIST",
+                { spine: publicationJson["page-list"], url: publicationJsonUrl });
+
+            // const readerControlsPageList = document.getElementById("reader_controls_PAGELIST");
+            // if (readerControlsPageList) {
+            //     appendToc(publicationJson["page-list"], readerControlsPageList, publicationJsonUrl);
+            // }
         }
 
-        const readerControlsLandmarks = document.getElementById("reader_controls_LANDMARKS");
-        if (readerControlsLandmarks) {
-            if (publicationJson.landmarks && publicationJson.landmarks.length) {
-                appendToc(publicationJson.landmarks, readerControlsLandmarks, publicationJsonUrl);
-            }
-            if (publicationJson.lot && publicationJson.lot.length) {
-                readerControlsLandmarks.appendChild(document.createElement("hr"));
-                appendToc(publicationJson.lot, readerControlsLandmarks, publicationJsonUrl);
-            }
-            if (publicationJson.loa && publicationJson.loa.length) {
-                readerControlsLandmarks.appendChild(document.createElement("hr"));
-                appendToc(publicationJson.loa, readerControlsLandmarks, publicationJsonUrl);
-            }
-            if (publicationJson.loi && publicationJson.loi.length) {
-                readerControlsLandmarks.appendChild(document.createElement("hr"));
-                appendToc(publicationJson.loi, readerControlsLandmarks, publicationJsonUrl);
-            }
-            if (publicationJson.lov && publicationJson.lov.length) {
-                readerControlsLandmarks.appendChild(document.createElement("hr"));
-                appendToc(publicationJson.lov, readerControlsLandmarks, publicationJsonUrl);
-            }
+        const landmarksData = [];
+        if (publicationJson.landmarks && publicationJson.landmarks.length) {
+            landmarksData.push({
+                label: "Main",
+                spine: publicationJson.landmarks,
+                url: publicationJsonUrl,
+            });
         }
+        if (publicationJson.lot && publicationJson.lot.length) {
+            landmarksData.push({
+                label: "Tables",
+                spine: publicationJson.lot,
+                url: publicationJsonUrl,
+            });
+        }
+        if (publicationJson.loi && publicationJson.loi.length) {
+            landmarksData.push({
+                label: "Illustrations",
+                spine: publicationJson.loi,
+                url: publicationJsonUrl,
+            });
+        }
+        if (publicationJson.lov && publicationJson.lov.length) {
+            landmarksData.push({
+                label: "Video",
+                spine: publicationJson.lov,
+                url: publicationJsonUrl,
+            });
+        }
+        if (publicationJson.loa && publicationJson.loa.length) {
+            landmarksData.push({
+                label: "Audio",
+                spine: publicationJson.loa,
+                url: publicationJsonUrl,
+            });
+        }
+        if (landmarksData.length) {
+            // landmarksData.push({
+            //     label: "Testing...",
+            //     spine: publicationJson.landmarks,
+            //     url: publicationJsonUrl,
+            // });
+            riotMountSpineListGroup("#reader_controls_LANDMARKS",
+                { spinegroup: landmarksData, url: publicationJsonUrl });
+        }
+
+        // const readerControlsLandmarks = document.getElementById("reader_controls_LANDMARKS");
+        // if (readerControlsLandmarks) {
+        //     if (publicationJson.landmarks && publicationJson.landmarks.length) {
+        //         appendToc(publicationJson.landmarks, readerControlsLandmarks, publicationJsonUrl);
+        //     }
+        //     if (publicationJson.lot && publicationJson.lot.length) {
+        //         readerControlsLandmarks.appendChild(document.createElement("hr"));
+        //         appendToc(publicationJson.lot, readerControlsLandmarks, publicationJsonUrl);
+        //     }
+        //     if (publicationJson.loa && publicationJson.loa.length) {
+        //         readerControlsLandmarks.appendChild(document.createElement("hr"));
+        //         appendToc(publicationJson.loa, readerControlsLandmarks, publicationJsonUrl);
+        //     }
+        //     if (publicationJson.loi && publicationJson.loi.length) {
+        //         readerControlsLandmarks.appendChild(document.createElement("hr"));
+        //         appendToc(publicationJson.loi, readerControlsLandmarks, publicationJsonUrl);
+        //     }
+        //     if (publicationJson.lov && publicationJson.lov.length) {
+        //         readerControlsLandmarks.appendChild(document.createElement("hr"));
+        //         appendToc(publicationJson.lov, readerControlsLandmarks, publicationJsonUrl);
+        //     }
+        // }
     })();
     //     const spineItemUrl = publicationJsonUrl + "/../" + publicationJson.spine[0].href;
     //     console.log(spineItemUrl);

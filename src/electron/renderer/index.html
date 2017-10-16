@@ -53,6 +53,7 @@
 
   <!-- <script type="application/javascript" src="./riots/mytag/index.js"> </script> -->
   <script type="application/javascript" src="./riots/spinelist/index.js"> </script>
+  <script type="application/javascript" src="./riots/spinelistgroup/index.js"> </script>
 
   <!-- <script type="application/javascript" src="./index.js"> </script> -->
   <script type="application/javascript">
@@ -77,7 +78,7 @@
     <button id="drawerButton" class="mdc-button mdc-ripple-surface" data-mdc-auto-init="MDCRipple"><i class="material-icons md-36">menu</i></button>
 
     <aside id="drawer" class="mdc-temporary-drawer">
-      <nav class="mdc-temporary-drawer__drawer">
+      <nav id="drawerNav" class="mdc-temporary-drawer__drawer">
 
           <div id="nav-select" class="mdc-select" role="listbox" tabindex="0" style="width: 100% !important;">
             <span id="nav-select-text" class="mdc-select__selected-text">Table of contents</span>
@@ -104,11 +105,18 @@
           </div>
 
           <div id="tabsPanels">
-              <div class="tabPanel active">PANEL 1</div>
-              <div class="tabPanel">PANEL 2</div>
-              <div class="tabPanel">PANEL 3</div>
-              <div class="tabPanel">PANEL 4</div>
-              <div class="tabPanel">PANEL 5</div>
+              <div class="tabPanel active" id="reader_controls_TOC"> </div>
+              <div class="tabPanel" id="reader_controls_SPINE" data-is="riot-spinelist"> </div>
+              <div class="tabPanel" id="reader_controls_PAGELIST" data-is="riot-spinelist"> </div>
+              <div class="tabPanel" id="reader_controls_LANDMARKS" data-is="riot-spinelistgroup"> </div>
+              <div class="tabPanel" id="reader_controls_TOOLS">
+                ReadiumCSS:
+                <button id="cssButtonInject" disabled>inject</button>
+                <button id="cssButtonReset" disabled>remove</button>
+                <hr>
+                <button id="buttonDebug" class="mdc-button mdc-button--raised mdc-ripple-surface" data-mdc-auto-init="MDCRipple">TOGGLE DEBUG VIEW</button>
+                <button id="buttonDark" class="mdc-button mdc-button--raised mdc-ripple-surface" data-mdc-auto-init="MDCRipple">TOGGLE DARK THEME</button>
+              </div>
           </div>
           <!-- <div id="tabs" class="mdc-tab-bar-scroller">
             <div class="mdc-tab-bar-scroller__indicator mdc-tab-bar-scroller__indicator--back">
@@ -178,7 +186,7 @@
       <button id="buttonNavLeft" class="mdc-button mdc-ripple-surface" data-mdc-auto-init="MDCRipple"><i class="material-icons md-36">keyboard_arrow_left</i></button>
       <button id="buttonNavRight" class="mdc-button mdc-ripple-surface" data-mdc-auto-init="MDCRipple"><i class="material-icons md-36">keyboard_arrow_right</i></button>
 
-      <div id="reader_controls">
+      <!-- <div id="reader_controls">
           <hr>
           <div id="tabHeaders">
             <button id="buttonTab_TOC"
@@ -201,26 +209,18 @@
           <div id="tabContents">
             <div id="reader_controls_TOC" class="sectionTAB">
             </div>
-            <div id="reader_controls_SPINE" class="sectionTAB" data-is="riot-spinelist">
-              <!-- <riot-spinelist> </riot-spinelist> -->
-              <!-- <virtual data-is="riot-spinelist"> </virtual> -->
+            <div id="reader_controls_SPINE" class="sectionTAB">
             </div>
             <div id="reader_controls_PAGELIST" class="sectionTAB">
             </div>
             <div id="reader_controls_LANDMARKS" class="sectionTAB">
             </div>
             <div id="reader_controls_TOOLS" class="sectionTAB">
-              ReadiumCSS:
-              <button id="cssButtonInject" disabled>inject</button>
-              <button id="cssButtonReset" disabled>remove</button>
-              <hr>
-              <button id="buttonDebug" class="mdc-button mdc-button--raised mdc-ripple-surface" data-mdc-auto-init="MDCRipple">TOGGLE DEBUG VIEW</button>
-              <button id="buttonDark" class="mdc-button mdc-button--raised mdc-ripple-surface" data-mdc-auto-init="MDCRipple">TOGGLE DARK THEME</button>
             </div>
           </div>
       </div>
       <button id="showControlsButton">O</button>
-      <button id="hideControlsButton">X</button>
+      <button id="hideControlsButton">X</button> -->
     </main>
 
 

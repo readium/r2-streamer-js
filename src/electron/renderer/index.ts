@@ -101,15 +101,17 @@ function showLcpDialog(message?: string) {
         if (lcpPassInput) {
             lcpPassInput.focus();
         }
-    }, 200);
+    }, 1000);
 }
 
 let snackBar: any;
 
 window.addEventListener("DOMContentLoaded", () => {
 
-    // material-components-web
-    (window as any).mdc.autoInit();
+    setTimeout(() => {
+        // material-components-web
+        (window as any).mdc.autoInit();
+    }, 500);
 
     // const tag = riot.mount("*");
     // riotMountMyTag({ opt1: "val1" });
@@ -147,15 +149,15 @@ window.addEventListener("DOMContentLoaded", () => {
     navSelector.listen("MDCSelect:change", (ev: any) => {
         console.log("MDCSelect:change");
         console.log(ev);
-        console.log(navSelector.selectedOptions[0].textContent);
-        console.log(navSelector.selectedIndex);
-        console.log(navSelector.value);
+        console.log(ev.detail.selectedOptions[0].textContent);
+        console.log(ev.detail.selectedIndex);
+        console.log(ev.detail.value);
 
         const activePanel = document.querySelector(".tabPanel.active");
         if (activePanel) {
             activePanel.classList.remove("active");
         }
-        const newActivePanel = document.querySelector(".tabPanel:nth-child(" + (navSelector.selectedIndex + 1) + ")");
+        const newActivePanel = document.querySelector(".tabPanel:nth-child(" + (ev.detail.selectedIndex + 1) + ")");
         if (newActivePanel) {
             newActivePanel.classList.add("active");
         }
