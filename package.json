@@ -91,7 +91,7 @@
     "ava": "^0.22.0",
     "browserify": "^14.4.0",
     "cpy-cli": "^1.0.1",
-    "cross-env": "^5.0.5",
+    "cross-env": "^5.1.0",
     "eclint": "^2.4.3",
     "electron": "1.7.*",
     "exorcist": "^1.0.0",
