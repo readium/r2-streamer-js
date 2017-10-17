@@ -1,7 +1,7 @@
 <riot-linktree>
 
   <ul if="{ links && links.length }">
-    <li each="{ links }">
+    <li each="{ links }" no-reorder>
       <a if="{ href }" href="{ url + '/../' + href }" data-href="{ href }" title="{ href }" onclick="{ parent.onclick }">
         <span class="mdc-list-item__text">{ title } <span if="{ !basic }" class="mdc-list-item__text__secondary">{ href }</span></span>
       </a>

@@ -1,7 +1,7 @@
 <riot-linklistgroup>
 
   <div if="{ linksgroup && linksgroup.length }" class="mdc-list-group">
-    <virtual each="{ linksgroup }">
+    <virtual each="{ linksgroup }" no-reorder>
       <h2 class="mdc-list-group__subheader">{ label }</h2>
       <div data-is="riot-linklist" links="{ links }" url="{ url }" basic="{ basic }"> </div>
       <hr class="mdc-list-divider">

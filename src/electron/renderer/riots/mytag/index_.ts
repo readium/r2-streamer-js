@@ -46,4 +46,10 @@ export const riotMountMyTag = (opts: any) => {
         console.log(document.getElementById("myRiotTagID"));
         console.log(that.root.querySelectorAll("button")[0]);
     });
+
+    this.shouldUpdate = (data: any, nextOpts: any) => {
+        console.log(data);
+        console.log(nextOpts);
+        return true;
+    };
 };
