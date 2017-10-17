@@ -3,7 +3,7 @@
   <div if="{ linksgroup && linksgroup.length }" class="mdc-list-group">
     <virtual each="{ linksgroup }">
       <h2 class="mdc-list-group__subheader">{ label }</h2>
-      <virtual data-is="riot-linklist" links="{ links }" url="{ url }" basic="{ basic }"> </virtual>
+      <div data-is="riot-linklist" links="{ links }" url="{ url }" basic="{ basic }"> </div>
       <hr class="mdc-list-divider">
     </virtual>
   </div>
@@ -12,8 +12,6 @@
 
   <style>
     .mdc-list-group__subheader { padding-left: 0.5em; font-weight: 600; line-height: 1em; }
-    .mdc-list-item { overflow-x: hidden; }
-    .mdc-list-item__text, .mdc-list-item__text__secondary { white-space: nowrap; text-overflowxxx: clip; }
   </style>
 
   <script>window.riot_linklistgroup.call(this, this.opts);</script>

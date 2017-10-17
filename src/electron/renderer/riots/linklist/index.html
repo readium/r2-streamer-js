@@ -18,8 +18,23 @@
   <p if="{ !links || !links.length }">NO LINKS!?</p>
 
   <style>
-    .mdc-list-item { overflow-x: hidden; }
-    .mdc-list-item__text, .mdc-list-item__text__secondary { white-space: nowrap; text-overflowxxx: clip; }
+    .mdc-list-item__text, .mdc-list-item__text__secondary {
+      white-space: nowrap;
+      text-overflow: clip;
+    }
+    .mdc-list-item {
+      overflow-x: hidden;
+      padding-left: 3px;
+      border-left: 3px solid var(--mdc-theme-background, white);
+    }
+    .mdc-list-item:hover {
+      border-left: 3px solid var(--mdc-theme-secondary, magenta);
+    }
+    .mdc-list-item:hover > span,
+    .mdc-list-item:hover > span > span,
+    .mdc-list-item:hover > span {
+      color: var(--mdc-theme-primary, blue);
+    }
   </style>
 
   <script>window.riot_linklist.call(this, this.opts);</script>

@@ -14,6 +14,11 @@ import {
     IRiotOptsLinkListGroupItem,
     riotMountLinkListGroup,
 } from "./riots/linklistgroup/index_";
+import {
+    IRiotOptsLinkTree,
+    IRiotOptsLinkTreeItem,
+    riotMountLinkTree,
+} from "./riots/linktree/index_";
 
 // import { riotMountMyTag } from "./riots/mytag/index_";
 // import { RiotMixinWithOpts } from "./riots/riot_mixin_EventTracer";
@@ -43,7 +48,7 @@ const pathFileName = pathDecoded.substr(
 // tslint:disable-next-line:no-string-literal
 const lcpHint = queryParams["lcpHint"];
 
-const basicLinkTitles = true;
+const basicLinkTitles = false;
 
 let snackBar: any;
 let drawer: any;
@@ -515,7 +520,7 @@ function startNavigatorExperiment() {
         if (publicationJson.spine) {
 
             const opts: IRiotOptsLinkList = {
-                basic: basicLinkTitles,
+                basic: true, // always single-line list items (no title)
                 links: publicationJson.spine as IRiotOptsLinkListItem[],
                 url: publicationJsonUrl,
             };
@@ -559,10 +564,18 @@ function startNavigatorExperiment() {
         }
 
         if (publicationJson.toc && publicationJson.toc.length) {
-            const readerControlsToc = document.getElementById("reader_controls_TOC");
-            if (readerControlsToc) {
-                appendToc(publicationJson.toc, readerControlsToc);
-            }
+
+            const opts: IRiotOptsLinkTree = {
+                basic: basicLinkTitles,
+                links: publicationJson.toc as IRiotOptsLinkTreeItem[],
+                url: publicationJsonUrl,
+            };
+            riotMountLinkTree("#reader_controls_TOC", opts);
+
+            // const readerControlsToc = document.getElementById("reader_controls_TOC");
+            // if (readerControlsToc) {
+            //     appendToc(publicationJson.toc, readerControlsToc);
+            // }
         }
         if (publicationJson["page-list"] && publicationJson["page-list"].length) {
 
@@ -660,64 +673,64 @@ function startNavigatorExperiment() {
     // a.click();
 }
 
-function appendToc(json: any, anchor: HTMLElement) {
+// function appendToc(json: any, anchor: HTMLElement) {
 
-    const ul = document.createElement("ul");
-    // ul.setAttribute("class", "mdc-list mdc-list--dense");
+//     const ul = document.createElement("ul");
+//     // ul.setAttribute("class", "mdc-list mdc-list--dense");
 
-    json.forEach((tocLinkJson: any) => {
-        const li = document.createElement("li");
-        // li.setAttribute("class", "mdc-list-item");
+//     json.forEach((tocLinkJson: any) => {
+//         const li = document.createElement("li");
+//         // li.setAttribute("class", "mdc-list-item");
 
-        if (!tocLinkJson.title) {
-            tocLinkJson.title = "xxx";
-        }
+//         if (!tocLinkJson.title) {
+//             tocLinkJson.title = "xxx";
+//         }
 
-        if (tocLinkJson.href) {
-            const tocLink = document.createElement("a");
-            const tocLinkHref = publicationJsonUrl + "/../" + tocLinkJson.href;
-            tocLink.setAttribute("href", tocLinkHref);
-            tocLink.setAttribute("data-href", tocLinkJson.href);
-            tocLink.setAttribute("title", tocLinkJson.href);
-            tocLink.addEventListener("click", (event) => {
-                event.preventDefault();
-                handleLink(tocLinkHref);
-                // loadLink(tocLinkHref, tocLinkJson.href, publicationJsonUrl);
-            });
-            const linkSpan = document.createElement("span");
-            linkSpan.setAttribute("class", "mdc-list-item__text");
-            linkSpan.appendChild(document.createTextNode(tocLinkJson.title));
+//         if (tocLinkJson.href) {
+//             const tocLink = document.createElement("a");
+//             const tocLinkHref = publicationJsonUrl + "/../" + tocLinkJson.href;
+//             tocLink.setAttribute("href", tocLinkHref);
+//             tocLink.setAttribute("data-href", tocLinkJson.href);
+//             tocLink.setAttribute("title", tocLinkJson.href);
+//             tocLink.addEventListener("click", (event) => {
+//                 event.preventDefault();
+//                 handleLink(tocLinkHref);
+//                 // loadLink(tocLinkHref, tocLinkJson.href, publicationJsonUrl);
+//             });
+//             const linkSpan = document.createElement("span");
+//             linkSpan.setAttribute("class", "mdc-list-item__text");
+//             linkSpan.appendChild(document.createTextNode(tocLinkJson.title));
 
-            if (!basicLinkTitles) {
-                const tocHeading = document.createElement("span");
-                tocHeading.setAttribute("class", "mdc-list-item__text__secondary");
-                tocHeading.appendChild(document.createTextNode(tocLinkJson.href));
-                linkSpan.appendChild(tocHeading);
-            }
+//             if (!basicLinkTitles) {
+//                 const tocHeading = document.createElement("span");
+//                 tocHeading.setAttribute("class", "mdc-list-item__text__secondary");
+//                 tocHeading.appendChild(document.createTextNode(tocLinkJson.href));
+//                 linkSpan.appendChild(tocHeading);
+//             }
 
-            tocLink.appendChild(linkSpan);
-            li.appendChild(tocLink);
+//             tocLink.appendChild(linkSpan);
+//             li.appendChild(tocLink);
 
-            // const br = document.createElement("br");
-            // li.appendChild(br);
+//             // const br = document.createElement("br");
+//             // li.appendChild(br);
 
-        } else {
-            const tocHeading = document.createElement("span");
-            // tocHeading.setAttribute("style", "padding-bottom: 1em;");
-            tocHeading.setAttribute("class", "mdc-list-item__text__secondary");
-            tocHeading.appendChild(document.createTextNode(tocLinkJson.title));
-            li.appendChild(tocHeading);
-        }
+//         } else {
+//             const tocHeading = document.createElement("span");
+//             // tocHeading.setAttribute("style", "padding-bottom: 1em;");
+//             tocHeading.setAttribute("class", "mdc-list-item__text__secondary");
+//             tocHeading.appendChild(document.createTextNode(tocLinkJson.title));
+//             li.appendChild(tocHeading);
+//         }
 
-        ul.appendChild(li);
+//         ul.appendChild(li);
 
-        if (tocLinkJson.children && tocLinkJson.children.length) {
-            appendToc(tocLinkJson.children, li);
-        }
-    });
+//         if (tocLinkJson.children && tocLinkJson.children.length) {
+//             appendToc(tocLinkJson.children, li);
+//         }
+//     });
 
-    anchor.appendChild(ul);
-}
+//     anchor.appendChild(ul);
+// }
 
 function navLeftOrRight(_right: boolean, _publicationJsonUrl: string, _publicationJson: any) {
     // TODO: publication spine + pagination state
