@@ -31,6 +31,10 @@ export const riotMountLinkTree = (selector: string, opts: IRiotOptsLinkTree) => 
     this.url = opts.url;
     this.basic = opts.basic ? true : false;
 
+    this.setBasic = (basic: boolean) => {
+        this.setPropertyRecursively("basic", basic, "riot-linktree");
+    };
+
     this.onclick = (ev: RiotEvent) => {
         ev.preventUpdate = true;
         ev.preventDefault();
@@ -39,5 +43,13 @@ export const riotMountLinkTree = (selector: string, opts: IRiotOptsLinkTree) => 
         if (href) {
             handleLink(href);
         }
+    };
+
+    this.shouldUpdate = (data: any, nextOpts: any) => {
+        console.log("shouldUpdate - linktree");
+        console.log(data);
+        console.log(nextOpts);
+        // return data && typeof data.basic !== "undefined";
+        return true;
     };
 };

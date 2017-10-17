@@ -48,7 +48,7 @@ const pathFileName = pathDecoded.substr(
 // tslint:disable-next-line:no-string-literal
 const lcpHint = queryParams["lcpHint"];
 
-const basicLinkTitles = false;
+const basicLinkTitles = true;
 
 let snackBar: any;
 let drawer: any;
@@ -451,6 +451,27 @@ function startNavigatorExperiment() {
 
             _webviews.forEach((wv) => {
                 wv.send(R2_EVENT_READIUMCSS, JSON.stringify(jsonMsg)); // .getWebContents()
+            });
+        });
+    }
+
+    const basicSwitch = document.getElementById("nav_basic_switch-input");
+    if (basicSwitch) {
+        basicSwitch.addEventListener("change", (_event) => {
+            const checked = (basicSwitch as HTMLInputElement).checked;
+            console.log(checked);
+            const tags: RiotTag[] = riot.update();
+            console.log(tags);
+            console.log(riot);
+            tags.forEach((tag) => {
+                // (tag as any).basic = !checked;
+                (tag as any).setBasic(!checked);
+                console.log(tag);
+            });
+            // riot.update();
+            tags.forEach((tag) => {
+                tag.update();
+                // tag.update({ basic: !checked });
             });
         });
     }

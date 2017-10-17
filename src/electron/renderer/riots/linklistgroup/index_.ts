@@ -30,4 +30,16 @@ export const riotMountLinkListGroup = (selector: string, opts: IRiotOptsLinkList
     this.linksgroup = opts.linksgroup;
     this.url = opts.url;
     this.basic = opts.basic ? true : false;
+
+    this.setBasic = (basic: boolean) => {
+        this.setPropertyRecursively("basic", basic, "riot-linklist");
+    };
+
+    this.shouldUpdate = (data: any, nextOpts: any) => {
+        console.log("shouldUpdate - linklistgroup");
+        console.log(data);
+        console.log(nextOpts);
+        // return data && typeof data.basic !== "undefined";
+        return true;
+    };
 };

@@ -1,6 +1,7 @@
 export interface RiotMixinWithOpts extends RiotMixin {
     getOpts(): any;
     setOpts(opts: any, update: boolean): RiotTag;
+    setPropertyRecursively(name: string, val: any, childTagName: string): void;
 }
 // tslint:disable-next-line:variable-name
 export const riot_mixin_EventTracer: RiotMixinWithOpts = {
@@ -34,6 +35,26 @@ export const riot_mixin_EventTracer: RiotMixinWithOpts = {
         that.on("unmount", () => {
             console.log("EVENT mount");
         });
+    },
+
+    setPropertyRecursively(name: string, val: any, childTagName: string) {
+
+        this[name] = val;
+
+        const that = this as RiotTag;
+        const children = that.tags[childTagName] as any;
+
+        if (!children) {
+            return;
+        }
+
+        if (children instanceof Array) {
+            children.forEach((child: any) => {
+                child.setPropertyRecursively(name, val, childTagName);
+            });
+        } else {
+            children.setPropertyRecursively(name, val, childTagName);
+        }
     },
 
     getOpts(): any {
