@@ -54,6 +54,7 @@ let snackBar: any;
 let drawer: any;
 
 export function handleLink(href: string) {
+    console.log("handleLink");
     console.log(href);
     const prefix = publicationJsonUrl.replace("manifest.json", "");
     if (href.startsWith(prefix)) {
@@ -174,21 +175,21 @@ window.addEventListener("DOMContentLoaded", () => {
     }
     if (drawerElement) {
         drawerElement.addEventListener("MDCTemporaryDrawer:open", () => {
-            console.log("MDCTemporaryDrawer:open");
+            // console.log("MDCTemporaryDrawer:open");
         });
         drawerElement.addEventListener("MDCTemporaryDrawer:close", () => {
-            console.log("MDCTemporaryDrawer:close");
+            // console.log("MDCTemporaryDrawer:close");
         });
     }
 
     const selectElement = document.getElementById("nav-select");
     const navSelector = new (window as any).mdc.select.MDCSelect(selectElement);
     navSelector.listen("MDCSelect:change", (ev: any) => {
-        console.log("MDCSelect:change");
-        console.log(ev);
-        console.log(ev.detail.selectedOptions[0].textContent);
-        console.log(ev.detail.selectedIndex);
-        console.log(ev.detail.value);
+        // console.log("MDCSelect:change");
+        // console.log(ev);
+        // console.log(ev.detail.selectedOptions[0].textContent);
+        // console.log(ev.detail.selectedIndex);
+        // console.log(ev.detail.value);
 
         const activePanel = document.querySelector(".tabPanel.active");
         if (activePanel) {
@@ -221,14 +222,14 @@ window.addEventListener("DOMContentLoaded", () => {
     const lcpPassInput = document.getElementById("lcpPassInput");
     lcpDialog = new (window as any).mdc.dialog.MDCDialog(diagElem);
     lcpDialog.listen("MDCDialog:accept", () => {
-        console.log("MDCDialog:accept");
+        // console.log("MDCDialog:accept");
 
         const lcpPass = (lcpPassInput as HTMLInputElement).value;
 
         ipcRenderer.send(R2_EVENT_TRY_LCP_PASS, pathDecoded, lcpPass);
     });
     lcpDialog.listen("MDCDialog:cancel", () => {
-        console.log("MDCDialog:cancel");
+        // console.log("MDCDialog:cancel");
 
         // ipcRenderer.send(R2_EVENT_TRY_LCP_PASS, pathDecoded, "NILL");
         setTimeout(() => {
@@ -459,20 +460,30 @@ function startNavigatorExperiment() {
     if (basicSwitch) {
         basicSwitch.addEventListener("change", (_event) => {
             const checked = (basicSwitch as HTMLInputElement).checked;
-            console.log(checked);
+            // console.log("checked: " + checked);
+
             const tags: RiotTag[] = riot.update();
-            console.log(tags);
-            console.log(riot);
+            // console.log(tags);
+            // console.log(riot);
+            // console.log("----- 1");
             tags.forEach((tag) => {
-                // (tag as any).basic = !checked;
-                (tag as any).setBasic(!checked);
-                console.log(tag);
+                // (tag.opts as any).basic = !checked;
+                if ((tag as any).setBasic) {
+                    (tag as any).setBasic(!checked);
+                    // console.log(tag);
+                    tag.update();
+                }
             });
+            // console.log("----- 2");
             // riot.update();
-            tags.forEach((tag) => {
-                tag.update();
-                // tag.update({ basic: !checked });
-            });
+            // tags.forEach((tag) => {
+            //     // tag.update();
+            //     console.log("-----");
+            //     console.log(tag.opts.basic);
+            //     tag.update({ basic: !checked });
+            //     console.log(tag);
+            //     console.log(tag.opts.basic);
+            // });
         });
     }
 
@@ -546,6 +557,7 @@ function startNavigatorExperiment() {
                 url: publicationJsonUrl,
             };
             riotMountLinkList("#reader_controls_SPINE", opts);
+            // data-is="riot-linklist"
 
             const firstLinear = publicationJson.spine.length ? publicationJson.spine[0] : undefined;
             if (firstLinear) {
@@ -592,6 +604,7 @@ function startNavigatorExperiment() {
                 url: publicationJsonUrl,
             };
             riotMountLinkTree("#reader_controls_TOC", opts);
+            // data-is="riot-linktree"
 
             // const readerControlsToc = document.getElementById("reader_controls_TOC");
             // if (readerControlsToc) {
@@ -606,6 +619,7 @@ function startNavigatorExperiment() {
                 url: publicationJsonUrl,
             };
             riotMountLinkList("#reader_controls_PAGELIST", opts);
+            // data-is="riot-linklist"
 
             // const readerControlsPageList = document.getElementById("reader_controls_PAGELIST");
             // if (readerControlsPageList) {
@@ -618,35 +632,35 @@ function startNavigatorExperiment() {
             landmarksData.push({
                 label: "Main",
                 links: publicationJson.landmarks as IRiotOptsLinkListItem[],
-                url: publicationJsonUrl,
+                // url: publicationJsonUrl,
             });
         }
         if (publicationJson.lot && publicationJson.lot.length) {
             landmarksData.push({
                 label: "Tables",
                 links: publicationJson.lot as IRiotOptsLinkListItem[],
-                url: publicationJsonUrl,
+                // url: publicationJsonUrl,
             });
         }
         if (publicationJson.loi && publicationJson.loi.length) {
             landmarksData.push({
                 label: "Illustrations",
                 links: publicationJson.loi as IRiotOptsLinkListItem[],
-                url: publicationJsonUrl,
+                // url: publicationJsonUrl,
             });
         }
         if (publicationJson.lov && publicationJson.lov.length) {
             landmarksData.push({
                 label: "Video",
                 links: publicationJson.lov as IRiotOptsLinkListItem[],
-                url: publicationJsonUrl,
+                // url: publicationJsonUrl,
             });
         }
         if (publicationJson.loa && publicationJson.loa.length) {
             landmarksData.push({
                 label: "Audio",
                 links: publicationJson.loa as IRiotOptsLinkListItem[],
-                url: publicationJsonUrl,
+                // url: publicationJsonUrl,
             });
         }
         if (landmarksData.length) {
@@ -661,6 +675,7 @@ function startNavigatorExperiment() {
                 url: publicationJsonUrl,
             };
             riotMountLinkListGroup("#reader_controls_LANDMARKS", opts);
+            // data-is="riot-linklistgroup"
         }
 
         // const readerControlsLandmarks = document.getElementById("reader_controls_LANDMARKS");

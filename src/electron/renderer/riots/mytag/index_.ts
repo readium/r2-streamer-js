@@ -2,10 +2,11 @@
 // http://riotjs.com/api/
 import { riot_mixin_EventTracer } from "../riot_mixin_EventTracer";
 
-export const riotMountMyTag = (opts: any) => {
+export const riotMountMyTag = (opts: any): RiotTag[] => {
     const tag = riot.mount("riot-mytag", opts);
     console.log(tag); // RiotTag[]
-    console.log((tag[0] as any).getOpts()); // see RiotMixinWithOpts
+    // console.log((tag[0] as any).getOpts()); // see RiotMixinWithOpts
+    return tag;
 };
 
 (window as any).riot_mytag = function(opts: any) {
@@ -47,7 +48,7 @@ export const riotMountMyTag = (opts: any) => {
         console.log(that.root.querySelectorAll("button")[0]);
     });
 
-    this.shouldUpdate = (data: any, nextOpts: any) => {
+    that.shouldUpdate = (data: any, nextOpts: any) => {
         console.log(data);
         console.log(nextOpts);
         return true;

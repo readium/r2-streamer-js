@@ -1,10 +1,9 @@
-export interface RiotMixinWithOpts extends RiotMixin {
-    getOpts(): any;
-    setOpts(opts: any, update: boolean): RiotTag;
-    setPropertyRecursively(name: string, val: any, childTagName: string): void;
-}
+// export interface RiotMixinWithOpts extends RiotMixin {
+//     getOpts(): any;
+//     setOpts(opts: any, update: boolean): RiotTag;
+// }
 // tslint:disable-next-line:variable-name
-export const riot_mixin_EventTracer: RiotMixinWithOpts = {
+export const riot_mixin_EventTracer = { // : RiotMixinWithOpts
     init(opts: any) {
         console.log(opts);
         console.log(this);
@@ -37,37 +36,17 @@ export const riot_mixin_EventTracer: RiotMixinWithOpts = {
         });
     },
 
-    setPropertyRecursively(name: string, val: any, childTagName: string) {
+    // getOpts(): any {
+    //     const that = this as RiotTag;
+    //     return that.opts;
+    // },
 
-        this[name] = val;
-
-        const that = this as RiotTag;
-        const children = that.tags[childTagName] as any;
-
-        if (!children) {
-            return;
-        }
-
-        if (children instanceof Array) {
-            children.forEach((child: any) => {
-                child.setPropertyRecursively(name, val, childTagName);
-            });
-        } else {
-            children.setPropertyRecursively(name, val, childTagName);
-        }
-    },
-
-    getOpts(): any {
-        const that = this as RiotTag;
-        return that.opts;
-    },
-
-    setOpts(opts: any, update: boolean): RiotTag {
-        const that = this as RiotTag;
-        that.opts = opts;
-        if (update) {
-            that.update();
-        }
-        return that;
-    },
+    // setOpts(opts: any, update: boolean): RiotTag {
+    //     const that = this as RiotTag;
+    //     that.opts = opts;
+    //     if (update) {
+    //         that.update();
+    //     }
+    //     return that;
+    // },
 };
