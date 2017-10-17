@@ -4,8 +4,8 @@ import { shell } from "electron";
 import { R2_EVENT_LINK, R2_EVENT_READIUMCSS, R2_EVENT_TRY_LCP_PASS, R2_EVENT_TRY_LCP_PASS_RES } from "../common/events";
 import { R2_SESSION_WEBVIEW } from "../common/sessions";
 import { getURLQueryParams } from "./querystring";
-import { riotMountSpineList } from "./riots/spinelist/index_";
-import { riotMountSpineListGroup } from "./riots/spinelistgroup/index_";
+import { riotMountLinkList } from "./riots/linklist/index_";
+import { riotMountLinkListGroup } from "./riots/linklistgroup/index_";
 
 // import { riotMountMyTag } from "./riots/mytag/index_";
 // import { RiotMixinWithOpts } from "./riots/riot_mixin_EventTracer";
@@ -506,8 +506,8 @@ function startNavigatorExperiment() {
 
         if (publicationJson.spine) {
 
-            riotMountSpineList("#reader_controls_SPINE",
-                { spine: publicationJson.spine, url: publicationJsonUrl, basic: basicLinkTitles });
+            riotMountLinkList("#reader_controls_SPINE",
+                { links: publicationJson.spine, url: publicationJsonUrl, basic: basicLinkTitles });
 
             const firstLinear = publicationJson.spine.length ? publicationJson.spine[0] : undefined;
             if (firstLinear) {
@@ -554,8 +554,8 @@ function startNavigatorExperiment() {
         }
         if (publicationJson["page-list"] && publicationJson["page-list"].length) {
 
-            riotMountSpineList("#reader_controls_PAGELIST",
-                { spine: publicationJson["page-list"], url: publicationJsonUrl, basic: basicLinkTitles });
+            riotMountLinkList("#reader_controls_PAGELIST",
+                { links: publicationJson["page-list"], url: publicationJsonUrl, basic: basicLinkTitles });
 
             // const readerControlsPageList = document.getElementById("reader_controls_PAGELIST");
             // if (readerControlsPageList) {
@@ -567,46 +567,46 @@ function startNavigatorExperiment() {
         if (publicationJson.landmarks && publicationJson.landmarks.length) {
             landmarksData.push({
                 label: "Main",
-                spine: publicationJson.landmarks,
+                links: publicationJson.landmarks,
                 url: publicationJsonUrl,
             });
         }
         if (publicationJson.lot && publicationJson.lot.length) {
             landmarksData.push({
                 label: "Tables",
-                spine: publicationJson.lot,
+                links: publicationJson.lot,
                 url: publicationJsonUrl,
             });
         }
         if (publicationJson.loi && publicationJson.loi.length) {
             landmarksData.push({
                 label: "Illustrations",
-                spine: publicationJson.loi,
+                links: publicationJson.loi,
                 url: publicationJsonUrl,
             });
         }
         if (publicationJson.lov && publicationJson.lov.length) {
             landmarksData.push({
                 label: "Video",
-                spine: publicationJson.lov,
+                links: publicationJson.lov,
                 url: publicationJsonUrl,
             });
         }
         if (publicationJson.loa && publicationJson.loa.length) {
             landmarksData.push({
                 label: "Audio",
-                spine: publicationJson.loa,
+                links: publicationJson.loa,
                 url: publicationJsonUrl,
             });
         }
         if (landmarksData.length) {
             // landmarksData.push({
             //     label: "Testing...",
-            //     spine: publicationJson.landmarks,
+            //     links: publicationJson.landmarks,
             //     url: publicationJsonUrl,
             // });
-            riotMountSpineListGroup("#reader_controls_LANDMARKS",
-                { spinegroup: landmarksData, url: publicationJsonUrl, basic: basicLinkTitles });
+            riotMountLinkListGroup("#reader_controls_LANDMARKS",
+                { linksgroup: landmarksData, url: publicationJsonUrl, basic: basicLinkTitles });
         }
 
         // const readerControlsLandmarks = document.getElementById("reader_controls_LANDMARKS");

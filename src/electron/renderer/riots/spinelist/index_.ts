@@ -3,12 +3,12 @@
 import { handleLink } from "../../index";
 import { riot_mixin_EventTracer } from "../riot_mixin_EventTracer";
 
-export const riotMountSpineList = (selector: string, opts: any) => {
+export const riotMountLinkList = (selector: string, opts: any) => {
     const tag = riot.mount(selector, opts);
     console.log(tag); // RiotTag[]
 };
 
-(window as any).riot_spinelist = function(opts: any) {
+(window as any).riot_linklist = function(opts: any) {
     console.log(opts);
     console.log(this);
 
@@ -16,7 +16,7 @@ export const riotMountSpineList = (selector: string, opts: any) => {
 
     that.mixin(riot_mixin_EventTracer);
 
-    this.spine = opts.spine;
+    this.links = opts.links;
     this.url = opts.url;
     this.basic = opts.basic ? true : false;
 

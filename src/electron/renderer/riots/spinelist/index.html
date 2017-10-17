@@ -1,6 +1,6 @@
-<riot-spinelist>
-  <nav if="{ spine && spine.length }" class="{ mdc-list: true, mdc-list--dense: true, mdc-list--two-line: !basic }">
-    <a each="{ spine }" href="{ parent.url + '/../' + href }" data-href="{ href }" title="{ href }" onclick="{ parent.onclick }" class="mdc-list-item mdc-ripple-surfacexx"
+<riot-linklist>
+  <nav if="{ links && links.length }" class="{ mdc-list: true, mdc-list--dense: true, mdc-list--two-line: !basic }">
+    <a each="{ links }" href="{ parent.url + '/../' + href }" data-href="{ href }" title="{ href }" onclick="{ parent.onclick }" class="mdc-list-item mdc-ripple-surfacexx"
       data-mdc-auto-initxx="MDCRipple">
 
       <span if="{ title }" class="mdc-list-item__text">
@@ -15,12 +15,12 @@
     </a>
   </nav>
 
-  <p if="{ !spine || !spine.length }">NO SPINE!?</p>
+  <p if="{ !links || !links.length }">NO LINKS!?</p>
 
   <style>
     .mdc-list-item { overflow-x: hidden; }
     .mdc-list-item__text, .mdc-list-item__text__secondary { white-space: nowrap; text-overflowxxx: clip; }
   </style>
 
-  <script>window.riot_spinelist.call(this, this.opts);</script>
-</riot-spinelist>
+  <script>window.riot_linklist.call(this, this.opts);</script>
+</riot-linklist>
