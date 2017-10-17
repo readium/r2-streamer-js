@@ -13,6 +13,11 @@ html, body {
 html.debug body {
   background: silver;
 }
+*:focus {
+  outline-style: solid !important;
+  outline-width: 2px !important;
+  outline-color: var(--mdc-theme-primary-light, blue) !important;
+}
 body.flex {
   display: flex;
   height: 100vh;
@@ -204,6 +209,12 @@ form {
   width: 100%;
 }
 
+#reader_controls_TOC a:focus {
+  background-color: rgba(230, 230, 230, 1);
+}
+.mdc-theme--dark #reader_controls_TOC a:focus {
+  background-color: rgba(70, 70, 70, 1);
+}
 .mdc-theme--dark #reader_controls_TOC ul {
   border-left: 1px solid #000000;
 }
@@ -213,12 +224,23 @@ form {
 .mdc-theme--dark #reader_controls_TOC a:hover {
   border-left: 3px solid var(--mdc-theme-secondary, orange);
 }
-.mdc-theme--dark .mdc-list-item {
-  border-left: 3px solid #303030;
-}
 .mdc-theme--dark #reader_controls_TOC a:hover > span,
 .mdc-theme--dark #reader_controls_TOC a:hover > span > span {
   color: var(--mdc-theme-primary-light, blue);
+}
+.mdc-list-item {
+  padding-left: 3px;
+  border-left: 3px solid var(--mdc-theme-background, white);
+}
+.mdc-theme--dark .mdc-list-item {
+  border-left: 3px solid #303030;
+}
+.mdc-list-item:hover {
+  border-left: 3px solid var(--mdc-theme-secondary, magenta);
+}
+.mdc-list-item:hover > span,
+.mdc-list-item:hover > span > span {
+  color: var(--mdc-theme-primary, blue);
 }
 .mdc-theme--dark .mdc-list-item:hover > span,
 .mdc-theme--dark .mdc-list-item:hover > span > span {

@@ -19,16 +19,24 @@
       display: block;
     }
     li {
-      margin-top: 1em;
+      margin-top: 0.5em;
     }
     ul {
+      padding-left: 0;
       list-style: none;
-      padding-left: 1em;
       border-left: 1px solid #DDDDDD;
     }
+    li > ul {
+      padding-left: 1em;
+    }
     a {
-      padding-left: 3px;
+      padding-top: 8px;
+      padding-bottom: 4px;
+      padding-left: 6px;
       border-left: 3px solid var(--mdc-theme-background, white);
+    }
+    li > span {
+      padding-left: 6px;
     }
     a:hover {
       border-left: 3px solid var(--mdc-theme-secondary, magenta);
