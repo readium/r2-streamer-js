@@ -54,7 +54,7 @@
     "filehound": "^1.16.2",
     "image-size": "^0.6.1",
     "json-markup": "^1.1.0",
-    "material-components-web": "^0.22.0",
+    "material-components-web": "^0.23.0",
     "material-design-icons": "^3.0.1",
     "mime-types": "^2.1.17",
     "moment": "2.18.*",
