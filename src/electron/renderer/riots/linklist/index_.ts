@@ -3,12 +3,22 @@
 import { handleLink } from "../../index";
 import { riot_mixin_EventTracer } from "../riot_mixin_EventTracer";
 
-export const riotMountLinkList = (selector: string, opts: any) => {
+export interface IRiotOptsLinkListItem {
+    href: string;
+    title: string;
+}
+export interface IRiotOptsLinkList {
+    basic: boolean;
+    links: IRiotOptsLinkListItem[];
+    url: string;
+}
+
+export const riotMountLinkList = (selector: string, opts: IRiotOptsLinkList) => {
     const tag = riot.mount(selector, opts);
     console.log(tag); // RiotTag[]
 };
 
-(window as any).riot_linklist = function(opts: any) {
+(window as any).riot_linklist = function(opts: IRiotOptsLinkList) {
     console.log(opts);
     console.log(this);
 

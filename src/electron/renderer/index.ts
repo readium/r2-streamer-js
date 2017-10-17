@@ -4,8 +4,16 @@ import { shell } from "electron";
 import { R2_EVENT_LINK, R2_EVENT_READIUMCSS, R2_EVENT_TRY_LCP_PASS, R2_EVENT_TRY_LCP_PASS_RES } from "../common/events";
 import { R2_SESSION_WEBVIEW } from "../common/sessions";
 import { getURLQueryParams } from "./querystring";
-import { riotMountLinkList } from "./riots/linklist/index_";
-import { riotMountLinkListGroup } from "./riots/linklistgroup/index_";
+import {
+    IRiotOptsLinkList,
+    IRiotOptsLinkListItem,
+    riotMountLinkList,
+} from "./riots/linklist/index_";
+import {
+    IRiotOptsLinkListGroup,
+    IRiotOptsLinkListGroupItem,
+    riotMountLinkListGroup,
+} from "./riots/linklistgroup/index_";
 
 // import { riotMountMyTag } from "./riots/mytag/index_";
 // import { RiotMixinWithOpts } from "./riots/riot_mixin_EventTracer";
@@ -506,8 +514,12 @@ function startNavigatorExperiment() {
 
         if (publicationJson.spine) {
 
-            riotMountLinkList("#reader_controls_SPINE",
-                { links: publicationJson.spine, url: publicationJsonUrl, basic: basicLinkTitles });
+            const opts: IRiotOptsLinkList = {
+                basic: basicLinkTitles,
+                links: publicationJson.spine as IRiotOptsLinkListItem[],
+                url: publicationJsonUrl,
+            };
+            riotMountLinkList("#reader_controls_SPINE", opts);
 
             const firstLinear = publicationJson.spine.length ? publicationJson.spine[0] : undefined;
             if (firstLinear) {
@@ -554,8 +566,12 @@ function startNavigatorExperiment() {
         }
         if (publicationJson["page-list"] && publicationJson["page-list"].length) {
 
-            riotMountLinkList("#reader_controls_PAGELIST",
-                { links: publicationJson["page-list"], url: publicationJsonUrl, basic: basicLinkTitles });
+            const opts: IRiotOptsLinkList = {
+                basic: basicLinkTitles,
+                links: publicationJson["page-list"] as IRiotOptsLinkListItem[],
+                url: publicationJsonUrl,
+            };
+            riotMountLinkList("#reader_controls_PAGELIST", opts);
 
             // const readerControlsPageList = document.getElementById("reader_controls_PAGELIST");
             // if (readerControlsPageList) {
@@ -563,39 +579,39 @@ function startNavigatorExperiment() {
             // }
         }
 
-        const landmarksData = [];
+        const landmarksData: IRiotOptsLinkListGroupItem[] = [];
         if (publicationJson.landmarks && publicationJson.landmarks.length) {
             landmarksData.push({
                 label: "Main",
-                links: publicationJson.landmarks,
+                links: publicationJson.landmarks as IRiotOptsLinkListItem[],
                 url: publicationJsonUrl,
             });
         }
         if (publicationJson.lot && publicationJson.lot.length) {
             landmarksData.push({
                 label: "Tables",
-                links: publicationJson.lot,
+                links: publicationJson.lot as IRiotOptsLinkListItem[],
                 url: publicationJsonUrl,
             });
         }
         if (publicationJson.loi && publicationJson.loi.length) {
             landmarksData.push({
                 label: "Illustrations",
-                links: publicationJson.loi,
+                links: publicationJson.loi as IRiotOptsLinkListItem[],
                 url: publicationJsonUrl,
             });
         }
         if (publicationJson.lov && publicationJson.lov.length) {
             landmarksData.push({
                 label: "Video",
-                links: publicationJson.lov,
+                links: publicationJson.lov as IRiotOptsLinkListItem[],
                 url: publicationJsonUrl,
             });
         }
         if (publicationJson.loa && publicationJson.loa.length) {
             landmarksData.push({
                 label: "Audio",
-                links: publicationJson.loa,
+                links: publicationJson.loa as IRiotOptsLinkListItem[],
                 url: publicationJsonUrl,
             });
         }
@@ -605,8 +621,12 @@ function startNavigatorExperiment() {
             //     links: publicationJson.landmarks,
             //     url: publicationJsonUrl,
             // });
-            riotMountLinkListGroup("#reader_controls_LANDMARKS",
-                { linksgroup: landmarksData, url: publicationJsonUrl, basic: basicLinkTitles });
+            const opts: IRiotOptsLinkListGroup = {
+                basic: basicLinkTitles,
+                linksgroup: landmarksData,
+                url: publicationJsonUrl,
+            };
+            riotMountLinkListGroup("#reader_controls_LANDMARKS", opts);
         }
 
         // const readerControlsLandmarks = document.getElementById("reader_controls_LANDMARKS");
