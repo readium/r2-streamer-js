@@ -5,38 +5,7 @@
   <title>Readium 2 NodeJS 'streamer' (Electron 'navigator')</title>
   <meta charset="UTF-8" >
 
-  <style type="text/css">
-    @font-face {
-      font-family: 'Material Icons';
-      font-style: normal;
-      font-weight: 400;
-      src: local('Material Icons'),
-        local('MaterialIcons-Regular'),
-        url(./MaterialIcons-Regular.woff2) format('woff2');
-    }
-    .material-icons {
-      font-family: 'Material Icons';
-      font-weight: normal;
-      font-style: normal;
-      font-size: 24px;  /* Preferred icon size */
-      display: inline-block;
-      line-height: 1;
-      text-transform: none;
-      letter-spacing: normal;
-      word-wrap: normal;
-      white-space: nowrap;
-      direction: ltr;
-      -webkit-font-smoothing: antialiased;
-      text-rendering: optimizeLegibility;
-    }
-  </style>
-
   <link rel="stylesheet" href="./material-components-web.css" >
-  <style type="text/css">
-    :root {
-      --mdc-theme-primary: #0e4ead;
-    }
-  </style>
 
   <!-- <link type="text/css" href="./riots/mytag/index.css" rel="stylesheet" > -->
   <style type="riot"> </style>
@@ -76,7 +45,7 @@
         <b>{ prop1 }</b>
     </riot-mytag> -->
 
-    <button id="drawerButton" class="mdc-button mdc-ripple-surface" data-mdc-auto-init="MDCRipple"><i class="material-icons md-36">menu</i></button>
+    <button id="drawerButton" class="mdc-button mdc-ripple-surfacexxx" data-mdc-auto-initxxx="MDCRipple"><i class="material-icons md-36">menu</i></button>
 
     <aside id="drawer" class="mdc-temporary-drawer">
       <nav id="drawerNav" class="mdc-temporary-drawer__drawer">
@@ -99,7 +68,14 @@
                   </li>
                   <li class="mdc-list-divider" role="presentation" disabled> </li>
                   <li class="mdc-list-item" role="option" id="selectTools" tabindex="0">
-                    Tools
+                    Styles
+                  </li>
+                  <li class="mdc-list-item" role="option" id="selectTools" tabindex="0">
+                    Advanced
+                  </li>
+                  <li class="mdc-list-divider" role="presentation" disabled> </li>
+                  <li class="mdc-list-item" role="option" id="selectTools" tabindex="0">
+                    Developer tools
                   </li>
               </ul>
             </div>
@@ -110,24 +86,48 @@
               <div class="tabPanel" id="reader_controls_LANDMARKS" data-is="riot-linklistgroup"> </div>
               <div class="tabPanel" id="reader_controls_PAGELIST" data-is="riot-linklist"> </div>
               <div class="tabPanel" id="reader_controls_SPINE" data-is="riot-linklist"> </div>
-              <div class="tabPanel" id="reader_controls_TOOLS">
+              <div class="tabPanel" id="reader_controls_STYLES">
 
-                  <div id="nav_basic_switch" style="padding:0;padding-top:1em;padding-bottom:1em">
-                      <div class="mdc-switch">
-                  <input type="checkbox" id="nav_basic_switch-input" class="mdc-switch__native-control" />
-                  <div class="mdc-switch__background">
-                    <div class="mdc-switch__knob"></div>
+                <div style="padding:0;padding-top:1em;padding-bottom:1em">
+                  <div class="mdc-switch">
+                    <input type="checkbox" id="dark_switch-input" class="mdc-switch__native-control" />
+                    <div class="mdc-switch__background">
+                      <div class="mdc-switch__knob"></div>
+                    </div>
                   </div>
+                  <label for="dark_switch-input" class="mdc-switch-label">Dark theme</label>
                 </div>
-                <label for="nav_basic_switch-input" class="mdc-switch-label">Show paths</label>
-              </div>
 
+                <hr>
                 ReadiumCSS:
                 <button id="cssButtonInject" disabled>inject</button>
                 <button id="cssButtonReset" disabled>remove</button>
                 <hr>
-                <button id="buttonDebug" class="mdc-button mdc-button--raised mdc-ripple-surface" data-mdc-auto-init="MDCRipple">TOGGLE DEBUG VIEW</button>
-                <button id="buttonDark" class="mdc-button mdc-button--raised mdc-ripple-surface" data-mdc-auto-init="MDCRipple">TOGGLE DARK THEME</button>
+
+                <button id="buttonClearSettingsStyle" class="mdc-button mdc-button--raised mdc-ripple-surfacexx" data-mdc-auto-initxx="MDCRipple">Restore defaults</button>
+
+              </div>
+              <div class="tabPanel" id="reader_controls_ADVANCED">
+
+                <div style="padding:0;padding-top:1em;padding-bottom:1em">
+                  <div class="mdc-switch">
+                    <input type="checkbox" id="nav_basic_switch-input" class="mdc-switch__native-control" />
+                    <div class="mdc-switch__background">
+                      <div class="mdc-switch__knob"></div>
+                    </div>
+                  </div>
+                  <label for="nav_basic_switch-input" class="mdc-switch-label">Show navigation links</label>
+                </div>
+
+                <button id="buttonClearSettings" class="mdc-button mdc-button--raised mdc-ripple-surfacexx" data-mdc-auto-initxx="MDCRipple">Reset all settings</button>
+
+              </div>
+              <div class="tabPanel" id="reader_controls_TOOLS">
+
+
+                <button id="buttonDebug" class="mdc-button mdc-button--raised mdc-ripple-surfacexx" data-mdc-auto-initxx="MDCRipple">TOGGLE DEBUG VIEW</button>
+                <button id="buttonOpenSettings" class="mdc-button mdc-button--raised mdc-ripple-surfacexx" data-mdc-auto-initxx="MDCRipple">OPEN SETTINGS</button>
+
               </div>
           </div>
           <!-- <div id="tabs" class="mdc-tab-bar-scroller">

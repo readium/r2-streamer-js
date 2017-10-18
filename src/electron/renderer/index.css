@@ -1,5 +1,31 @@
+
+@font-face {
+  font-family: 'Material Icons';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Material Icons'),
+    local('MaterialIcons-Regular'),
+    url(./MaterialIcons-Regular.woff2) format('woff2');
+}
+.material-icons {
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;  /* Preferred icon size */
+  display: inline-block;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
 :root {
   --R2__specialDimension: 36px;
+  --mdc-theme-primary: #0e4ead;
+  --mdc-theme-secondary: #0051ff;
 }
 html, body {
   height: 100%;
@@ -13,10 +39,27 @@ html, body {
 html.debug body {
   background: silver;
 }
+.mdc-dialog {
+  z-index: 6; /* over mdc-temporary-drawer (5) */
+}
+/* .mdc-snackbar {
+  z-index: 7;
+} */
 *:focus {
   outline-style: solid !important;
   outline-width: 2px !important;
-  outline-color: var(--mdc-theme-primary-light, blue) !important;
+  outline-color: var(--mdc-theme-primary, blue) !important;
+  outline-offset: 0px !important;
+}
+*.no-focus-outline:focus {
+  outline-style: none !important;
+}
+.mdc-switch__native-control:focus ~ .mdc-switch__background .mdc-switch__knob::before {
+  width: 30px;
+  height: 30px;
+  border-radius: 15px;
+  top: -5px;
+  left: -5px;
 }
 body.flex {
   display: flex;
@@ -45,7 +88,7 @@ body.flex {
   top: var(--R2__specialDimension);
   bottom: 0px;
   background: white;
-  border-top: 1px solid silver;
+  /* border-top: 1px solid silver; */
 }
 html.debug #reader_chrome {
   border: 3px solid orange;
@@ -81,7 +124,7 @@ html.debug #publication_viewport {
   overflow: hidden;
   overflow-y: scroll;
   overflow-x: auto;
-  border: 1px solid black;
+  /* border: 1px solid black; */
 }
 html.debug #reader_controls {
   border-right: 10px solid black;
@@ -112,6 +155,12 @@ html.debug #webview2 {
 }
 form {
   margin: 0; padding: 0;
+}
+#lcpDialog .mdc-textfield__input {
+  width: 50%;
+}
+#lcpDialog .mdc-form-field, #lcpDialog .mdc-textfield {
+  width: 100%;
 }
 /* form#lcpPassForm {
   box-sizing: border-box;
@@ -159,8 +208,8 @@ form {
 #buttonNavLeft, #buttonNavRight {
   display: block;
   position: absolute;
-  top: 40%;
-  bottom: 40%;
+  top: 20%;
+  bottom: 20%;
   margin: 0;
   padding: 0;
   width: var(--R2__specialDimension);
@@ -208,10 +257,20 @@ form {
   overflow: auto;
   width: 100%;
 }
-
+#reader_controls_ADVANCED, #reader_controls_TOOLS, #reader_controls_STYLES {
+  padding: 1em;
+}
 #reader_controls_TOC a:focus {
   background-color: rgba(230, 230, 230, 1);
 }
+body.mdc-theme--dark {
+  color: var(--mdc-theme-background, white);
+}
+
+body.mdc-theme--dark,
+.mdc-theme--dark #reader_chrome,
+.mdc-theme--dark #publication_viewport,
+.mdc-theme--dark .mdc-button:not(.mdc-button--raised),
 .mdc-theme--dark #reader_controls_TOC a:focus {
   background-color: rgba(70, 70, 70, 1);
 }

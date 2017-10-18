@@ -20,6 +20,8 @@ import {
     riotMountLinkTree,
 } from "./riots/linktree/index_";
 
+import ElectronStore = require("electron-store");
+
 // import { riotMountMyTag } from "./riots/mytag/index_";
 // import { RiotMixinWithOpts } from "./riots/riot_mixin_EventTracer";
 // import { startServiceWorkerExperiment } from "./sw/index_service-worker";
@@ -48,7 +50,77 @@ const pathFileName = pathDecoded.substr(
 // tslint:disable-next-line:no-string-literal
 const lcpHint = queryParams["lcpHint"];
 
-const basicLinkTitles = true;
+const defaultsStyling = {
+    dark: false,
+};
+const defaults = {
+    basicLinkTitles: true,
+    styling: defaultsStyling,
+};
+const electronStore = new ElectronStore({
+    defaults,
+    name: "readium2-navigator",
+});
+
+(electronStore as any).onDidChange("styling.dark", (newValue: any, oldValue: any) => {
+    if (typeof newValue === "undefined" || typeof oldValue === "undefined") {
+        return;
+    }
+    console.log("STORE CHANGE: styling.dark");
+    console.log(oldValue);
+    console.log(newValue);
+
+    const darkSwitch = document.getElementById("dark_switch-input");
+    if (darkSwitch) {
+        (darkSwitch as HTMLInputElement).checked = newValue;
+    }
+
+    if (newValue) {
+        document.body.classList.add("mdc-theme--dark");
+    } else {
+        document.body.classList.remove("mdc-theme--dark");
+    }
+});
+
+(electronStore as any).onDidChange("basicLinkTitles", (newValue: any, oldValue: any) => {
+    if (typeof newValue === "undefined" || typeof oldValue === "undefined") {
+        return;
+    }
+    console.log("STORE CHANGE: basicLinkTitles");
+    console.log(oldValue);
+    console.log(newValue);
+
+    const basicSwitch = document.getElementById("nav_basic_switch-input");
+    if (basicSwitch) {
+        (basicSwitch as HTMLInputElement).checked = !newValue;
+    }
+
+    const tags: RiotTag[] = riot.update();
+    // console.log(tags);
+    // console.log(riot);
+    // console.log("----- 1");
+    tags.forEach((tag) => {
+        // (tag.opts as any).basic = !checked;
+        if ((tag.opts as any).fixBasic) {
+            return;
+        }
+        if ((tag as any).setBasic) {
+            (tag as any).setBasic(newValue);
+            // console.log(tag);
+            tag.update();
+        }
+    });
+    // console.log("----- 2");
+    // riot.update();
+    // tags.forEach((tag) => {
+    //     // tag.update();
+    //     console.log("-----");
+    //     console.log(tag.opts.basic);
+    //     tag.update({ basic: !checked });
+    //     console.log(tag);
+    //     console.log(tag.opts.basic);
+    // });
+});
 
 let snackBar: any;
 let drawer: any;
@@ -87,22 +159,26 @@ ipcRenderer.on(R2_EVENT_TRY_LCP_PASS_RES, (_event: any, okay: boolean, msg: stri
     console.log(msg);
 
     if (!okay) {
-        showLcpDialog(msg);
+        // const message = "LCP error.";
+        // const data = {
+        //     // actionHandler: () => {
+        //     //     console.log("SnackBar OK");
+        //     // },
+        //     // actionOnBottom: false,
+        //     actionText: null,
+        //     message,
+        //     multiline: false,
+        //     timeout: 1000,
+        // };
+        // snackBar.show(data);
+
+        setTimeout(() => {
+            showLcpDialog(msg);
+        }, 500);
+
         return;
     }
 
-    const message = "Correct publication passphrase.";
-    const data = {
-        actionHandler: () => {
-            console.log("SnackBar OK");
-        },
-        actionOnBottom: false,
-        actionText: "OK",
-        message,
-        multiline: false,
-        timeout: 2000,
-    };
-    snackBar.show(data);
     startNavigatorExperiment();
 
     // const lcpPassMessage = document.getElementById("lcpPassMessage");
@@ -140,8 +216,41 @@ function showLcpDialog(message?: string) {
         const lcpPassInput = document.getElementById("lcpPassInput");
         if (lcpPassInput) {
             lcpPassInput.focus();
+            setTimeout(() => {
+                lcpPassInput.classList.add("no-focus-outline");
+            }, 500);
         }
-    }, 1000);
+    }, 800);
+}
+
+function installKeyboardMouseFocusHandler() {
+    let dateLastKeyboardEvent = new Date();
+    let dateLastMouseEvent = new Date();
+    document.body.addEventListener("focusin", debounce((ev: any) => {
+        const focusWasTriggeredByMouse = dateLastMouseEvent > dateLastKeyboardEvent;
+        if (focusWasTriggeredByMouse) {
+            if (ev.target && ev.target.classList) {
+                ev.target.classList.add("no-focus-outline");
+            }
+        }
+    }, 500));
+    document.body.addEventListener("focusout", (ev: any) => {
+        if (ev.target && ev.target.classList) {
+            ev.target.classList.remove("no-focus-outline");
+        }
+    });
+    document.body.addEventListener("mousedown", () => {
+        dateLastMouseEvent = new Date();
+    });
+    document.body.addEventListener("keydown", () => {
+        dateLastKeyboardEvent = new Date();
+    });
+    // document.body.addEventListener("mouseup", () => {
+    //     dateLastMouseEvent = new Date();
+    // });
+    // document.body.addEventListener("keyup", () => {
+    //     dateLastKeyboardEvent = new Date();
+    // });
 }
 
 window.addEventListener("DOMContentLoaded", () => {
@@ -161,6 +270,14 @@ window.addEventListener("DOMContentLoaded", () => {
         (h1 as HTMLElement).textContent = pathFileName;
     }
 
+    installKeyboardMouseFocusHandler();
+
+    if (electronStore.get("styling.dark")) {
+        document.body.classList.add("mdc-theme--dark");
+    } else {
+        document.body.classList.remove("mdc-theme--dark");
+    }
+
     const snackBarElem = document.getElementById("snackbar");
     snackBar = new (window as any).mdc.snackbar.MDCSnackbar(snackBarElem);
     snackBar.dismissesOnAction = true;
@@ -173,14 +290,14 @@ window.addEventListener("DOMContentLoaded", () => {
             drawer.open = true;
         });
     }
-    if (drawerElement) {
-        drawerElement.addEventListener("MDCTemporaryDrawer:open", () => {
-            // console.log("MDCTemporaryDrawer:open");
-        });
-        drawerElement.addEventListener("MDCTemporaryDrawer:close", () => {
-            // console.log("MDCTemporaryDrawer:close");
-        });
-    }
+    // if (drawerElement) {
+    //     drawerElement.addEventListener("MDCTemporaryDrawer:open", () => {
+    //         console.log("MDCTemporaryDrawer:open");
+    //     });
+    //     drawerElement.addEventListener("MDCTemporaryDrawer:close", () => {
+    //         console.log("MDCTemporaryDrawer:close");
+    //     });
+    // }
 
     const selectElement = document.getElementById("nav-select");
     const navSelector = new (window as any).mdc.select.MDCSelect(selectElement);
@@ -264,6 +381,62 @@ window.addEventListener("DOMContentLoaded", () => {
     //     });
     // }
 
+    const buttonClearSettings = document.getElementById("buttonClearSettings");
+    if (buttonClearSettings) {
+        buttonClearSettings.addEventListener("click", () => {
+            // electronStore.clear();
+            electronStore.store = defaults;
+
+            drawer.open = false;
+            setTimeout(() => {
+                const message = "Settings reset.";
+                const data = {
+                    actionHandler: () => {
+                        // console.log("SnackBar OK");
+                    },
+                    actionOnBottom: false,
+                    actionText: "OK",
+                    message,
+                    multiline: false,
+                    timeout: 2000,
+                };
+                snackBar.show(data);
+            }, 500);
+        });
+    }
+
+    const buttonClearSettingsStyle = document.getElementById("buttonClearSettingsStyle");
+    if (buttonClearSettingsStyle) {
+        buttonClearSettingsStyle.addEventListener("click", () => {
+
+            // (electronStore.store as any).styling = defaultsStyling;
+            electronStore.set("styling", defaultsStyling);
+
+            drawer.open = false;
+            setTimeout(() => {
+                const message = "Default styles.";
+                const data = {
+                    actionHandler: () => {
+                        // console.log("SnackBar OK");
+                    },
+                    actionOnBottom: false,
+                    actionText: "OK",
+                    message,
+                    multiline: false,
+                    timeout: 2000,
+                };
+                snackBar.show(data);
+            }, 500);
+        });
+    }
+
+    const buttonOpenSettings = document.getElementById("buttonOpenSettings");
+    if (buttonOpenSettings) {
+        buttonOpenSettings.addEventListener("click", () => {
+            electronStore.openInEditor();
+        });
+    }
+
     const buttonDebug = document.getElementById("buttonDebug");
     if (buttonDebug) {
         buttonDebug.addEventListener("click", () => {
@@ -271,17 +444,6 @@ window.addEventListener("DOMContentLoaded", () => {
                 document.documentElement.classList.remove("debug");
             } else {
                 document.documentElement.classList.add("debug");
-            }
-        });
-    }
-
-    const buttonDark = document.getElementById("buttonDark");
-    if (buttonDark) {
-        buttonDark.addEventListener("click", () => {
-            if (document.body.classList.contains("mdc-theme--dark")) {
-                document.body.classList.remove("mdc-theme--dark");
-            } else {
-                document.body.classList.add("mdc-theme--dark");
             }
         });
     }
@@ -456,34 +618,23 @@ function startNavigatorExperiment() {
         });
     }
 
+    const darkSwitch = document.getElementById("dark_switch-input");
+    if (darkSwitch) {
+        (darkSwitch as HTMLInputElement).checked = electronStore.get("styling.dark");
+        darkSwitch.addEventListener("change", (_event) => {
+            const checked = (darkSwitch as HTMLInputElement).checked;
+            console.log("DARK checked: " + checked);
+            electronStore.set("styling.dark", checked);
+        });
+    }
+
     const basicSwitch = document.getElementById("nav_basic_switch-input");
     if (basicSwitch) {
+        (basicSwitch as HTMLInputElement).checked = !electronStore.get("basicLinkTitles");
         basicSwitch.addEventListener("change", (_event) => {
             const checked = (basicSwitch as HTMLInputElement).checked;
-            // console.log("checked: " + checked);
-
-            const tags: RiotTag[] = riot.update();
-            // console.log(tags);
-            // console.log(riot);
-            // console.log("----- 1");
-            tags.forEach((tag) => {
-                // (tag.opts as any).basic = !checked;
-                if ((tag as any).setBasic) {
-                    (tag as any).setBasic(!checked);
-                    // console.log(tag);
-                    tag.update();
-                }
-            });
-            // console.log("----- 2");
-            // riot.update();
-            // tags.forEach((tag) => {
-            //     // tag.update();
-            //     console.log("-----");
-            //     console.log(tag.opts.basic);
-            //     tag.update({ basic: !checked });
-            //     console.log(tag);
-            //     console.log(tag.opts.basic);
-            // });
+            console.log("BASIC checked: " + checked);
+            electronStore.set("basicLinkTitles", !checked);
         });
     }
 
@@ -553,6 +704,7 @@ function startNavigatorExperiment() {
 
             const opts: IRiotOptsLinkList = {
                 basic: true, // always single-line list items (no title)
+                fixBasic: true,
                 links: publicationJson.spine as IRiotOptsLinkListItem[],
                 url: publicationJsonUrl,
             };
@@ -599,7 +751,7 @@ function startNavigatorExperiment() {
         if (publicationJson.toc && publicationJson.toc.length) {
 
             const opts: IRiotOptsLinkTree = {
-                basic: basicLinkTitles,
+                basic: electronStore.get("basicLinkTitles"),
                 links: publicationJson.toc as IRiotOptsLinkTreeItem[],
                 url: publicationJsonUrl,
             };
@@ -614,7 +766,7 @@ function startNavigatorExperiment() {
         if (publicationJson["page-list"] && publicationJson["page-list"].length) {
 
             const opts: IRiotOptsLinkList = {
-                basic: basicLinkTitles,
+                basic: electronStore.get("basicLinkTitles"),
                 links: publicationJson["page-list"] as IRiotOptsLinkListItem[],
                 url: publicationJsonUrl,
             };
@@ -670,7 +822,7 @@ function startNavigatorExperiment() {
             //     url: publicationJsonUrl,
             // });
             const opts: IRiotOptsLinkListGroup = {
-                basic: basicLinkTitles,
+                basic: electronStore.get("basicLinkTitles"),
                 linksgroup: landmarksData,
                 url: publicationJsonUrl,
             };

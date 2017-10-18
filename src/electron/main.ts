@@ -117,7 +117,7 @@ ipcMain.on(R2_EVENT_TRY_LCP_PASS, async (event: any, publicationFilePath: string
     }
     event.sender.send(R2_EVENT_TRY_LCP_PASS_RES,
         okay,
-        (okay ? "Correct." : "incorrect, please try again."));
+        (okay ? "Correct." : "Please try again."));
 });
 
 async function tryLcpPass(publicationFilePath: string, lcpPass: string): Promise<boolean> {

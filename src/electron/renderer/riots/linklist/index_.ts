@@ -13,6 +13,7 @@ export interface IRiotOptsLinkListItem {
 }
 export interface IRiotOptsLinkList {
     basic: boolean;
+    fixBasic?: boolean;
     links: IRiotOptsLinkListItem[];
     url: string;
 }
