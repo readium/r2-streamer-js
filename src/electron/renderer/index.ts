@@ -52,6 +52,9 @@ const lcpHint = queryParams["lcpHint"];
 
 const defaultsStyling = {
     dark: false,
+    invert: false,
+    night: false,
+    readiumcss: false,
 };
 const defaults = {
     basicLinkTitles: true,
@@ -62,17 +65,17 @@ const electronStore = new ElectronStore({
     name: "readium2-navigator",
 });
 
-(electronStore as any).onDidChange("styling.dark", (newValue: any, oldValue: any) => {
+(electronStore as any).onDidChange("styling.night", (newValue: any, oldValue: any) => {
     if (typeof newValue === "undefined" || typeof oldValue === "undefined") {
         return;
     }
-    console.log("STORE CHANGE: styling.dark");
+    console.log("STORE CHANGE: styling.night");
     console.log(oldValue);
     console.log(newValue);
 
-    const darkSwitch = document.getElementById("dark_switch-input");
-    if (darkSwitch) {
-        (darkSwitch as HTMLInputElement).checked = newValue;
+    const nightSwitch = document.getElementById("night_switch-input");
+    if (nightSwitch) {
+        (nightSwitch as HTMLInputElement).checked = newValue;
     }
 
     if (newValue) {
@@ -80,6 +83,104 @@ const electronStore = new ElectronStore({
     } else {
         document.body.classList.remove("mdc-theme--dark");
     }
+
+    readiumCssOnOff();
+});
+
+const readiumCssOnOff = () => {
+    const on = electronStore.get("styling.readiumcss");
+    if (on) {
+        const dark = electronStore.get("styling.dark");
+        const sepia = electronStore.get("styling.sepia");
+        const night = electronStore.get("styling.night");
+        const font = electronStore.get("styling.font");
+        const cssJson = {
+            dark,
+            font,
+            night,
+            sepia,
+        };
+        const jsonMsg = { injectCSS: "yes", setCSS: cssJson };
+
+        _webviews.forEach((wv) => {
+            wv.send(R2_EVENT_READIUMCSS, JSON.stringify(jsonMsg)); // .getWebContents()
+        });
+    } else {
+        const jsonMsg = { injectCSS: "rollback", setCSS: "rollback" };
+
+        _webviews.forEach((wv) => {
+            wv.send(R2_EVENT_READIUMCSS, JSON.stringify(jsonMsg)); // .getWebContents()
+        });
+    }
+};
+
+(electronStore as any).onDidChange("styling.readiumcss", (newValue: any, oldValue: any) => {
+    if (typeof newValue === "undefined" || typeof oldValue === "undefined") {
+        return;
+    }
+    console.log("STORE CHANGE: styling.readiumcss");
+    console.log(oldValue);
+    console.log(newValue);
+
+    const readiumcssSwitch = document.getElementById("readiumcss_switch-input");
+    if (readiumcssSwitch) {
+        (readiumcssSwitch as HTMLInputElement).checked = newValue;
+    }
+
+    readiumCssOnOff();
+
+    const nightSwitch = document.getElementById("night_switch-input");
+    if (nightSwitch) {
+        (nightSwitch as HTMLInputElement).disabled = !newValue;
+    }
+
+    const fontSelect = document.getElementById("fontSelect");
+    if (fontSelect) {
+        // if (!newValue) {
+        //     fontSelect.setAttribute("disabled", "");
+        // } else {
+        //     fontSelect.removeAttribute("disabled");
+        // }
+        (fontSelect as HTMLSelectElement).disabled = !newValue;
+    }
+
+    if (!newValue) {
+        electronStore.set("styling.night", false);
+    }
+});
+
+const initFontSelect = () => {
+    const fontSelect = document.getElementById("fontSelect");
+    if (fontSelect) {
+        const font = electronStore.get("styling.font");
+        const i = font === "OLD" ? 1 :
+            (font === "MODERN" ? 2 :
+                (font === "SANS" ? 3 :
+                    (font === "HUMAN" ? 4 :
+                        (font === "DYS" ? 5 :
+                            0))));
+        (fontSelect as HTMLSelectElement).selectedIndex = i;
+
+        // if (!electronStore.get("styling.readiumcss")) {
+        //     fontSelect.setAttribute("disabled", "");
+        // } else {
+        //     fontSelect.removeAttribute("disabled");
+        // }
+        (fontSelect as HTMLSelectElement).disabled = !electronStore.get("styling.readiumcss");
+    }
+};
+
+(electronStore as any).onDidChange("styling.font", (newValue: any, oldValue: any) => {
+    if (typeof newValue === "undefined" || typeof oldValue === "undefined") {
+        return;
+    }
+    console.log("STORE CHANGE: styling.font");
+    console.log(oldValue);
+    console.log(newValue);
+
+    initFontSelect();
+
+    readiumCssOnOff();
 });
 
 (electronStore as any).onDidChange("basicLinkTitles", (newValue: any, oldValue: any) => {
@@ -272,7 +373,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
     installKeyboardMouseFocusHandler();
 
-    if (electronStore.get("styling.dark")) {
+    if (electronStore.get("styling.night")) {
         document.body.classList.add("mdc-theme--dark");
     } else {
         document.body.classList.remove("mdc-theme--dark");
@@ -485,15 +586,17 @@ function createWebView() {
 
         webview1.clearHistory();
 
-        const cssButtonN1 = document.getElementById("cssButtonInject");
-        if (cssButtonN1) {
-            cssButtonN1.removeAttribute("disabled");
-        }
+        readiumCssOnOff();
 
-        const cssButtonN2 = document.getElementById("cssButtonReset");
-        if (cssButtonN2) {
-            cssButtonN2.removeAttribute("disabled");
-        }
+        // const cssButtonInject = document.getElementById("cssButtonInject");
+        // if (cssButtonInject) {
+        //     cssButtonInject.removeAttribute("disabled");
+        // }
+
+        // const cssButtonReset = document.getElementById("cssButtonReset");
+        // if (cssButtonReset) {
+        //     cssButtonReset.removeAttribute("disabled");
+        // }
 
         // webview1.style.visibility = "visible";
 
@@ -586,45 +689,47 @@ function startNavigatorExperiment() {
         publicationViewport.appendChild(webviewFull);
     }
 
-    // const hideControlsButton = document.getElementById("hideControlsButton");
-    // if (hideControlsButton) {
-    //     hideControlsButton.addEventListener("click", (_event) => {
-    //         if (readerControls) {
-    //             readerControls.style.display = "none";
-    //         }
-    //         hideControlsButton.style.display = "none";
-    //     });
-    // }
-
-    const cssButton1 = document.getElementById("cssButtonInject");
-    if (cssButton1) {
-        cssButton1.addEventListener("click", (_event) => {
-            const jsonMsg = { injectCSS: "yes", setCSS: "ok" };
-
-            _webviews.forEach((wv) => {
-                wv.send(R2_EVENT_READIUMCSS, JSON.stringify(jsonMsg)); // .getWebContents()
-            });
+    initFontSelect();
+    const fontSelect = document.getElementById("fontSelect");
+    if (fontSelect) {
+        fontSelect.addEventListener("change", (_event) => {
+            const index = (fontSelect as HTMLSelectElement).selectedIndex;
+            console.log("FONT index: " + index);
+            const ff = index === 0 ? "DEFAULT" :
+                (index === 1 ? "OLD" :
+                    (index === 2 ? "MODERN" :
+                        (index === 3 ? "SANS" :
+                            (index === 4 ? "HUMAN" :
+                                (index === 5 ? "DYS" :
+                                    "DEFAULT")))));
+            electronStore.set("styling.font", ff);
         });
     }
 
-    const cssButton2 = document.getElementById("cssButtonReset");
-    if (cssButton2) {
-        cssButton2.addEventListener("click", (_event) => {
-            const jsonMsg = { injectCSS: "rollback", setCSS: "rollback" };
-
-            _webviews.forEach((wv) => {
-                wv.send(R2_EVENT_READIUMCSS, JSON.stringify(jsonMsg)); // .getWebContents()
-            });
+    const nightSwitch = document.getElementById("night_switch-input");
+    if (nightSwitch) {
+        (nightSwitch as HTMLInputElement).checked = electronStore.get("styling.night");
+        nightSwitch.addEventListener("change", (_event) => {
+            const checked = (nightSwitch as HTMLInputElement).checked;
+            console.log("NIGHT checked: " + checked);
+            electronStore.set("styling.night", checked);
         });
+
+        // if (!electronStore.get("styling.readiumcss")) {
+        //     nightSwitch.setAttribute("disabled", "");
+        // } else {
+        //     nightSwitch.removeAttribute("disabled");
+        // }
+        (nightSwitch as HTMLInputElement).disabled = !electronStore.get("styling.readiumcss");
     }
 
-    const darkSwitch = document.getElementById("dark_switch-input");
-    if (darkSwitch) {
-        (darkSwitch as HTMLInputElement).checked = electronStore.get("styling.dark");
-        darkSwitch.addEventListener("change", (_event) => {
-            const checked = (darkSwitch as HTMLInputElement).checked;
-            console.log("DARK checked: " + checked);
-            electronStore.set("styling.dark", checked);
+    const readiumcssSwitch = document.getElementById("readiumcss_switch-input");
+    if (readiumcssSwitch) {
+        (readiumcssSwitch as HTMLInputElement).checked = electronStore.get("styling.readiumcss");
+        readiumcssSwitch.addEventListener("change", (_event) => {
+            const checked = (readiumcssSwitch as HTMLInputElement).checked;
+            console.log("READIUMCSS checked: " + checked);
+            electronStore.set("styling.readiumcss", checked);
         });
     }
 

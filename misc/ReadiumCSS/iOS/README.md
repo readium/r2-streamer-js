@@ -1,3 +1,3 @@
 Downloaded from:
 https://github.com/readium/readium-css/tree/develop/prototype/iOS-implem/dist
-commit 5d7817dd11b04895b6f73f10fa0455044398fa13
+commit a4920b0ed5b5c102f589f1644835acda304f8f0d

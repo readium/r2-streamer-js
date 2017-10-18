@@ -34,16 +34,8 @@
 </head>
 
 <body class="mdc-typography">
-    <!-- <h1 style="color: red;"><span>Electron index.html (renderer process)</span></h1> -->
-    <!-- <h1 class="mdc-typography--headline">TITLE</h1> -->
+
     <h3 class="mdc-typography--subheading1" id="pubTitle">TITLE</h3>
-
-    <!-- <button id="buttonStart" class="mdc-button mdc-button--raised">[ START ]</button> -->
-    <!-- <button id="buttonDevTools" class="mdc-button">OPEN DEV TOOLS</button> -->
-
-    <!-- <riot-mytag>
-        <b>{ prop1 }</b>
-    </riot-mytag> -->
 
     <button id="drawerButton" class="mdc-button mdc-ripple-surfacexxx" data-mdc-auto-initxxx="MDCRipple"><i class="material-icons md-36">menu</i></button>
 
@@ -90,19 +82,41 @@
 
                 <div style="padding:0;padding-top:1em;padding-bottom:1em">
                   <div class="mdc-switch">
-                    <input type="checkbox" id="dark_switch-input" class="mdc-switch__native-control" />
+                    <input type="checkbox" id="readiumcss_switch-input" class="mdc-switch__native-control" />
                     <div class="mdc-switch__background">
                       <div class="mdc-switch__knob"></div>
                     </div>
                   </div>
-                  <label for="dark_switch-input" class="mdc-switch-label">Dark theme</label>
+                  <label for="readiumcss_switch-input" class="mdc-switch-label">Enable styling</label>
                 </div>
 
-                <hr>
-                ReadiumCSS:
-                <button id="cssButtonInject" disabled>inject</button>
-                <button id="cssButtonReset" disabled>remove</button>
-                <hr>
+                <hr class="mdc-list-divider" role="presentation">
+
+                <div style="margin-left: 1em; padding-left: 1em; border-left: 1px solid silver;">
+
+                  <div style="padding:0;padding-top:0.6em;padding-bottom:1em">
+                    <div class="mdc-switch">
+                      <input type="checkbox" id="night_switch-input" class="mdc-switch__native-control" />
+                      <div class="mdc-switch__background">
+                        <div class="mdc-switch__knob"></div>
+                      </div>
+                    </div>
+                    <label for="night_switch-input" class="mdc-switch-label">Night mode</label>
+                  </div>
+
+                  <span class="mdc-typography--text">Font: </span>
+                  <select id="fontSelect" class="mdc-select" style="display: inline-block;">
+                      <option value="DEFAULT" selected>Publisher default</option>
+                      <option value="OLD" selected>Old Style</option>
+                      <option value="MODERN" selected>Modern</option>
+                      <option value="SANS" selected>Sans</option>
+                      <option value="HUMAN" selected>Humanist</option>
+                      <option value="DYS" selected>Readable (dys)</option>
+                  </select>
+
+                </div>
+
+                <hr class="mdc-list-divider" role="presentation">
 
                 <button id="buttonClearSettingsStyle" class="mdc-button mdc-button--raised mdc-ripple-surfacexx" data-mdc-auto-initxx="MDCRipple">Restore defaults</button>
 
@@ -130,63 +144,6 @@
 
               </div>
           </div>
-          <!-- <div id="tabs" class="mdc-tab-bar-scroller">
-            <div class="mdc-tab-bar-scroller__indicator mdc-tab-bar-scroller__indicator--back">
-              <a class="mdc-tab-bar-scroller__indicator__inner material-icons" href="#" aria-label="scroll back button">
-                navigate_before
-              </a>
-            </div>
-            <div class="mdc-tab-bar-scroller__scroll-frame">
-              <nav id="tabsScroll" class="mdc-tab-bar mdc-tab-bar-scroller__scroll-frame__tabs">
-                <a class="mdc-tab mdc-tab--active" href="#">Table Of Contents</a>
-                <a class="mdc-tab" href="#">Spine</a>
-                <a class="mdc-tab" href="#">Page list</a>
-                <a class="mdc-tab" href="#">Landmarks</a>
-                <a class="mdc-tab" href="#">Tools</a>
-                <span class="mdc-tab-bar__indicator"></span>
-              </nav>
-            </div>
-            <div class="mdc-tab-bar-scroller__indicator mdc-tab-bar-scroller__indicator--forward">
-              <a class="mdc-tab-bar-scroller__indicator__inner material-icons" href="#" aria-label="scroll forward button">
-                navigate_next
-              </a>
-            </div>
-          </div> -->
-        <!-- <header class="mdc-temporary-drawer__header">
-          <div class="mdc-temporary-drawer__header-content mdc-theme--primary-bg mdc-theme--text-primary-on-primary">
-            Header here
-          </div>
-        </header> -->
-        <!-- <nav class="mdc-temporary-drawer__content mdc-list-group">
-          <div id="icon-with-text-demo" class="mdc-list">
-            <a class="mdc-list-item mdc-temporary-drawer--selected" href="#">
-              <i class="material-icons mdc-list-item__start-detail" aria-hidden="true">inbox</i>Inbox
-            </a>
-            <a class="mdc-list-item" href="#">
-              <i class="material-icons mdc-list-item__start-detail" aria-hidden="true">star</i>Star
-            </a>
-            <a class="mdc-list-item" href="#">
-              <i class="material-icons mdc-list-item__start-detail" aria-hidden="true">send</i>Sent Mail
-            </a>
-            <a class="mdc-list-item" href="#">
-              <i class="material-icons mdc-list-item__start-detail" aria-hidden="true">drafts</i>Drafts
-            </a>
-          </div>
-
-          <hr class="mdc-list-divider">
-
-          <div class="mdc-list">
-            <a class="mdc-list-item" href="#">
-              <i class="material-icons mdc-list-item__start-detail" aria-hidden="true">email</i>All Mail
-            </a>
-            <a class="mdc-list-item" href="#">
-              <i class="material-icons mdc-list-item__start-detail" aria-hidden="true">delete</i>Trash
-            </a>
-            <a class="mdc-list-item" href="#">
-              <i class="material-icons mdc-list-item__start-detail" aria-hidden="true">report</i>Spam
-            </a>
-          </div>
-        </nav> -->
       </nav>
     </aside>
 
@@ -198,41 +155,6 @@
       <button id="buttonNavLeft" class="mdc-button mdc-ripple-surface" data-mdc-auto-init="MDCRipple"><i class="material-icons md-36">keyboard_arrow_left</i></button>
       <button id="buttonNavRight" class="mdc-button mdc-ripple-surface" data-mdc-auto-init="MDCRipple"><i class="material-icons md-36">keyboard_arrow_right</i></button>
 
-      <!-- <div id="reader_controls">
-          <hr>
-          <div id="tabHeaders">
-            <button id="buttonTab_TOC"
-            onclick="javascript:[].forEach.call(document.querySelectorAll('.sectionTAB'), (el) => el.style.display = 'none');   document.getElementById('reader_controls_TOC').style.display = 'block';"
-            >Table Of Contents</button>
-            <button id="buttonTab_SPINE"
-            onclick="javascript:[].forEach.call(document.querySelectorAll('.sectionTAB'), (el) => el.style.display = 'none');   document.getElementById('reader_controls_SPINE').style.display = 'block';"
-            >Spine</button>
-            <button id="buttonTab_PAGELIST"
-            onclick="javascript:[].forEach.call(document.querySelectorAll('.sectionTAB'), (el) => el.style.display = 'none');   document.getElementById('reader_controls_PAGELIST').style.display = 'block';"
-            >Page list</button>
-            <button id="buttonTab_LANDMARKS"
-            onclick="javascript:[].forEach.call(document.querySelectorAll('.sectionTAB'), (el) => el.style.display = 'none');   document.getElementById('reader_controls_LANDMARKS').style.display = 'block';"
-            >Landmarks</button>
-            <button id="buttonTab_TOOLS"
-            onclick="javascript:[].forEach.call(document.querySelectorAll('.sectionTAB'), (el) => el.style.display = 'none');   document.getElementById('reader_controls_TOOLS').style.display = 'block';"
-            >Tools</button>
-          </div>
-          <hr>
-          <div id="tabContents">
-            <div id="reader_controls_TOC" class="sectionTAB">
-            </div>
-            <div id="reader_controls_SPINE" class="sectionTAB">
-            </div>
-            <div id="reader_controls_PAGELIST" class="sectionTAB">
-            </div>
-            <div id="reader_controls_LANDMARKS" class="sectionTAB">
-            </div>
-            <div id="reader_controls_TOOLS" class="sectionTAB">
-            </div>
-          </div>
-      </div>
-      <button id="showControlsButton">O</button>
-      <button id="hideControlsButton">X</button> -->
     </main>
 
 
@@ -252,7 +174,6 @@
 
         <section id="mdc-dialog-default-description" class="mdc-dialog__body">
 
-          <!-- <form id="lcpPassForm" action="#"> -->
             <div class="mdc-form-field">
               <div class="mdc-textfield" data-mdc-auto-init="MDCTextfield">
                 <input type="password" name="lcpPassInput" id="lcpPassInput" size="40" class="mdc-textfield__input">
@@ -260,14 +181,12 @@
                 <span id="lcpPassMessage" style="color: red; margin-left: 1em;"> </span>
               </div>
             </div>
-            <!-- <button type="submit" class="mdc-button mdc-button--raised mdc-button--dense mdc-ripple-surface" data-mdc-auto-init="MDCRipple">Submit</button> -->
+
             <p><strong>Hint: </strong><span id="lcpPassHint">-</span></p>
-          <!-- </form> -->
 
         </section>
 
         <footer class="mdc-dialog__footer">
-          <!-- <button type="button" class="mdc-button mdc-dialog__footer__button mdc-dialog__footer__button--cancel">Decline</button> -->
           <button type="button" id="lcpDialogAcceptButton" class="mdc-button mdc-dialog__footer__button mdc-dialog__footer__button--accept">OK</button>
         </footer>
       </div>
