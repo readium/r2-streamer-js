@@ -1,4 +1,4 @@
-/* Readium CSS 
+/* Readium CSS
    Pagination module
 
    A set of styles to paginate ePublications
@@ -7,9 +7,9 @@
 
 /* Config */
 
-/* Columns are responsive by default, even if column-width is set in pixels, 
+/* Columns are responsive by default, even if column-width is set in pixels,
    which means two-page spread will switch to single page depending on current font-size.
-   If you want more control, I’m afraid you’ll have to update colWidth/colGap dynamically, 
+   If you want more control, I’m afraid you’ll have to update colWidth/colGap dynamically,
    which is how a significant amount of RS do at the moment. */
 
 /* Default for smartphone portrait (small screens) */
@@ -38,28 +38,28 @@
 }
 
 /* :root selector has same specificity as a class i.e. 0010
-   We might have to change that to html / context 
+   We might have to change that to html / context
    -> https://css-tricks.com/almanac/selectors/r/root/ */
 
 :root {
-  
+
     /* In case you use left position to scroll, can be removed if using transform: translateX() */
     position: relative;
-  
+
     -webkit-column-width: var(--RS__colWidth);
     -moz-column-width: var(--RS__colWidth);
     column-width: var(--RS__colWidth);
-  
+
     /* Init pagination */
     /* TODO: document columns’ logic cos it might feel weird at first */
     -webkit-column-count: var(--RS__colCount);
     -moz-column-count: var(--RS__colCount);
     column-count: var(--RS__colCount);
-  
+
     -webkit-column-gap: var(--RS__colGap);
     -moz-column-gap: var(--RS__colGap);
     column-gap: var(--RS__colGap);
-  
+
     /* Default is balance and we want columns to be filled entirely (100vh) */
     -moz-column-fill: auto;
     column-fill: auto;
@@ -67,15 +67,15 @@
     height: 100vh;
     padding: 0 !important;
     margin: 0 !important;
-  
+
     /* Column size will depend on this if we want to make it responsive */
     font-size: 100% !important;
-  
+
     -webkit-text-size-adjust: 100%;
-  
+
     /* Switch to newer box model (not inherited by authors’ styles) */
     box-sizing: border-box;
-  
+
     /* Fix bug for older Chrome */
     -webkit-perspective: 1;
     /* Prevents options pop-up when long tap in webkit */
@@ -85,14 +85,14 @@
 body {
   /*  overflow: hidden; bugfix: contents won’t paginate in Firefox and one sample in Safari */
     width: 100%;
-  
+
     /* Limit line-length but we have to reset when 2 columns and control the viewport.
        By using max-width + margin auto, margins will shrink when font-size increases,
        which is what would be expected in terms of typography. */
     max-width: var(--RS__maxLineLength) !important;
     padding: 0 var(--RS__pageGutter) !important;
     margin: 0 auto !important;
-  
+
     /* We need a minimum padding on body so that descandants/ascendants in italic/script are not cut-off.
        Drawback: we have to use border-box so that it doesn’t screw the box model,
        which means it impacts colWidth and max-width */
@@ -120,7 +120,7 @@ body {
 
 /* Desktop small + phablet + tablet landscape */
 
-@media screen and (min-width: 60em), screen and (min-width: 36em) and (max-width: 47em) and (orientation: landscape) {
+/* @media screen and (min-width: 60em), screen and (min-width: 36em) and (max-width: 47em) and (orientation: landscape) { */
   :root {
     /* The size at which we want 2 columns to switch to 1 (depending on font-size) */
     --RS__colWidth: 20em; /* 20 * 16 = 320px but 20 * 28 = 560px so it will switch to 1 col @ 175% font-size (user-setting) on an iPad */
@@ -128,7 +128,7 @@ body {
     --RS__colCount: 2;
     --RS__maxLineLength: none; /* If we don’t use this, colNumber user setting won’t work in Safari… */
   }
-}
+/* } */
 
 /* Desktop + tablet large */
 
@@ -142,7 +142,7 @@ body {
 
 /* At this point (80em or so), constraining line length must be done at the web view/iframe level, or by limiting the size of :root itself */
 
-/* Readium CSS 
+/* Readium CSS
    Scroll module
 
    A set of styles to scroll ePublications
@@ -153,20 +153,20 @@ body {
 /* [style*="--USER__view"] can be used to increase specificity but performance hit */
 
 :root[style*="readium-scroll-on"] {
-  
+
   /* Reset columns, auto + auto = columns can’t be created */
   -webkit-columns: auto auto !important;
   -moz-columns: auto auto !important;
   columns: auto auto !important;
   /* Reset html size so that the user can scroll */
   width: auto !important;
-  height: auto !important;  
+  height: auto !important;
 }
 
 /* Make sure line-length is limited in all configs */
 
 :root[style*="readium-scroll-on"] body {
-  --RS__maxLineLength: 40rem !important; 
+  --RS__maxLineLength: 40rem !important;
 
   margin-top: var(--RS__pageGutter) !important;
   margin-bottom: var(--RS__pageGutter) !important;
@@ -178,7 +178,7 @@ body {
 
 /* Do we add a top/bottom margin for body in vertical scroll or not? */
 
-/* Readium CSS 
+/* Readium CSS
    Default highlights
 
    A stylesheet for user highlights
@@ -210,7 +210,7 @@ body {
   background-color: yellow !important;
 }
 
-/* Readium CSS 
+/* Readium CSS
    Night mode
 
    A preset theme for night mode
@@ -261,7 +261,7 @@ body {
   filter: invert(100%);
 }
 
-/* Darken all images on user’s demand 
+/* Darken all images on user’s demand
    [style*="--USER__darkenFilter"] can be used to increase specificity but performance hit */
 
 :root[style*="readium-night-on"][style*="readium-darken-on"] img {
@@ -284,7 +284,7 @@ body {
   filter: brightness(80%) invert(100%);
 }
 
-/* Readium CSS 
+/* Readium CSS
    Sepia mode
 
    A preset theme for sepia mode
@@ -323,14 +323,14 @@ body {
   color: var(--THEME__visitedColor);
 }
 
-/* Disable for proto as there are hardware-, platform- and browser-specific bugs (some or all images won’t render in Blink/Webkit)  
+/* Disable for proto as there are hardware-, platform- and browser-specific bugs (some or all images won’t render in Blink/Webkit)
 :root[style*="readium-sepia-on"] svg,
 :root[style*="readium-sepia-on"] img {
   mix-blend-mode: multiply;
 }
 */
 
-/* Readium CSS 
+/* Readium CSS
    User Overrides
 
    A stylesheet to manage user settings
@@ -339,7 +339,7 @@ body {
 
 /* Variables are added to html (setProperty -> style) */
 
-/* For user overrides which need [style*="readium-advanced-on"] flag, 
+/* For user overrides which need [style*="readium-advanced-on"] flag,
    see https://github.com/readium/readium-css/issues/16 > User Overrides advanced */
 
 /* Number of columns = 1 | 2 */
@@ -348,7 +348,7 @@ body {
 
 /* apply col setting except for tablet portrait */
 
-@media screen and (min-width: 60em), screen and (min-width: 36em) and (max-width: 47em) and (orientation: landscape) {
+/* @media screen and (min-width: 60em), screen and (min-width: 36em) and (max-width: 47em) and (orientation: landscape) { */
   :root[style*="--USER__colCount: 1"],
   :root[style*="--USER__colCount:1"],
   :root[style*="--USER__colCount: 2"],
@@ -370,7 +370,7 @@ body {
   :root[style*="--USER__colCount:2"] {
     --RS__colWidth: auto; /* User explicitely tells he/she wants 2 columns, we reset floor value */
   }
-}
+/* } */
 
 /* Page Margins: the user margin is a factor of the page gutter e.g. 0.5, 0.75, 1, 1.25, 1.5, etc. */
 
@@ -409,7 +409,7 @@ body {
 }
 
 :root[style*="readium-advanced-on"][style*="--USER__textAlign"] body, :root[style*="text-align"] body,
-:root[style*="readium-advanced-on"][style*="--USER__textAlign"] *:not(blockquote):not(figcaption) p, :root[style*="text-align"] *:not(blockquote):not(figcaption) p, 
+:root[style*="readium-advanced-on"][style*="--USER__textAlign"] *:not(blockquote):not(figcaption) p, :root[style*="text-align"] *:not(blockquote):not(figcaption) p,
 :root[style*="readium-advanced-on"][style*="--USER__textAlign"] li, :root[style*="text-align"] li {
   text-align: inherit !important;
   -moz-text-align-last: auto !important;
@@ -529,7 +529,7 @@ body {
 
 :root[style*="readium-font-on"][style*="AccessibleDfa"] * {
   text-decoration: none !important;
-  font-variant-numeric: normal !important;  
+  font-variant-numeric: normal !important;
   font-variant-position: normal !important;
 }
 
@@ -625,7 +625,7 @@ span[style] {
 
 */
 
-/* Readium CSS 
+/* Readium CSS
    Font size normalize
 
    A stylesheet to normalize font-size
@@ -686,7 +686,7 @@ span[style] {
   font-size: 67.5% !important;
 }
 
-/* The following styles kick in if you define the typeScale variable in the DOM. 
+/* The following styles kick in if you define the typeScale variable in the DOM.
     No need to repeat declarations which don’t make use of the variable */
 
 :root[style*="readium-advanced-on"][style*="--USER__typeScale"] h1 {

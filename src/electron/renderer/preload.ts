@@ -30,6 +30,8 @@ ipcRenderer.on(R2_EVENT_READIUMCSS, (_event: any, messageString: any) => {
         }
 
         removeAllCSS();
+        removeAllCSSInline();
+
         if (messageJson.injectCSS.indexOf("rollback") < 0) {
             // appendCSS("base");
             // appendCSS("html5patch");
@@ -55,6 +57,79 @@ ipcRenderer.on(R2_EVENT_READIUMCSS, (_event: any, messageString: any) => {
             appendCSS("before");
             appendCSS("default");
             appendCSS("after");
+
+            appendCSSInline("scrollbars", `
+::-webkit-scrollbar-button {
+height: 0px !important;
+width: 0px !important;
+}
+
+::-webkit-scrollbar-corner {
+background: transparent !important;
+}
+
+/*::-webkit-scrollbar-track-piece {
+background-color: red;
+} */
+
+::-webkit-scrollbar {
+width:  14px;
+height: 14px;
+}
+
+::-webkit-scrollbar-thumb {
+background: #727272;
+background-clip: padding-box !important;
+border: 3px solid transparent !important;
+border-radius: 30px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+background: #4d4d4d;
+}
+
+::-webkit-scrollbar-track {
+box-shadow: inset 0 0 3px rgba(40, 40, 40, 0.2);
+background: #dddddd;
+box-sizing: content-box;
+}
+
+::-webkit-scrollbar-track:horizontal {
+border-top: 1px solid silver;
+}
+::-webkit-scrollbar-track:vertical {
+border-left: 1px solid silver;
+}
+
+.mdc-theme--dark ::-webkit-scrollbar-thumb {
+background: #a4a4a4;
+border: 3px solid #545454;
+}
+
+.mdc-theme--dark ::-webkit-scrollbar-thumb:hover {
+background: #dedede;
+}
+
+.mdc-theme--dark ::-webkit-scrollbar-track {
+background: #545454;
+}
+
+.mdc-theme--dark ::-webkit-scrollbar-track:horizontal {
+border-top: 1px solid black;
+}
+.mdc-theme--dark ::-webkit-scrollbar-track:vertical {
+border-left: 1px solid black;
+}
+::selection {
+background-color: rgb(155, 179, 240) !important;
+color: black !important;
+}
+
+.mdc-theme--dark ::selection {
+background-color: rgb(100, 122, 177) !important;
+color: white !important;
+}
+`);
         }
     }
 
@@ -112,6 +187,14 @@ ipcRenderer.on(R2_EVENT_READIUMCSS, (_event: any, messageString: any) => {
                 if (typeof messageJson.setCSS.align === "string") {
                     align = messageJson.setCSS.align;
                 }
+            }
+
+            if (night) {
+                // win.document.body
+                docElement.classList.add("mdc-theme--dark");
+            } else {
+                // win.document.body
+                docElement.classList.remove("mdc-theme--dark");
             }
 
             const needsAdvanced = true; // dark || invert;
@@ -263,6 +346,25 @@ win.addEventListener("resize", () => {
     win.document.body.scrollLeft = 0;
     win.document.body.scrollTop = 0;
 });
+
+function appendCSSInline(id: string, css: string) {
+    const styleElement = win.document.createElement("style");
+    styleElement.setAttribute("id", "Readium2-" + id);
+    styleElement.setAttribute("type", "text/css");
+    styleElement.appendChild(document.createTextNode(css));
+    win.document.head.appendChild(styleElement);
+}
+
+function removeCSSInline(id: string) {
+    const styleElement = win.document.getElementById("Readium2-" + id);
+    if (styleElement && styleElement.parentNode) {
+        styleElement.parentNode.removeChild(styleElement);
+    }
+}
+
+function removeAllCSSInline() {
+    removeCSSInline("scrollbars");
+}
 
 function appendCSS(mod: string) {
     const linkElement = win.document.createElement("link");
