@@ -2,12 +2,12 @@ import { ipcRenderer } from "electron";
 
 import { R2_EVENT_LINK, R2_EVENT_READIUMCSS } from "../common/events";
 
-console.log("PRELOAD");
+// console.log("PRELOAD");
 
 const win = (global as any).window as Window;
 
-console.log(win.location.pathname);
-console.log(win.location.origin);
+// console.log(win.location.pathname);
+// console.log(win.location.origin);
 
 const urlRootReadiumCSS = win.location.origin + "/readium-css/iOS/";
 
@@ -56,7 +56,7 @@ ipcRenderer.on(R2_EVENT_READIUMCSS, (_event: any, messageString: any) => {
                     needsDefaultCSS = false;
                 }
             }
-            console.log("needsDefaultCSS: " + needsDefaultCSS);
+            // console.log("needsDefaultCSS: " + needsDefaultCSS);
 
             // appendCSS("base");
             // appendCSS("html5patch");
@@ -320,14 +320,14 @@ color: white !important;
 });
 
 win.addEventListener("DOMContentLoaded", () => {
-    console.log("PRELOAD DOM READY");
+    // console.log("PRELOAD DOM READY");
 
     win.document.addEventListener("click", (e) => {
         const href = (e.target as any).href;
         if (!href) {
             return;
         }
-        console.log("HREF CLICK: " + href);
+        // console.log("HREF CLICK: " + href);
         e.preventDefault();
         e.stopPropagation();
         ipcRenderer.sendToHost(R2_EVENT_LINK, href);
@@ -369,7 +369,7 @@ win.addEventListener("DOMContentLoaded", () => {
 });
 
 win.addEventListener("resize", () => {
-    console.log("webview resize");
+    // console.log("webview resize");
     if (win.document.body) {
         win.document.body.scrollLeft = 0;
         win.document.body.scrollTop = 0;

@@ -18,11 +18,11 @@ export interface IRiotOptsLinkTree {
     url: string;
 }
 
-export interface IRiotTagLinkTree extends
-    // IRiotOptsLinkTree,
-    RiotTag { // RiotMixinWithRecursivePropertySetter
-    setBasic: (basic: boolean) => void;
-}
+// export interface IRiotTagLinkTree extends
+//     // IRiotOptsLinkTree,
+//     RiotTag { // RiotMixinWithRecursivePropertySetter
+//     // setBasic: (basic: boolean) => void;
+// }
 
 export const riotMountLinkTree = (selector: string, opts: IRiotOptsLinkTree): RiotTag[] => {
     const tag = riot.mount(selector, opts);
@@ -34,7 +34,7 @@ export const riotMountLinkTree = (selector: string, opts: IRiotOptsLinkTree): Ri
     // console.log(opts);
     // console.log(this);
 
-    const that = this as IRiotTagLinkTree;
+    // const that = this as RiotTag;
 
     // that.mixin(riot_mixin_RecursivePropertySetter);
 
@@ -42,11 +42,11 @@ export const riotMountLinkTree = (selector: string, opts: IRiotOptsLinkTree): Ri
     // that.url = opts.url;
     // that.basic = opts.basic ? true : false;
 
-    that.setBasic = (basic: boolean) => {
-        that.opts.basic = basic;
-        // that.basic = basic;
-        // that.setPropertyRecursively("basic", basic, "riot-linktree");
-    };
+    // that.setBasic = (basic: boolean) => {
+    //     that.opts.basic = basic;
+    //     // that.basic = basic;
+    //     // that.setPropertyRecursively("basic", basic, "riot-linktree");
+    // };
 
     this.onclick = (ev: RiotEvent) => {
         ev.preventUpdate = true;

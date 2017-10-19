@@ -26,23 +26,23 @@ import ElectronStore = require("electron-store");
 // import { RiotMixinWithOpts } from "./riots/riot_mixin_EventTracer";
 // import { startServiceWorkerExperiment } from "./sw/index_service-worker";
 
-console.log("INDEX");
+// console.log("INDEX");
 
-console.log(window.location);
-console.log(document.baseURI);
-console.log(document.URL);
+// console.log(window.location);
+// console.log(document.baseURI);
+// console.log(document.URL);
 
 const queryParams = getURLQueryParams();
 
 // tslint:disable-next-line:no-string-literal
 const publicationJsonUrl = queryParams["pub"];
 
-console.log(" (((( publicationJsonUrl )))) " + publicationJsonUrl);
+// console.log(" (((( publicationJsonUrl )))) " + publicationJsonUrl);
 
 const pathBase64 = publicationJsonUrl.replace(/.*\/pub\/(.*)\/manifest.json/, "$1");
-console.log(pathBase64);
+// console.log(pathBase64);
 const pathDecoded = window.atob(pathBase64);
-console.log(pathDecoded);
+// console.log(pathDecoded);
 const pathFileName = pathDecoded.substr(
     pathDecoded.replace(/\\/g, "/").lastIndexOf("/") + 1,
     pathDecoded.length - 1);
@@ -71,9 +71,9 @@ const electronStore = new ElectronStore({
     if (typeof newValue === "undefined" || typeof oldValue === "undefined") {
         return;
     }
-    console.log("STORE CHANGE: styling.night");
-    console.log(oldValue);
-    console.log(newValue);
+    // console.log("STORE CHANGE: styling.night");
+    // console.log(oldValue);
+    // console.log(newValue);
 
     const nightSwitch = document.getElementById("night_switch-input");
     if (nightSwitch) {
@@ -122,9 +122,9 @@ const readiumCssOnOff = () => {
     if (typeof newValue === "undefined" || typeof oldValue === "undefined") {
         return;
     }
-    console.log("STORE CHANGE: styling.readiumcss");
-    console.log(oldValue);
-    console.log(newValue);
+    // console.log("STORE CHANGE: styling.readiumcss");
+    // console.log(oldValue);
+    // console.log(newValue);
 
     const readiumcssSwitch = document.getElementById("readiumcss_switch-input");
     if (readiumcssSwitch) {
@@ -167,8 +167,8 @@ const initFontSelect = () => {
 
         // (fontSelect as HTMLSelectElement)
         (fontSelect as any).mdcSelect.selectedIndex = i;
-        console.log("FONT SELECT INIT");
-        console.log((fontSelect as any).mdcSelect.selectedIndex);
+        // console.log("FONT SELECT INIT");
+        // console.log((fontSelect as any).mdcSelect.selectedIndex);
 
         // if (!electronStore.get("styling.readiumcss")) {
         //     fontSelect.setAttribute("disabled", "");
@@ -184,61 +184,62 @@ const initFontSelect = () => {
     if (typeof newValue === "undefined" || typeof oldValue === "undefined") {
         return;
     }
-    console.log("STORE CHANGE: styling.font");
-    console.log(oldValue);
-    console.log(newValue);
+    // console.log("STORE CHANGE: styling.font");
+    // console.log(oldValue);
+    // console.log(newValue);
 
     initFontSelect();
 
     readiumCssOnOff();
 });
 
-(electronStore as any).onDidChange("basicLinkTitles", (newValue: any, oldValue: any) => {
-    if (typeof newValue === "undefined" || typeof oldValue === "undefined") {
-        return;
-    }
-    console.log("STORE CHANGE: basicLinkTitles");
-    console.log(oldValue);
-    console.log(newValue);
+// (electronStore as any).onDidChange("basicLinkTitles", (newValue: any, oldValue: any) => {
+//     if (typeof newValue === "undefined" || typeof oldValue === "undefined") {
+//         return;
+//     }
+//     console.log("STORE CHANGE: basicLinkTitles");
+//     console.log(oldValue);
+//     console.log(newValue);
 
-    const basicSwitch = document.getElementById("nav_basic_switch-input");
-    if (basicSwitch) {
-        (basicSwitch as HTMLInputElement).checked = !newValue;
-    }
+//     const basicSwitch = document.getElementById("nav_basic_switch-input");
+//     if (basicSwitch) {
+//         (basicSwitch as HTMLInputElement).checked = !newValue;
+//     }
 
-    const tags: RiotTag[] = riot.update();
-    // console.log(tags);
-    // console.log(riot);
-    // console.log("----- 1");
-    tags.forEach((tag) => {
-        // (tag.opts as any).basic = !checked;
-        if ((tag.opts as any).fixBasic) {
-            return;
-        }
-        if ((tag as any).setBasic) {
-            (tag as any).setBasic(newValue);
-            // console.log(tag);
-            tag.update();
-        }
-    });
-    // console.log("----- 2");
-    // riot.update();
-    // tags.forEach((tag) => {
-    //     // tag.update();
-    //     console.log("-----");
-    //     console.log(tag.opts.basic);
-    //     tag.update({ basic: !checked });
-    //     console.log(tag);
-    //     console.log(tag.opts.basic);
-    // });
-});
+//     const tags: RiotTag[] = riot.update();
+//     // console.log(tags);
+//     // console.log(riot);
+//     // console.log("----- 1");
+//     tags.forEach((tag) => {
+//         // (tag.opts as any).basic = !checked;
+//         if ((tag.opts as any).fixBasic) {
+//             return;
+//         }
+//         if ((tag as any).setBasic) {
+//             (tag as any).setBasic(newValue);
+//             // console.log(tag);
+//             tag.update();
+//         }
+//     });
+//     // console.log("----- 2");
+//     // riot.update();
+//     // tags.forEach((tag) => {
+//     //     // tag.update();
+//     //     console.log("-----");
+//     //     console.log(tag.opts.basic);
+//     //     tag.update({ basic: !checked });
+//     //     console.log(tag);
+//     //     console.log(tag.opts.basic);
+//     // });
+// });
 
 let snackBar: any;
 let drawer: any;
 
 export function handleLink(href: string) {
-    console.log("handleLink");
-    console.log(href);
+    // console.log("handleLink");
+    // console.log(href);
+
     const prefix = publicationJsonUrl.replace("manifest.json", "");
     if (href.startsWith(prefix)) {
         if (drawer.open) {
@@ -259,15 +260,15 @@ window.onerror = (err) => {
 };
 
 ipcRenderer.on(R2_EVENT_LINK, (_event: any, href: string) => {
-    console.log("R2_EVENT_LINK");
-    console.log(href);
+    // console.log("R2_EVENT_LINK");
+    // console.log(href);
     handleLink(href);
 });
 
 ipcRenderer.on(R2_EVENT_TRY_LCP_PASS_RES, (_event: any, okay: boolean, msg: string) => {
-    console.log("R2_EVENT_TRY_LCP_PASS_RES");
-    console.log(okay);
-    console.log(msg);
+    // console.log("R2_EVENT_TRY_LCP_PASS_RES");
+    // console.log(okay);
+    // console.log(msg);
 
     if (!okay) {
         // const message = "LCP error.";
@@ -417,14 +418,14 @@ window.addEventListener("DOMContentLoaded", () => {
     }
     if (drawerElement) {
         drawerElement.addEventListener("click", (ev) => {
-            console.log("DRAWER CLICK");
-            console.log(ev.target);
+            // console.log("DRAWER CLICK");
+            // console.log(ev.target);
             const allMenus = drawerElement.querySelectorAll(".mdc-simple-menu");
             const openedMenus: Node[] = [];
             allMenus.forEach((elem) => {
                 if ((elem as any).mdcSimpleMenu && (elem as any).mdcSimpleMenu.open) {
-                    console.log("OPENED MENU");
-                    console.log(elem);
+                    // console.log("OPENED MENU");
+                    // console.log(elem);
                     openedMenus.push(elem);
                 }
             });
@@ -440,8 +441,8 @@ window.addEventListener("DOMContentLoaded", () => {
             }
             if (needsToCloseMenus) {
                 openedMenus.forEach((elem) => {
-                    console.log("CLOSING MENU");
-                    console.log(elem);
+                    // console.log("CLOSING MENU");
+                    // console.log(elem);
                     (elem as any).mdcSimpleMenu.open = false;
                     const ss = (elem.parentNode as HTMLElement).querySelector(".mdc-select__selected-text");
                     if (ss) {
@@ -451,7 +452,7 @@ window.addEventListener("DOMContentLoaded", () => {
                     }
                 });
             } else {
-                console.log("NOT CLOSING MENU");
+                // console.log("NOT CLOSING MENU");
             }
         }, true);
     }
@@ -559,10 +560,10 @@ window.addEventListener("DOMContentLoaded", () => {
     if (buttonClearSettingsStyle) {
         buttonClearSettingsStyle.addEventListener("click", () => {
 
-            console.log(electronStore.store);
+            // console.log(electronStore.store);
             // (electronStore.store as any).styling = defaultsStyling;
             electronStore.set("styling", defaultsStyling);
-            console.log(electronStore.store);
+            // console.log(electronStore.store);
 
             drawer.open = false;
             setTimeout(() => {
@@ -624,8 +625,8 @@ function createWebView() {
     webview1.setAttribute("disableguestresize", "");
 
     webview1.addEventListener("ipc-message", (event) => {
-        console.log("webview1 ipc-message");
-        console.log(event.channel);
+        // console.log("webview1 ipc-message");
+        // console.log(event.channel);
         if (event.channel === R2_EVENT_LINK) {
             handleLink(event.args[0]);
         }
@@ -633,7 +634,7 @@ function createWebView() {
 
     webview1.addEventListener("dom-ready", () => {
         // webview1.openDevTools();
-        console.log("WEBVIEW DOM READY: " + _webviews.length);
+        // console.log("WEBVIEW DOM READY: " + _webviews.length);
 
         webview1.clearHistory();
 
@@ -735,7 +736,7 @@ function startNavigatorExperiment() {
     const fontSelect = document.getElementById("fontSelect");
     if (fontSelect) {
         (fontSelect as any).mdcSelect.listen("MDCSelect:change", (ev: any) => {
-            console.log("font MDCSelect:change");
+            // console.log("font MDCSelect:change");
             // console.log(ev);
             // console.log(ev.detail.selectedOptions[0].textContent);
             // console.log(ev.detail.selectedIndex);
@@ -743,7 +744,7 @@ function startNavigatorExperiment() {
 
             const index = ev.detail.selectedIndex;
 
-            console.log("FONT index: " + index);
+            // console.log("FONT index: " + index);
             const ff = index === 0 ? "DEFAULT" :
                 (index === 1 ? "OLD" :
                     (index === 2 ? "MODERN" :
@@ -765,7 +766,7 @@ function startNavigatorExperiment() {
         (nightSwitch as HTMLInputElement).checked = electronStore.get("styling.night");
         nightSwitch.addEventListener("change", (_event) => {
             const checked = (nightSwitch as HTMLInputElement).checked;
-            console.log("NIGHT checked: " + checked);
+            // console.log("NIGHT checked: " + checked);
             electronStore.set("styling.night", checked);
         });
 
@@ -782,7 +783,7 @@ function startNavigatorExperiment() {
         (readiumcssSwitch as HTMLInputElement).checked = electronStore.get("styling.readiumcss");
         readiumcssSwitch.addEventListener("change", (_event) => {
             const checked = (readiumcssSwitch as HTMLInputElement).checked;
-            console.log("READIUMCSS checked: " + checked);
+            // console.log("READIUMCSS checked: " + checked);
             electronStore.set("styling.readiumcss", checked);
         });
     }
@@ -792,7 +793,7 @@ function startNavigatorExperiment() {
         (basicSwitch as HTMLInputElement).checked = !electronStore.get("basicLinkTitles");
         basicSwitch.addEventListener("change", (_event) => {
             const checked = (basicSwitch as HTMLInputElement).checked;
-            console.log("BASIC checked: " + checked);
+            // console.log("BASIC checked: " + checked);
             electronStore.set("basicLinkTitles", !checked);
         });
     }
@@ -823,9 +824,9 @@ function startNavigatorExperiment() {
         if (!response.ok) {
             console.log("BAD RESPONSE?!");
         }
-        response.headers.forEach((arg0: any, arg1: any) => {
-            console.log(arg0 + " => " + arg1);
-        });
+        // response.headers.forEach((arg0: any, arg1: any) => {
+        //     console.log(arg0 + " => " + arg1);
+        // });
 
         let publicationJson: any | undefined;
         try {
@@ -836,7 +837,7 @@ function startNavigatorExperiment() {
         if (!publicationJson) {
             return;
         }
-        console.log(publicationJson);
+        // console.log(publicationJson);
 
         if (publicationJson.metadata && publicationJson.metadata.title) {
             const h1 = document.getElementById("pubTitle");
@@ -862,11 +863,15 @@ function startNavigatorExperiment() {
         if (publicationJson.spine) {
 
             const opts: IRiotOptsLinkList = {
-                basic: true, // always single-line list items (no title)
-                fixBasic: true,
+                // get basic() {
+                //     return true;
+                // },
+                basic: true,
+                fixBasic: true, // always single-line list items (no title)
                 links: publicationJson.spine as IRiotOptsLinkListItem[],
                 url: publicationJsonUrl,
             };
+            // const tag =
             riotMountLinkList("#reader_controls_SPINE", opts);
             // data-is="riot-linklist"
 
@@ -910,12 +915,30 @@ function startNavigatorExperiment() {
         if (publicationJson.toc && publicationJson.toc.length) {
 
             const opts: IRiotOptsLinkTree = {
+                // get basic() {
+                //     return electronStore.get("basicLinkTitles");
+                // },
                 basic: electronStore.get("basicLinkTitles"),
                 links: publicationJson.toc as IRiotOptsLinkTreeItem[],
                 url: publicationJsonUrl,
             };
-            riotMountLinkTree("#reader_controls_TOC", opts);
+            const tag = riotMountLinkTree("#reader_controls_TOC", opts)[0];
             // data-is="riot-linktree"
+
+            (electronStore as any).onDidChange("basicLinkTitles", (newValue: any, oldValue: any) => {
+                if (typeof newValue === "undefined" || typeof oldValue === "undefined") {
+                    return;
+                }
+                // console.log("STORE CHANGE 1: basicLinkTitles");
+                // console.log(oldValue);
+                // console.log(newValue);
+                // console.log(electronStore.get("basicLinkTitles"));
+                // console.log(tag.opts.basic);
+                // console.log(tag);
+
+                tag.opts.basic = newValue;
+                tag.update();
+            });
 
             // const readerControlsToc = document.getElementById("reader_controls_TOC");
             // if (readerControlsToc) {
@@ -925,12 +948,29 @@ function startNavigatorExperiment() {
         if (publicationJson["page-list"] && publicationJson["page-list"].length) {
 
             const opts: IRiotOptsLinkList = {
+                // get basic() {
+                //     return electronStore.get("basicLinkTitles");
+                // },
                 basic: electronStore.get("basicLinkTitles"),
                 links: publicationJson["page-list"] as IRiotOptsLinkListItem[],
                 url: publicationJsonUrl,
             };
-            riotMountLinkList("#reader_controls_PAGELIST", opts);
+            const tag = riotMountLinkList("#reader_controls_PAGELIST", opts)[0];
             // data-is="riot-linklist"
+
+            (electronStore as any).onDidChange("basicLinkTitles", (newValue: any, oldValue: any) => {
+                if (typeof newValue === "undefined" || typeof oldValue === "undefined") {
+                    return;
+                }
+                // console.log("STORE CHANGE 2: basicLinkTitles");
+                // console.log(oldValue);
+                // console.log(newValue);
+                // console.log(electronStore.get("basicLinkTitles"));
+                // console.log(tag);
+
+                tag.opts.basic = newValue;
+                tag.update();
+            });
 
             // const readerControlsPageList = document.getElementById("reader_controls_PAGELIST");
             // if (readerControlsPageList) {
@@ -981,12 +1021,29 @@ function startNavigatorExperiment() {
             //     url: publicationJsonUrl,
             // });
             const opts: IRiotOptsLinkListGroup = {
+                // get basic() {
+                //     return electronStore.get("basicLinkTitles");
+                // },
                 basic: electronStore.get("basicLinkTitles"),
                 linksgroup: landmarksData,
                 url: publicationJsonUrl,
             };
-            riotMountLinkListGroup("#reader_controls_LANDMARKS", opts);
+            const tag = riotMountLinkListGroup("#reader_controls_LANDMARKS", opts)[0];
             // data-is="riot-linklistgroup"
+
+            (electronStore as any).onDidChange("basicLinkTitles", (newValue: any, oldValue: any) => {
+                if (typeof newValue === "undefined" || typeof oldValue === "undefined") {
+                    return;
+                }
+                // console.log("STORE CHANGE 3: basicLinkTitles");
+                // console.log(oldValue);
+                // console.log(newValue);
+                // console.log(electronStore.get("basicLinkTitles"));
+                // console.log(tag);
+
+                tag.opts.basic = newValue;
+                tag.update();
+            });
         }
 
         // const readerControlsLandmarks = document.getElementById("reader_controls_LANDMARKS");
