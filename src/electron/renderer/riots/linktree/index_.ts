@@ -18,11 +18,13 @@ export interface IRiotOptsLinkTree {
     url: string;
 }
 
-// export interface IRiotTagLinkTree extends
-//     // IRiotOptsLinkTree,
-//     RiotTag { // RiotMixinWithRecursivePropertySetter
-//     // setBasic: (basic: boolean) => void;
-// }
+export interface IRiotTagLinkTree extends
+    // IRiotOptsLinkTree,
+    RiotTag { // RiotMixinWithRecursivePropertySetter
+    setBasic: (basic: boolean) => void;
+    // getBasic: () => boolean;
+    // basic: boolean;
+}
 
 export const riotMountLinkTree = (selector: string, opts: IRiotOptsLinkTree): RiotTag[] => {
     const tag = riot.mount(selector, opts);
@@ -30,22 +32,44 @@ export const riotMountLinkTree = (selector: string, opts: IRiotOptsLinkTree): Ri
     return tag;
 };
 
-(window as any).riot_linktree = function(_opts: IRiotOptsLinkTree) {
+// tslint:disable-next-line:space-before-function-paren
+(window as any).riot_linktree = function (_opts: IRiotOptsLinkTree) {
     // console.log(opts);
     // console.log(this);
 
-    // const that = this as RiotTag;
+    const that = this as IRiotTagLinkTree;
 
     // that.mixin(riot_mixin_RecursivePropertySetter);
 
     // that.links = opts.links;
     // that.url = opts.url;
-    // that.basic = opts.basic ? true : false;
+    // this.basic = opts.basic ? true : false;
 
+    // Object.defineProperty(this, "basic", { get: () => that.opts.basic });
     // that.setBasic = (basic: boolean) => {
-    //     that.opts.basic = basic;
-    //     // that.basic = basic;
-    //     // that.setPropertyRecursively("basic", basic, "riot-linktree");
+    // tslint:disable-next-line:space-before-function-paren
+    that.setBasic = function (basic: boolean) {
+        // console.log("SET: " + basic);
+        // if (that !== this) {
+        //     console.log(that);
+        //     console.log(this);
+        // }
+        this.opts.basic = basic;
+        // this.basic = basic;
+        this.update();
+    };
+
+    // // that.getBasic = (): boolean => {
+    // that.getBasic = function (): boolean {
+    //     // console.log("GET");
+    //     // if (that !== this) {
+    //     //     console.log(that);
+    //     //     console.log(this);
+    //     // }
+    //     const val = this.opts.basic;
+    //     // const val = this.basic;
+    //     // console.log("GET: " + val);
+    //     return val;
     // };
 
     this.onclick = (ev: RiotEvent) => {

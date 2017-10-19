@@ -18,11 +18,12 @@ export interface IRiotOptsLinkListGroup {
     url: string;
 }
 
-// export interface IRiotTagLinkListGroup extends
-//     // IRiotOptsLinkListGroup,
-//     RiotTag { // RiotMixinWithRecursivePropertySetter
-//     // setBasic: (basic: boolean) => void;
-// }
+export interface IRiotTagLinkListGroup extends
+    // IRiotOptsLinkListGroup,
+    RiotTag { // RiotMixinWithRecursivePropertySetter
+    setBasic: (basic: boolean) => void;
+    // setBasic: (basic: boolean) => void;
+}
 
 export const riotMountLinkListGroup = (selector: string, opts: IRiotOptsLinkListGroup): RiotTag[] => {
     const tag = riot.mount(selector, opts);
@@ -30,11 +31,12 @@ export const riotMountLinkListGroup = (selector: string, opts: IRiotOptsLinkList
     return tag;
 };
 
-(window as any).riot_linklistgroup = function(_opts: IRiotOptsLinkListGroup) {
+// tslint:disable-next-line:space-before-function-paren
+(window as any).riot_linklistgroup = function (_opts: IRiotOptsLinkListGroup) {
     // console.log(opts);
     // console.log(this);
 
-    const that = this as RiotTag;
+    const that = this as IRiotTagLinkListGroup;
 
     // that.mixin(riot_mixin_RecursivePropertySetter);
 
@@ -48,11 +50,9 @@ export const riotMountLinkListGroup = (selector: string, opts: IRiotOptsLinkList
     //     // that.setPropertyRecursively("basic", basic, "riot-linklist");
     // };
 
-    that.shouldUpdate = (_data: any, _nextOpts: any) => {
-        // console.log("shouldUpdate - linklistgroup");
-        // console.log(data);
-        // console.log(nextOpts);
-        // return data && typeof data.basic !== "undefined";
-        return true;
+    // tslint:disable-next-line:space-before-function-paren
+    that.setBasic = function (basic: boolean) {
+        this.opts.basic = basic;
+        this.update();
     };
 };

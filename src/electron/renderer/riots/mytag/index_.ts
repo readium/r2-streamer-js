@@ -9,7 +9,8 @@ export const riotMountMyTag = (opts: any): RiotTag[] => {
     return tag;
 };
 
-(window as any).riot_mytag = function(opts: any) {
+// tslint:disable-next-line:space-before-function-paren
+(window as any).riot_mytag = function (opts: any) {
     console.log(opts);
     console.log(this);
 

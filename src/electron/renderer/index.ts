@@ -7,16 +7,19 @@ import { getURLQueryParams } from "./querystring";
 import {
     IRiotOptsLinkList,
     IRiotOptsLinkListItem,
+    IRiotTagLinkList,
     riotMountLinkList,
 } from "./riots/linklist/index_";
 import {
     IRiotOptsLinkListGroup,
     IRiotOptsLinkListGroupItem,
+    IRiotTagLinkListGroup,
     riotMountLinkListGroup,
 } from "./riots/linklistgroup/index_";
 import {
     IRiotOptsLinkTree,
     IRiotOptsLinkTreeItem,
+    IRiotTagLinkTree,
     riotMountLinkTree,
 } from "./riots/linktree/index_";
 
@@ -193,45 +196,45 @@ const initFontSelect = () => {
     readiumCssOnOff();
 });
 
-// (electronStore as any).onDidChange("basicLinkTitles", (newValue: any, oldValue: any) => {
-//     if (typeof newValue === "undefined" || typeof oldValue === "undefined") {
-//         return;
-//     }
-//     console.log("STORE CHANGE: basicLinkTitles");
-//     console.log(oldValue);
-//     console.log(newValue);
+(electronStore as any).onDidChange("basicLinkTitles", (newValue: any, oldValue: any) => {
+    if (typeof newValue === "undefined" || typeof oldValue === "undefined") {
+        return;
+    }
+    // console.log("STORE CHANGE: basicLinkTitles");
+    // console.log(oldValue);
+    // console.log(newValue);
 
-//     const basicSwitch = document.getElementById("nav_basic_switch-input");
-//     if (basicSwitch) {
-//         (basicSwitch as HTMLInputElement).checked = !newValue;
-//     }
+    const basicSwitch = document.getElementById("nav_basic_switch-input");
+    if (basicSwitch) {
+        (basicSwitch as HTMLInputElement).checked = !newValue;
+    }
 
-//     const tags: RiotTag[] = riot.update();
-//     // console.log(tags);
-//     // console.log(riot);
-//     // console.log("----- 1");
-//     tags.forEach((tag) => {
-//         // (tag.opts as any).basic = !checked;
-//         if ((tag.opts as any).fixBasic) {
-//             return;
-//         }
-//         if ((tag as any).setBasic) {
-//             (tag as any).setBasic(newValue);
-//             // console.log(tag);
-//             tag.update();
-//         }
-//     });
-//     // console.log("----- 2");
-//     // riot.update();
-//     // tags.forEach((tag) => {
-//     //     // tag.update();
-//     //     console.log("-----");
-//     //     console.log(tag.opts.basic);
-//     //     tag.update({ basic: !checked });
-//     //     console.log(tag);
-//     //     console.log(tag.opts.basic);
-//     // });
-// });
+    // const tags: RiotTag[] = riot.update();
+    // // console.log(tags);
+    // // console.log(riot);
+    // // console.log("----- 1");
+    // tags.forEach((tag) => {
+    //     // (tag.opts as any).basic = !checked;
+    //     if ((tag.opts as any).fixBasic) {
+    //         return;
+    //     }
+    //     if ((tag as any).setBasic) {
+    //         (tag as any).setBasic(newValue);
+    //         // console.log(tag);
+    //         tag.update();
+    //     }
+    // });
+    // // console.log("----- 2");
+    // // riot.update();
+    // // tags.forEach((tag) => {
+    // //     // tag.update();
+    // //     console.log("-----");
+    // //     console.log(tag.opts.basic);
+    // //     tag.update({ basic: !checked });
+    // //     console.log(tag);
+    // //     console.log(tag.opts.basic);
+    // // });
+});
 
 let snackBar: any;
 let drawer: any;
@@ -922,7 +925,7 @@ function startNavigatorExperiment() {
                 links: publicationJson.toc as IRiotOptsLinkTreeItem[],
                 url: publicationJsonUrl,
             };
-            const tag = riotMountLinkTree("#reader_controls_TOC", opts)[0];
+            const tag = riotMountLinkTree("#reader_controls_TOC", opts)[0] as IRiotTagLinkTree;
             // data-is="riot-linktree"
 
             (electronStore as any).onDidChange("basicLinkTitles", (newValue: any, oldValue: any) => {
@@ -936,8 +939,7 @@ function startNavigatorExperiment() {
                 // console.log(tag.opts.basic);
                 // console.log(tag);
 
-                tag.opts.basic = newValue;
-                tag.update();
+                tag.setBasic(newValue);
             });
 
             // const readerControlsToc = document.getElementById("reader_controls_TOC");
@@ -955,7 +957,7 @@ function startNavigatorExperiment() {
                 links: publicationJson["page-list"] as IRiotOptsLinkListItem[],
                 url: publicationJsonUrl,
             };
-            const tag = riotMountLinkList("#reader_controls_PAGELIST", opts)[0];
+            const tag = riotMountLinkList("#reader_controls_PAGELIST", opts)[0] as IRiotTagLinkList;
             // data-is="riot-linklist"
 
             (electronStore as any).onDidChange("basicLinkTitles", (newValue: any, oldValue: any) => {
@@ -968,8 +970,7 @@ function startNavigatorExperiment() {
                 // console.log(electronStore.get("basicLinkTitles"));
                 // console.log(tag);
 
-                tag.opts.basic = newValue;
-                tag.update();
+                tag.setBasic(newValue);
             });
 
             // const readerControlsPageList = document.getElementById("reader_controls_PAGELIST");
@@ -1028,7 +1029,7 @@ function startNavigatorExperiment() {
                 linksgroup: landmarksData,
                 url: publicationJsonUrl,
             };
-            const tag = riotMountLinkListGroup("#reader_controls_LANDMARKS", opts)[0];
+            const tag = riotMountLinkListGroup("#reader_controls_LANDMARKS", opts)[0] as IRiotTagLinkListGroup;
             // data-is="riot-linklistgroup"
 
             (electronStore as any).onDidChange("basicLinkTitles", (newValue: any, oldValue: any) => {
@@ -1041,8 +1042,7 @@ function startNavigatorExperiment() {
                 // console.log(electronStore.get("basicLinkTitles"));
                 // console.log(tag);
 
-                tag.opts.basic = newValue;
-                tag.update();
+                tag.setBasic(newValue);
             });
         }
 
