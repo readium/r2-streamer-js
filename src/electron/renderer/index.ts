@@ -392,7 +392,7 @@ window.addEventListener("DOMContentLoaded", () => {
         const menu = new (window as any).mdc.menu.MDCSimpleMenu(menuEl);
         (menuEl as any).mdcSimpleMenu = menu;
         return menu;
-      };
+    };
 
     const fontSelect = document.getElementById("fontSelect");
     if (fontSelect) {
