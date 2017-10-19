@@ -33,6 +33,31 @@ ipcRenderer.on(R2_EVENT_READIUMCSS, (_event: any, messageString: any) => {
         removeAllCSSInline();
 
         if (messageJson.injectCSS.indexOf("rollback") < 0) {
+
+            let needsDefaultCSS = true;
+            if (win.document.head && win.document.head.childElementCount) {
+                let elem = win.document.head.firstElementChild;
+                while (elem) {
+                    if ((elem.localName && elem.localName.toLowerCase() === "style") ||
+                        (elem.getAttribute &&
+                            (elem.getAttribute("rel") === "stylesheet" ||
+                                elem.getAttribute("type") === "text/css" ||
+                                (elem.getAttribute("src") &&
+                                    (elem.getAttribute("src") as string).endsWith(".css"))))) {
+                        needsDefaultCSS = false;
+                        break;
+                    }
+                    elem = elem.nextElementSibling;
+                }
+            }
+            if (needsDefaultCSS && win.document.body) {
+                const styleAttr = win.document.body.querySelector("*[style]");
+                if (styleAttr) {
+                    needsDefaultCSS = false;
+                }
+            }
+            console.log("needsDefaultCSS: " + needsDefaultCSS);
+
             // appendCSS("base");
             // appendCSS("html5patch");
             // appendCSS("safeguards");
@@ -55,7 +80,9 @@ ipcRenderer.on(R2_EVENT_READIUMCSS, (_event: any, messageString: any) => {
             // }
 
             appendCSS("before");
-            appendCSS("default");
+            if (needsDefaultCSS) {
+                appendCSS("default");
+            }
             appendCSS("after");
 
             appendCSSInline("scrollbars", `
@@ -343,8 +370,10 @@ win.addEventListener("DOMContentLoaded", () => {
 
 win.addEventListener("resize", () => {
     console.log("webview resize");
-    win.document.body.scrollLeft = 0;
-    win.document.body.scrollTop = 0;
+    if (win.document.body) {
+        win.document.body.scrollLeft = 0;
+        win.document.body.scrollTop = 0;
+    }
 });
 
 function appendCSSInline(id: string, css: string) {
@@ -372,7 +401,11 @@ function appendCSS(mod: string) {
     linkElement.setAttribute("rel", "stylesheet");
     linkElement.setAttribute("type", "text/css");
     linkElement.setAttribute("href", urlRootReadiumCSS + "ReadiumCSS-" + mod + ".css");
-    win.document.head.appendChild(linkElement);
+    if (mod === "before" && win.document.head.childElementCount) {
+        win.document.head.insertBefore(linkElement, win.document.head.firstElementChild);
+    } else {
+        win.document.head.appendChild(linkElement);
+    }
 }
 
 function removeCSS(mod: string) {
