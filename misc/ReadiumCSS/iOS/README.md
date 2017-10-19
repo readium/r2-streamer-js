@@ -8,16 +8,19 @@ in ReadiumCSS-before.css:
 
 
 -- REMOVED USER-SELECT --
+
+```
   /* Disable text-selection in CSS until it’s managed in touchHandler.js */
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-
+```
 
 
 -- REMOVED MEDIA QUERY (KEEP RULES) --
 
+```
 /* Desktop small + phablet + tablet landscape */
 
 @media screen and (min-width: 60em), screen and (min-width: 36em) and (max-width: 47em) and (orientation: landscape) {
@@ -29,11 +32,12 @@ in ReadiumCSS-before.css:
     --RS__maxLineLength: none; /* If we don’t use this, colNumber user setting won’t work in Safari… */
   }
 }
-
+```
 
 
 -- REMOVED MEDIA QUERY (KEEP RULES) --
 
+```
 /* apply col setting except for tablet portrait */
 
 @media screen and (min-width: 60em), screen and (min-width: 36em) and (max-width: 47em) and (orientation: landscape) {
@@ -59,3 +63,4 @@ in ReadiumCSS-before.css:
     --RS__colWidth: auto; /* User explicitely tells he/she wants 2 columns, we reset floor value */
   }
 }
+```
