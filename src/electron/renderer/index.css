@@ -233,15 +233,18 @@ form {
 .tabPanel.active {
   display: block;
 }
-#nav-select {
+/* #nav-select */
+.mdc-select {
   width: 100% !important;
   background-position-x: 96%;
 }
-#nav-select-menu {
-  width: 100% !important;
-}
-#nav-select-text {
+/* #nav-select-text */
+.mdc-select__selected-text {
   padding-left: 1em;
+}
+/* #nav-select-menu */
+.mdc-select__menu {
+  width: 100% !important;
 }
 #drawerNav {
   height: 100%;

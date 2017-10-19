@@ -42,7 +42,7 @@
     <aside id="drawer" class="mdc-temporary-drawer">
       <nav id="drawerNav" class="mdc-temporary-drawer__drawer">
 
-          <div id="nav-select" class="mdc-select" role="listbox" tabindex="0" style="width: 100% !important;">
+          <div id="nav-select" class="mdc-select" role="listbox" tabindex="0">
             <span id="nav-select-text" class="mdc-select__selected-text">Table of contents</span>
             <div id="nav-select-menu" class="mdc-simple-menu mdc-select__menu">
               <ul class="mdc-list mdc-simple-menu__items">
@@ -105,14 +105,41 @@
                   </div>
 
                   <span class="mdc-typography--text">Font: </span>
-                  <select id="fontSelect" class="mdc-select" style="display: inline-block;">
+
+                  <div id="fontSelect" class="mdc-select" role="listbox" tabindex="0">
+                    <span class="mdc-select__selected-text">Default</span>
+                    <div class="mdc-simple-menu mdc-select__menu">
+                      <ul class="mdc-list mdc-simple-menu__items">
+                          <li class="mdc-list-item" role="option" tabindex="0" aria-selected>
+                            Default
+                          </li>
+                          <li class="mdc-list-item" role="option" tabindex="0">
+                            Old Style
+                          </li>
+                          <li class="mdc-list-item" role="option" tabindex="0">
+                            Modern
+                          </li>
+                          <li class="mdc-list-item" role="option" tabindex="0">
+                            Sans
+                          </li>
+                          <li class="mdc-list-item" role="option" tabindex="0">
+                            Humanist
+                          </li>
+                          <li class="mdc-list-item" role="option" tabindex="0">
+                            Readable (dys)
+                          </li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <!-- <select id="fontSelect" class="mdc-select" style="display: inline-block;">
                       <option value="DEFAULT" selected>Publisher default</option>
                       <option value="OLD" selected>Old Style</option>
                       <option value="MODERN" selected>Modern</option>
                       <option value="SANS" selected>Sans</option>
                       <option value="HUMAN" selected>Humanist</option>
                       <option value="DYS" selected>Readable (dys)</option>
-                  </select>
+                  </select> -->
 
                 </div>
 

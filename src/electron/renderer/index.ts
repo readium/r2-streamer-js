@@ -52,9 +52,11 @@ const lcpHint = queryParams["lcpHint"];
 
 const defaultsStyling = {
     dark: false,
+    font: "DEFAULT",
     invert: false,
     night: false,
     readiumcss: false,
+    sepia: false,
 };
 const defaults = {
     basicLinkTitles: true,
@@ -91,12 +93,14 @@ const readiumCssOnOff = () => {
     const on = electronStore.get("styling.readiumcss");
     if (on) {
         const dark = electronStore.get("styling.dark");
-        const sepia = electronStore.get("styling.sepia");
-        const night = electronStore.get("styling.night");
         const font = electronStore.get("styling.font");
+        const invert = electronStore.get("styling.invert");
+        const night = electronStore.get("styling.night");
+        const sepia = electronStore.get("styling.sepia");
         const cssJson = {
             dark,
             font,
+            invert,
             night,
             sepia,
         };
@@ -141,7 +145,8 @@ const readiumCssOnOff = () => {
         // } else {
         //     fontSelect.removeAttribute("disabled");
         // }
-        (fontSelect as HTMLSelectElement).disabled = !newValue;
+        // (fontSelect as HTMLSelectElement)
+        (fontSelect as any).mdcSelect.disabled = !newValue;
     }
 
     if (!newValue) {
@@ -159,14 +164,19 @@ const initFontSelect = () => {
                     (font === "HUMAN" ? 4 :
                         (font === "DYS" ? 5 :
                             0))));
-        (fontSelect as HTMLSelectElement).selectedIndex = i;
+
+        // (fontSelect as HTMLSelectElement)
+        (fontSelect as any).mdcSelect.selectedIndex = i;
+        console.log("FONT SELECT INIT");
+        console.log((fontSelect as any).mdcSelect.selectedIndex);
 
         // if (!electronStore.get("styling.readiumcss")) {
         //     fontSelect.setAttribute("disabled", "");
         // } else {
         //     fontSelect.removeAttribute("disabled");
         // }
-        (fontSelect as HTMLSelectElement).disabled = !electronStore.get("styling.readiumcss");
+        // (fontSelect as HTMLSelectElement)
+        (fontSelect as any).mdcSelect.disabled = !electronStore.get("styling.readiumcss");
     }
 };
 
@@ -378,18 +388,72 @@ window.addEventListener("DOMContentLoaded", () => {
     } else {
         document.body.classList.remove("mdc-theme--dark");
     }
+    const menuFactory = (menuEl: HTMLElement) => {
+        const menu = new (window as any).mdc.menu.MDCSimpleMenu(menuEl);
+        (menuEl as any).mdcSimpleMenu = menu;
+        return menu;
+      };
+
+    const fontSelect = document.getElementById("fontSelect");
+    if (fontSelect) {
+        // MDCSelect.attachTo(fontSelect)
+        const fontSelector = new (window as any).mdc.select.MDCSelect(fontSelect, undefined, menuFactory);
+        (fontSelect as any).mdcSelect = fontSelector;
+    }
 
     const snackBarElem = document.getElementById("snackbar");
     snackBar = new (window as any).mdc.snackbar.MDCSnackbar(snackBarElem);
+    (snackBarElem as any).mdcSnackbar = snackBar;
     snackBar.dismissesOnAction = true;
 
     const drawerElement = document.getElementById("drawer");
     drawer = new (window as any).mdc.drawer.MDCTemporaryDrawer(drawerElement);
+    (drawerElement as any).mdcTemporaryDrawer = drawer;
     const drawerButton = document.getElementById("drawerButton");
     if (drawerButton) {
         drawerButton.addEventListener("click", () => {
             drawer.open = true;
         });
+    }
+    if (drawerElement) {
+        drawerElement.addEventListener("click", (ev) => {
+            console.log("DRAWER CLICK");
+            console.log(ev.target);
+            const allMenus = drawerElement.querySelectorAll(".mdc-simple-menu");
+            const openedMenus: Node[] = [];
+            allMenus.forEach((elem) => {
+                if ((elem as any).mdcSimpleMenu && (elem as any).mdcSimpleMenu.open) {
+                    console.log("OPENED MENU");
+                    console.log(elem);
+                    openedMenus.push(elem);
+                }
+            });
+
+            let needsToCloseMenus = true;
+            let currElem: Node | null = ev.target as Node;
+            while (currElem) {
+                if (openedMenus.indexOf(currElem) >= 0) {
+                    needsToCloseMenus = false;
+                    break;
+                }
+                currElem = currElem.parentNode;
+            }
+            if (needsToCloseMenus) {
+                openedMenus.forEach((elem) => {
+                    console.log("CLOSING MENU");
+                    console.log(elem);
+                    (elem as any).mdcSimpleMenu.open = false;
+                    const ss = (elem.parentNode as HTMLElement).querySelector(".mdc-select__selected-text");
+                    if (ss) {
+                        (ss as HTMLElement).style.transform = "initial";
+                        (ss as HTMLElement).style.opacity = "1";
+                        (ss as HTMLElement).focus();
+                    }
+                });
+            } else {
+                console.log("NOT CLOSING MENU");
+            }
+        }, true);
     }
     // if (drawerElement) {
     //     drawerElement.addEventListener("MDCTemporaryDrawer:open", () => {
@@ -401,7 +465,8 @@ window.addEventListener("DOMContentLoaded", () => {
     // }
 
     const selectElement = document.getElementById("nav-select");
-    const navSelector = new (window as any).mdc.select.MDCSelect(selectElement);
+    const navSelector = new (window as any).mdc.select.MDCSelect(selectElement, undefined, menuFactory);
+    (selectElement as any).mdcSelect = navSelector;
     navSelector.listen("MDCSelect:change", (ev: any) => {
         // console.log("MDCSelect:change");
         // console.log(ev);
@@ -419,26 +484,10 @@ window.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // const tabsElement = document.getElementById("tabs");
-    // const tabs = new (window as any).mdc.tabs.MDCTabBarScroller(tabsElement);
-    // // tabs.tabBar.layout();
-    // tabs.tabBar.preventDefaultOnClick = true;
-    // tabs.tabBar.listen("MDCTabBar:change", (ev: any) => {
-    //     console.log("MDCTabBar:change");
-    //     console.log(ev.detail.activeTabIndex);
-    //     const activePanel = document.querySelector(".tabPanel.active");
-    //     if (activePanel) {
-    //         activePanel.classList.remove("active");
-    //     }
-    //     const newActivePanel = document.querySelector(".tabPanel:nth-child(" + (ev.detail.activeTabIndex + 1) + ")");
-    //     if (newActivePanel) {
-    //         newActivePanel.classList.add("active");
-    //     }
-    // });
-
     const diagElem = document.querySelector("#lcpDialog");
     const lcpPassInput = document.getElementById("lcpPassInput");
     lcpDialog = new (window as any).mdc.dialog.MDCDialog(diagElem);
+    (diagElem as any).mdcDialog = lcpDialog;
     lcpDialog.listen("MDCDialog:accept", () => {
         // console.log("MDCDialog:accept");
 
@@ -510,8 +559,10 @@ window.addEventListener("DOMContentLoaded", () => {
     if (buttonClearSettingsStyle) {
         buttonClearSettingsStyle.addEventListener("click", () => {
 
+            console.log(electronStore.store);
             // (electronStore.store as any).styling = defaultsStyling;
             electronStore.set("styling", defaultsStyling);
+            console.log(electronStore.store);
 
             drawer.open = false;
             setTimeout(() => {
@@ -587,16 +638,6 @@ function createWebView() {
         webview1.clearHistory();
 
         readiumCssOnOff();
-
-        // const cssButtonInject = document.getElementById("cssButtonInject");
-        // if (cssButtonInject) {
-        //     cssButtonInject.removeAttribute("disabled");
-        // }
-
-        // const cssButtonReset = document.getElementById("cssButtonReset");
-        // if (cssButtonReset) {
-        //     cssButtonReset.removeAttribute("disabled");
-        // }
 
         // webview1.style.visibility = "visible";
 
@@ -690,10 +731,18 @@ function startNavigatorExperiment() {
     }
 
     initFontSelect();
+
     const fontSelect = document.getElementById("fontSelect");
     if (fontSelect) {
-        fontSelect.addEventListener("change", (_event) => {
-            const index = (fontSelect as HTMLSelectElement).selectedIndex;
+        (fontSelect as any).mdcSelect.listen("MDCSelect:change", (ev: any) => {
+            console.log("font MDCSelect:change");
+            // console.log(ev);
+            // console.log(ev.detail.selectedOptions[0].textContent);
+            // console.log(ev.detail.selectedIndex);
+            // console.log(ev.detail.value);
+
+            const index = ev.detail.selectedIndex;
+
             console.log("FONT index: " + index);
             const ff = index === 0 ? "DEFAULT" :
                 (index === 1 ? "OLD" :
@@ -704,6 +753,11 @@ function startNavigatorExperiment() {
                                     "DEFAULT")))));
             electronStore.set("styling.font", ff);
         });
+
+        // fontSelect.addEventListener("change", (_event) => {
+        //     const index = (fontSelect as HTMLSelectElement).selectedIndex;
+        //     ...
+        // });
     }
 
     const nightSwitch = document.getElementById("night_switch-input");
