@@ -1,6 +1,7 @@
 import debounce = require("debounce");
-import { ipcRenderer } from "electron";
 import { shell } from "electron";
+import { ipcRenderer } from "electron";
+import ElectronStore = require("electron-store");
 import { R2_EVENT_LINK, R2_EVENT_READIUMCSS, R2_EVENT_TRY_LCP_PASS, R2_EVENT_TRY_LCP_PASS_RES } from "../common/events";
 import { R2_SESSION_WEBVIEW } from "../common/sessions";
 import { getURLQueryParams } from "./querystring";
@@ -22,8 +23,12 @@ import {
     IRiotTagLinkTree,
     riotMountLinkTree,
 } from "./riots/linktree/index_";
-
-import ElectronStore = require("electron-store");
+import {
+    IRiotOptsMenuSelect,
+    IRiotOptsMenuSelectItem,
+    IRiotTagMenuSelect,
+    riotMountMenuSelect,
+} from "./riots/menuselect/index_";
 
 // import { riotMountMyTag } from "./riots/mytag/index_";
 // import { RiotMixinWithOpts } from "./riots/riot_mixin_EventTracer";
@@ -92,7 +97,7 @@ const electronStore = new ElectronStore({
     readiumCssOnOff();
 });
 
-const readiumCssOnOff = () => {
+const readiumCssOnOff = debounce(() => {
     const on = electronStore.get("styling.readiumcss");
     if (on) {
         const dark = electronStore.get("styling.dark");
@@ -119,7 +124,7 @@ const readiumCssOnOff = () => {
             wv.send(R2_EVENT_READIUMCSS, JSON.stringify(jsonMsg)); // .getWebContents()
         });
     }
-};
+}, 500);
 
 (electronStore as any).onDidChange("styling.readiumcss", (newValue: any, oldValue: any) => {
     if (typeof newValue === "undefined" || typeof oldValue === "undefined") {
@@ -141,59 +146,9 @@ const readiumCssOnOff = () => {
         (nightSwitch as HTMLInputElement).disabled = !newValue;
     }
 
-    const fontSelect = document.getElementById("fontSelect");
-    if (fontSelect) {
-        // if (!newValue) {
-        //     fontSelect.setAttribute("disabled", "");
-        // } else {
-        //     fontSelect.removeAttribute("disabled");
-        // }
-        // (fontSelect as HTMLSelectElement)
-        (fontSelect as any).mdcSelect.disabled = !newValue;
-    }
-
     if (!newValue) {
         electronStore.set("styling.night", false);
     }
-});
-
-const initFontSelect = () => {
-    const fontSelect = document.getElementById("fontSelect");
-    if (fontSelect) {
-        const font = electronStore.get("styling.font");
-        const i = font === "OLD" ? 1 :
-            (font === "MODERN" ? 2 :
-                (font === "SANS" ? 3 :
-                    (font === "HUMAN" ? 4 :
-                        (font === "DYS" ? 5 :
-                            0))));
-
-        // (fontSelect as HTMLSelectElement)
-        (fontSelect as any).mdcSelect.selectedIndex = i;
-        // console.log("FONT SELECT INIT");
-        // console.log((fontSelect as any).mdcSelect.selectedIndex);
-
-        // if (!electronStore.get("styling.readiumcss")) {
-        //     fontSelect.setAttribute("disabled", "");
-        // } else {
-        //     fontSelect.removeAttribute("disabled");
-        // }
-        // (fontSelect as HTMLSelectElement)
-        (fontSelect as any).mdcSelect.disabled = !electronStore.get("styling.readiumcss");
-    }
-};
-
-(electronStore as any).onDidChange("styling.font", (newValue: any, oldValue: any) => {
-    if (typeof newValue === "undefined" || typeof oldValue === "undefined") {
-        return;
-    }
-    // console.log("STORE CHANGE: styling.font");
-    // console.log(oldValue);
-    // console.log(newValue);
-
-    initFontSelect();
-
-    readiumCssOnOff();
 });
 
 (electronStore as any).onDidChange("basicLinkTitles", (newValue: any, oldValue: any) => {
@@ -368,6 +323,65 @@ function installKeyboardMouseFocusHandler() {
     // });
 }
 
+const initFontSelector = () => {
+
+    const options: IRiotOptsMenuSelectItem[] =
+        [{
+            id: "DEFAULT",
+            label: "Default",
+        }, {
+            id: "OLD",
+            label: "Old Style",
+        }, {
+            id: "MODERN",
+            label: "Modern",
+        }, {
+            id: "SANS",
+            label: "Sans",
+        }, {
+            id: "HUMAN",
+            label: "Humanist",
+        }, {
+            id: "DYS",
+            label: "Readable (dys)",
+        }];
+    const opts: IRiotOptsMenuSelect = {
+        disabled: !electronStore.get("styling.readiumcss"),
+        options,
+        selected: electronStore.get("styling.font"), // options[0].id,
+    };
+    const tag = riotMountMenuSelect("#fontSelect", opts)[0] as IRiotTagMenuSelect;
+    // data-is="riot-menuselect"
+
+    tag.on("selectionChanged", (val: string) => {
+        // console.log("selectionChanged (font)");
+
+        electronStore.set("styling.font", val);
+    });
+
+    (electronStore as any).onDidChange("styling.font", (newValue: any, oldValue: any) => {
+        if (typeof newValue === "undefined" || typeof oldValue === "undefined") {
+            return;
+        }
+
+        // console.log("styling.font");
+
+        tag.setSelectedItem(newValue);
+
+        readiumCssOnOff();
+    });
+
+    (electronStore as any).onDidChange("styling.readiumcss", (newValue: any, oldValue: any) => {
+        if (typeof newValue === "undefined" || typeof oldValue === "undefined") {
+            return;
+        }
+
+        // console.log("styling.readiumcss");
+
+        tag.setDisabled(!newValue);
+    });
+};
+
 window.addEventListener("DOMContentLoaded", () => {
 
     setTimeout(() => {
@@ -392,18 +406,8 @@ window.addEventListener("DOMContentLoaded", () => {
     } else {
         document.body.classList.remove("mdc-theme--dark");
     }
-    const menuFactory = (menuEl: HTMLElement) => {
-        const menu = new (window as any).mdc.menu.MDCSimpleMenu(menuEl);
-        (menuEl as any).mdcSimpleMenu = menu;
-        return menu;
-    };
 
-    const fontSelect = document.getElementById("fontSelect");
-    if (fontSelect) {
-        // MDCSelect.attachTo(fontSelect)
-        const fontSelector = new (window as any).mdc.select.MDCSelect(fontSelect, undefined, menuFactory);
-        (fontSelect as any).mdcSelect = fontSelector;
-    }
+    initFontSelector();
 
     const snackBarElem = document.getElementById("snackbar");
     snackBar = new (window as any).mdc.snackbar.MDCSnackbar(snackBarElem);
@@ -467,6 +471,12 @@ window.addEventListener("DOMContentLoaded", () => {
     //         console.log("MDCTemporaryDrawer:close");
     //     });
     // }
+
+    const menuFactory = (menuEl: HTMLElement) => {
+        const menu = new (window as any).mdc.menu.MDCSimpleMenu(menuEl);
+        (menuEl as any).mdcSimpleMenu = menu;
+        return menu;
+    };
 
     const selectElement = document.getElementById("nav-select");
     const navSelector = new (window as any).mdc.select.MDCSelect(selectElement, undefined, menuFactory);
@@ -732,36 +742,6 @@ function startNavigatorExperiment() {
     const publicationViewport = document.getElementById("publication_viewport");
     if (publicationViewport) {
         publicationViewport.appendChild(webviewFull);
-    }
-
-    initFontSelect();
-
-    const fontSelect = document.getElementById("fontSelect");
-    if (fontSelect) {
-        (fontSelect as any).mdcSelect.listen("MDCSelect:change", (ev: any) => {
-            // console.log("font MDCSelect:change");
-            // console.log(ev);
-            // console.log(ev.detail.selectedOptions[0].textContent);
-            // console.log(ev.detail.selectedIndex);
-            // console.log(ev.detail.value);
-
-            const index = ev.detail.selectedIndex;
-
-            // console.log("FONT index: " + index);
-            const ff = index === 0 ? "DEFAULT" :
-                (index === 1 ? "OLD" :
-                    (index === 2 ? "MODERN" :
-                        (index === 3 ? "SANS" :
-                            (index === 4 ? "HUMAN" :
-                                (index === 5 ? "DYS" :
-                                    "DEFAULT")))));
-            electronStore.set("styling.font", ff);
-        });
-
-        // fontSelect.addEventListener("change", (_event) => {
-        //     const index = (fontSelect as HTMLSelectElement).selectedIndex;
-        //     ...
-        // });
     }
 
     const nightSwitch = document.getElementById("night_switch-input");

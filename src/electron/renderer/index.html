@@ -24,6 +24,7 @@
   <script type="application/javascript" src="./riots/linklist/index.js"> </script>
   <script type="application/javascript" src="./riots/linklistgroup/index.js"> </script>
   <script type="application/javascript" src="./riots/linktree/index.js"> </script>
+  <script type="application/javascript" src="./riots/menuselect/index.js"> </script>
 
   <!-- <script type="application/javascript" src="./index.js"> </script> -->
   <script type="application/javascript">
@@ -106,41 +107,7 @@
 
                   <span class="mdc-typography--text">Font: </span>
 
-                  <div id="fontSelect" class="mdc-select" role="listbox" tabindex="0">
-                    <span class="mdc-select__selected-text">Default</span>
-                    <div class="mdc-simple-menu mdc-select__menu">
-                      <ul class="mdc-list mdc-simple-menu__items">
-                          <li class="mdc-list-item" role="option" tabindex="0" aria-selected>
-                            Default
-                          </li>
-                          <li class="mdc-list-item" role="option" tabindex="0">
-                            Old Style
-                          </li>
-                          <li class="mdc-list-item" role="option" tabindex="0">
-                            Modern
-                          </li>
-                          <li class="mdc-list-item" role="option" tabindex="0">
-                            Sans
-                          </li>
-                          <li class="mdc-list-item" role="option" tabindex="0">
-                            Humanist
-                          </li>
-                          <li class="mdc-list-item" role="option" tabindex="0">
-                            Readable (dys)
-                          </li>
-                      </ul>
-                    </div>
-                  </div>
-
-                  <!-- <select id="fontSelect" class="mdc-select" style="display: inline-block;">
-                      <option value="DEFAULT" selected>Publisher default</option>
-                      <option value="OLD" selected>Old Style</option>
-                      <option value="MODERN" selected>Modern</option>
-                      <option value="SANS" selected>Sans</option>
-                      <option value="HUMAN" selected>Humanist</option>
-                      <option value="DYS" selected>Readable (dys)</option>
-                  </select> -->
-
+                  <div data-is="riot-menuselect" id="fontSelect"> </div>
                 </div>
 
                 <hr class="mdc-list-divider" role="presentation">
