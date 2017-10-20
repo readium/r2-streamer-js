@@ -1,5 +1,6 @@
 import debounce = require("debounce");
 import { ipcRenderer } from "electron";
+import ResizeSensor = require("resize-sensor/ResizeSensor");
 // import { fullQualifiedSelector } from "./cssselector";
 
 import { R2_EVENT_LINK, R2_EVENT_READIUMCSS, R2_EVENT_WEBVIEW_READY } from "../common/events";
@@ -13,7 +14,7 @@ const win = (global as any).window as Window;
 
 const urlRootReadiumCSS = win.location.origin + "/readium-css/iOS/";
 
-const urlResizeSensor = win.location.origin + "/resize-sensor.js";
+// const urlResizeSensor = win.location.origin + "/resize-sensor.js";
 
 const DEBUG_VISUALS = true;
 
@@ -463,8 +464,9 @@ const activateResizeSensor = () => {
     let skipFirstScroll = skipFirstResize;
 
     if (win.document.body) {
+        // new (win as any).
         // tslint:disable-next-line:no-unused-expression
-        new (win as any).ResizeSensor(win.document.body, () => {
+        new ResizeSensor(win.document.body, () => {
             console.log("ResizeSensor");
             // console.log(win.document.body.clientWidth);
             // console.log(win.document.body.clientHeight);
@@ -513,20 +515,18 @@ const activateResizeSensor = () => {
     }, 800));
 };
 
-const injectResizeSensor = () => {
-
-    ensureHead();
-
-    const scriptElement = win.document.createElement("script");
-    scriptElement.setAttribute("id", "Readium2-ResizeSensor");
-    scriptElement.setAttribute("type", "application/javascript");
-    scriptElement.setAttribute("src", urlResizeSensor);
-    scriptElement.appendChild(win.document.createTextNode(" "));
-    win.document.head.appendChild(scriptElement);
-    scriptElement.addEventListener("load", () => {
-        console.log("ResizeSensor LOADED");
-    });
-};
+// const injectResizeSensor = () => {
+//     ensureHead();
+//     const scriptElement = win.document.createElement("script");
+//     scriptElement.setAttribute("id", "Readium2-ResizeSensor");
+//     scriptElement.setAttribute("type", "application/javascript");
+//     scriptElement.setAttribute("src", urlResizeSensor);
+//     scriptElement.appendChild(win.document.createTextNode(" "));
+//     win.document.head.appendChild(scriptElement);
+//     scriptElement.addEventListener("load", () => {
+//         console.log("ResizeSensor LOADED");
+//     });
+// };
 
 let _locationHashOverride: Element | undefined;
 let _readyPassDone = false;
@@ -579,7 +579,7 @@ outline-style: none !important;
         return false;
     }, true);
 
-    injectResizeSensor();
+    // injectResizeSensor();
 });
 
 const processXY = (x: number, y: number) => {

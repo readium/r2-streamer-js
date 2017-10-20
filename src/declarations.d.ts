@@ -11,6 +11,7 @@ declare module "yazl";
 declare module "yauzl";
 declare module "filehound";
 declare module "bindings";
+declare module "resize-sensor/ResizeSensor";
 
 // See test/ava.ts
 // Also see .vscode/launch.json
