@@ -1,7 +1,10 @@
+import { IStringMap } from "@r2-streamer-js/models/metadata-multilang";
+import { Publication } from "@r2-streamer-js/models/publication";
 import debounce = require("debounce");
 import { ipcRenderer } from "electron";
 import { shell } from "electron";
 import ElectronStore = require("electron-store");
+import { JSON as TAJSON } from "ta-json";
 import {
     R2_EVENT_LINK,
     R2_EVENT_READIUMCSS,
@@ -901,39 +904,55 @@ function startNavigatorExperiment() {
         //     console.log(arg0 + " => " + arg1);
         // });
 
-        let publicationJson: any | undefined;
+        let pubJson: any | undefined;
         try {
-            publicationJson = await response.json();
+            pubJson = await response.json();
         } catch (e) {
             console.log(e);
         }
-        if (!publicationJson) {
+        if (!pubJson) {
             return;
         }
         // console.log(publicationJson);
 
-        if (publicationJson.metadata && publicationJson.metadata.title) {
-            const h1 = document.getElementById("pubTitle");
-            if (h1) {
-                (h1 as HTMLElement).textContent = publicationJson.metadata.title;
+        // const pubJson = global.JSON.parse(publicationStr);
+
+        const publication = TAJSON.deserialize<Publication>(pubJson, Publication);
+
+        if (publication.Metadata && publication.Metadata.Title) {
+            let title: string | undefined;
+            if (typeof publication.Metadata.Title === "string") {
+                title = publication.Metadata.Title;
+            } else {
+                const keys = Object.keys(publication.Metadata.Title as IStringMap);
+                if (keys && keys.length) {
+                    title = (publication.Metadata.Title as IStringMap)[keys[0]];
+                }
+            }
+
+            if (title) {
+                const h1 = document.getElementById("pubTitle");
+                if (h1) {
+                    (h1 as HTMLElement).textContent = title;
+                }
             }
         }
 
         const buttonNavLeft = document.getElementById("buttonNavLeft");
         if (buttonNavLeft) {
             buttonNavLeft.addEventListener("click", (_event) => {
-                navLeftOrRight(false, publicationJsonUrl, publicationJson);
+                navLeftOrRight(false, publicationJsonUrl, publication);
             });
         }
 
         const buttonNavRight = document.getElementById("buttonNavRight");
         if (buttonNavRight) {
             buttonNavRight.addEventListener("click", (_event) => {
-                navLeftOrRight(true, publicationJsonUrl, publicationJson);
+                navLeftOrRight(true, publicationJsonUrl, publication);
             });
         }
 
-        if (publicationJson.spine) {
+        if (publication.Spine && publication.Spine.length) {
 
             const opts: IRiotOptsLinkList = {
                 // get basic() {
@@ -941,17 +960,17 @@ function startNavigatorExperiment() {
                 // },
                 basic: true,
                 fixBasic: true, // always single-line list items (no title)
-                links: publicationJson.spine as IRiotOptsLinkListItem[],
+                links: pubJson.spine as IRiotOptsLinkListItem[],
                 url: publicationJsonUrl,
             };
             // const tag =
             riotMountLinkList("#reader_controls_SPINE", opts);
             // data-is="riot-linklist"
 
-            const firstLinear = publicationJson.spine.length ? publicationJson.spine[0] : undefined;
+            const firstLinear = publication.Spine[0];
             if (firstLinear) {
                 setTimeout(() => {
-                    const firstLinearLinkHref = publicationJsonUrl + "/../" + firstLinear.href;
+                    const firstLinearLinkHref = publicationJsonUrl + "/../" + firstLinear.Href;
                     handleLink(firstLinearLinkHref);
                 }, 200);
             }
@@ -985,14 +1004,14 @@ function startNavigatorExperiment() {
             // }
         }
 
-        if (publicationJson.toc && publicationJson.toc.length) {
+        if (publication.TOC && publication.TOC.length) {
 
             const opts: IRiotOptsLinkTree = {
                 // get basic() {
                 //     return electronStore.get("basicLinkTitles");
                 // },
                 basic: electronStore.get("basicLinkTitles"),
-                links: publicationJson.toc as IRiotOptsLinkTreeItem[],
+                links: pubJson.toc as IRiotOptsLinkTreeItem[],
                 url: publicationJsonUrl,
             };
             const tag = riotMountLinkTree("#reader_controls_TOC", opts)[0] as IRiotTagLinkTree;
@@ -1017,14 +1036,14 @@ function startNavigatorExperiment() {
             //     appendToc(publicationJson.toc, readerControlsToc);
             // }
         }
-        if (publicationJson["page-list"] && publicationJson["page-list"].length) {
+        if (publication.PageList && publication.PageList.length) {
 
             const opts: IRiotOptsLinkList = {
                 // get basic() {
                 //     return electronStore.get("basicLinkTitles");
                 // },
                 basic: electronStore.get("basicLinkTitles"),
-                links: publicationJson["page-list"] as IRiotOptsLinkListItem[],
+                links: pubJson["page-list"] as IRiotOptsLinkListItem[],
                 url: publicationJsonUrl,
             };
             const tag = riotMountLinkList("#reader_controls_PAGELIST", opts)[0] as IRiotTagLinkList;
@@ -1050,38 +1069,38 @@ function startNavigatorExperiment() {
         }
 
         const landmarksData: IRiotOptsLinkListGroupItem[] = [];
-        if (publicationJson.landmarks && publicationJson.landmarks.length) {
+        if (publication.Landmarks && publication.Landmarks.length) {
             landmarksData.push({
                 label: "Main",
-                links: publicationJson.landmarks as IRiotOptsLinkListItem[],
+                links: pubJson.landmarks as IRiotOptsLinkListItem[],
                 // url: publicationJsonUrl,
             });
         }
-        if (publicationJson.lot && publicationJson.lot.length) {
+        if (publication.LOT && publication.LOT.length) {
             landmarksData.push({
                 label: "Tables",
-                links: publicationJson.lot as IRiotOptsLinkListItem[],
+                links: pubJson.lot as IRiotOptsLinkListItem[],
                 // url: publicationJsonUrl,
             });
         }
-        if (publicationJson.loi && publicationJson.loi.length) {
+        if (publication.LOI && publication.LOI.length) {
             landmarksData.push({
                 label: "Illustrations",
-                links: publicationJson.loi as IRiotOptsLinkListItem[],
+                links: pubJson.loi as IRiotOptsLinkListItem[],
                 // url: publicationJsonUrl,
             });
         }
-        if (publicationJson.lov && publicationJson.lov.length) {
+        if (publication.LOV && publication.LOV.length) {
             landmarksData.push({
                 label: "Video",
-                links: publicationJson.lov as IRiotOptsLinkListItem[],
+                links: pubJson.lov as IRiotOptsLinkListItem[],
                 // url: publicationJsonUrl,
             });
         }
-        if (publicationJson.loa && publicationJson.loa.length) {
+        if (publication.LOA && publication.LOA.length) {
             landmarksData.push({
                 label: "Audio",
-                links: publicationJson.loa as IRiotOptsLinkListItem[],
+                links: pubJson.loa as IRiotOptsLinkListItem[],
                 // url: publicationJsonUrl,
             });
         }
@@ -1206,6 +1225,6 @@ function startNavigatorExperiment() {
 //     anchor.appendChild(ul);
 // }
 
-function navLeftOrRight(_right: boolean, _publicationJsonUrl: string, _publicationJson: any) {
+function navLeftOrRight(_right: boolean, _publicationJsonUrl: string, _publication: Publication) {
     // TODO: publication spine + pagination state
 }

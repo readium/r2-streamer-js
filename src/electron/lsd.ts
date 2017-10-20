@@ -1,9 +1,9 @@
 import * as fs from "fs";
 
-import { Publication } from "@models/publication";
-import { LCP } from "@parser/epub/lcp";
-import { streamToBufferPromise } from "@utils/stream/BufferUtils";
-import { injectBufferInZip } from "@utils/zip/zipInjector";
+import { streamToBufferPromise } from "@r2-streamer-js/_utils/stream/BufferUtils";
+import { injectBufferInZip } from "@r2-streamer-js/_utils/zip/zipInjector";
+import { Publication } from "@r2-streamer-js/models/publication";
+import { LCP } from "@r2-streamer-js/parser/epub/lcp";
 import * as debug_ from "debug";
 import * as moment from "moment";
 import * as request from "request";

@@ -32,6 +32,9 @@
       ],
       "@opds/*": [
         "src/opds/*"
+      ],
+      "@r2-streamer-js/*": [
+        "src/*"
       ]
     },
     "strictNullChecks": true,

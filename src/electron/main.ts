@@ -17,10 +17,12 @@ import * as crypto from "crypto";
 import * as fs from "fs";
 import * as path from "path";
 
-import { Publication } from "@models/publication";
-import { LCP } from "@parser/epub/lcp";
-import { encodeURIComponent_RFC3986 } from "@utils/http/UrlUtils";
-import { injectFileInZip } from "@utils/zip/zipInjector";
+import { encodeURIComponent_RFC3986 } from "@r2-streamer-js/_utils/http/UrlUtils";
+import { injectFileInZip } from "@r2-streamer-js/_utils/zip/zipInjector";
+import { Server } from "@r2-streamer-js/http/server";
+import { initGlobals } from "@r2-streamer-js/init-globals";
+import { Publication } from "@r2-streamer-js/models/publication";
+import { LCP } from "@r2-streamer-js/parser/epub/lcp";
 import * as debug_ from "debug";
 import { BrowserWindow, Menu, app, dialog, ipcMain, session, webContents } from "electron";
 import * as express from "express";
@@ -29,9 +31,6 @@ import * as portfinder from "portfinder";
 import * as request from "request";
 import * as requestPromise from "request-promise-native";
 import { JSON as TAJSON } from "ta-json";
-
-import { Server } from "../http/server";
-import { initGlobals } from "../init-globals";
 import { R2_EVENT_DEVTOOLS, R2_EVENT_LINK, R2_EVENT_TRY_LCP_PASS, R2_EVENT_TRY_LCP_PASS_RES } from "./common/events";
 import { R2_SESSION_WEBVIEW } from "./common/sessions";
 import { IDeviceIDManager, launchStatusDocumentProcessing } from "./lsd";
