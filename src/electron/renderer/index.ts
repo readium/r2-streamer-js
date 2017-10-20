@@ -1,8 +1,14 @@
 import debounce = require("debounce");
-import { shell } from "electron";
 import { ipcRenderer } from "electron";
+import { shell } from "electron";
 import ElectronStore = require("electron-store");
-import { R2_EVENT_LINK, R2_EVENT_READIUMCSS, R2_EVENT_TRY_LCP_PASS, R2_EVENT_TRY_LCP_PASS_RES } from "../common/events";
+import {
+    R2_EVENT_LINK,
+    R2_EVENT_READIUMCSS,
+    R2_EVENT_TRY_LCP_PASS,
+    R2_EVENT_TRY_LCP_PASS_RES,
+    R2_EVENT_WEBVIEW_READY,
+} from "../common/events";
 import { R2_SESSION_WEBVIEW } from "../common/sessions";
 import { getURLQueryParams } from "./querystring";
 import {
@@ -204,7 +210,7 @@ export function handleLink(href: string) {
             drawer.open = false;
             setTimeout(() => {
                 loadLink(href, href.replace(prefix, ""), publicationJsonUrl);
-            }, 500);
+            }, 200);
         } else {
             loadLink(href, href.replace(prefix, ""), publicationJsonUrl);
         }
@@ -215,6 +221,38 @@ export function handleLink(href: string) {
 
 window.onerror = (err) => {
     console.log("Error", err);
+};
+
+const unhideWebView = (_id: string, forced: boolean) => {
+    const hidePanel = document.getElementById("reader_chrome_HIDE");
+    if (forced) {
+        if (hidePanel && hidePanel.style.display === "none") {
+            return;
+        }
+        console.log("unhideWebView FORCED");
+    }
+    // console.log("unhideWebView ID: " + id);
+    // if (_webviews.length) {
+    // let href = _webviews[0].getAttribute("src");
+    // // console.log("WEBVIEW SRC: " + href);
+    // const wc = _webviews[0].getWebContents();
+    // if (wc) {
+    //     const url = wc.getURL();
+    //     if (url) {
+    //         href = url;
+    //         // console.log("WEBVIEW URL: " + href);
+    //     }
+    // }
+    // if (href === id) {
+    // console.log("webview unhiding...");
+
+    if (hidePanel) {
+        hidePanel.style.display = "none";
+    }
+    // _webviews[0].style.opacity = "1";
+    // _webviews[0].style.visibility = "visible";
+    // _webviews[0].classList.remove("hidden");
+    // }
 };
 
 ipcRenderer.on(R2_EVENT_LINK, (_event: any, href: string) => {
@@ -642,6 +680,10 @@ function createWebView() {
         // console.log(event.channel);
         if (event.channel === R2_EVENT_LINK) {
             handleLink(event.args[0]);
+        } else if (event.channel === R2_EVENT_WEBVIEW_READY) {
+            console.log("R2_EVENT_WEBVIEW_READY");
+            const id = event.args[0];
+            unhideWebView(id, false);
         }
     });
 
@@ -705,6 +747,22 @@ window.addEventListener("resize", debounce(() => {
 
 function loadLink(hrefFull: string, _hrefPartial: string, _publicationJsonUrl: string) {
     if (_webviews.length) {
+
+        const hidePanel = document.getElementById("reader_chrome_HIDE");
+        if (hidePanel) {
+            hidePanel.style.display = "block";
+        }
+        // _webviews[0].style.opacity = "0.6";
+        // _webviews[0].style.visibility = "hidden";
+        // _webviews[0].classList.add("hidden");
+        setTimeout(() => {
+            if (_webviews.length) {
+                const href = _webviews[0].getAttribute("src");
+                if (href) {
+                    unhideWebView(href, true);
+                }
+            }
+        }, 3000);
         _webviews[0].setAttribute("src", hrefFull);
         // _webviews[0].getWebContents().loadURL(tocLinkHref, { extraHeaders: "pragma: no-cache\n" });
         // _webviews[0].loadURL(tocLinkHref, { extraHeaders: "pragma: no-cache\n" });

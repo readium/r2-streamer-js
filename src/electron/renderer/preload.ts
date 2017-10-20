@@ -1,7 +1,8 @@
 import debounce = require("debounce");
 import { ipcRenderer } from "electron";
+// import { fullQualifiedSelector } from "./cssselector";
 
-import { R2_EVENT_LINK, R2_EVENT_READIUMCSS } from "../common/events";
+import { R2_EVENT_LINK, R2_EVENT_READIUMCSS, R2_EVENT_WEBVIEW_READY } from "../common/events";
 
 // console.log("PRELOAD");
 
@@ -13,6 +14,8 @@ const win = (global as any).window as Window;
 const urlRootReadiumCSS = win.location.origin + "/readium-css/iOS/";
 
 const urlResizeSensor = win.location.origin + "/resize-sensor.js";
+
+const DEBUG_VISUALS = true;
 
 const ensureHead = () => {
     const docElement = win.document.documentElement;
@@ -34,6 +37,12 @@ ipcRenderer.on(R2_EVENT_READIUMCSS, (_event: any, messageString: any) => {
     // ipcRenderer.sendToHost(R2_EVENT_READIUMCSS, "pong");
 
     const messageJson = JSON.parse(messageString);
+    setTimeout(() => {
+        readiumCSS(messageJson);
+    }, 50);
+});
+
+const readiumCSS = (messageJson: any) => {
 
     const docElement = win.document.documentElement;
 
@@ -170,7 +179,16 @@ color: black !important;
 background-color: rgb(100, 122, 177) !important;
 color: white !important;
 }
-`);
+*:focus {
+outline-style: solid !important;
+outline-width: 2px !important;
+outline-color: blue !important;
+outline-offset: 0px !important;
+}
+*.no-focus-outline:focus {
+outline-style: none !important;
+}
+    `);
         }
     }
 
@@ -260,15 +278,6 @@ color: white !important;
             if (paged) {
                 docElement.style.overflow = "hidden";
             }
-            // win.document.body.offsetWidth === single column width (takes into account column gap?)
-            // win.document.body.clientWidth === same
-            // win.document.body.scrollWidth === full document width (all columns)
-            //
-            // win.document.body.offsetHeight === full document height (sum of all columns minus trailing blank space?)
-            // win.document.body.clientHeight === same
-            // win.document.body.scrollHeight === visible viewport height
-            //
-            // win.document.body.scrollLeft === positive number for left shift
 
             const needsFontOverride = typeof font !== "undefined" && font !== "DEFAULT";
             // readium-font-on | readium-font-off
@@ -329,13 +338,78 @@ color: white !important;
             // docElement.style.setProperty("--USER__textColor", "#000000");
         }
     }
-});
+
+    checkReadyPass();
+};
+
+const checkReadyPass = () => {
+    if (_readyPassDone) {
+        return;
+    }
+    _readyPassDone = true;
+
+    if (DEBUG_VISUALS) {
+        injectReadPosCSS();
+
+        if (win.location.hash && win.location.hash.length > 1) {
+            // console.log(win.location.hash);
+            const elem = win.document.getElementById(win.location.hash.substr(1));
+            if (elem) {
+                elem.classList.add("readium2-read-pos");
+            }
+        }
+    }
+
+    win.addEventListener("resize", () => {
+        console.log("webview resize");
+        scrollToHash();
+    });
+
+    activateResizeSensor();
+
+    if (win.document.body) {
+
+        // win.document.body.offsetWidth === single column width (takes into account column gap?)
+        // win.document.body.clientWidth === same
+        // win.document.body.scrollWidth === full document width (all columns)
+        //
+        // win.document.body.offsetHeight === full document height (sum of all columns minus trailing blank space?)
+        // win.document.body.clientHeight === same
+        // win.document.body.scrollHeight === visible viewport height
+        //
+        // win.document.body.scrollLeft === positive number for horizontal shift
+        // win.document.body.scrollTop === positive number for vertical shift
+
+        win.document.body.addEventListener("click", (ev: MouseEvent) => {
+
+            const x = ev.clientX; // win.document.body.scrollLeft;
+            const y = ev.clientY; // win.document.body.scrollTop;
+
+            processXY(x, y);
+        });
+    }
+};
+
+const notifyReady = debounce(() => {
+    if (_readyEventSent) {
+        return;
+    }
+    _readyEventSent = true;
+    console.log("READY win.location.href => " + win.location.href);
+    ipcRenderer.sendToHost(R2_EVENT_WEBVIEW_READY, win.location.href);
+}, 500);
 
 const scrollToHash = debounce(() => {
 
-    // console.log("scrollToHash");
+    console.log("scrollToHash");
 
-    if (win.location.hash && win.location.hash.length > 1) {
+    if (_locationHashOverride) {
+        _locationHashOverride.scrollIntoView({
+            behavior: "instant",
+            block: "start",
+            inline: "nearest",
+        });
+    } else if (win.location.hash && win.location.hash.length > 1) {
         // console.log(win.location.hash);
         const elem = win.document.getElementById(win.location.hash.substr(1));
         if (elem) {
@@ -353,7 +427,93 @@ const scrollToHash = debounce(() => {
     }
 }, 500);
 
-const initResizeSensor = () => {
+const injectReadPosCSS = () => {
+
+    if (!DEBUG_VISUALS) {
+        return;
+    }
+
+    ensureHead();
+
+    const styleElement = win.document.createElement("style");
+    styleElement.setAttribute("id", "Readium2-ReadPos");
+    styleElement.setAttribute("type", "text/css");
+    const css = `
+:root[style*="readium-sepia-on"] .readium2-read-pos,
+:root[style*="readium-night-on"] .readium2-read-pos,
+.readium2-read-pos {
+    color: red !important;
+    background-color: silver !important;
+}
+:root[style*="readium-sepia-on"] .readium2-read-pos2,
+:root[style*="readium-night-on"] .readium2-read-pos2,
+.readium2-read-pos2 {
+    color: blue !important;
+    background-color: yellow !important;
+}
+`;
+    styleElement.appendChild(win.document.createTextNode(css));
+    win.document.head.appendChild(styleElement);
+};
+
+const activateResizeSensor = () => {
+
+    const docElement = win.document.documentElement;
+    let skipFirstResize = docElement.getAttribute("data-readiumcss") || false;
+    let skipFirstScroll = skipFirstResize;
+
+    if (win.document.body) {
+        // tslint:disable-next-line:no-unused-expression
+        new (win as any).ResizeSensor(win.document.body, () => {
+            console.log("ResizeSensor");
+            // console.log(win.document.body.clientWidth);
+            // console.log(win.document.body.clientHeight);
+
+            scrollToHash();
+
+            if (skipFirstResize) {
+                console.log("ResizeSensor SKIP FIRST");
+                skipFirstResize = false;
+                return;
+            }
+
+            notifyReady();
+        });
+    }
+
+    // setTimeout(() => {
+    //     scrollToHash();
+    // }, 500);
+
+    win.addEventListener("scroll", debounce((_ev: Event) => {
+        // console.log("scroll");
+
+        if (skipFirstScroll) {
+            console.log("Scroll SKIP FIRST");
+            skipFirstScroll = false;
+            return;
+        }
+
+        // console.log("win.innerWidth: " + win.innerWidth);
+        // console.log("win.innerHeight: " + win.innerHeight);
+
+        // const element = win.document.body; // docElement
+        // if (!element) {
+        //     return;
+        // }
+
+        // console.log("element.scrollWidth: " + element.scrollWidth);
+        // console.log("element.scrollLeft: " + element.scrollLeft);
+
+        // console.log("element.scrollHeight: " + element.scrollHeight);
+        // console.log("element.scrollTop: " + element.scrollTop);
+
+        processXY(0, 0);
+        // processXY(win.innerWidth / 2, 10);
+    }, 800));
+};
+
+const injectResizeSensor = () => {
 
     ensureHead();
 
@@ -362,29 +522,50 @@ const initResizeSensor = () => {
     scriptElement.setAttribute("type", "application/javascript");
     scriptElement.setAttribute("src", urlResizeSensor);
     scriptElement.appendChild(win.document.createTextNode(" "));
-    if (win.document.head.childElementCount) {
-        win.document.head.insertBefore(scriptElement, win.document.head.firstElementChild);
-    } else {
-        win.document.head.appendChild(scriptElement);
-    }
-
+    win.document.head.appendChild(scriptElement);
     scriptElement.addEventListener("load", () => {
-        // console.log("ResizeSensor LOADED");
-        if (win.document.body) {
-            // tslint:disable-next-line:no-unused-expression
-            new (win as any).ResizeSensor(win.document.body, () => {
-                // console.log("ResizeSensor");
-                // console.log(win.document.body.clientWidth);
-                // console.log(win.document.body.clientHeight);
-
-                scrollToHash();
-            });
-        }
+        console.log("ResizeSensor LOADED");
     });
 };
 
+let _locationHashOverride: Element | undefined;
+let _readyPassDone = false;
+let _readyEventSent = false;
+
+const resetInitialState = () => {
+    _locationHashOverride = undefined;
+    _readyPassDone = false;
+    _readyEventSent = false;
+};
+
+win.addEventListener("load", () => {
+    console.log("PRELOAD WIN LOAD");
+    resetInitialState();
+});
+
+win.addEventListener("unload", () => {
+    console.log("PRELOAD WIN UNLOAD");
+    resetInitialState();
+});
+
 win.addEventListener("DOMContentLoaded", () => {
-    // console.log("PRELOAD DOM READY");
+    console.log("PRELOAD DOM READY");
+    resetInitialState();
+
+    appendCSSInline("selectionAndFocus", `
+::selection {
+background-color: rgb(155, 179, 240) !important;
+color: black !important;
+}
+*:focus {
+outline-style: solid !important;
+outline-width: 2px !important;
+outline-color: blue !important;
+outline-offset: 0px !important;
+}
+*.no-focus-outline:focus {
+outline-style: none !important;
+}`);
 
     win.document.addEventListener("click", (e) => {
         const href = (e.target as any).href;
@@ -398,46 +579,81 @@ win.addEventListener("DOMContentLoaded", () => {
         return false;
     }, true);
 
-    initResizeSensor();
-
-    // const borderDiv1 = win.document.createElement("div");
-    // borderDiv1.setAttribute("id", "ReadiumBorderDIV1");
-    // borderDiv1.setAttribute("style",
-    // tslint:disable-next-line:max-line-length
-    // "display:block;position:absolute;margin:0;padding:0;box-sizing:border-box;left:3px;right:3px;top:3px;bottom:3px;z-index:1000;background-color:transparent;border:2px solid blue;");
-    // win.document.body.appendChild(borderDiv1);
-
-    // const borderDiv2 = win.document.createElement("div");
-    // borderDiv2.setAttribute("id", "ReadiumBorderDIV2");
-    // borderDiv2.setAttribute("style",
-    // tslint:disable-next-line:max-line-length
-    // "display:block;position:fixed;margin:0;padding:0;box-sizing:border-box;left:0;top:0;width:100%;height:100%;z-index:900;background-color:transparent;border:2px solid black;");
-    // // borderDiv2.appendChild(win.document.createTextNode("TEST"));
-    // win.document.body.appendChild(borderDiv2);
-
-    // win.addEventListener("scroll", (e) => {
-    //     console.log(e);
-
-    //     console.log(win.innerWidth);
-    //     console.log(win.innerHeight);
-
-    //     const element = win.document.body; // docElement
-    //     if (!element) {
-    //         return;
-    //     }
-
-    //     console.log(element.scrollWidth);
-    //     console.log(element.scrollLeft);
-
-    //     console.log(element.scrollHeight);
-    //     console.log(element.scrollTop);
-    // });
+    injectResizeSensor();
 });
 
-win.addEventListener("resize", () => {
-    // console.log("webview resize");
-    scrollToHash();
-});
+const processXY = (x: number, y: number) => {
+
+    // console.log("x" + x);
+    // console.log("y" + y);
+
+    // const elems = document.elementsFromPoint(x, y);
+    // // console.log(elems);
+    // let element: Element | undefined = elems && elems.length ? elems[0] : undefined;
+    let element: Element | undefined;
+
+    // if ((document as any).caretPositionFromPoint) {
+    //     console.log("caretPositionFromPoint");
+    //     const range = (document as any).caretPositionFromPoint(x, y);
+    //     const node = range.offsetNode;
+    //     const offset = range.offset;
+    // } else if (document.caretRangeFromPoint) {
+    //     console.log("caretRangeFromPoint");
+    // }
+
+    let textNode: Node | undefined;
+    let textNodeOffset = 0;
+
+    const range = document.caretRangeFromPoint(x, y);
+    if (range) {
+        const node = range.startContainer;
+        const offset = range.startOffset;
+        // console.log(node);
+        // console.log(node.nodeType);
+        // console.log(offset);
+
+        if (node) {
+            if (node.nodeType === Node.ELEMENT_NODE) {
+                element = node as Element;
+            } else if (node.nodeType === Node.TEXT_NODE) {
+                textNode = node;
+                textNodeOffset = offset;
+                if (node.parentNode && node.parentNode.nodeType === Node.ELEMENT_NODE) {
+                    element = node.parentNode as Element;
+                }
+            }
+        }
+    }
+
+    if (DEBUG_VISUALS) {
+        const existings = document.querySelectorAll(".readium2-read-pos, .readium2-read-pos2");
+        existings.forEach((existing) => {
+            existing.classList.remove("readium2-read-pos");
+            existing.classList.remove("readium2-read-pos2");
+        });
+    }
+    if (element) {
+        _locationHashOverride = element;
+
+        if (DEBUG_VISUALS) {
+            element.classList.add("readium2-read-pos2");
+
+            // // console.log("fullQualifiedSelector TRUE");
+            // // const sel1 = fullQualifiedSelector(element, true);
+            // // console.log(sel1);
+
+            // // console.log("fullQualifiedSelector FALSE");
+            // const sel2 = fullQualifiedSelector(element, false);
+            // // console.log(sel2);
+
+            // const selecteds = document.querySelectorAll(sel2);
+            // selecteds.forEach((selected) => {
+            //     selected.classList.remove("readium2-read-pos");
+            //     selected.classList.add("readium2-read-pos2");
+            // });
+        }
+    }
+};
 
 function appendCSSInline(id: string, css: string) {
     const styleElement = win.document.createElement("style");
