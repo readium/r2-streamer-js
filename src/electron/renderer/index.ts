@@ -647,7 +647,7 @@ function createWebView() {
 
     webview1.addEventListener("dom-ready", () => {
         // webview1.openDevTools();
-        // console.log("WEBVIEW DOM READY: " + _webviews.length);
+        console.log("WEBVIEW DOM READY: " + _webviews.length);
 
         webview1.clearHistory();
 

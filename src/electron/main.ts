@@ -309,6 +309,45 @@ app.on("ready", () => {
         };
         _publicationsServer.expressUse("/readium-css", express.static("misc/ReadiumCSS", staticOptions));
 
+        _publicationsServer.expressGet(["/resize-sensor.js"],
+            (req: express.Request, res: express.Response) => {
+
+                const swPth = "./renderer/ResizeSensor.js";
+                const swFullPath = path.resolve(path.join(__dirname, swPth));
+                if (!fs.existsSync(swFullPath)) {
+
+                    const err = "Missing ResizeSensor JS! ";
+                    debug(err + swFullPath);
+                    res.status(500).send("<html><body><p>Internal Server Error</p><p>"
+                        + err + "</p></body></html>");
+                    return;
+                }
+
+                const swJS = fs.readFileSync(swFullPath, { encoding: "utf8" });
+                // debug(swJS);
+
+                // this.setResponseCORS(res);
+                res.set("Content-Type", "text/javascript; charset=utf-8");
+
+                const checkSum = crypto.createHash("sha256");
+                checkSum.update(swJS);
+                const hash = checkSum.digest("hex");
+
+                const match = req.header("If-None-Match");
+                if (match === hash) {
+                    debug("ResizeSensor.js cache");
+                    res.status(304); // StatusNotModified
+                    res.end();
+                    return;
+                }
+
+                res.setHeader("ETag", hash);
+
+                // res.setHeader("Cache-Control", "public,max-age=86400");
+
+                res.status(200).send(swJS);
+            });
+
         // _publicationsServer.expressGet(["/sw.js"],
         //     (req: express.Request, res: express.Response) => {
 

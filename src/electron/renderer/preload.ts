@@ -1,3 +1,4 @@
+import debounce = require("debounce");
 import { ipcRenderer } from "electron";
 
 import { R2_EVENT_LINK, R2_EVENT_READIUMCSS } from "../common/events";
@@ -11,6 +12,21 @@ const win = (global as any).window as Window;
 
 const urlRootReadiumCSS = win.location.origin + "/readium-css/iOS/";
 
+const urlResizeSensor = win.location.origin + "/resize-sensor.js";
+
+const ensureHead = () => {
+    const docElement = win.document.documentElement;
+
+    if (!win.document.head) {
+        const headElement = win.document.createElement("head");
+        if (win.document.body) {
+            docElement.insertBefore(headElement, win.document.body);
+        } else {
+            docElement.appendChild(headElement);
+        }
+    }
+};
+
 ipcRenderer.on(R2_EVENT_READIUMCSS, (_event: any, messageString: any) => {
     // console.log("ipcRenderer");
     // console.log(event);
@@ -19,20 +35,17 @@ ipcRenderer.on(R2_EVENT_READIUMCSS, (_event: any, messageString: any) => {
 
     const messageJson = JSON.parse(messageString);
 
+    const docElement = win.document.documentElement;
+
     if (messageJson.injectCSS) {
-        if (!win.document.head) {
-            const headElement = win.document.createElement("head");
-            if (win.document.body) {
-                win.document.documentElement.insertBefore(headElement, win.document.body);
-            } else {
-                win.document.documentElement.appendChild(headElement);
-            }
-        }
+        ensureHead();
 
-        removeAllCSS();
-        removeAllCSSInline();
-
-        if (messageJson.injectCSS.indexOf("rollback") < 0) {
+        if (messageJson.injectCSS.indexOf("rollback") >= 0) {
+            docElement.removeAttribute("data-readiumcss");
+            removeAllCSS();
+            removeAllCSSInline();
+        } else if (!docElement.hasAttribute("data-readiumcss")) {
+            docElement.setAttribute("data-readiumcss", "yes");
 
             let needsDefaultCSS = true;
             if (win.document.head && win.document.head.childElementCount) {
@@ -85,7 +98,7 @@ ipcRenderer.on(R2_EVENT_READIUMCSS, (_event: any, messageString: any) => {
             }
             appendCSS("after");
 
-            appendCSSInline("scrollbars", `
+            appendCSSInline("scrollbarsAndSelection", `
 ::-webkit-scrollbar-button {
 height: 0px !important;
 width: 0px !important;
@@ -147,6 +160,7 @@ border-top: 1px solid black;
 .mdc-theme--dark ::-webkit-scrollbar-track:vertical {
 border-left: 1px solid black;
 }
+
 ::selection {
 background-color: rgb(155, 179, 240) !important;
 color: black !important;
@@ -167,8 +181,6 @@ color: white !important;
     // tslint:disable-next-line:max-line-length
     // https://github.com/readium/readium-css/blob/develop/prototype/iOS-implem/Specific-docs/CSS09-user_prefs.md#switches
     if (messageJson.setCSS) {
-
-        const docElement = win.document.documentElement;
 
         if (typeof messageJson.setCSS === "string" && messageJson.setCSS.indexOf("rollback") >= 0) {
 
@@ -319,6 +331,58 @@ color: white !important;
     }
 });
 
+const scrollToHash = debounce(() => {
+
+    // console.log("scrollToHash");
+
+    if (win.location.hash && win.location.hash.length > 1) {
+        // console.log(win.location.hash);
+        const elem = win.document.getElementById(win.location.hash.substr(1));
+        if (elem) {
+            elem.scrollIntoView({
+                behavior: "instant",
+                block: "start",
+                inline: "nearest",
+            });
+        }
+    } else {
+        if (win.document.body) {
+            win.document.body.scrollLeft = 0;
+            win.document.body.scrollTop = 0;
+        }
+    }
+}, 500);
+
+const initResizeSensor = () => {
+
+    ensureHead();
+
+    const scriptElement = win.document.createElement("script");
+    scriptElement.setAttribute("id", "Readium2-ResizeSensor");
+    scriptElement.setAttribute("type", "application/javascript");
+    scriptElement.setAttribute("src", urlResizeSensor);
+    scriptElement.appendChild(win.document.createTextNode(" "));
+    if (win.document.head.childElementCount) {
+        win.document.head.insertBefore(scriptElement, win.document.head.firstElementChild);
+    } else {
+        win.document.head.appendChild(scriptElement);
+    }
+
+    scriptElement.addEventListener("load", () => {
+        // console.log("ResizeSensor LOADED");
+        if (win.document.body) {
+            // tslint:disable-next-line:no-unused-expression
+            new (win as any).ResizeSensor(win.document.body, () => {
+                // console.log("ResizeSensor");
+                // console.log(win.document.body.clientWidth);
+                // console.log(win.document.body.clientHeight);
+
+                scrollToHash();
+            });
+        }
+    });
+};
+
 win.addEventListener("DOMContentLoaded", () => {
     // console.log("PRELOAD DOM READY");
 
@@ -333,6 +397,8 @@ win.addEventListener("DOMContentLoaded", () => {
         ipcRenderer.sendToHost(R2_EVENT_LINK, href);
         return false;
     }, true);
+
+    initResizeSensor();
 
     // const borderDiv1 = win.document.createElement("div");
     // borderDiv1.setAttribute("id", "ReadiumBorderDIV1");
@@ -355,7 +421,7 @@ win.addEventListener("DOMContentLoaded", () => {
     //     console.log(win.innerWidth);
     //     console.log(win.innerHeight);
 
-    //     const element = win.document.body; // win.document.documentElement
+    //     const element = win.document.body; // docElement
     //     if (!element) {
     //         return;
     //     }
@@ -370,10 +436,7 @@ win.addEventListener("DOMContentLoaded", () => {
 
 win.addEventListener("resize", () => {
     // console.log("webview resize");
-    if (win.document.body) {
-        win.document.body.scrollLeft = 0;
-        win.document.body.scrollTop = 0;
-    }
+    scrollToHash();
 });
 
 function appendCSSInline(id: string, css: string) {
@@ -392,7 +455,7 @@ function removeCSSInline(id: string) {
 }
 
 function removeAllCSSInline() {
-    removeCSSInline("scrollbars");
+    removeCSSInline("scrollbarsAndSelection");
 }
 
 function appendCSS(mod: string) {
