@@ -261,7 +261,7 @@ ipcRenderer.on(R2_EVENT_LINK, (_event: any, href: string) => {
     handleLink(href);
 });
 
-ipcRenderer.on(R2_EVENT_TRY_LCP_PASS_RES, (_event: any, okay: boolean, msg: string) => {
+ipcRenderer.on(R2_EVENT_TRY_LCP_PASS_RES, (_event: any, okay: boolean, msg: string, passSha256Hex: string) => {
     // console.log("R2_EVENT_TRY_LCP_PASS_RES");
     // console.log(okay);
     // console.log(msg);
@@ -285,6 +285,25 @@ ipcRenderer.on(R2_EVENT_TRY_LCP_PASS_RES, (_event: any, okay: boolean, msg: stri
         }, 500);
 
         return;
+    }
+
+    const lcpStore = electronStore.get("lcp");
+    if (!lcpStore) {
+        const lcpObj: any = {};
+        const pubLcpObj: any = lcpObj[pathDecoded] = {};
+        pubLcpObj.sha = passSha256Hex;
+
+        electronStore.set("lcp", lcpObj);
+    } else {
+        const pubLcpStore = lcpStore[pathDecoded];
+        if (pubLcpStore) {
+            pubLcpStore.sha = passSha256Hex;
+        } else {
+            lcpStore[pathDecoded] = {
+                sha: passSha256Hex,
+            };
+        }
+        electronStore.set("lcp", lcpStore);
     }
 
     startNavigatorExperiment();
@@ -545,7 +564,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
         const lcpPass = (lcpPassInput as HTMLInputElement).value;
 
-        ipcRenderer.send(R2_EVENT_TRY_LCP_PASS, pathDecoded, lcpPass);
+        ipcRenderer.send(R2_EVENT_TRY_LCP_PASS, pathDecoded, lcpPass, false);
     });
     lcpDialog.listen("MDCDialog:cancel", () => {
         // console.log("MDCDialog:cancel");
@@ -568,7 +587,20 @@ window.addEventListener("DOMContentLoaded", () => {
     }
 
     if (lcpHint) {
-        showLcpDialog();
+
+        let lcpPassSha256Hex: string | undefined;
+        const lcpStore = electronStore.get("lcp");
+        if (lcpStore) {
+            const pubLcpStore = lcpStore[pathDecoded];
+            if (pubLcpStore && pubLcpStore.sha) {
+                lcpPassSha256Hex = pubLcpStore.sha;
+            }
+        }
+        if (lcpPassSha256Hex) {
+            ipcRenderer.send(R2_EVENT_TRY_LCP_PASS, pathDecoded, lcpPassSha256Hex, true);
+        } else {
+            showLcpDialog();
+        }
     } else {
         startNavigatorExperiment();
     }

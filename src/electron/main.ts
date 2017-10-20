@@ -105,37 +105,61 @@ ipcMain.on(R2_EVENT_DEVTOOLS, (_event: any, _arg: any) => {
     openAllDevTools();
 });
 
-ipcMain.on(R2_EVENT_TRY_LCP_PASS, async (event: any, publicationFilePath: string, lcpPass: string) => {
-    debug(publicationFilePath);
-    debug(lcpPass);
+ipcMain.on(R2_EVENT_TRY_LCP_PASS, async (
+    event: any,
+    publicationFilePath: string,
+    lcpPass: string,
+    isSha256Hex: boolean) => {
+
+    // debug(publicationFilePath);
+    // debug(lcpPass);
     let okay = false;
     try {
-        okay = await tryLcpPass(publicationFilePath, lcpPass);
+        okay = await tryLcpPass(publicationFilePath, lcpPass, isSha256Hex);
     } catch (err) {
         debug(err);
         okay = false;
     }
+
+    let passSha256Hex: string | undefined;
+    if (okay) {
+        if (isSha256Hex) {
+            passSha256Hex = lcpPass;
+        } else {
+            const checkSum = crypto.createHash("sha256");
+            checkSum.update(lcpPass);
+            passSha256Hex = checkSum.digest("hex");
+            // const lcpPass64 = new Buffer(hash).toString("base64");
+            // const lcpPassHex = new Buffer(lcpPass64, "base64").toString("utf8");
+        }
+    }
+
     event.sender.send(R2_EVENT_TRY_LCP_PASS_RES,
         okay,
-        (okay ? "Correct." : "Please try again."));
+        (okay ? "Correct." : "Please try again."),
+        passSha256Hex ? passSha256Hex : "xxx",
+    );
 });
 
-async function tryLcpPass(publicationFilePath: string, lcpPass: string): Promise<boolean> {
+async function tryLcpPass(publicationFilePath: string, lcpPass: string, isSha256Hex: boolean): Promise<boolean> {
     const publication = _publicationsServer.cachedPublication(publicationFilePath);
     if (!publication) {
         return false;
     }
-    // TODO: ask user for plain text passphrase, convert to SHA256 hex format,
-    // or fetch from persistent storage
-    // const lcpPass64 =
-    //     "ZWM0ZjJkYmIzYjE0MDA5NTU1MGM5YWZiYmI2OWI1ZDZmZDllODE0YjlkYTgyZmFkMGIzNGU5ZmNiZTU2ZjFjYg";
-    // (this is "dan")
-    const checkSum = crypto.createHash("sha256");
-    checkSum.update(lcpPass);
-    const lcpPassHex = checkSum.digest("hex");
-    // const lcpPass64 = new Buffer(hash).toString("base64");
-    // const lcpPassHex = new Buffer(lcpPass64, "base64").toString("utf8");
-    const okay = await publication.LCP.setUserPassphrase(lcpPassHex); // hex
+
+    let lcpPassHex: string | undefined;
+
+    if (isSha256Hex) {
+        lcpPassHex = lcpPass;
+    } else {
+        const checkSum = crypto.createHash("sha256");
+        checkSum.update(lcpPass);
+        lcpPassHex = checkSum.digest("hex");
+        // const lcpPass64 = new Buffer(hash).toString("base64");
+        // const lcpPassHex = new Buffer(lcpPass64, "base64").toString("utf8");
+    }
+
+    const okay = await publication.LCP.setUserPassphrase(lcpPassHex);
     if (!okay) {
         debug("FAIL publication.LCP.setUserPassphrase()");
     }
@@ -192,12 +216,6 @@ async function createElectronBrowserWindow(publicationFilePath: string, publicat
         if (!lcpHint) {
             lcpHint = "LCP passphrase";
         }
-        // TODO: passphrase from cache (persistent storage, user settings)
-        // const testLcpPass = "danzzz";
-        // const okay = await tryLcpPass(publicationFilePath, testLcpPass);
-        // if (okay) {
-        //     lcpHint = undefined;
-        // }
     }
 
     const electronBrowserWindow = new BrowserWindow({
@@ -424,6 +442,8 @@ app.on("ready", () => {
                         filePathToLoadOnLaunch = filePath;
                     }
                 } else {
+                    filePath = fs.realpathSync(filePath);
+                    console.log(filePath);
                     filePathToLoadOnLaunch = filePath;
                 }
             }
