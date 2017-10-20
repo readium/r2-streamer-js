@@ -1,1 +1,1 @@
-export const R2_SESSION_WEBVIEW = "persist:publicationwebview";
+export const R2_SESSION_WEBVIEW = "persist:readium2pubwebview";

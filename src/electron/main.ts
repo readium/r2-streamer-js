@@ -828,7 +828,7 @@ function clearSession(
 }
 
 function getWebViewSession() {
-    return session.fromPartition(R2_SESSION_WEBVIEW, { cache: false });
+    return session.fromPartition(R2_SESSION_WEBVIEW, { cache: true });
 }
 
 function clearWebviewSession(
@@ -837,7 +837,7 @@ function clearWebviewSession(
 
     const sess = getWebViewSession();
     if (sess) {
-        clearSession(sess, "[persist:publicationwebview]", callbackCache, callbackStorageData);
+        clearSession(sess, "[" + R2_SESSION_WEBVIEW + "]", callbackCache, callbackStorageData);
     } else {
         if (callbackCache) {
             callbackCache();
