@@ -175,7 +175,6 @@ export function serverOPDS2(server: Server, topRouter: express.Application) {
                 }
 
                 res.setHeader("ETag", hash);
-
                 // res.setHeader("Cache-Control", "public,max-age=86400");
 
                 res.status(200).send(publicationsJsonStr);

@@ -175,6 +175,8 @@ export function serverMediaOverlays(server: Server, routerPathBase64: express.Ro
                 }
 
                 res.setHeader("ETag", hash);
+                // res.setHeader("Cache-Control", "public,max-age=86400");
+
                 res.status(200);
 
                 if (isHead) {

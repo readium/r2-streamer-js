@@ -322,7 +322,17 @@ app.on("ready", () => {
 
         // https://expressjs.com/en/4x/api.html#express.static
         const staticOptions = {
-            etag: false,
+            dotfiles: "ignore",
+            etag: true,
+            fallthrough: false,
+            immutable: true,
+            index: false,
+            maxAge: "1d",
+            redirect: false,
+            // extensions: ["css", "otf"],
+            // setHeaders: function (res, path, stat) {
+            //   res.set('x-timestamp', Date.now())
+            // }
         };
         _publicationsServer.expressUse("/readium-css", express.static("misc/ReadiumCSS", staticOptions));
 
@@ -359,7 +369,6 @@ app.on("ready", () => {
         //         }
 
         //         res.setHeader("ETag", hash);
-
         //         // res.setHeader("Cache-Control", "public,max-age=86400");
 
         //         res.status(200).send(swJS);
@@ -398,7 +407,6 @@ app.on("ready", () => {
         //         }
 
         //         res.setHeader("ETag", hash);
-
         //         // res.setHeader("Cache-Control", "public,max-age=86400");
 
         //         res.status(200).send(swJS);

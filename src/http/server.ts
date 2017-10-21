@@ -176,7 +176,6 @@ export class Server {
                     }
 
                     res.setHeader("ETag", hash);
-
                     // res.setHeader("Cache-Control", "public,max-age=86400");
 
                     res.status(200).send(jsonStr);

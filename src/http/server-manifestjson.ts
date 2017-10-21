@@ -295,6 +295,7 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
                 }
 
                 res.setHeader("ETag", hash);
+                // res.setHeader("Cache-Control", "public,max-age=86400");
 
                 const links = publication.GetPreFetchResources();
                 if (links && links.length) {
@@ -306,8 +307,6 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
 
                     res.setHeader("Link", prefetch);
                 }
-
-                // res.setHeader("Cache-Control", "public,max-age=86400");
 
                 res.status(200);
 
