@@ -334,7 +334,7 @@ app.on("ready", () => {
             //   res.set('x-timestamp', Date.now())
             // }
         };
-        _publicationsServer.expressUse("/readium-css", express.static("misc/ReadiumCSS", staticOptions));
+        _publicationsServer.expressUse("/readium-css", express.static("dist/ReadiumCSS", staticOptions));
 
         // _publicationsServer.expressGet(["/resize-sensor.js"],
         //     (req: express.Request, res: express.Response) => {
