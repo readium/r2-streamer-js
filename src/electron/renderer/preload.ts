@@ -1,9 +1,10 @@
 import debounce = require("debounce");
 import { ipcRenderer } from "electron";
 import ResizeSensor = require("resize-sensor/ResizeSensor");
-// import { fullQualifiedSelector } from "./cssselector";
 
 import { R2_EVENT_LINK, R2_EVENT_READIUMCSS, R2_EVENT_WEBVIEW_READY } from "../common/events";
+
+// import { fullQualifiedSelector } from "./cssselector";
 
 const win = (global as any).window as Window;
 
