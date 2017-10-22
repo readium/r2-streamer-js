@@ -97,12 +97,17 @@ async function createElectronBrowserWindow(publicationFilePath: string, publicat
         return;
     }
 
-    await launchStatusDocumentProcessing(publication, publicationFilePath, deviceIDManager, () => {
-        debug("launchStatusDocumentProcessing DONE.");
-    });
-
     let lcpHint: string | undefined;
     if (publication && publication.LCP) {
+
+        try {
+            await launchStatusDocumentProcessing(publication, publicationFilePath, deviceIDManager, () => {
+                debug("launchStatusDocumentProcessing DONE.");
+            });
+        } catch (err) {
+            debug(err);
+        }
+
         if (publication.LCP.Encryption &&
             publication.LCP.Encryption.UserKey &&
             publication.LCP.Encryption.UserKey.TextHint) {
