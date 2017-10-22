@@ -36,6 +36,7 @@ import { R2_SESSION_WEBVIEW } from "../common/sessions";
 import { trackBrowserWindow } from "./browser-window-tracker";
 import { installLcpHandler } from "./lcp";
 import { deviceIDManager, launchStatusDocumentProcessing } from "./lsd";
+import { setupReadiumCSS } from "./readium-css";
 
 // import * as mime from "mime-types";
 
@@ -205,21 +206,7 @@ app.on("ready", () => {
 
         installLcpHandler(_publicationsServer);
 
-        // https://expressjs.com/en/4x/api.html#express.static
-        const staticOptions = {
-            dotfiles: "ignore",
-            etag: true,
-            fallthrough: false,
-            immutable: true,
-            index: false,
-            maxAge: "1d",
-            redirect: false,
-            // extensions: ["css", "otf"],
-            // setHeaders: function (res, path, stat) {
-            //   res.set('x-timestamp', Date.now())
-            // }
-        };
-        _publicationsServer.expressUse("/readium-css", express.static("dist/ReadiumCSS", staticOptions));
+        setupReadiumCSS(_publicationsServer, "dist/ReadiumCSS");
 
         // _publicationsServer.expressGet(["/resize-sensor.js"],
         //     (req: express.Request, res: express.Response) => {
