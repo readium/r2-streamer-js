@@ -574,12 +574,18 @@ outline-style: none !important;
     // injectResizeSensor();
 
     try {
+        // console.log("-----");
         // console.log(win.location.search);
         if (win.location.search) {
             const token = "readiumcss=";
             const i = win.location.search.indexOf(token);
             if (i > 0) {
-                const base64 = win.location.search.substr(i + token.length);
+                let base64 = win.location.search.substr(i + token.length);
+                const j = base64.indexOf("&");
+                if (j > 0) {
+                    base64 = base64.substr(0, j);
+                }
+                // console.log(base64);
                 const str = window.atob(base64);
                 // console.log(str);
 
