@@ -83,6 +83,13 @@ const electronStore = new ElectronStore({
     name: "readium2-navigator",
 });
 
+const defaultsLCP = {
+};
+const electronStoreLCP = new ElectronStore({
+    defaults: defaultsLCP,
+    name: "readium2-navigator-lcp",
+});
+
 (electronStore as any).onDidChange("styling.night", (newValue: any, oldValue: any) => {
     if (typeof newValue === "undefined" || typeof oldValue === "undefined") {
         return;
@@ -266,13 +273,13 @@ ipcRenderer.on(R2_EVENT_TRY_LCP_PASS_RES, (_event: any, okay: boolean, msg: stri
         return;
     }
 
-    const lcpStore = electronStore.get("lcp");
+    const lcpStore = electronStoreLCP.get("lcp");
     if (!lcpStore) {
         const lcpObj: any = {};
         const pubLcpObj: any = lcpObj[pathDecoded] = {};
         pubLcpObj.sha = passSha256Hex;
 
-        electronStore.set("lcp", lcpObj);
+        electronStoreLCP.set("lcp", lcpObj);
     } else {
         const pubLcpStore = lcpStore[pathDecoded];
         if (pubLcpStore) {
@@ -282,7 +289,7 @@ ipcRenderer.on(R2_EVENT_TRY_LCP_PASS_RES, (_event: any, okay: boolean, msg: stri
                 sha: passSha256Hex,
             };
         }
-        electronStore.set("lcp", lcpStore);
+        electronStoreLCP.set("lcp", lcpStore);
     }
 
     startNavigatorExperiment();
@@ -526,7 +533,7 @@ window.addEventListener("DOMContentLoaded", () => {
     if (lcpHint) {
 
         let lcpPassSha256Hex: string | undefined;
-        const lcpStore = electronStore.get("lcp");
+        const lcpStore = electronStoreLCP.get("lcp");
         if (lcpStore) {
             const pubLcpStore = lcpStore[pathDecoded];
             if (pubLcpStore && pubLcpStore.sha) {

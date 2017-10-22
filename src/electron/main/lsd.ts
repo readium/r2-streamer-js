@@ -1,5 +1,7 @@
 import * as fs from "fs";
 
+import ElectronStore = require("electron-store");
+
 import { streamToBufferPromise } from "@r2-streamer-js/_utils/stream/BufferUtils";
 import { injectBufferInZip } from "@r2-streamer-js/_utils/zip/zipInjector";
 import { Publication } from "@r2-streamer-js/models/publication";
@@ -9,35 +11,81 @@ import * as moment from "moment";
 import * as request from "request";
 import * as requestPromise from "request-promise-native";
 import { JSON as TAJSON } from "ta-json";
+import * as uuid from "uuid";
 
 const debug = debug_("r2:electron:main:lsd");
+
+const defaultsLSD = {
+};
+const electronStoreLSD = new ElectronStore({
+    defaults: defaultsLSD,
+    name: "readium2-navigator-lsd",
+});
+
+const LSD_STORE_DEVICEID_ENTRY_PREFIX = "deviceID_";
 
 export interface IDeviceIDManager {
     getDeviceNAME(): string;
 
     getDeviceID(): string;
 
-    checkDeviceID(key: string): string;
+    checkDeviceID(key: string): string | undefined;
 
     recordDeviceID(key: string): void;
 }
 
 export const deviceIDManager: IDeviceIDManager = {
 
-    checkDeviceID: (_key: string): string => {
-        return "";
+    checkDeviceID: (key: string): string | undefined => {
+
+        const entry = LSD_STORE_DEVICEID_ENTRY_PREFIX + key;
+
+        const lsdStore = electronStoreLSD.get("lsd");
+        if (!lsdStore || !lsdStore[entry]) {
+            return undefined;
+        }
+
+        return lsdStore[entry];
     },
 
     getDeviceID: (): string => {
-        return "";
+
+        let id = uuid.v4();
+
+        const lsdStore = electronStoreLSD.get("lsd");
+        if (!lsdStore) {
+            electronStoreLSD.set("lsd", {
+                deviceID: id,
+            });
+        } else {
+            if (lsdStore.deviceID) {
+                id = lsdStore.deviceID;
+            } else {
+                lsdStore.deviceID = id;
+                electronStoreLSD.set("lsd", lsdStore);
+            }
+        }
+
+        return id;
     },
 
     getDeviceNAME: (): string => {
-        return "";
+        return "Readium2 Electron desktop app";
     },
 
-    recordDeviceID: (_key: string) => {
-        return;
+    recordDeviceID: (key: string) => {
+
+        const id = this.getDeviceID();
+
+        const lsdStore = electronStoreLSD.get("lsd");
+        if (!lsdStore) {
+            // Should be init'ed at this.getDeviceID()
+            debug("LSD store problem?!");
+            return;
+        }
+
+        const entry = LSD_STORE_DEVICEID_ENTRY_PREFIX + key;
+        lsdStore[entry] = id;
     },
 };
 
