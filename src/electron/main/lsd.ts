@@ -10,7 +10,7 @@ import * as request from "request";
 import * as requestPromise from "request-promise-native";
 import { JSON as TAJSON } from "ta-json";
 
-const debug = debug_("r2:lsd");
+const debug = debug_("r2:electron:main:lsd");
 
 export interface IDeviceIDManager {
     getDeviceNAME(): string;

@@ -6,7 +6,7 @@ import { ipcMain } from "electron";
 
 import { R2_EVENT_TRY_LCP_PASS, R2_EVENT_TRY_LCP_PASS_RES } from "../common/events";
 
-const debug = debug_("r2:lsd");
+const debug = debug_("r2:electron:main:lcp");
 
 export function installLcpHandler(_publicationsServer: Server) {
 
