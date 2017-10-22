@@ -24,7 +24,6 @@ import { Publication } from "@r2-streamer-js/models/publication";
 import { LCP, setLcpNativePluginPath } from "@r2-streamer-js/parser/epub/lcp";
 import * as debug_ from "debug";
 import { BrowserWindow, Menu, app, dialog, ipcMain, session, webContents } from "electron";
-import * as express from "express";
 import * as filehound from "filehound";
 import * as portfinder from "portfinder";
 import * as request from "request";
