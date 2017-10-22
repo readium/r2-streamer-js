@@ -3,6 +3,7 @@ import { ipcRenderer } from "electron";
 import ResizeSensor = require("resize-sensor/ResizeSensor");
 
 import { R2_EVENT_LINK, R2_EVENT_READIUMCSS, R2_EVENT_WEBVIEW_READY } from "../common/events";
+import { getURLQueryParams } from "./querystring";
 
 // import { fullQualifiedSelector } from "./cssselector";
 
@@ -565,6 +566,9 @@ outline-style: none !important;
             return;
         }
 
+        // console.log("+++++");
+        // console.log(href);
+
         e.preventDefault();
         e.stopPropagation();
         ipcRenderer.sendToHost(R2_EVENT_LINK, href);
@@ -575,16 +579,29 @@ outline-style: none !important;
 
     try {
         // console.log("-----");
+        // console.log(win.location.href);
+        // console.log(win.location.origin);
+        // console.log(win.location.pathname);
         // console.log(win.location.search);
+        // console.log(win.location.hash);
         if (win.location.search) {
-            const token = "readiumcss=";
-            const i = win.location.search.indexOf(token);
-            if (i > 0) {
-                let base64 = win.location.search.substr(i + token.length);
-                const j = base64.indexOf("&");
-                if (j > 0) {
-                    base64 = base64.substr(0, j);
+            const params = getURLQueryParams(win.location.search);
+            // tslint:disable-next-line:no-string-literal
+            let base64 = params["readiumcss"];
+            if (!base64) {
+                console.log("!readiumcss BASE64 ??!");
+                const token = "readiumcss=";
+                const i = win.location.search.indexOf(token);
+                if (i > 0) {
+                    base64 = win.location.search.substr(i + token.length);
+                    const j = base64.indexOf("&");
+                    if (j > 0) {
+                        base64 = base64.substr(0, j);
+                    }
+                    base64 = decodeURIComponent(base64);
                 }
+            }
+            if (base64) {
                 // console.log(base64);
                 const str = window.atob(base64);
                 // console.log(str);

@@ -5,10 +5,12 @@ import ElectronStore = require("electron-store");
 import * as path from "path";
 import { JSON as TAJSON } from "ta-json";
 
+import { encodeURIComponent_RFC3986 } from "@r2-streamer-js/_utils/http/UrlUtils";
 import { initGlobals } from "@r2-streamer-js/init-globals";
 import { IStringMap } from "@r2-streamer-js/models/metadata-multilang";
 import { Publication } from "@r2-streamer-js/models/publication";
 import { setLcpNativePluginPath } from "@r2-streamer-js/parser/epub/lcp";
+
 import {
     R2_EVENT_LINK,
     R2_EVENT_READIUMCSS,
@@ -725,6 +727,10 @@ function loadLink(hrefFull: string, _hrefPartial: string, _publicationJsonUrl: s
         }, 5000);
 
         let urlWithSearch = hrefFull;
+        // console.log("#######");
+        // console.log(urlWithSearch);
+        // console.log(_hrefPartial);
+        // console.log(_publicationJsonUrl);
         const urlParts = hrefFull.split("#");
         if (urlParts && (urlParts.length === 1 || urlParts.length === 2)) {
 
@@ -732,14 +738,36 @@ function loadLink(hrefFull: string, _hrefPartial: string, _publicationJsonUrl: s
             // const str = window.atob(base64);
             const base64 = window.btoa(str);
 
-            const alreadyHasSearch = urlParts[0].indexOf("?") > 0;
+            let alreadyHasSearch = urlParts[0].indexOf("?") > 0;
+            if (alreadyHasSearch) {
+                const token = "readiumcss=";
+                const i = urlParts[0].indexOf(token);
+                if (i > 0) {
+                    let rcss = urlParts[0].substr(i);
+                    const j = rcss.indexOf("&");
+                    if (j > 0) {
+                        rcss = rcss.substr(0, j);
+                    }
+                    urlParts[0] = urlParts[0].replace(rcss, "");
+                    urlParts[0] = urlParts[0].replace("?&", "?");
+                    urlParts[0] = urlParts[0].replace("&&", "&");
+                }
+            }
+            if (alreadyHasSearch &&
+                urlParts[0].indexOf("?") === (urlParts[0].length - 1)) {
+                urlParts[0] = urlParts[0].substr(0, urlParts[0].length - 1);
+                alreadyHasSearch = false;
+            }
+
             urlWithSearch = urlParts[0] +
                 (alreadyHasSearch ? "&" : "?") +
                 "readiumcss=" +
-                base64 +
+                encodeURIComponent_RFC3986(base64) +
                 (urlParts.length === 2 ? ("#" + urlParts[1]) : "");
         }
 
+        // console.log("####### >>>");
+        // console.log(urlWithSearch);
         _webviews[0].setAttribute("src", urlWithSearch);
         // _webviews[0].getWebContents().loadURL(tocLinkHref, { extraHeaders: "pragma: no-cache\n" });
         // _webviews[0].loadURL(tocLinkHref, { extraHeaders: "pragma: no-cache\n" });

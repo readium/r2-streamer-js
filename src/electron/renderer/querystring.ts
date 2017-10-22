@@ -1,9 +1,9 @@
 export interface IStringMap { [key: string]: string; }
 
-export const getURLQueryParams = (): IStringMap => {
+export const getURLQueryParams = (search?: string): IStringMap => {
     const params: IStringMap = {};
 
-    let query = window.location.search;
+    let query = search || window.location.search;
     if (query && query.length) {
         query = query.substring(1);
         const keyParams = query.split("&");
