@@ -5,9 +5,11 @@ import * as util from "util";
 import { Publication } from "@models/publication";
 import { PublicationParsePromise } from "@parser/publication-parser";
 
+import { setLcpNativePluginPath } from "@parser/epub/lcp";
 import { initGlobals } from "../init-globals";
 
 initGlobals();
+setLcpNativePluginPath(path.join(process.cwd(), "LCP/lcp.node"));
 
 console.log("process.cwd():");
 console.log(process.cwd());

@@ -1,8 +1,11 @@
+import * as path from "path";
+
 import { Metadata } from "@models/metadata";
 import { Contributor } from "@models/metadata-contributor";
 import { test } from "ava";
 import { JSON as TAJSON } from "ta-json";
 
+import { setLcpNativePluginPath } from "@parser/epub/lcp";
 import { initGlobals } from "../src/init-globals";
 import {
     checkType,
@@ -14,6 +17,7 @@ import {
 } from "./helpers";
 
 initGlobals();
+setLcpNativePluginPath(path.join(process.cwd(), "LCP/lcp.node"));
 
 // ==========================
 

@@ -22,6 +22,15 @@ const AES_BLOCK_SIZE = 16;
 
 const debug = debug_("r2:publication:lcp");
 
+let LCP_NATIVE_PLUGIN_PATH = path.join(process.cwd(), "LCP/lcp.node");
+export function setLcpNativePluginPath(filepath: string): boolean {
+    LCP_NATIVE_PLUGIN_PATH = filepath;
+
+    debug(LCP_NATIVE_PLUGIN_PATH);
+
+    return fs.existsSync(LCP_NATIVE_PLUGIN_PATH);
+}
+
 @JsonObject()
 export class LCP {
     @JsonProperty("id")
@@ -86,10 +95,7 @@ export class LCP {
         this.ContentKey = undefined;
         this._lcpContext = undefined;
 
-        const lcpNodeFilePath = path.join(process.cwd(), "LCP/lcp.node");
-        debug(lcpNodeFilePath);
-
-        if (fs.existsSync(lcpNodeFilePath)) {
+        if (fs.existsSync(LCP_NATIVE_PLUGIN_PATH)) {
             debug("LCP _usesNativeNodePlugin");
             this._usesNativeNodePlugin = true;
             this._lcpNative = bind({
@@ -110,7 +116,7 @@ export class LCP {
     public async decrypt(encryptedContent: Buffer): Promise<Buffer> {
         // this.init();
         if (!this.isNativeNodePlugin()) {
-            return Promise.reject("direct ecrypt buffer only for native plugin");
+            return Promise.reject("direct decrypt buffer only for native plugin");
         }
         if (!this._lcpContext) {
             return Promise.reject("LCP context not initialized (needs setUserPassphrase)");

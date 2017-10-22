@@ -19,10 +19,11 @@ import * as path from "path";
 
 import { encodeURIComponent_RFC3986 } from "@r2-streamer-js/_utils/http/UrlUtils";
 import { injectFileInZip } from "@r2-streamer-js/_utils/zip/zipInjector";
+import { trackBrowserWindow } from "@r2-streamer-js/electron/main_browser-window-tracker";
 import { Server } from "@r2-streamer-js/http/server";
 import { initGlobals } from "@r2-streamer-js/init-globals";
 import { Publication } from "@r2-streamer-js/models/publication";
-import { LCP } from "@r2-streamer-js/parser/epub/lcp";
+import { LCP, setLcpNativePluginPath } from "@r2-streamer-js/parser/epub/lcp";
 import * as debug_ from "debug";
 import { BrowserWindow, Menu, app, dialog, ipcMain, session, webContents } from "electron";
 import * as express from "express";
@@ -31,13 +32,14 @@ import * as portfinder from "portfinder";
 import * as request from "request";
 import * as requestPromise from "request-promise-native";
 import { JSON as TAJSON } from "ta-json";
-import { R2_EVENT_DEVTOOLS, R2_EVENT_LINK, R2_EVENT_TRY_LCP_PASS, R2_EVENT_TRY_LCP_PASS_RES } from "./common/events";
+import { R2_EVENT_DEVTOOLS, R2_EVENT_TRY_LCP_PASS, R2_EVENT_TRY_LCP_PASS_RES } from "./common/events";
 import { R2_SESSION_WEBVIEW } from "./common/sessions";
 import { IDeviceIDManager, launchStatusDocumentProcessing } from "./lsd";
 
 // import * as mime from "mime-types";
 
 initGlobals();
+setLcpNativePluginPath(path.join(process.cwd(), "LCP/lcp.node"));
 
 const debug = debug_("r2:electron:main");
 
@@ -47,37 +49,10 @@ let _publicationsRootUrl: string;
 let _publicationsFilePaths: string[];
 let _publicationsUrls: string[];
 
-let _electronBrowserWindows: Electron.BrowserWindow[];
-
 const DEFAULT_BOOK_PATH = fs.realpathSync(path.resolve("./misc/epubs/"));
 let _lastBookPath: string | undefined;
 
 // protocol.registerStandardSchemes(["epub", "file"], { secure: true });
-
-app.on("web-contents-created", (_evt, wc) => {
-    if (!_electronBrowserWindows || !_electronBrowserWindows.length) {
-        return;
-    }
-    _electronBrowserWindows.forEach((win) => {
-        if (wc.hostWebContents &&
-            wc.hostWebContents.id === win.webContents.id) {
-            debug("WEBVIEW web-contents-created");
-
-            wc.on("will-navigate", (event, url) => {
-                debug("webview.getWebContents().on('will-navigate'");
-
-                // debug(event.sender);
-                debug(url);
-                const wcUrl = event.sender.getURL();
-                debug(wcUrl);
-                event.preventDefault();
-
-                // ipcMain.emit
-                win.webContents.send(R2_EVENT_LINK, url);
-            });
-        }
-    });
-});
 
 function openAllDevTools() {
     for (const wc of webContents.getAllWebContents()) {
@@ -232,10 +207,7 @@ async function createElectronBrowserWindow(publicationFilePath: string, publicat
         },
         width: 800,
     });
-    if (!_electronBrowserWindows) {
-        _electronBrowserWindows = [];
-    }
-    _electronBrowserWindows.push(electronBrowserWindow);
+    trackBrowserWindow(electronBrowserWindow);
 
     // electronBrowserWindow.on("resize", () => {
     //     const [width, height] = electronBrowserWindow.getContentSize();
@@ -256,16 +228,6 @@ async function createElectronBrowserWindow(publicationFilePath: string, publicat
     electronBrowserWindow.webContents.on("dom-ready", () => {
         debug("electronBrowserWindow dom-ready " + publicationFilePath + " : " + publicationUrl);
         // electronBrowserWindow.webContents.openDevTools();
-    });
-
-    electronBrowserWindow.on("closed", () => {
-        debug("electronBrowserWindow closed " + publicationFilePath + " : " + publicationUrl);
-        const i = _electronBrowserWindows.indexOf(electronBrowserWindow);
-        if (i < 0) {
-            debug("electronBrowserWindow NOT FOUND?!");
-            return;
-        }
-        _electronBrowserWindows.splice(i, 1);
     });
 
     const urlEncoded = encodeURIComponent_RFC3986(publicationUrl);

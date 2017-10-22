@@ -6,9 +6,11 @@ import { Zip1 } from "@utils/zip/zip1";
 import { Zip2 } from "@utils/zip/zip2";
 import { Zip3 } from "@utils/zip/zip3";
 
+import { setLcpNativePluginPath } from "@parser/epub/lcp";
 import { initGlobals } from "../init-globals";
 
 initGlobals();
+setLcpNativePluginPath(path.join(process.cwd(), "LCP/lcp.node"));
 
 console.log("process.cwd():");
 console.log(process.cwd());

@@ -1,9 +1,12 @@
+import * as path from "path";
+
 import { Metadata } from "@models/metadata";
 import { IStringMap } from "@models/metadata-multilang";
 import { OPDSPublicationMetadata } from "@opds/opds2/opds2-publicationMetadata";
 import { test } from "ava";
 import { JSON as TAJSON } from "ta-json";
 
+import { setLcpNativePluginPath } from "@parser/epub/lcp";
 import { initGlobals } from "../src/init-globals";
 import {
     checkType_Object,
@@ -13,6 +16,7 @@ import {
 } from "./helpers";
 
 initGlobals();
+setLcpNativePluginPath(path.join(process.cwd(), "LCP/lcp.node"));
 
 // ==========================
 

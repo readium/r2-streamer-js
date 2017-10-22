@@ -1,3 +1,5 @@
+import * as path from "path";
+
 import { Entry } from "@opds/opds1/opds-entry";
 import { OPDSPublicationMetadata } from "@opds/opds2/opds2-publicationMetadata";
 import { XML } from "@utils/xml-js-mapper";
@@ -5,6 +7,7 @@ import { test } from "ava";
 import { JSON as TAJSON } from "ta-json";
 import * as xmldom from "xmldom";
 
+import { setLcpNativePluginPath } from "@parser/epub/lcp";
 import { initGlobals } from "../src/init-globals";
 import {
     checkDate,
@@ -15,6 +18,7 @@ import {
 } from "./helpers";
 
 initGlobals();
+setLcpNativePluginPath(path.join(process.cwd(), "LCP/lcp.node"));
 
 // ==========================
 

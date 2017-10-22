@@ -1,8 +1,11 @@
+import * as path from "path";
+
 import { Link } from "@models/publication-link";
 import { OPDSLink } from "@opds/opds2/opds2-link";
 import { test } from "ava";
 import { JSON as TAJSON } from "ta-json";
 
+import { setLcpNativePluginPath } from "@parser/epub/lcp";
 import { initGlobals } from "../src/init-globals";
 import {
     checkType_Array,
@@ -12,6 +15,7 @@ import {
 } from "./helpers";
 
 initGlobals();
+setLcpNativePluginPath(path.join(process.cwd(), "LCP/lcp.node"));
 
 // ==========================
 

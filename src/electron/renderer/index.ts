@@ -1,11 +1,14 @@
-import { initGlobals } from "@r2-streamer-js/init-globals";
-import { IStringMap } from "@r2-streamer-js/models/metadata-multilang";
-import { Publication } from "@r2-streamer-js/models/publication";
 import debounce = require("debounce");
 import { shell } from "electron";
 import { ipcRenderer } from "electron";
 import ElectronStore = require("electron-store");
+import * as path from "path";
 import { JSON as TAJSON } from "ta-json";
+
+import { setLcpNativePluginPath } from "@parser/epub/lcp";
+import { initGlobals } from "@r2-streamer-js/init-globals";
+import { IStringMap } from "@r2-streamer-js/models/metadata-multilang";
+import { Publication } from "@r2-streamer-js/models/publication";
 import {
     R2_EVENT_LINK,
     R2_EVENT_READIUMCSS,
@@ -45,6 +48,7 @@ import {
 // console.log(document.URL);
 
 initGlobals();
+setLcpNativePluginPath(path.join(process.cwd(), "LCP/lcp.node"));
 
 const queryParams = getURLQueryParams();
 
