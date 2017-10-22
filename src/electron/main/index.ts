@@ -157,7 +157,7 @@ async function createElectronBrowserWindow(publicationFilePath: string, publicat
     });
 
     const urlEncoded = encodeURIComponent_RFC3986(publicationUrl);
-    let fullUrl = `file://${__dirname}/renderer/index.html?pub=${urlEncoded}`;
+    let fullUrl = `file://${__dirname}/../renderer/index.html?pub=${urlEncoded}`;
     if (lcpHint) {
         fullUrl = fullUrl + "&lcpHint=" + encodeURIComponent_RFC3986(lcpHint);
     }
