@@ -13,13 +13,13 @@
 // https://github.com/electron/electron/blob/master/docs/api/dialog.md
 // https://github.com/electron/electron/blob/master/docs/api/ipc-renderer.md
 
-import * as crypto from "crypto";
 import * as fs from "fs";
 import * as path from "path";
 
 import { encodeURIComponent_RFC3986 } from "@r2-streamer-js/_utils/http/UrlUtils";
 import { injectFileInZip } from "@r2-streamer-js/_utils/zip/zipInjector";
-import { trackBrowserWindow } from "@r2-streamer-js/electron/main_browser-window-tracker";
+import { trackBrowserWindow } from "@r2-streamer-js/electron/main/browser-window-tracker";
+import { installLcpHandler } from "@r2-streamer-js/electron/main/lcp";
 import { Server } from "@r2-streamer-js/http/server";
 import { initGlobals } from "@r2-streamer-js/init-globals";
 import { Publication } from "@r2-streamer-js/models/publication";
@@ -32,9 +32,10 @@ import * as portfinder from "portfinder";
 import * as request from "request";
 import * as requestPromise from "request-promise-native";
 import { JSON as TAJSON } from "ta-json";
-import { R2_EVENT_DEVTOOLS, R2_EVENT_TRY_LCP_PASS, R2_EVENT_TRY_LCP_PASS_RES } from "./common/events";
-import { R2_SESSION_WEBVIEW } from "./common/sessions";
-import { IDeviceIDManager, launchStatusDocumentProcessing } from "./lsd";
+
+import { R2_EVENT_DEVTOOLS } from "../common/events";
+import { R2_SESSION_WEBVIEW } from "../common/sessions";
+import { deviceIDManager, launchStatusDocumentProcessing } from "./lsd";
 
 // import * as mime from "mime-types";
 
@@ -79,67 +80,6 @@ ipcMain.on(R2_EVENT_DEVTOOLS, (_event: any, _arg: any) => {
     openAllDevTools();
 });
 
-ipcMain.on(R2_EVENT_TRY_LCP_PASS, async (
-    event: any,
-    publicationFilePath: string,
-    lcpPass: string,
-    isSha256Hex: boolean) => {
-
-    // debug(publicationFilePath);
-    // debug(lcpPass);
-    let okay = false;
-    try {
-        okay = await tryLcpPass(publicationFilePath, lcpPass, isSha256Hex);
-    } catch (err) {
-        debug(err);
-        okay = false;
-    }
-
-    let passSha256Hex: string | undefined;
-    if (okay) {
-        if (isSha256Hex) {
-            passSha256Hex = lcpPass;
-        } else {
-            const checkSum = crypto.createHash("sha256");
-            checkSum.update(lcpPass);
-            passSha256Hex = checkSum.digest("hex");
-            // const lcpPass64 = new Buffer(hash).toString("base64");
-            // const lcpPassHex = new Buffer(lcpPass64, "base64").toString("utf8");
-        }
-    }
-
-    event.sender.send(R2_EVENT_TRY_LCP_PASS_RES,
-        okay,
-        (okay ? "Correct." : "Please try again."),
-        passSha256Hex ? passSha256Hex : "xxx",
-    );
-});
-
-async function tryLcpPass(publicationFilePath: string, lcpPass: string, isSha256Hex: boolean): Promise<boolean> {
-    const publication = _publicationsServer.cachedPublication(publicationFilePath);
-    if (!publication) {
-        return false;
-    }
-
-    let lcpPassHex: string | undefined;
-
-    if (isSha256Hex) {
-        lcpPassHex = lcpPass;
-    } else {
-        const checkSum = crypto.createHash("sha256");
-        checkSum.update(lcpPass);
-        lcpPassHex = checkSum.digest("hex");
-        // const lcpPass64 = new Buffer(hash).toString("base64");
-        // const lcpPassHex = new Buffer(lcpPass64, "base64").toString("utf8");
-    }
-
-    const okay = await publication.LCP.setUserPassphrase(lcpPassHex);
-    if (!okay) {
-        debug("FAIL publication.LCP.setUserPassphrase()");
-    }
-    return okay;
-}
-
 async function createElectronBrowserWindow(publicationFilePath: string, publicationUrl: string) {
 
     debug("createElectronBrowserWindow() " + publicationFilePath + " : " + publicationUrl);
@@ -156,25 +96,6 @@ async function createElectronBrowserWindow(publicationFilePath: string, publicat
     if (!publication) {
         return;
     }
-
-    const deviceIDManager: IDeviceIDManager = {
-
-        checkDeviceID: (_key: string): string => {
-            return "";
-        },
-
-        getDeviceID: (): string => {
-            return "";
-        },
-
-        getDeviceNAME: (): string => {
-            return "";
-        },
-
-        recordDeviceID: (_key: string) => {
-            return;
-        },
-    };
 
     await launchStatusDocumentProcessing(publication, publicationFilePath, deviceIDManager, () => {
         debug("launchStatusDocumentProcessing DONE.");
@@ -233,7 +154,7 @@ async function createElectronBrowserWindow(publicationFilePath: string, publicat
     const urlEncoded = encodeURIComponent_RFC3986(publicationUrl);
     let fullUrl = `file://${__dirname}/renderer/index.html?pub=${urlEncoded}`;
     if (lcpHint) {
-        fullUrl = fullUrl + "&lcpHint=" + lcpHint;
+        fullUrl = fullUrl + "&lcpHint=" + encodeURIComponent_RFC3986(lcpHint);
     }
     // `file://${process.cwd()}/src/electron/renderer/index.html`;
     // `file://${__dirname}/../../../../src/electron/renderer/index.html`
@@ -281,6 +202,8 @@ app.on("ready", () => {
             disableDecryption: false,
             disableReaders: false,
         });
+
+        installLcpHandler(_publicationsServer);
 
         // https://expressjs.com/en/4x/api.html#express.static
         const staticOptions = {

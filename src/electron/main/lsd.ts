@@ -22,6 +22,25 @@ export interface IDeviceIDManager {
     recordDeviceID(key: string): void;
 }
 
+export const deviceIDManager: IDeviceIDManager = {
+
+    checkDeviceID: (_key: string): string => {
+        return "";
+    },
+
+    getDeviceID: (): string => {
+        return "";
+    },
+
+    getDeviceNAME: (): string => {
+        return "";
+    },
+
+    recordDeviceID: (_key: string) => {
+        return;
+    },
+};
+
 export async function launchStatusDocumentProcessing(
     publication: Publication,
     publicationPath: string,
@@ -144,7 +163,7 @@ export async function launchStatusDocumentProcessing(
         //                 if (deviceIDForStatusDoc == null) {
         //                     doRegister = true;
         //                 } else if (!deviceIDForStatusDoc.equals(deviceID)) {
-            // // this should really never happen ... but let's ensure anyway.
+        // // this should really never happen ... but let's ensure anyway.
         //                     doRegister = true;
         //                 }
         //             }
@@ -296,7 +315,7 @@ async function fetchAndInjectUpdatedLicense(
                 const newHref = href.replace("/licenses/", "/api/v1/purchases/license/");
                 debug("TRYING AGAIN: " + newHref);
                 await fetchAndInjectUpdatedLicense(publication, publicationPath,
-                        newHref, onStatusDocumentProcessingComplete);
+                    newHref, onStatusDocumentProcessingComplete);
             } else {
                 failure("HTTP CODE " + response.statusCode);
             }

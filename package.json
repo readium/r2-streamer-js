@@ -149,7 +149,7 @@
     "electron-renderer:es6-es2015": "npm run browserify:es6-es2015 && npm run riot:es6-es2015 && cpy \"./ReadiumCSS/**/*.*\" ../dist/ --cwd=./misc --parents",
     "electron-renderer:es7-es2016": "npm run browserify:es7-es2016 && npm run riot:es7-es2016 && cpy \"./ReadiumCSS/**/*.*\" ../dist/ --cwd=./misc --parents",
     "electron-renderer:es8-es2017": "npm run browserify:es8-es2017 && npm run riot:es8-es2017 && cpy \"./ReadiumCSS/**/*.*\" ../dist/ --cwd=./misc --parents",
-    "electron": "node tools/electronRename.js && cross-env DEBUG=r2:* BUILD_ENV=DEV electron ./dist/es8-es2017/src/electron/main.js",
+    "electron": "node tools/electronRename.js && cross-env DEBUG=r2:* BUILD_ENV=DEV electron ./dist/es8-es2017/src/electron/main/index.js",
     "_pregitdist": "npm run build:all",
     "gitdist": "cd ../r2-streamer-js-dist/ && git status || echo status && (rimraf \"*\" && echo rimrafOK) || echo rimrafNOK && cpy ../r2-streamer-js/package.json . && cpy ../r2-streamer-js/package-lock.json . && cpy ../r2-streamer-js/LICENSE . && cpy ../r2-streamer-js/README.md . && cpy \"docs/**/*.*\" ../r2-streamer-js-dist/ --cwd=../r2-streamer-js/ --parents && cpy \"dist/**/*.*\" ../r2-streamer-js-dist/ --cwd=../r2-streamer-js/ --parents && git add * || echo add && git commit -a -m \"add new dist\" || echo commit && git push || echo push && git status || echo status && cd ..",
     "start": "cross-env DEBUG=r2:* node \"./dist/es6-es2015/src/http/server-cli.js\" ./misc/epubs/",

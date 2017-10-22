@@ -116,7 +116,7 @@
       "name": "electron",
       "type": "node",
       "request": "launch",
-      "program": "${workspaceRoot}/src/electron/main.ts",
+      "program": "${workspaceRoot}/src/electron/main/index.ts",
       "stopOnEntry": false,
       "cwd": "${workspaceRoot}",
       "internalConsoleOptions": "openOnSessionStart",

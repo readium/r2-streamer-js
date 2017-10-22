@@ -1,6 +1,6 @@
 import { app } from "electron";
 
-import { R2_EVENT_LINK } from "./common/events";
+import { R2_EVENT_LINK } from "../common/events";
 
 let _electronBrowserWindows: Electron.BrowserWindow[];
 
