@@ -18,8 +18,6 @@ import * as path from "path";
 
 import { encodeURIComponent_RFC3986 } from "@r2-streamer-js/_utils/http/UrlUtils";
 import { injectFileInZip } from "@r2-streamer-js/_utils/zip/zipInjector";
-import { trackBrowserWindow } from "@r2-streamer-js/electron/main/browser-window-tracker";
-import { installLcpHandler } from "@r2-streamer-js/electron/main/lcp";
 import { Server } from "@r2-streamer-js/http/server";
 import { initGlobals } from "@r2-streamer-js/init-globals";
 import { Publication } from "@r2-streamer-js/models/publication";
@@ -35,6 +33,8 @@ import { JSON as TAJSON } from "ta-json";
 
 import { R2_EVENT_DEVTOOLS } from "../common/events";
 import { R2_SESSION_WEBVIEW } from "../common/sessions";
+import { trackBrowserWindow } from "./browser-window-tracker";
+import { installLcpHandler } from "./lcp";
 import { deviceIDManager, launchStatusDocumentProcessing } from "./lsd";
 
 // import * as mime from "mime-types";
