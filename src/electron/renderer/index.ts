@@ -403,6 +403,14 @@ const initFontSelector = () => {
 
 window.addEventListener("DOMContentLoaded", () => {
 
+    window.document.addEventListener("keydown", (ev: KeyboardEvent) => {
+        if (ev.keyCode === 37) { // left
+            navLeftOrRight(true);
+        } else if (ev.keyCode === 39) { // right
+            navLeftOrRight(false);
+        }
+    });
+
     setTimeout(() => {
         // material-components-web
         (window as any).mdc.autoInit();

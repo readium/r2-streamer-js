@@ -572,7 +572,7 @@ const activateResizeSensor = () => {
                     // notifyReady();
                 });
             });
-        }, 1000);
+        }, 2000);
     } else {
         scrollToHash();
     }
