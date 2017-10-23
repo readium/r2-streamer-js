@@ -42,7 +42,7 @@ export const riotMountLinkTree = (selector: string, opts: IRiotOptsLinkTree): Ri
 
         const href = (ev.currentTarget as HTMLElement).getAttribute("href");
         if (href) {
-            handleLink(href, false);
+            handleLink(href, undefined, false);
         }
     };
 };

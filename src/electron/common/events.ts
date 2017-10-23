@@ -19,6 +19,10 @@ export const R2_EVENT_PAGE_TURN = "R2_EVENT_PAGE_TURN";
 // in RENDERER: webview.addEventListener("ipc-message")
 export const R2_EVENT_PAGE_TURN_RES = "R2_EVENT_PAGE_TURN_RES";
 
+// in WEBVIEW: ipcRenderer.sendToHost()
+// in RENDERER: webview.addEventListener("ipc-message")
+export const R2_EVENT_READING_LOCATION = "R2_EVENT_READING_LOCATION";
+
 // in MAIN: browserWindow.webContents.send(()
 // in RENDERER: ipcRenderer.on()
 // in WEBVIEW: ipcRenderer.sendToHost()

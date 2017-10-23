@@ -1,6 +1,6 @@
 export const animateProperty = (
     cAF: (id: number) => void, // typically: window.cancelAnimationFrame
-    callback: (cancelled: boolean) => void,
+    callback: ((cancelled: boolean) => void) | undefined,
     property: string, // numerical, e.g. "scrollTop" or "scrollLeft"
     duration: number, // e.g. 200
     object: any, // typically, window.document.body (Element)

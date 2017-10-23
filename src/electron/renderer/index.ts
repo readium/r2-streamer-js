@@ -7,6 +7,7 @@ import { ipcRenderer } from "electron";
 import * as path from "path";
 import { JSON as TAJSON } from "ta-json";
 
+import { encodeURIComponent_RFC3986 } from "@r2-streamer-js/_utils/http/UrlUtils";
 import { initGlobals } from "@r2-streamer-js/init-globals";
 import { IStringMap } from "@r2-streamer-js/models/metadata-multilang";
 import { Publication } from "@r2-streamer-js/models/publication";
@@ -17,6 +18,7 @@ import {
     R2_EVENT_LINK,
     R2_EVENT_PAGE_TURN,
     R2_EVENT_PAGE_TURN_RES,
+    R2_EVENT_READING_LOCATION,
     R2_EVENT_READIUMCSS,
     R2_EVENT_TRY_LCP_PASS,
     R2_EVENT_TRY_LCP_PASS_RES,
@@ -182,16 +184,16 @@ const readiumCssOnOff = debounce(() => {
 let snackBar: any;
 let drawer: any;
 
-export function handleLink(href: string, previous: boolean) {
+export function handleLink(href: string, previous: boolean | undefined, useGoto: boolean) {
     const prefix = publicationJsonUrl.replace("manifest.json", "");
     if (href.startsWith(prefix)) {
         if (drawer.open) {
             drawer.open = false;
             setTimeout(() => {
-                loadLink(href, previous);
+                loadLink(href, previous, useGoto);
             }, 200);
         } else {
-            loadLink(href, previous);
+            loadLink(href, previous, useGoto);
         }
     } else {
         shell.openExternal(href);
@@ -266,7 +268,7 @@ const unhideWebView = (_id: string, forced: boolean) => {
 ipcRenderer.on(R2_EVENT_LINK, (_event: any, href: string) => {
     console.log("R2_EVENT_LINK");
     console.log(href);
-    handleLink(href, false);
+    handleLink(href, undefined, false);
 });
 
 ipcRenderer.on(R2_EVENT_TRY_LCP_PASS_RES, (_event: any, okay: boolean, msg: string, passSha256Hex: string) => {
@@ -637,6 +639,18 @@ window.addEventListener("DOMContentLoaded", () => {
     // }
 });
 
+const saveReadingLocation = (doc: string, loc: string) => {
+    let obj = electronStore.get("readingLocation");
+    if (!obj) {
+        obj = {};
+    }
+    obj[pathDecoded] = {
+        doc,
+        loc,
+    };
+    electronStore.set("readingLocation", obj);
+};
+
 const _webviews: Electron.WebviewTag[] = [];
 
 function createWebView() {
@@ -652,10 +666,15 @@ function createWebView() {
 
     webview1.addEventListener("ipc-message", (event) => {
         if (event.channel === R2_EVENT_LINK) {
-            handleLink(event.args[0], false);
+            handleLink(event.args[0], undefined, false);
         } else if (event.channel === R2_EVENT_WEBVIEW_READY) {
             const id = event.args[0];
             unhideWebView(id, false);
+        } else if (event.channel === R2_EVENT_READING_LOCATION) {
+            const cssSelector = event.args[0];
+            if ((webview1 as any).READIUM2_LINK) {
+                saveReadingLocation((webview1 as any).READIUM2_LINK.Href, cssSelector);
+            }
         } else if (event.channel === R2_EVENT_PAGE_TURN_RES) {
             if (!_publication) {
                 return;
@@ -689,7 +708,7 @@ function createWebView() {
                 return;
             }
             const linkHref = publicationJsonUrl + "/../" + nextOrPreviousSpineItem.Href;
-            handleLink(linkHref, goPREVIOUS);
+            handleLink(linkHref, goPREVIOUS, false);
         } else {
             console.log("webview1 ipc-message");
             console.log(event.channel);
@@ -753,7 +772,7 @@ window.addEventListener("resize", debounce(() => {
     });
 }, 200));
 
-function loadLink(hrefFull: string, previous: boolean) {
+function loadLink(hrefFull: string, previous: boolean | undefined, useGoto: boolean) {
     if (_publication && _webviews.length) {
 
         const hidePanel = document.getElementById("reader_chrome_HIDE");
@@ -779,9 +798,26 @@ function loadLink(hrefFull: string, previous: boolean) {
         const linkUri = new URI(hrefFull);
         linkUri.search((data: any) => {
             // overrides existing (leaves others intact)
-            data.readiumprevious = previous ? "true" : "false";
+
+            if (typeof previous === "undefined") {
+                // erase unwanted forward of query param during linking
+                data.readiumprevious = undefined;
+                // delete data.readiumprevious;
+            } else {
+                data.readiumprevious = previous ? "true" : "false";
+            }
+
+            if (!useGoto) {
+                // erase unwanted forward of query param during linking
+                data.readiumgoto = undefined;
+                // delete data.readiumgoto;
+            }
+
             data.readiumcss = rcssJsonstrBase64;
         });
+        if (useGoto) {
+            linkUri.hash("").normalizeHash();
+        }
 
         const pubUri = new URI(publicationJsonUrl);
 
@@ -930,14 +966,6 @@ function startNavigatorExperiment() {
             };
             // const tag =
             riotMountLinkList("#reader_controls_SPINE", opts);
-
-            const firstLinear = _publication.Spine[0];
-            if (firstLinear) {
-                setTimeout(() => {
-                    const firstLinearLinkHref = publicationJsonUrl + "/../" + firstLinear.Href;
-                    handleLink(firstLinearLinkHref, false);
-                }, 200);
-            }
         }
 
         if (_publication.TOC && _publication.TOC.length) {
@@ -1018,6 +1046,45 @@ function startNavigatorExperiment() {
                 }
                 tag.setBasic(newValue);
             });
+        }
+
+        const readStore = electronStore.get("readingLocation");
+        let linkToLoad: Link | undefined;
+        let linkToLoadGoto: string | undefined;
+        const obj = readStore[pathDecoded];
+        if (obj && obj.doc) {
+            if (_publication.Spine && _publication.Spine.length) {
+                linkToLoad = _publication.Spine.find((spineLink) => {
+                    return spineLink.Href === obj.doc;
+                });
+                if (linkToLoad && obj.loc) {
+                    linkToLoadGoto = obj.loc;
+                }
+            }
+            if (!linkToLoad &&
+                _publication.Resources && _publication.Resources.length) {
+                linkToLoad = _publication.Resources.find((resLink) => {
+                    return resLink.Href === obj.doc;
+                });
+                if (linkToLoad && obj.loc) {
+                    linkToLoadGoto = obj.loc;
+                }
+            }
+        }
+        if (!linkToLoad) {
+            if (_publication.Spine && _publication.Spine.length) {
+                const firstLinear = _publication.Spine[0];
+                if (firstLinear) {
+                    linkToLoad = firstLinear;
+                }
+            }
+        }
+        if (linkToLoad) {
+            setTimeout(() => {
+                const hrefToLoad = publicationJsonUrl + "/../" + (linkToLoad as Link).Href +
+                    (linkToLoadGoto ? ("?readiumgoto=" + encodeURIComponent_RFC3986(linkToLoadGoto)) : "");
+                handleLink(hrefToLoad, undefined, true);
+            }, 200);
         }
     })();
 }
