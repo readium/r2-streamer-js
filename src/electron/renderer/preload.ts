@@ -2,6 +2,8 @@ import debounce = require("debounce");
 import ResizeSensor = require("resize-sensor/ResizeSensor");
 
 import { ipcRenderer } from "electron";
+import { animateProperty } from "./animateProperty";
+import { easings } from "./easings";
 import { getURLQueryParams } from "./querystring";
 
 import {
@@ -89,12 +91,34 @@ ipcRenderer.on(R2_EVENT_PAGE_TURN, (_event: any, messageString: any) => {
 
     if (!goPREVIOUS) { // goPREVIOUS && isRTL || !goPREVIOUS && !isRTL) { // right
         if (element.scrollTop < maxHeightShift) { // not at bottom
-            element.scrollTop += win.document.documentElement.clientHeight;
+            animateProperty(win.cancelAnimationFrame,
+                (cancelled: boolean) => {
+                    console.log(cancelled);
+                },
+                "scrollTop",
+                300,
+                element,
+                element.scrollTop + win.document.documentElement.clientHeight,
+                win.requestAnimationFrame,
+                easings.easeInOutQuad,
+            );
+            // element.scrollTop += win.document.documentElement.clientHeight;
             return;
         }
     } else if (goPREVIOUS) { //  && !isRTL || !goPREVIOUS && isRTL) { // left
         if (element.scrollTop > 0) { // not at top
-            element.scrollTop -= win.document.documentElement.clientHeight;
+            animateProperty(win.cancelAnimationFrame,
+                (cancelled: boolean) => {
+                    console.log(cancelled);
+                },
+                "scrollTop",
+                300,
+                element,
+                element.scrollTop - win.document.documentElement.clientHeight,
+                win.requestAnimationFrame,
+                easings.easeInOutQuad,
+            );
+            // element.scrollTop -= win.document.documentElement.clientHeight;
             return;
         }
     }
