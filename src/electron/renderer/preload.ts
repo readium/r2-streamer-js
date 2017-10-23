@@ -1,6 +1,8 @@
 import debounce = require("debounce");
-import { ipcRenderer } from "electron";
 import ResizeSensor = require("resize-sensor/ResizeSensor");
+
+import { ipcRenderer } from "electron";
+import { getURLQueryParams } from "./querystring";
 
 import {
     R2_EVENT_LINK,
@@ -9,7 +11,6 @@ import {
     R2_EVENT_READIUMCSS,
     R2_EVENT_WEBVIEW_READY,
 } from "../common/events";
-import { getURLQueryParams } from "./querystring";
 
 // import { fullQualifiedSelector } from "./cssselector";
 
@@ -19,6 +20,8 @@ const urlRootReadiumCSS = win.location.origin + "/readium-css/iOS/";
 // const urlResizeSensor = win.location.origin + "/resize-sensor.js";
 
 const DEBUG_VISUALS = true;
+
+const queryParams = win.location.search ? getURLQueryParams(win.location.search) : undefined;
 
 const ensureHead = () => {
     const docElement = win.document.documentElement;
@@ -79,17 +82,17 @@ ipcRenderer.on(R2_EVENT_PAGE_TURN, (_event: any, messageString: any) => {
     const maxHeightShift = element.scrollHeight - win.document.documentElement.clientHeight;
 
     const messageJson = JSON.parse(messageString);
-    const isRTL = messageJson.direction === "RTL"; //  any other value is LTR
+    // const isRTL = messageJson.direction === "RTL"; //  any other value is LTR
     const goPREVIOUS = messageJson.go === "PREVIOUS"; // any other value is NEXT
 
     // console.log(JSON.stringify(messageJson, null, "  "));
 
-    if (goPREVIOUS && isRTL || !goPREVIOUS && !isRTL) { // right
+    if (!goPREVIOUS) { // goPREVIOUS && isRTL || !goPREVIOUS && !isRTL) { // right
         if (element.scrollTop < maxHeightShift) { // not at bottom
             element.scrollTop += win.document.documentElement.clientHeight;
             return;
         }
-    } else if (goPREVIOUS && !isRTL || !goPREVIOUS && isRTL) { // left
+    } else if (goPREVIOUS) { //  && !isRTL || !goPREVIOUS && isRTL) { // left
         if (element.scrollTop > 0) { // not at top
             element.scrollTop -= win.document.documentElement.clientHeight;
             return;
@@ -466,6 +469,19 @@ const scrollToHash = debounce(() => {
         }
     } else {
         if (win.document.body) {
+
+            if (queryParams) {
+                // tslint:disable-next-line:no-string-literal
+                const previous = queryParams["readiumprevious"];
+                const isPreviousNavDirection = previous === "true";
+                if (isPreviousNavDirection) {
+                    const maxHeightShift = win.document.body.scrollHeight - win.document.documentElement.clientHeight;
+
+                    win.document.body.scrollLeft = 0;
+                    win.document.body.scrollTop = maxHeightShift;
+                    return;
+                }
+            }
             win.document.body.scrollLeft = 0;
             win.document.body.scrollTop = 0;
         }
@@ -623,30 +639,31 @@ outline-style: none !important;
 
     // injectResizeSensor();
 
+    // console.log("-----");
+    // console.log(win.location.href);
+    // console.log(win.location.origin);
+    // console.log(win.location.pathname);
+    // console.log(win.location.search);
+    // console.log(win.location.hash);
+
+    // const linkUri = new URI(win.location.href);
     try {
-        // console.log("-----");
-        // console.log(win.location.href);
-        // console.log(win.location.origin);
-        // console.log(win.location.pathname);
-        // console.log(win.location.search);
-        // console.log(win.location.hash);
-        if (win.location.search) {
-            const params = getURLQueryParams(win.location.search);
+        if (queryParams) {
             // tslint:disable-next-line:no-string-literal
-            let base64 = params["readiumcss"];
-            if (!base64) {
-                console.log("!readiumcss BASE64 ??!");
-                const token = "readiumcss=";
-                const i = win.location.search.indexOf(token);
-                if (i > 0) {
-                    base64 = win.location.search.substr(i + token.length);
-                    const j = base64.indexOf("&");
-                    if (j > 0) {
-                        base64 = base64.substr(0, j);
-                    }
-                    base64 = decodeURIComponent(base64);
-                }
-            }
+            const base64 = queryParams["readiumcss"];
+            // if (!base64) {
+            //     console.log("!readiumcss BASE64 ??!");
+            //     const token = "readiumcss=";
+            //     const i = win.location.search.indexOf(token);
+            //     if (i > 0) {
+            //         base64 = win.location.search.substr(i + token.length);
+            //         const j = base64.indexOf("&");
+            //         if (j > 0) {
+            //             base64 = base64.substr(0, j);
+            //         }
+            //         base64 = decodeURIComponent(base64);
+            //     }
+            // }
             if (base64) {
                 // console.log(base64);
                 const str = window.atob(base64);

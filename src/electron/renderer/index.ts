@@ -1,11 +1,12 @@
 import debounce = require("debounce");
+import ElectronStore = require("electron-store");
+import URI = require("urijs");
+
 import { shell } from "electron";
 import { ipcRenderer } from "electron";
-import ElectronStore = require("electron-store");
 import * as path from "path";
 import { JSON as TAJSON } from "ta-json";
 
-import { encodeURIComponent_RFC3986 } from "@r2-streamer-js/_utils/http/UrlUtils";
 import { initGlobals } from "@r2-streamer-js/init-globals";
 import { IStringMap } from "@r2-streamer-js/models/metadata-multilang";
 import { Publication } from "@r2-streamer-js/models/publication";
@@ -181,16 +182,16 @@ const readiumCssOnOff = debounce(() => {
 let snackBar: any;
 let drawer: any;
 
-export function handleLink(href: string) {
+export function handleLink(href: string, previous: boolean) {
     const prefix = publicationJsonUrl.replace("manifest.json", "");
     if (href.startsWith(prefix)) {
         if (drawer.open) {
             drawer.open = false;
             setTimeout(() => {
-                loadLink(href, href.replace(prefix, ""), publicationJsonUrl);
+                loadLink(href, previous);
             }, 200);
         } else {
-            loadLink(href, href.replace(prefix, ""), publicationJsonUrl);
+            loadLink(href, previous);
         }
     } else {
         shell.openExternal(href);
@@ -265,7 +266,7 @@ const unhideWebView = (_id: string, forced: boolean) => {
 ipcRenderer.on(R2_EVENT_LINK, (_event: any, href: string) => {
     console.log("R2_EVENT_LINK");
     console.log(href);
-    handleLink(href);
+    handleLink(href, false);
 });
 
 ipcRenderer.on(R2_EVENT_TRY_LCP_PASS_RES, (_event: any, okay: boolean, msg: string, passSha256Hex: string) => {
@@ -643,7 +644,7 @@ function createWebView() {
 
     webview1.addEventListener("ipc-message", (event) => {
         if (event.channel === R2_EVENT_LINK) {
-            handleLink(event.args[0]);
+            handleLink(event.args[0], false);
         } else if (event.channel === R2_EVENT_WEBVIEW_READY) {
             const id = event.args[0];
             unhideWebView(id, false);
@@ -657,7 +658,7 @@ function createWebView() {
 
             const messageString = event.args[0];
             const messageJson = JSON.parse(messageString);
-            const isRTL = messageJson.direction === "RTL"; //  any other value is LTR
+            // const isRTL = messageJson.direction === "RTL"; //  any other value is LTR
             const goPREVIOUS = messageJson.go === "PREVIOUS"; // any other value is NEXT
 
             if (!(webview1 as any).READIUM2_LINK) {
@@ -680,7 +681,7 @@ function createWebView() {
                 return;
             }
             const linkHref = publicationJsonUrl + "/../" + nextOrPreviousSpineItem.Href;
-            handleLink(linkHref);
+            handleLink(linkHref, goPREVIOUS);
         } else {
             console.log("webview1 ipc-message");
             console.log(event.channel);
@@ -744,7 +745,7 @@ window.addEventListener("resize", debounce(() => {
     });
 }, 200));
 
-function loadLink(hrefFull: string, _hrefPartial: string, _publicationJsonUrl: string) {
+function loadLink(hrefFull: string, previous: boolean) {
     if (_publication && _webviews.length) {
 
         const hidePanel = document.getElementById("reader_chrome_HIDE");
@@ -763,57 +764,31 @@ function loadLink(hrefFull: string, _hrefPartial: string, _publicationJsonUrl: s
             }
         }, 5000);
 
-        let urlWithSearch = hrefFull;
-        // console.log("#######");
-        // console.log(urlWithSearch);
-        // console.log(_hrefPartial);
-        // console.log(_publicationJsonUrl);
-        const urlParts = hrefFull.split("#");
-        if (urlParts && (urlParts.length === 1 || urlParts.length === 2)) {
+        const rcssJsonstr = computeReadiumCssJsonMessage();
+        // const str = window.atob(base64);
+        const rcssJsonstrBase64 = window.btoa(rcssJsonstr);
 
-            const str = computeReadiumCssJsonMessage();
-            // const str = window.atob(base64);
-            const base64 = window.btoa(str);
+        const linkUri = new URI(hrefFull);
+        linkUri.search((data: any) => {
+            // overrides existing (leaves others intact)
+            data.readiumprevious = previous ? "true" : "false";
+            data.readiumcss = rcssJsonstrBase64;
+        });
 
-            let alreadyHasSearch = urlParts[0].indexOf("?") > 0;
-            if (alreadyHasSearch) {
-                const token = "readiumcss=";
-                const i = urlParts[0].indexOf(token);
-                if (i > 0) {
-                    let rcss = urlParts[0].substr(i);
-                    const j = rcss.indexOf("&");
-                    if (j > 0) {
-                        rcss = rcss.substr(0, j);
-                    }
-                    urlParts[0] = urlParts[0].replace(rcss, "");
-                    urlParts[0] = urlParts[0].replace("?&", "?");
-                    urlParts[0] = urlParts[0].replace("&&", "&");
-                }
-            }
-            if (alreadyHasSearch &&
-                urlParts[0].indexOf("?") === (urlParts[0].length - 1)) {
-                urlParts[0] = urlParts[0].substr(0, urlParts[0].length - 1);
-                alreadyHasSearch = false;
-            }
+        const pubUri = new URI(publicationJsonUrl);
 
-            urlWithSearch = urlParts[0] +
-                (alreadyHasSearch ? "&" : "?") +
-                "readiumcss=" +
-                encodeURIComponent_RFC3986(base64) +
-                (urlParts.length === 2 ? ("#" + urlParts[1]) : "");
-        }
+        // "/pub/BASE64_PATH/manifest.json" ==> "/pub/BASE64_PATH/"
+        const pathPrefix = pubUri.path().replace("manifest.json", "");
 
-        const rootPubUrl = publicationJsonUrl.replace("manifest.json", ""); // contains trailing slash!
-        const onlyPath = urlParts[0].replace(rootPubUrl, "").replace("manifest.json/../", ""); // no leading slash!
-        // console.log("---- 1: " + onlyPath);
+        // "/pub/BASE64_PATH/epub/chapter.html" ==> "epub/chapter.html"
+        const linkPath = linkUri.normalizePath().path().replace(pathPrefix, "");
+
         let pubLink = _publication.Spine.find((spineLink) => {
-            // console.log("---- 2: " + spineLink.Href);
-            // const linkHref = publicationJsonUrl + "/../" + spineLink.Href;
-            return onlyPath.indexOf(spineLink.Href) === 0;
+            return spineLink.Href === linkPath;
         });
         if (!pubLink) {
             pubLink = _publication.Resources.find((spineLink) => {
-                return onlyPath.indexOf(spineLink.Href) === 0;
+                return spineLink.Href === linkPath;
             });
         }
         if (pubLink) {
@@ -822,11 +797,13 @@ function loadLink(hrefFull: string, _hrefPartial: string, _publicationJsonUrl: s
             console.log("WEBVIEW READIUM2_LINK ??!!");
             (_webviews[0] as any).READIUM2_LINK = undefined;
         }
-        // console.log("####### >>>");
-        // console.log(urlWithSearch);
-        _webviews[0].setAttribute("src", urlWithSearch);
-        // _webviews[0].getWebContents().loadURL(tocLinkHref, { extraHeaders: "pragma: no-cache\n" });
-        // _webviews[0].loadURL(tocLinkHref, { extraHeaders: "pragma: no-cache\n" });
+
+        const uriStr = linkUri.toString();
+        // console.log("####### >>> ---");
+        // console.log(uriStr);
+        _webviews[0].setAttribute("src", uriStr);
+        // _webviews[0].getWebContents().loadURL(uriStr, { extraHeaders: "pragma: no-cache\n" });
+        // _webviews[0].loadURL(uriStr, { extraHeaders: "pragma: no-cache\n" });
     }
 }
 
@@ -950,7 +927,7 @@ function startNavigatorExperiment() {
             if (firstLinear) {
                 setTimeout(() => {
                     const firstLinearLinkHref = publicationJsonUrl + "/../" + firstLinear.Href;
-                    handleLink(firstLinearLinkHref);
+                    handleLink(firstLinearLinkHref, false);
                 }, 200);
             }
         }
