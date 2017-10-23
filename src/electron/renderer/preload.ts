@@ -39,45 +39,64 @@ ipcRenderer.on(R2_EVENT_READIUMCSS, (_event: any, messageString: any) => {
 });
 
 ipcRenderer.on(R2_EVENT_PAGE_TURN, (_event: any, messageString: any) => {
+    const element = win.document.body;
+    if (!element) {
+        return;
+    }
+    // console.log("---");
+    // console.log("webview.innerWidth: " + win.innerWidth);
+    // console.log("document.offsetWidth: " + win.document.documentElement.offsetWidth);
+    // console.log("document.clientWidth: " + win.document.documentElement.clientWidth);
+    // console.log("document.scrollWidth: " + win.document.documentElement.scrollWidth);
+    // console.log("document.scrollLeft: " + win.document.documentElement.scrollLeft);
+    // console.log("body.offsetWidth: " + element.offsetWidth);
+    // console.log("body.clientWidth: " + element.clientWidth);
+    // console.log("body.scrollWidth: " + element.scrollWidth);
+    // console.log("body.scrollLeft: " + element.scrollLeft);
+    // console.log("---");
+    // console.log("webview.innerHeight: " + win.innerHeight);
+    // console.log("document.offsetHeight: " + win.document.documentElement.offsetHeight);
+    // console.log("document.clientHeight: " + win.document.documentElement.clientHeight);
+    // console.log("document.scrollHeight: " + win.document.documentElement.scrollHeight);
+    // console.log("document.scrollTop: " + win.document.documentElement.scrollTop);
+    // console.log("body.offsetHeight: " + element.offsetHeight);
+    // console.log("body.clientHeight: " + element.clientHeight);
+    // console.log("body.scrollHeight: " + element.scrollHeight);
+    // console.log("body.scrollTop: " + element.scrollTop);
+    // console.log("---");
+
+    // win.document.body.offsetWidth === single column width (takes into account column gap?)
+    // win.document.body.clientWidth === same
+    // win.document.body.scrollWidth === full document width (all columns)
+    //
+    // win.document.body.offsetHeight === full document height (sum of all columns minus trailing blank space?)
+    // win.document.body.clientHeight === same
+    // win.document.body.scrollHeight === visible viewport height
+    //
+    // win.document.body.scrollLeft === positive number for horizontal shift
+    // win.document.body.scrollTop === positive number for vertical shift
+
+    const maxHeightShift = element.scrollHeight - win.document.documentElement.clientHeight;
+
     const messageJson = JSON.parse(messageString);
     const isRTL = messageJson.direction === "RTL"; //  any other value is LTR
     const goPREVIOUS = messageJson.go === "PREVIOUS"; // any other value is NEXT
-    const atEnd = false;
-    if (win.document.body) {
 
-        console.log("win.innerWidth: " + win.innerWidth);
-        console.log("win.innerHeight: " + win.innerHeight);
+    // console.log(JSON.stringify(messageJson, null, "  "));
 
-        const element = win.document.body; // docElement
-        if (!element) {
+    if (goPREVIOUS && isRTL || !goPREVIOUS && !isRTL) { // right
+        if (element.scrollTop < maxHeightShift) { // not at bottom
+            element.scrollTop += win.document.documentElement.clientHeight;
             return;
         }
-
-        console.log(element.clientWidth);
-        console.log(element.clientHeight);
-
-        console.log("element.scrollWidth: " + element.scrollWidth);
-        console.log("element.scrollLeft: " + element.scrollLeft);
-
-        console.log("element.scrollHeight: " + element.scrollHeight);
-        console.log("element.scrollTop: " + element.scrollTop);
-
-        // win.document.body.offsetWidth === single column width (takes into account column gap?)
-        // win.document.body.clientWidth === same
-        // win.document.body.scrollWidth === full document width (all columns)
-        //
-        // win.document.body.offsetHeight === full document height (sum of all columns minus trailing blank space?)
-        // win.document.body.clientHeight === same
-        // win.document.body.scrollHeight === visible viewport height
-        //
-        // win.document.body.scrollLeft === positive number for horizontal shift
-        // win.document.body.scrollTop === positive number for vertical shift
-
-        // if (goPREVIOUS && !isRTL
+    } else if (goPREVIOUS && !isRTL || !goPREVIOUS && isRTL) { // left
+        if (element.scrollTop > 0) { // not at top
+            element.scrollTop -= win.document.documentElement.clientHeight;
+            return;
+        }
     }
-    if (atEnd) {
-        ipcRenderer.sendToHost(R2_EVENT_PAGE_TURN_RES, messageString);
-    }
+
+    ipcRenderer.sendToHost(R2_EVENT_PAGE_TURN_RES, messageString);
 });
 
 const readiumCSS = (messageJson: any) => {
