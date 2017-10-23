@@ -9,10 +9,13 @@ import { encodeURIComponent_RFC3986 } from "@r2-streamer-js/_utils/http/UrlUtils
 import { initGlobals } from "@r2-streamer-js/init-globals";
 import { IStringMap } from "@r2-streamer-js/models/metadata-multilang";
 import { Publication } from "@r2-streamer-js/models/publication";
+import { Link } from "@r2-streamer-js/models/publication-link";
 import { setLcpNativePluginPath } from "@r2-streamer-js/parser/epub/lcp";
 
 import {
     R2_EVENT_LINK,
+    R2_EVENT_PAGE_TURN,
+    R2_EVENT_PAGE_TURN_RES,
     R2_EVENT_READIUMCSS,
     R2_EVENT_TRY_LCP_PASS,
     R2_EVENT_TRY_LCP_PASS_RES,
@@ -644,6 +647,40 @@ function createWebView() {
         } else if (event.channel === R2_EVENT_WEBVIEW_READY) {
             const id = event.args[0];
             unhideWebView(id, false);
+        } else if (event.channel === R2_EVENT_PAGE_TURN_RES) {
+            if (!_publication) {
+                return;
+            }
+            // const isRTL = _publication.Metadata &&
+            // _publication.Metadata.Direction &&
+            // _publication.Metadata.Direction.toLowerCase() === "rtl"; //  any other value is LTR
+
+            const messageString = event.args[0];
+            const messageJson = JSON.parse(messageString);
+            const isRTL = messageJson.direction === "RTL"; //  any other value is LTR
+            const goPREVIOUS = messageJson.go === "PREVIOUS"; // any other value is NEXT
+
+            if (!(webview1 as any).READIUM2_LINK) {
+                console.log("WEBVIEW READIUM2_LINK ??!!");
+                return;
+            }
+
+            let nextOrPreviousSpineItem: Link | undefined;
+            for (let i = 0; i < _publication.Spine.length; i++) {
+                if (_publication.Spine[i] === (webview1 as any).READIUM2_LINK) {
+                    if (goPREVIOUS && (i - 1) >= 0) {
+                        nextOrPreviousSpineItem = _publication.Spine[i - 1];
+                    } else if (!goPREVIOUS && (i + 1) < _publication.Spine.length) {
+                        nextOrPreviousSpineItem = _publication.Spine[i + 1];
+                    }
+                    break;
+                }
+            }
+            if (!nextOrPreviousSpineItem) {
+                return;
+            }
+            const linkHref = publicationJsonUrl + "/../" + nextOrPreviousSpineItem.Href;
+            handleLink(linkHref);
         } else {
             console.log("webview1 ipc-message");
             console.log(event.channel);
@@ -708,7 +745,7 @@ window.addEventListener("resize", debounce(() => {
 }, 200));
 
 function loadLink(hrefFull: string, _hrefPartial: string, _publicationJsonUrl: string) {
-    if (_webviews.length) {
+    if (_publication && _webviews.length) {
 
         const hidePanel = document.getElementById("reader_chrome_HIDE");
         if (hidePanel) {
@@ -766,6 +803,25 @@ function loadLink(hrefFull: string, _hrefPartial: string, _publicationJsonUrl: s
                 (urlParts.length === 2 ? ("#" + urlParts[1]) : "");
         }
 
+        const rootPubUrl = publicationJsonUrl.replace("manifest.json", ""); // contains trailing slash!
+        const onlyPath = urlParts[0].replace(rootPubUrl, "").replace("manifest.json/../", ""); // no leading slash!
+        // console.log("---- 1: " + onlyPath);
+        let pubLink = _publication.Spine.find((spineLink) => {
+            // console.log("---- 2: " + spineLink.Href);
+            // const linkHref = publicationJsonUrl + "/../" + spineLink.Href;
+            return onlyPath.indexOf(spineLink.Href) === 0;
+        });
+        if (!pubLink) {
+            pubLink = _publication.Resources.find((spineLink) => {
+                return onlyPath.indexOf(spineLink.Href) === 0;
+            });
+        }
+        if (pubLink) {
+            (_webviews[0] as any).READIUM2_LINK = pubLink;
+        } else {
+            console.log("WEBVIEW READIUM2_LINK ??!!");
+            (_webviews[0] as any).READIUM2_LINK = undefined;
+        }
         // console.log("####### >>>");
         // console.log(urlWithSearch);
         _webviews[0].setAttribute("src", urlWithSearch);
@@ -773,6 +829,9 @@ function loadLink(hrefFull: string, _hrefPartial: string, _publicationJsonUrl: s
         // _webviews[0].loadURL(tocLinkHref, { extraHeaders: "pragma: no-cache\n" });
     }
 }
+
+let _publication: Publication | undefined;
+let _publicationJSON: any | undefined;
 
 function startNavigatorExperiment() {
 
@@ -831,27 +890,26 @@ function startNavigatorExperiment() {
         //     console.log(arg0 + " => " + arg1);
         // });
 
-        let pubJson: any | undefined;
         try {
-            pubJson = await response.json();
+            _publicationJSON = await response.json();
         } catch (e) {
             console.log(e);
         }
-        if (!pubJson) {
+        if (!_publicationJSON) {
             return;
         }
         // const pubJson = global.JSON.parse(publicationStr);
 
-        const publication = TAJSON.deserialize<Publication>(pubJson, Publication);
+        _publication = TAJSON.deserialize<Publication>(_publicationJSON, Publication);
 
-        if (publication.Metadata && publication.Metadata.Title) {
+        if (_publication.Metadata && _publication.Metadata.Title) {
             let title: string | undefined;
-            if (typeof publication.Metadata.Title === "string") {
-                title = publication.Metadata.Title;
+            if (typeof _publication.Metadata.Title === "string") {
+                title = _publication.Metadata.Title;
             } else {
-                const keys = Object.keys(publication.Metadata.Title as IStringMap);
+                const keys = Object.keys(_publication.Metadata.Title as IStringMap);
                 if (keys && keys.length) {
-                    title = (publication.Metadata.Title as IStringMap)[keys[0]];
+                    title = (_publication.Metadata.Title as IStringMap)[keys[0]];
                 }
             }
 
@@ -866,29 +924,29 @@ function startNavigatorExperiment() {
         const buttonNavLeft = document.getElementById("buttonNavLeft");
         if (buttonNavLeft) {
             buttonNavLeft.addEventListener("click", (_event) => {
-                navLeftOrRight(false, publicationJsonUrl, publication);
+                navLeftOrRight(true);
             });
         }
 
         const buttonNavRight = document.getElementById("buttonNavRight");
         if (buttonNavRight) {
             buttonNavRight.addEventListener("click", (_event) => {
-                navLeftOrRight(true, publicationJsonUrl, publication);
+                navLeftOrRight(false);
             });
         }
 
-        if (publication.Spine && publication.Spine.length) {
+        if (_publication.Spine && _publication.Spine.length) {
 
             const opts: IRiotOptsLinkList = {
                 basic: true,
                 fixBasic: true, // always single-line list items (no title)
-                links: pubJson.spine as IRiotOptsLinkListItem[],
+                links: _publicationJSON.spine as IRiotOptsLinkListItem[],
                 url: publicationJsonUrl,
             };
             // const tag =
             riotMountLinkList("#reader_controls_SPINE", opts);
 
-            const firstLinear = publication.Spine[0];
+            const firstLinear = _publication.Spine[0];
             if (firstLinear) {
                 setTimeout(() => {
                     const firstLinearLinkHref = publicationJsonUrl + "/../" + firstLinear.Href;
@@ -897,11 +955,11 @@ function startNavigatorExperiment() {
             }
         }
 
-        if (publication.TOC && publication.TOC.length) {
+        if (_publication.TOC && _publication.TOC.length) {
 
             const opts: IRiotOptsLinkTree = {
                 basic: electronStore.get("basicLinkTitles"),
-                links: pubJson.toc as IRiotOptsLinkTreeItem[],
+                links: _publicationJSON.toc as IRiotOptsLinkTreeItem[],
                 url: publicationJsonUrl,
             };
             const tag = riotMountLinkTree("#reader_controls_TOC", opts)[0] as IRiotTagLinkTree;
@@ -913,11 +971,11 @@ function startNavigatorExperiment() {
                 tag.setBasic(newValue);
             });
         }
-        if (publication.PageList && publication.PageList.length) {
+        if (_publication.PageList && _publication.PageList.length) {
 
             const opts: IRiotOptsLinkList = {
                 basic: electronStore.get("basicLinkTitles"),
-                links: pubJson["page-list"] as IRiotOptsLinkListItem[],
+                links: _publicationJSON["page-list"] as IRiotOptsLinkListItem[],
                 url: publicationJsonUrl,
             };
             const tag = riotMountLinkList("#reader_controls_PAGELIST", opts)[0] as IRiotTagLinkList;
@@ -931,34 +989,34 @@ function startNavigatorExperiment() {
         }
 
         const landmarksData: IRiotOptsLinkListGroupItem[] = [];
-        if (publication.Landmarks && publication.Landmarks.length) {
+        if (_publication.Landmarks && _publication.Landmarks.length) {
             landmarksData.push({
                 label: "Main",
-                links: pubJson.landmarks as IRiotOptsLinkListItem[],
+                links: _publicationJSON.landmarks as IRiotOptsLinkListItem[],
             });
         }
-        if (publication.LOT && publication.LOT.length) {
+        if (_publication.LOT && _publication.LOT.length) {
             landmarksData.push({
                 label: "Tables",
-                links: pubJson.lot as IRiotOptsLinkListItem[],
+                links: _publicationJSON.lot as IRiotOptsLinkListItem[],
             });
         }
-        if (publication.LOI && publication.LOI.length) {
+        if (_publication.LOI && _publication.LOI.length) {
             landmarksData.push({
                 label: "Illustrations",
-                links: pubJson.loi as IRiotOptsLinkListItem[],
+                links: _publicationJSON.loi as IRiotOptsLinkListItem[],
             });
         }
-        if (publication.LOV && publication.LOV.length) {
+        if (_publication.LOV && _publication.LOV.length) {
             landmarksData.push({
                 label: "Video",
-                links: pubJson.lov as IRiotOptsLinkListItem[],
+                links: _publicationJSON.lov as IRiotOptsLinkListItem[],
             });
         }
-        if (publication.LOA && publication.LOA.length) {
+        if (_publication.LOA && _publication.LOA.length) {
             landmarksData.push({
                 label: "Audio",
-                links: pubJson.loa as IRiotOptsLinkListItem[],
+                links: _publicationJSON.loa as IRiotOptsLinkListItem[],
             });
         }
         if (landmarksData.length) {
@@ -979,6 +1037,20 @@ function startNavigatorExperiment() {
     })();
 }
 
-function navLeftOrRight(_right: boolean, _publicationJsonUrl: string, _publication: Publication) {
-    // TODO: publication spine + pagination state
+function navLeftOrRight(left: boolean) {
+    if (!_publication) {
+        return;
+    }
+    const isRTL = _publication.Metadata &&
+        _publication.Metadata.Direction &&
+        _publication.Metadata.Direction.toLowerCase() === "rtl"; //  any other value is LTR
+    const goPREVIOUS = left ? !isRTL : isRTL;
+    const messageJson = {
+        direction: isRTL ? "RTL" : "LTR",
+        go: goPREVIOUS ? "PREVIOUS" : "NEXT",
+    };
+    const messageStr = JSON.stringify(messageJson);
+    _webviews.forEach((wv) => {
+        wv.send(R2_EVENT_PAGE_TURN, messageStr); // .getWebContents()
+    });
 }

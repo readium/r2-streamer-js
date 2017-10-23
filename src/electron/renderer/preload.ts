@@ -2,7 +2,13 @@ import debounce = require("debounce");
 import { ipcRenderer } from "electron";
 import ResizeSensor = require("resize-sensor/ResizeSensor");
 
-import { R2_EVENT_LINK, R2_EVENT_READIUMCSS, R2_EVENT_WEBVIEW_READY } from "../common/events";
+import {
+    R2_EVENT_LINK,
+    R2_EVENT_PAGE_TURN,
+    R2_EVENT_PAGE_TURN_RES,
+    R2_EVENT_READIUMCSS,
+    R2_EVENT_WEBVIEW_READY,
+} from "../common/events";
 import { getURLQueryParams } from "./querystring";
 
 // import { fullQualifiedSelector } from "./cssselector";
@@ -30,6 +36,48 @@ const ensureHead = () => {
 ipcRenderer.on(R2_EVENT_READIUMCSS, (_event: any, messageString: any) => {
     const messageJson = JSON.parse(messageString);
     readiumCSS(messageJson);
+});
+
+ipcRenderer.on(R2_EVENT_PAGE_TURN, (_event: any, messageString: any) => {
+    const messageJson = JSON.parse(messageString);
+    const isRTL = messageJson.direction === "RTL"; //  any other value is LTR
+    const goPREVIOUS = messageJson.go === "PREVIOUS"; // any other value is NEXT
+    const atEnd = false;
+    if (win.document.body) {
+
+        console.log("win.innerWidth: " + win.innerWidth);
+        console.log("win.innerHeight: " + win.innerHeight);
+
+        const element = win.document.body; // docElement
+        if (!element) {
+            return;
+        }
+
+        console.log(element.clientWidth);
+        console.log(element.clientHeight);
+
+        console.log("element.scrollWidth: " + element.scrollWidth);
+        console.log("element.scrollLeft: " + element.scrollLeft);
+
+        console.log("element.scrollHeight: " + element.scrollHeight);
+        console.log("element.scrollTop: " + element.scrollTop);
+
+        // win.document.body.offsetWidth === single column width (takes into account column gap?)
+        // win.document.body.clientWidth === same
+        // win.document.body.scrollWidth === full document width (all columns)
+        //
+        // win.document.body.offsetHeight === full document height (sum of all columns minus trailing blank space?)
+        // win.document.body.clientHeight === same
+        // win.document.body.scrollHeight === visible viewport height
+        //
+        // win.document.body.scrollLeft === positive number for horizontal shift
+        // win.document.body.scrollTop === positive number for vertical shift
+
+        // if (goPREVIOUS && !isRTL
+    }
+    if (atEnd) {
+        ipcRenderer.sendToHost(R2_EVENT_PAGE_TURN_RES, messageString);
+    }
 });
 
 const readiumCSS = (messageJson: any) => {
@@ -358,17 +406,6 @@ const checkReadyPass = () => {
 
     if (win.document.body) {
 
-        // win.document.body.offsetWidth === single column width (takes into account column gap?)
-        // win.document.body.clientWidth === same
-        // win.document.body.scrollWidth === full document width (all columns)
-        //
-        // win.document.body.offsetHeight === full document height (sum of all columns minus trailing blank space?)
-        // win.document.body.clientHeight === same
-        // win.document.body.scrollHeight === visible viewport height
-        //
-        // win.document.body.scrollLeft === positive number for horizontal shift
-        // win.document.body.scrollTop === positive number for vertical shift
-
         win.document.body.addEventListener("click", (ev: MouseEvent) => {
 
             const x = ev.clientX; // win.document.body.scrollLeft;
@@ -453,23 +490,30 @@ const activateResizeSensor = () => {
 
     const useResizeSensor = true;
     if (useResizeSensor && win.document.body) {
-        // new (win as any).
-        // tslint:disable-next-line:no-unused-expression
-        new ResizeSensor(win.document.body, () => {
 
-            scrollToHash();
+        scrollToHash();
 
-            // if (skipFirstResize) {
-            //     console.log("ResizeSensor SKIP FIRST");
+        setTimeout(() => {
+            window.requestAnimationFrame((_timestamp) => {
+                // new (win as any).
+                // tslint:disable-next-line:no-unused-expression
+                new ResizeSensor(win.document.body, () => {
 
-            //     skipFirstResize = false;
-            //     return;
-            // } else {
-            //     console.log("ResizeSensor");
-            // }
+                    scrollToHash();
 
-            // notifyReady();
-        });
+                    // if (skipFirstResize) {
+                    //     console.log("ResizeSensor SKIP FIRST");
+
+                    //     skipFirstResize = false;
+                    //     return;
+                    // } else {
+                    //     console.log("ResizeSensor");
+                    // }
+
+                    // notifyReady();
+                });
+            });
+        }, 1000);
     } else {
         scrollToHash();
     }
@@ -480,23 +524,6 @@ const activateResizeSensor = () => {
         //     skipFirstScroll = false;
         //     return;
         // }
-
-        // console.log("win.innerWidth: " + win.innerWidth);
-        // console.log("win.innerHeight: " + win.innerHeight);
-
-        // const element = win.document.body; // docElement
-        // if (!element) {
-        //     return;
-        // }
-
-        // console.log(element.clientWidth);
-        // console.log(element.clientHeight);
-
-        // console.log("element.scrollWidth: " + element.scrollWidth);
-        // console.log("element.scrollLeft: " + element.scrollLeft);
-
-        // console.log("element.scrollHeight: " + element.scrollHeight);
-        // console.log("element.scrollTop: " + element.scrollTop);
 
         processXY(0, 0);
     }, 800));
