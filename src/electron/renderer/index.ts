@@ -105,10 +105,8 @@ const electronStoreLCP = new ElectronStore({
         return;
     }
 
-    const nightSwitch = document.getElementById("night_switch-input");
-    if (nightSwitch) {
-        (nightSwitch as HTMLInputElement).checked = newValue;
-    }
+    const nightSwitch = document.getElementById("night_switch-input") as HTMLInputElement;
+    nightSwitch.checked = newValue;
 
     if (newValue) {
         document.body.classList.add("mdc-theme--dark");
@@ -147,26 +145,25 @@ const computeReadiumCssJsonMessage = (): string => {
 const readiumCssOnOff = debounce(() => {
 
     const str = computeReadiumCssJsonMessage();
-    _webviews.forEach((wv) => {
-        wv.send(R2_EVENT_READIUMCSS, str); // .getWebContents()
-    });
+    if (_webview1) {
+        _webview1.send(R2_EVENT_READIUMCSS, str); // .getWebContents()
+    }
+    if (_webview2) {
+        _webview2.send(R2_EVENT_READIUMCSS, str); // .getWebContents()
+    }
 }, 500);
 
 (electronStore as any).onDidChange("styling.readiumcss", (newValue: any, oldValue: any) => {
     if (typeof newValue === "undefined" || typeof oldValue === "undefined") {
         return;
     }
-    const readiumcssSwitch = document.getElementById("readiumcss_switch-input");
-    if (readiumcssSwitch) {
-        (readiumcssSwitch as HTMLInputElement).checked = newValue;
-    }
+    const readiumcssSwitch = document.getElementById("readiumcss_switch-input") as HTMLInputElement;
+    readiumcssSwitch.checked = newValue;
 
     readiumCssOnOff();
 
-    const nightSwitch = document.getElementById("night_switch-input");
-    if (nightSwitch) {
-        (nightSwitch as HTMLInputElement).disabled = !newValue;
-    }
+    const nightSwitch = document.getElementById("night_switch-input") as HTMLInputElement;
+    nightSwitch.disabled = !newValue;
 
     if (!newValue) {
         electronStore.set("styling.night", false);
@@ -177,94 +174,28 @@ const readiumCssOnOff = debounce(() => {
     if (typeof newValue === "undefined" || typeof oldValue === "undefined") {
         return;
     }
-    const basicSwitch = document.getElementById("nav_basic_switch-input");
-    if (basicSwitch) {
-        (basicSwitch as HTMLInputElement).checked = !newValue;
-    }
+    const basicSwitch = document.getElementById("nav_basic_switch-input") as HTMLInputElement;
+    basicSwitch.checked = !newValue;
 });
 
 let snackBar: any;
 let drawer: any;
 
-export function handleLink(href: string, previous: boolean | undefined, useGoto: boolean) {
-    const prefix = publicationJsonUrl.replace("manifest.json", "");
-    if (href.startsWith(prefix)) {
-        if (drawer.open) {
-            drawer.open = false;
-            setTimeout(() => {
-                loadLink(href, previous, useGoto);
-            }, 200);
-        } else {
-            loadLink(href, previous, useGoto);
-        }
-    } else {
-        shell.openExternal(href);
-    }
-}
-
 window.onerror = (err) => {
     console.log("Error", err);
 };
 
-const unhideWebView = (_id: string, forced: boolean) => {
-    const hidePanel = document.getElementById("reader_chrome_HIDE");
-    if (hidePanel && hidePanel.style.display === "none") {
-
-        // const message = "Already revealed.";
-        // const data = {
-        //     actionHandler: () => {
-        //         // console.log("SnackBar OK");
-        //     },
-        //     actionOnBottom: false,
-        //     actionText: "OK",
-        //     message,
-        //     multiline: false,
-        //     timeout: 1000,
-        // };
-        // snackBar.show(data);
-
+const unhideWebView = (forced: boolean) => {
+    const hidePanel = document.getElementById("reader_chrome_HIDE") as HTMLElement;
+    if (hidePanel.style.display === "none") {
         return;
     }
     if (forced) {
         console.log("unhideWebView FORCED");
     }
-    // console.log("unhideWebView ID: " + id);
-    // if (_webviews.length) {
-    // let href = _webviews[0].getAttribute("src");
-    // // console.log("WEBVIEW SRC: " + href);
-    // const wc = _webviews[0].getWebContents();
-    // if (wc) {
-    //     const url = wc.getURL();
-    //     if (url) {
-    //         href = url;
-    //         // console.log("WEBVIEW URL: " + href);
-    //     }
-    // }
-    // if (href === id) {
-    // console.log("webview unhiding...");
-
     if (hidePanel) {
         hidePanel.style.display = "none";
     }
-    // _webviews[0].style.opacity = "1";
-    // _webviews[0].style.visibility = "visible";
-    // _webviews[0].classList.remove("hidden");
-    // }
-    // if (forced) {
-
-    //     const message = "Slow content :(";
-    //     const data = {
-    //         actionHandler: () => {
-    //             // console.log("SnackBar OK");
-    //         },
-    //         actionOnBottom: false,
-    //         actionText: "OK",
-    //         message,
-    //         multiline: false,
-    //         timeout: 1000,
-    //     };
-    //     snackBar.show(data);
-    // }
 };
 
 ipcRenderer.on(R2_EVENT_LINK, (_event: any, href: string) => {
@@ -311,23 +242,21 @@ function showLcpDialog(message?: string) {
 
     // dialog.lastFocusedTarget = evt.target;
 
-    const lcpPassHint = document.getElementById("lcpPassHint");
-    (lcpPassHint as HTMLInputElement).textContent = lcpHint;
+    const lcpPassHint = document.getElementById("lcpPassHint") as HTMLElement;
+    lcpPassHint.textContent = lcpHint;
 
     if (message) {
-        const lcpPassMessage = document.getElementById("lcpPassMessage");
-        (lcpPassMessage as HTMLInputElement).textContent = message;
+        const lcpPassMessage = document.getElementById("lcpPassMessage") as HTMLElement;
+        lcpPassMessage.textContent = message;
     }
 
     lcpDialog.show();
     setTimeout(() => {
-        const lcpPassInput = document.getElementById("lcpPassInput");
-        if (lcpPassInput) {
-            lcpPassInput.focus();
-            setTimeout(() => {
-                lcpPassInput.classList.add("no-focus-outline");
-            }, 500);
-        }
+        const lcpPassInput = document.getElementById("lcpPassInput") as HTMLElement;
+        lcpPassInput.focus();
+        setTimeout(() => {
+            lcpPassInput.classList.add("no-focus-outline");
+        }, 500);
     }, 800);
 }
 
@@ -396,10 +325,8 @@ const initFontSelector = () => {
     tag.on("selectionChanged", (val: string) => {
         // console.log("selectionChanged");
         // console.log(val);
-        // const element = tag.root.ownerDocument.getElementById(val);
-        // if (element) {
+        // const element = tag.root.ownerDocument.getElementById(val) as HTMLElement;
         //     console.log(element.textContent);
-        // }
         val = val.replace(ID_PREFIX, "");
         // console.log(val);
         electronStore.set("styling.font", val);
@@ -478,10 +405,8 @@ window.addEventListener("DOMContentLoaded", () => {
 
     window.document.title = "Readium2 [ " + pathFileName + "]";
 
-    const h1 = document.getElementById("pubTitle");
-    if (h1) {
-        (h1 as HTMLElement).textContent = pathFileName;
-    }
+    const h1 = document.getElementById("pubTitle") as HTMLElement;
+    h1.textContent = pathFileName;
 
     installKeyboardMouseFocusHandler();
 
@@ -493,62 +418,58 @@ window.addEventListener("DOMContentLoaded", () => {
 
     initFontSelector();
 
-    const snackBarElem = document.getElementById("snackbar");
+    const snackBarElem = document.getElementById("snackbar") as HTMLElement;
     snackBar = new (window as any).mdc.snackbar.MDCSnackbar(snackBarElem);
     (snackBarElem as any).mdcSnackbar = snackBar;
     snackBar.dismissesOnAction = true;
 
-    const drawerElement = document.getElementById("drawer");
+    const drawerElement = document.getElementById("drawer") as HTMLElement;
     drawer = new (window as any).mdc.drawer.MDCTemporaryDrawer(drawerElement);
     (drawerElement as any).mdcTemporaryDrawer = drawer;
-    const drawerButton = document.getElementById("drawerButton");
-    if (drawerButton) {
-        drawerButton.addEventListener("click", () => {
-            drawer.open = true;
+    const drawerButton = document.getElementById("drawerButton") as HTMLElement;
+    drawerButton.addEventListener("click", () => {
+        drawer.open = true;
+    });
+
+    drawerElement.addEventListener("click", (ev) => {
+        const allMenus = drawerElement.querySelectorAll(".mdc-simple-menu");
+        const openedMenus: Node[] = [];
+        allMenus.forEach((elem) => {
+            if ((elem as any).mdcSimpleMenu && (elem as any).mdcSimpleMenu.open) {
+                openedMenus.push(elem);
+            }
         });
-    }
-    if (drawerElement) {
-        drawerElement.addEventListener("click", (ev) => {
-            const allMenus = drawerElement.querySelectorAll(".mdc-simple-menu");
-            const openedMenus: Node[] = [];
-            allMenus.forEach((elem) => {
-                if ((elem as any).mdcSimpleMenu && (elem as any).mdcSimpleMenu.open) {
-                    openedMenus.push(elem);
+
+        let needsToCloseMenus = true;
+        let currElem: Node | null = ev.target as Node;
+        while (currElem) {
+            if (openedMenus.indexOf(currElem) >= 0) {
+                needsToCloseMenus = false;
+                break;
+            }
+            currElem = currElem.parentNode;
+        }
+        if (needsToCloseMenus) {
+            openedMenus.forEach((elem) => {
+                (elem as any).mdcSimpleMenu.open = false;
+                const ss = (elem.parentNode as HTMLElement).querySelector(".mdc-select__selected-text");
+                if (ss) {
+                    (ss as HTMLElement).style.transform = "initial";
+                    (ss as HTMLElement).style.opacity = "1";
+                    (ss as HTMLElement).focus();
                 }
             });
+        } else {
+            // console.log("NOT CLOSING MENU");
+        }
+    }, true);
 
-            let needsToCloseMenus = true;
-            let currElem: Node | null = ev.target as Node;
-            while (currElem) {
-                if (openedMenus.indexOf(currElem) >= 0) {
-                    needsToCloseMenus = false;
-                    break;
-                }
-                currElem = currElem.parentNode;
-            }
-            if (needsToCloseMenus) {
-                openedMenus.forEach((elem) => {
-                    (elem as any).mdcSimpleMenu.open = false;
-                    const ss = (elem.parentNode as HTMLElement).querySelector(".mdc-select__selected-text");
-                    if (ss) {
-                        (ss as HTMLElement).style.transform = "initial";
-                        (ss as HTMLElement).style.opacity = "1";
-                        (ss as HTMLElement).focus();
-                    }
-                });
-            } else {
-                // console.log("NOT CLOSING MENU");
-            }
-        }, true);
-    }
-    // if (drawerElement) {
     //     drawerElement.addEventListener("MDCTemporaryDrawer:open", () => {
     //         console.log("MDCTemporaryDrawer:open");
     //     });
     //     drawerElement.addEventListener("MDCTemporaryDrawer:close", () => {
     //         console.log("MDCTemporaryDrawer:close");
     //     });
-    // }
 
     const menuFactory = (menuEl: HTMLElement) => {
         const menu = new (window as any).mdc.menu.MDCSimpleMenu(menuEl);
@@ -556,7 +477,7 @@ window.addEventListener("DOMContentLoaded", () => {
         return menu;
     };
 
-    const selectElement = document.getElementById("nav-select");
+    const selectElement = document.getElementById("nav-select") as HTMLElement;
     const navSelector = new (window as any).mdc.select.MDCSelect(selectElement, undefined, menuFactory);
     (selectElement as any).mdcSelect = navSelector;
     navSelector.listen("MDCSelect:change", (ev: any) => {
@@ -577,12 +498,12 @@ window.addEventListener("DOMContentLoaded", () => {
     });
 
     const diagElem = document.querySelector("#lcpDialog");
-    const lcpPassInput = document.getElementById("lcpPassInput");
+    const lcpPassInput = document.getElementById("lcpPassInput") as HTMLInputElement;
     lcpDialog = new (window as any).mdc.dialog.MDCDialog(diagElem);
     (diagElem as any).mdcDialog = lcpDialog;
     lcpDialog.listen("MDCDialog:accept", () => {
 
-        const lcpPass = (lcpPassInput as HTMLInputElement).value;
+        const lcpPass = lcpPassInput.value;
 
         ipcRenderer.send(R2_EVENT_TRY_LCP_PASS, pathDecoded, lcpPass, false);
     });
@@ -596,10 +517,8 @@ window.addEventListener("DOMContentLoaded", () => {
         lcpPassInput.addEventListener("keyup", (ev) => {
             if (ev.keyCode === 13) {
                 ev.preventDefault();
-                const lcpDialogAcceptButton = document.getElementById("lcpDialogAcceptButton");
-                if (lcpDialogAcceptButton) {
-                    lcpDialogAcceptButton.click();
-                }
+                const lcpDialogAcceptButton = document.getElementById("lcpDialogAcceptButton") as HTMLElement;
+                lcpDialogAcceptButton.click();
             }
         });
     }
@@ -623,67 +542,59 @@ window.addEventListener("DOMContentLoaded", () => {
         startNavigatorExperiment();
     }
 
-    const buttonClearSettings = document.getElementById("buttonClearSettings");
-    if (buttonClearSettings) {
-        buttonClearSettings.addEventListener("click", () => {
-            // electronStore.clear();
-            electronStore.store = defaults;
+    const buttonClearSettings = document.getElementById("buttonClearSettings") as HTMLElement;
+    buttonClearSettings.addEventListener("click", () => {
+        // electronStore.clear();
+        electronStore.store = defaults;
 
-            drawer.open = false;
-            setTimeout(() => {
-                const message = "Settings reset.";
-                const data = {
-                    actionHandler: () => {
-                        // console.log("SnackBar OK");
-                    },
-                    actionOnBottom: false,
-                    actionText: "OK",
-                    message,
-                    multiline: false,
-                    timeout: 2000,
-                };
-                snackBar.show(data);
-            }, 500);
-        });
-    }
+        drawer.open = false;
+        setTimeout(() => {
+            const message = "Settings reset.";
+            const data = {
+                actionHandler: () => {
+                    // console.log("SnackBar OK");
+                },
+                actionOnBottom: false,
+                actionText: "OK",
+                message,
+                multiline: false,
+                timeout: 2000,
+            };
+            snackBar.show(data);
+        }, 500);
+    });
 
-    const buttonClearSettingsStyle = document.getElementById("buttonClearSettingsStyle");
-    if (buttonClearSettingsStyle) {
-        buttonClearSettingsStyle.addEventListener("click", () => {
+    const buttonClearSettingsStyle = document.getElementById("buttonClearSettingsStyle") as HTMLElement;
+    buttonClearSettingsStyle.addEventListener("click", () => {
 
-            electronStore.set("styling", defaultsStyling);
+        electronStore.set("styling", defaultsStyling);
 
-            drawer.open = false;
-            setTimeout(() => {
-                const message = "Default styles.";
-                const data = {
-                    actionHandler: () => {
-                        // console.log("SnackBar OK");
-                    },
-                    actionOnBottom: false,
-                    actionText: "OK",
-                    message,
-                    multiline: false,
-                    timeout: 2000,
-                };
-                snackBar.show(data);
-            }, 500);
-        });
-    }
+        drawer.open = false;
+        setTimeout(() => {
+            const message = "Default styles.";
+            const data = {
+                actionHandler: () => {
+                    // console.log("SnackBar OK");
+                },
+                actionOnBottom: false,
+                actionText: "OK",
+                message,
+                multiline: false,
+                timeout: 2000,
+            };
+            snackBar.show(data);
+        }, 500);
+    });
 
-    const buttonOpenSettings = document.getElementById("buttonOpenSettings");
-    if (buttonOpenSettings) {
-        buttonOpenSettings.addEventListener("click", () => {
-            electronStore.openInEditor();
-        });
-    }
+    const buttonOpenSettings = document.getElementById("buttonOpenSettings") as HTMLElement;
+    buttonOpenSettings.addEventListener("click", () => {
+        electronStore.openInEditor();
+    });
 
-    // const buttonDevTools = document.getElementById("buttonDevTools");
-    // if (buttonDevTools) {
+    // const buttonDevTools = document.getElementById("buttonDevTools") as HTMLElement;
     //     buttonDevTools.addEventListener("click", () => {
     //         ipcRenderer.send(R2_EVENT_DEVTOOLS, "test");
     //     });
-    // }
 });
 
 const saveReadingLocation = (doc: string, loc: string) => {
@@ -698,29 +609,41 @@ const saveReadingLocation = (doc: string, loc: string) => {
     electronStore.set("readingLocation", obj);
 };
 
-const _webviews: Electron.WebviewTag[] = [];
+let _webview1: Electron.WebviewTag;
+let _webview2: Electron.WebviewTag;
 
-function createWebView() {
-    const webview1 = document.createElement("webview");
-    webview1.setAttribute("class", "singleFull");
-    webview1.setAttribute("webpreferences",
+function createWebView(): Electron.WebviewTag {
+    const wv = document.createElement("webview");
+    wv.setAttribute("webpreferences",
         "nodeIntegration=0, nodeIntegrationInWorker=0, sandbox=0, javascript=1, " +
         "contextIsolation=0, webSecurity=1, allowRunningInsecureContent=0");
-    webview1.setAttribute("partition", R2_SESSION_WEBVIEW);
-    webview1.setAttribute("httpreferrer", publicationJsonUrl);
-    webview1.setAttribute("preload", "./preload.js");
-    webview1.setAttribute("disableguestresize", "");
+    wv.setAttribute("partition", R2_SESSION_WEBVIEW);
+    wv.setAttribute("httpreferrer", publicationJsonUrl);
+    wv.setAttribute("preload", "./preload.js");
+    wv.setAttribute("disableguestresize", "");
 
-    webview1.addEventListener("ipc-message", (event) => {
+    wv.addEventListener("dom-ready", () => {
+        // wv.openDevTools();
+
+        wv.clearHistory();
+    });
+
+    wv.addEventListener("ipc-message", (event) => {
+        const webview = event.currentTarget as Electron.WebviewTag;
+        const activeWebView = getActiveWebView();
+        if (webview !== activeWebView) {
+            return;
+        }
+
         if (event.channel === R2_EVENT_LINK) {
             handleLink(event.args[0], undefined, false);
         } else if (event.channel === R2_EVENT_WEBVIEW_READY) {
-            const id = event.args[0];
-            unhideWebView(id, false);
+            // const id = event.args[0];
+            unhideWebView(false);
         } else if (event.channel === R2_EVENT_READING_LOCATION) {
             const cssSelector = event.args[0];
-            if ((webview1 as any).READIUM2_LINK) {
-                saveReadingLocation((webview1 as any).READIUM2_LINK.Href, cssSelector);
+            if ((webview as any).READIUM2_LINK) {
+                saveReadingLocation((webview as any).READIUM2_LINK.Href, cssSelector);
             }
         } else if (event.channel === R2_EVENT_PAGE_TURN_RES) {
             if (!_publication) {
@@ -735,14 +658,14 @@ function createWebView() {
             // const isRTL = messageJson.direction === "RTL"; //  any other value is LTR
             const goPREVIOUS = messageJson.go === "PREVIOUS"; // any other value is NEXT
 
-            if (!(webview1 as any).READIUM2_LINK) {
+            if (!(webview as any).READIUM2_LINK) {
                 console.log("WEBVIEW READIUM2_LINK ??!!");
                 return;
             }
 
             let nextOrPreviousSpineItem: Link | undefined;
             for (let i = 0; i < _publication.Spine.length; i++) {
-                if (_publication.Spine[i] === (webview1 as any).READIUM2_LINK) {
+                if (_publication.Spine[i] === (webview as any).READIUM2_LINK) {
                     if (goPREVIOUS && (i - 1) >= 0) {
                         nextOrPreviousSpineItem = _publication.Spine[i - 1];
                     } else if (!goPREVIOUS && (i + 1) < _publication.Spine.length) {
@@ -762,182 +685,206 @@ function createWebView() {
         }
     });
 
-    webview1.addEventListener("dom-ready", () => {
-        // webview1.openDevTools();
-
-        webview1.clearHistory();
-
-        // ReadiumCSS config passed into load URL
-        // no need to do this in DOM-ready
-        // readiumCssOnOff();
-
-        // webview1.getWebContents().on("will-navigate", (evt, url) => {
-        //     console.log("webview1.getWebContents().on('will-navigate'");
-        //     console.log(evt);
-        //     console.log(url);
-        //     evt.preventDefault();
-        //     // webview1.stop();
-        //     shell.openExternal(url);
-        // });
-    });
-
-    // webview1.addEventListener("will-navigate", (evt) => {
-    //     console.log("webview1.addEventListener('will-navigate'");
-    //     console.log(evt);
-    //     console.log(evt.url);
-    //     // evt.preventDefault();
-    //     webview1.stop();
-    //     shell.openExternal(evt.url);
-    // });
-
-    return webview1;
+    return wv;
 }
+
+const adjustResize = (webview: Electron.WebviewTag) => {
+    const width = webview.clientWidth;
+    const height = webview.clientHeight;
+    const wc = webview.getWebContents();
+    if (wc && width && height) {
+        wc.setSize({
+            normal: {
+                height,
+                width,
+            },
+        });
+    }
+};
 
 window.addEventListener("resize", debounce(() => {
-
-    _webviews.forEach((wv) => {
-
-        // webview.offsetWidth == full including borders
-        // webview.scrollWidth == webview.clientWidth == without borders
-
-        // const computedStyle = window.getComputedStyle(webview1);
-        // console.log(parseInt(computedStyle.width as string, 10));
-        // console.log(parseInt(computedStyle.height as string, 10));
-
-        const width = wv.clientWidth;
-        const height = wv.clientHeight;
-
-        const wc = wv.getWebContents();
-        if (wc && width && height) {
-            wc.setSize({
-                normal: {
-                    height,
-                    width,
-                },
-            });
-        }
-    });
+    if (_webview1) {
+        adjustResize(_webview1);
+    }
+    if (_webview2) {
+        adjustResize(_webview2);
+    }
 }, 200));
 
-function loadLink(hrefFull: string, previous: boolean | undefined, useGoto: boolean) {
-    if (_publication && _webviews.length) {
-
-        const hidePanel = document.getElementById("reader_chrome_HIDE");
-        if (hidePanel) {
-            hidePanel.style.display = "block";
-        }
-        // _webviews[0].style.opacity = "0.6";
-        // _webviews[0].style.visibility = "hidden";
-        // _webviews[0].classList.add("hidden");
-        setTimeout(() => {
-            if (_webviews.length) {
-                const href = _webviews[0].getAttribute("src");
-                if (href) {
-                    unhideWebView(href, true);
-                }
-            }
-        }, 5000);
-
-        const rcssJsonstr = computeReadiumCssJsonMessage();
-        // const str = window.atob(base64);
-        const rcssJsonstrBase64 = window.btoa(rcssJsonstr);
-
-        const linkUri = new URI(hrefFull);
-        linkUri.search((data: any) => {
-            // overrides existing (leaves others intact)
-
-            if (typeof previous === "undefined") {
-                // erase unwanted forward of query param during linking
-                data.readiumprevious = undefined;
-                // delete data.readiumprevious;
-            } else {
-                data.readiumprevious = previous ? "true" : "false";
-            }
-
-            if (!useGoto) {
-                // erase unwanted forward of query param during linking
-                data.readiumgoto = undefined;
-                // delete data.readiumgoto;
-            }
-
-            data.readiumcss = rcssJsonstrBase64;
-        });
-        if (useGoto) {
-            linkUri.hash("").normalizeHash();
-        }
-
-        const pubUri = new URI(publicationJsonUrl);
-
-        // "/pub/BASE64_PATH/manifest.json" ==> "/pub/BASE64_PATH/"
-        const pathPrefix = pubUri.path().replace("manifest.json", "");
-
-        // "/pub/BASE64_PATH/epub/chapter.html" ==> "epub/chapter.html"
-        const linkPath = linkUri.normalizePath().path().replace(pathPrefix, "");
-
-        let pubLink = _publication.Spine.find((spineLink) => {
-            return spineLink.Href === linkPath;
-        });
-        if (!pubLink) {
-            pubLink = _publication.Resources.find((spineLink) => {
-                return spineLink.Href === linkPath;
-            });
-        }
-        if (pubLink) {
-            (_webviews[0] as any).READIUM2_LINK = pubLink;
+export function handleLink(href: string, previous: boolean | undefined, useGoto: boolean) {
+    const prefix = publicationJsonUrl.replace("manifest.json", "");
+    if (href.startsWith(prefix)) {
+        if (drawer.open) {
+            drawer.open = false;
+            setTimeout(() => {
+                loadLink(href, previous, useGoto);
+            }, 200);
         } else {
-            console.log("WEBVIEW READIUM2_LINK ??!!");
-            (_webviews[0] as any).READIUM2_LINK = undefined;
+            loadLink(href, previous, useGoto);
         }
-
-        const uriStr = linkUri.toString();
-        // console.log("####### >>> ---");
-        // console.log(uriStr);
-        _webviews[0].setAttribute("src", uriStr);
-        // _webviews[0].getWebContents().loadURL(uriStr, { extraHeaders: "pragma: no-cache\n" });
-        // _webviews[0].loadURL(uriStr, { extraHeaders: "pragma: no-cache\n" });
+    } else {
+        shell.openExternal(href);
     }
 }
+
+function loadLink(hrefFull: string, previous: boolean | undefined, useGoto: boolean) {
+
+    if (!_publication || !_webview1 || !_webview2) {
+        return;
+    }
+
+    const hidePanel = document.getElementById("reader_chrome_HIDE") as HTMLElement;
+    hidePanel.style.display = "block";
+
+    setTimeout(() => {
+        unhideWebView(true);
+    }, 5000);
+
+    const rcssJsonstr = computeReadiumCssJsonMessage();
+    // const str = window.atob(base64);
+    const rcssJsonstrBase64 = window.btoa(rcssJsonstr);
+
+    const linkUri = new URI(hrefFull);
+    linkUri.search((data: any) => {
+        // overrides existing (leaves others intact)
+
+        if (typeof previous === "undefined") {
+            // erase unwanted forward of query param during linking
+            data.readiumprevious = undefined;
+            // delete data.readiumprevious;
+        } else {
+            data.readiumprevious = previous ? "true" : "false";
+        }
+
+        if (!useGoto) {
+            // erase unwanted forward of query param during linking
+            data.readiumgoto = undefined;
+            // delete data.readiumgoto;
+        }
+
+        data.readiumcss = rcssJsonstrBase64;
+    });
+    if (useGoto) {
+        linkUri.hash("").normalizeHash();
+    }
+
+    const pubUri = new URI(publicationJsonUrl);
+
+    // "/pub/BASE64_PATH/manifest.json" ==> "/pub/BASE64_PATH/"
+    const pathPrefix = pubUri.path().replace("manifest.json", "");
+
+    // "/pub/BASE64_PATH/epub/chapter.html" ==> "epub/chapter.html"
+    const linkPath = linkUri.normalizePath().path().replace(pathPrefix, "");
+
+    let pubLink = _publication.Spine.find((spineLink) => {
+        return spineLink.Href === linkPath;
+    });
+    if (!pubLink) {
+        pubLink = _publication.Resources.find((spineLink) => {
+            return spineLink.Href === linkPath;
+        });
+    }
+
+    if (!pubLink) {
+        console.log("FATAL WEBVIEW READIUM2_LINK ??!!");
+        return;
+    }
+
+    const activeWebView = getActiveWebView();
+    const wv = activeWebView;
+
+    (wv as any).READIUM2_LINK = pubLink;
+    const uriStr = linkUri.toString();
+    // console.log("####### >>> ---");
+    // console.log(uriStr);
+    wv.setAttribute("src", uriStr);
+    // wv.getWebContents().loadURL(uriStr, { extraHeaders: "pragma: no-cache\n" });
+    // wv.loadURL(uriStr, { extraHeaders: "pragma: no-cache\n" });
+
+    let inSpine = true;
+    let index = _publication.Spine.indexOf(pubLink);
+    if (!index) {
+        inSpine = false;
+        index = _publication.Resources.indexOf(pubLink);
+    }
+    if (index >= 0 &&
+        (index + 1) < (inSpine ? _publication.Spine.length : _publication.Resources.length)) {
+        const nextPubLink = (inSpine ? _publication.Spine[index + 1] : _publication.Resources[index + 1]);
+
+        const linkUriNext = new URI(publicationJsonUrl + "/../" + nextPubLink.Href);
+        linkUriNext.normalizePath();
+        const uriStrNext = linkUriNext.toString();
+        _webview2.setAttribute("src", uriStrNext);
+    }
+
+    const slidingViewport = document.getElementById("sliding_viewport") as HTMLElement;
+    setTimeout(() => {
+        slidingViewport.classList.add("shiftedLeft");
+        setTimeout(() => {
+            slidingViewport.classList.remove("shiftedLeft");
+        }, 4000);
+    }, 4000);
+}
+
+const getActiveWebView = (): Electron.WebviewTag => {
+
+    let activeWebView: Electron.WebviewTag;
+    const slidingViewport = document.getElementById("sliding_viewport") as HTMLElement;
+    if (slidingViewport.classList.contains("shiftedLeft")) {
+        if (_webview1.classList.contains("posRight")) {
+            activeWebView = _webview1;
+        } else {
+            activeWebView = _webview2;
+        }
+    } else {
+        if (_webview2.classList.contains("posRight")) {
+            activeWebView = _webview1;
+        } else {
+            activeWebView = _webview2;
+        }
+    }
+
+    return activeWebView;
+};
 
 let _publication: Publication | undefined;
 let _publicationJSON: any | undefined;
 
 function startNavigatorExperiment() {
 
-    const webviewFull = createWebView();
-    _webviews.push(webviewFull);
+    _webview1 = createWebView();
+    _webview1.setAttribute("id", "webview1");
+    _webview1.setAttribute("class", "full");
 
-    const publicationViewport = document.getElementById("publication_viewport");
-    if (publicationViewport) {
-        publicationViewport.appendChild(webviewFull);
-    }
+    _webview2 = createWebView();
+    _webview2.setAttribute("id", "webview2");
+    _webview2.setAttribute("class", "full posRight");
 
-    const nightSwitch = document.getElementById("night_switch-input");
-    if (nightSwitch) {
-        (nightSwitch as HTMLInputElement).checked = electronStore.get("styling.night");
-        nightSwitch.addEventListener("change", (_event) => {
-            const checked = (nightSwitch as HTMLInputElement).checked;
-            electronStore.set("styling.night", checked);
-        });
-        (nightSwitch as HTMLInputElement).disabled = !electronStore.get("styling.readiumcss");
-    }
+    const slidingViewport = document.getElementById("sliding_viewport") as HTMLElement;
+    slidingViewport.appendChild(_webview1);
+    slidingViewport.appendChild(_webview2);
 
-    const readiumcssSwitch = document.getElementById("readiumcss_switch-input");
-    if (readiumcssSwitch) {
-        (readiumcssSwitch as HTMLInputElement).checked = electronStore.get("styling.readiumcss");
-        readiumcssSwitch.addEventListener("change", (_event) => {
-            const checked = (readiumcssSwitch as HTMLInputElement).checked;
-            electronStore.set("styling.readiumcss", checked);
-        });
-    }
+    const nightSwitch = document.getElementById("night_switch-input") as HTMLInputElement;
+    nightSwitch.checked = electronStore.get("styling.night");
+    nightSwitch.addEventListener("change", (_event) => {
+        const checked = nightSwitch.checked;
+        electronStore.set("styling.night", checked);
+    });
+    nightSwitch.disabled = !electronStore.get("styling.readiumcss");
 
-    const basicSwitch = document.getElementById("nav_basic_switch-input");
-    if (basicSwitch) {
-        (basicSwitch as HTMLInputElement).checked = !electronStore.get("basicLinkTitles");
-        basicSwitch.addEventListener("change", (_event) => {
-            const checked = (basicSwitch as HTMLInputElement).checked;
-            electronStore.set("basicLinkTitles", !checked);
-        });
-    }
+    const readiumcssSwitch = document.getElementById("readiumcss_switch-input") as HTMLInputElement;
+    readiumcssSwitch.checked = electronStore.get("styling.readiumcss");
+    readiumcssSwitch.addEventListener("change", (_event) => {
+        const checked = readiumcssSwitch.checked;
+        electronStore.set("styling.readiumcss", checked);
+    });
+
+    const basicSwitch = document.getElementById("nav_basic_switch-input") as HTMLInputElement;
+    basicSwitch.checked = !electronStore.get("basicLinkTitles");
+    basicSwitch.addEventListener("change", (_event) => {
+        const checked = basicSwitch.checked;
+        electronStore.set("basicLinkTitles", !checked);
+    });
 
     // tslint:disable-next-line:no-floating-promises
     (async () => {
@@ -982,26 +929,20 @@ function startNavigatorExperiment() {
             }
 
             if (title) {
-                const h1 = document.getElementById("pubTitle");
-                if (h1) {
-                    (h1 as HTMLElement).textContent = title;
-                }
+                const h1 = document.getElementById("pubTitle") as HTMLElement;
+                h1.textContent = title;
             }
         }
 
-        const buttonNavLeft = document.getElementById("buttonNavLeft");
-        if (buttonNavLeft) {
-            buttonNavLeft.addEventListener("click", (_event) => {
-                navLeftOrRight(true);
-            });
-        }
+        const buttonNavLeft = document.getElementById("buttonNavLeft") as HTMLElement;
+        buttonNavLeft.addEventListener("click", (_event) => {
+            navLeftOrRight(true);
+        });
 
-        const buttonNavRight = document.getElementById("buttonNavRight");
-        if (buttonNavRight) {
-            buttonNavRight.addEventListener("click", (_event) => {
-                navLeftOrRight(false);
-            });
-        }
+        const buttonNavRight = document.getElementById("buttonNavRight") as HTMLElement;
+        buttonNavRight.addEventListener("click", (_event) => {
+            navLeftOrRight(false);
+        });
 
         if (_publication.Spine && _publication.Spine.length) {
 
@@ -1126,18 +1067,18 @@ function startNavigatorExperiment() {
                 }
             }
         }
-        if (linkToLoad) {
-            setTimeout(() => {
-                const hrefToLoad = publicationJsonUrl + "/../" + (linkToLoad as Link).Href +
+        setTimeout(() => {
+            if (linkToLoad) {
+                const hrefToLoad = publicationJsonUrl + "/../" + linkToLoad.Href +
                     (linkToLoadGoto ? ("?readiumgoto=" + encodeURIComponent_RFC3986(linkToLoadGoto)) : "");
                 handleLink(hrefToLoad, undefined, true);
-            }, 200);
-        }
+            }
+        }, 100);
     })();
 }
 
 function navLeftOrRight(left: boolean) {
-    if (!_publication) {
+    if (!_publication || !_webview1) {
         return;
     }
     const isRTL = _publication.Metadata &&
@@ -1149,7 +1090,5 @@ function navLeftOrRight(left: boolean) {
         go: goPREVIOUS ? "PREVIOUS" : "NEXT",
     };
     const messageStr = JSON.stringify(messageJson);
-    _webviews.forEach((wv) => {
-        wv.send(R2_EVENT_PAGE_TURN, messageStr); // .getWebContents()
-    });
+    _webview1.send(R2_EVENT_PAGE_TURN, messageStr); // .getWebContents()
 }
