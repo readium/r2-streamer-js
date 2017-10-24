@@ -392,7 +392,8 @@ outline-style: none !important;
                         (font === "OLD" ? "var(--RS__oldStyleTf)" :
                             (font === "MODERN" ? "var(--RS__modernTf)" :
                                 (font === "SANS" ? "var(--RS__sansTf)" :
-                                    (font === "HUMAN" ? "var(--RS__humanistTf)" : "var(--RS__oldStyleTf)")
+                                    (font === "HUMAN" ? "var(--RS__humanistTf)" :
+                                        (font ? font : "var(--RS__oldStyleTf)"))
                                 )
                             )
                         )

@@ -69,6 +69,7 @@
     "resize-sensor": "github:normanzb/resize-sensor#master",
     "riot": "^3.7.3",
     "slugify": "^1.2.1",
+    "system-font-families": "^0.5.0",
     "ta-json": "github:danielweck/ta-json#dist",
     "tmp": "^0.0.33",
     "tslib": "^1.8.0",

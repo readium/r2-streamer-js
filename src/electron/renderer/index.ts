@@ -1,3 +1,5 @@
+import SystemFonts = require("system-font-families");
+
 import debounce = require("debounce");
 import ElectronStore = require("electron-store");
 import URI = require("urijs");
@@ -355,34 +357,51 @@ function installKeyboardMouseFocusHandler() {
 
 const initFontSelector = () => {
 
+    const ID_PREFIX = "fontselect_";
+
     const options: IRiotOptsMenuSelectItem[] =
         [{
-            id: "DEFAULT",
+            id: ID_PREFIX + "DEFAULT",
             label: "Default",
         }, {
-            id: "OLD",
+            id: ID_PREFIX + "OLD",
             label: "Old Style",
         }, {
-            id: "MODERN",
+            id: ID_PREFIX + "MODERN",
             label: "Modern",
         }, {
-            id: "SANS",
+            id: ID_PREFIX + "SANS",
             label: "Sans",
         }, {
-            id: "HUMAN",
+            id: ID_PREFIX + "HUMAN",
             label: "Humanist",
         }, {
-            id: "DYS",
+            id: ID_PREFIX + "DYS",
             label: "Readable (dys)",
         }];
+    let selectedID = ID_PREFIX + electronStore.get("styling.font");
+    const foundItem = options.find((item) => {
+        return item.id === selectedID;
+    });
+    if (!foundItem) {
+        selectedID = options[0].id;
+    }
     const opts: IRiotOptsMenuSelect = {
         disabled: !electronStore.get("styling.readiumcss"),
         options,
-        selected: electronStore.get("styling.font"),
+        selected: selectedID,
     };
     const tag = riotMountMenuSelect("#fontSelect", opts)[0] as IRiotTagMenuSelect;
 
     tag.on("selectionChanged", (val: string) => {
+        // console.log("selectionChanged");
+        // console.log(val);
+        // const element = tag.root.ownerDocument.getElementById(val);
+        // if (element) {
+        //     console.log(element.textContent);
+        // }
+        val = val.replace(ID_PREFIX, "");
+        // console.log(val);
         electronStore.set("styling.font", val);
     });
 
@@ -390,7 +409,9 @@ const initFontSelector = () => {
         if (typeof newValue === "undefined" || typeof oldValue === "undefined") {
             return;
         }
-        tag.setSelectedItem(newValue);
+        // console.log("onDidChange");
+        // console.log(newValue);
+        tag.setSelectedItem(ID_PREFIX + newValue);
 
         readiumCssOnOff();
     });
@@ -401,6 +422,43 @@ const initFontSelector = () => {
         }
         tag.setDisabled(!newValue);
     });
+
+    setTimeout(async () => {
+
+        let _sysFonts: string[] = [];
+        const systemFonts = new SystemFonts.default();
+        // const sysFonts = systemFonts.getFontsSync();
+        try {
+            _sysFonts = await systemFonts.getFonts();
+            // console.log(_sysFonts);
+        } catch (err) {
+            console.log(err);
+        }
+        if (_sysFonts && _sysFonts.length) {
+            const arr = ((tag.opts as IRiotOptsMenuSelect).options as IRiotOptsMenuSelectItem[]);
+            const divider: IRiotOptsMenuSelectItem = {
+                id: ID_PREFIX + "_",
+                label: "_",
+            };
+            arr.push(divider);
+            _sysFonts.forEach((sysFont) => {
+                const option: IRiotOptsMenuSelectItem = {
+                    id: ID_PREFIX + sysFont, // .replace(/ /g, "_"),
+                    label: sysFont,
+                };
+                arr.push(option);
+            });
+            let newSelectedID = ID_PREFIX + electronStore.get("styling.font");
+            const newFoundItem = options.find((item) => {
+                return item.id === newSelectedID;
+            });
+            if (!newFoundItem) {
+                newSelectedID = arr[0].id;
+            }
+            (tag.opts as IRiotOptsMenuSelect).selected = newSelectedID;
+            tag.update();
+        }
+    }, 5000);
 };
 
 window.addEventListener("DOMContentLoaded", () => {
@@ -617,17 +675,6 @@ window.addEventListener("DOMContentLoaded", () => {
     if (buttonOpenSettings) {
         buttonOpenSettings.addEventListener("click", () => {
             electronStore.openInEditor();
-        });
-    }
-
-    const buttonDebug = document.getElementById("buttonDebug");
-    if (buttonDebug) {
-        buttonDebug.addEventListener("click", () => {
-            if (document.documentElement.classList.contains("debug")) {
-                document.documentElement.classList.remove("debug");
-            } else {
-                document.documentElement.classList.add("debug");
-            }
         });
     }
 

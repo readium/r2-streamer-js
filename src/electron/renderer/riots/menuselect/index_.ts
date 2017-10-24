@@ -33,18 +33,40 @@ export const riotMountMenuSelect = (selector: string, opts: IRiotOptsMenuSelect)
 
     // tslint:disable-next-line:space-before-function-paren
     that.getIndexForId = function (id: string): number | undefined {
+        // let nDivider = 0;
+        // (this.opts as IRiotOptsMenuSelect).options.forEach((option) => {
+        //     if (option.label === "_") {
+        //         nDivider++;
+        //     }
+        // });
+        let index = -1;
         const found = (this.opts as IRiotOptsMenuSelect).options.find((option) => {
+            if (option.label !== "_") {
+                index++;
+            }
             return option.id === id;
         });
-        return found ? (this.opts as IRiotOptsMenuSelect).options.indexOf(found) : undefined;
+        // (this.opts as IRiotOptsMenuSelect).options.indexOf(found) - nDivider
+        return found ? index : undefined;
     };
 
     // tslint:disable-next-line:space-before-function-paren
     that.getIndexForLabel = function (label: string): number | undefined {
+        // let nDivider = 0;
+        // (this.opts as IRiotOptsMenuSelect).options.forEach((option) => {
+        //     if (option.label === "_") {
+        //         nDivider++;
+        //     }
+        // });
+        let index = -1;
         const found = (this.opts as IRiotOptsMenuSelect).options.find((option) => {
+            if (option.label !== "_") {
+                index++;
+            }
             return option.label === label;
         });
-        return found ? (this.opts as IRiotOptsMenuSelect).options.indexOf(found) : undefined;
+        // (this.opts as IRiotOptsMenuSelect).options.indexOf(found) - nDivider
+        return found ? index : undefined;
     };
 
     // tslint:disable-next-line:space-before-function-paren
@@ -66,8 +88,16 @@ export const riotMountMenuSelect = (selector: string, opts: IRiotOptsMenuSelect)
     // tslint:disable-next-line:space-before-function-paren
     that.setSelectedItem = function (item: string) {
 
-        this.opts.selected = item;
-        (that.root as any).mdcSelect.selectedIndex = that.getIndexForId(item);
+        let index = that.getIndexForId(item);
+        if (typeof index === "undefined" || index < 0) {
+            index = 0;
+            item = (this.opts as IRiotOptsMenuSelect).options[0].id;
+        }
+        // console.log("setSelectedItem");
+        // console.log(item);
+        // console.log(index);
+        (this.opts as IRiotOptsMenuSelect).selected = item;
+        (that.root as any).mdcSelect.selectedIndex = index;
         this.update();
     };
 
@@ -98,6 +128,13 @@ export const riotMountMenuSelect = (selector: string, opts: IRiotOptsMenuSelect)
             // console.log(ev.detail.selectedOptions[0].textContent);
             // console.log(ev.detail.selectedIndex);
             // console.log(ev.detail.value);
+
+            // let label = ev.detail.value;
+            // const element = that.root.ownerDocument.getElementById(label);
+            // if (element) {
+            //     console.log(element.textContent);
+            //     label = element.textContent;
+            // }
 
             that.trigger("selectionChanged", ev.detail.value);
         });

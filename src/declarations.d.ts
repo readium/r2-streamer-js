@@ -12,6 +12,7 @@ declare module "yauzl";
 declare module "filehound";
 declare module "bindings";
 declare module "resize-sensor/ResizeSensor";
+declare module "system-font-families";
 
 // See test/ava.ts
 // Also see .vscode/launch.json

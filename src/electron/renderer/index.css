@@ -36,9 +36,6 @@ html, body {
   padding: 0;
   box-sizing: border-box;
 }
-html.debug body {
-  background: silver;
-}
 .mdc-dialog {
   z-index: 6; /* over mdc-temporary-drawer (5) */
 }
@@ -95,10 +92,6 @@ body.flex {
   display: none;
   z-index: 2;
 }
-html.debug #reader_chrome {
-  border: 3px solid orange;
-  background: green;
-}
 #publication_viewport {
   display: block;
   position: absolute;
@@ -110,10 +103,6 @@ html.debug #reader_chrome {
   padding: 0;
   box-sizing: border-box;
   background: white;
-}
-html.debug #publication_viewport {
-  border: 6px solid magenta;
-  background: blue;
 }
 #reader_controls {
   display: none;
@@ -131,10 +120,6 @@ html.debug #publication_viewport {
   overflow-x: auto;
   /* border: 1px solid black; */
 }
-html.debug #reader_controls {
-  border-right: 10px solid black;
-  border-bottom: 10px solid black;
-}
 webview {
   display: flex;
   margin: 0;
@@ -149,17 +134,10 @@ webview.singleFull {
 /* webview.hidden {
   visibility: hidden;
 } */
-html.debug webview {
-  background: red;
-}
 #webview2 {
   width: 100%;
   height: 50px;
   background: white;
-}
-html.debug #webview2 {
-  background: yellow;
-  border: 2px solid black;
 }
 form {
   margin: 0; padding: 0;
