@@ -17,7 +17,7 @@ const debug = debug_("r2:electron:main:lsd");
 
 const defaultsLSD = {
 };
-const electronStoreLSD = new ElectronStore({
+export const electronStoreLSD = new ElectronStore({
     defaults: defaultsLSD,
     name: "readium2-navigator-lsd",
 });

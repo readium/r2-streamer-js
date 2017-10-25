@@ -16,12 +16,15 @@ import { Publication } from "@r2-streamer-js/models/publication";
 import { Link } from "@r2-streamer-js/models/publication-link";
 import { setLcpNativePluginPath } from "@r2-streamer-js/parser/epub/lcp";
 
+// import { electronStoreLSD } from "../main/lsd";
+
 import {
     R2_EVENT_LINK,
     R2_EVENT_PAGE_TURN,
     R2_EVENT_PAGE_TURN_RES,
     R2_EVENT_READING_LOCATION,
     R2_EVENT_READIUMCSS,
+    R2_EVENT_SCROLLTO,
     R2_EVENT_TRY_LCP_PASS,
     R2_EVENT_TRY_LCP_PASS_RES,
     R2_EVENT_WEBVIEW_READY,
@@ -145,12 +148,8 @@ const computeReadiumCssJsonMessage = (): string => {
 const readiumCssOnOff = debounce(() => {
 
     const str = computeReadiumCssJsonMessage();
-    if (_webview1) {
-        _webview1.send(R2_EVENT_READIUMCSS, str); // .getWebContents()
-    }
-    if (_webview2) {
-        _webview2.send(R2_EVENT_READIUMCSS, str); // .getWebContents()
-    }
+    _webview1.send(R2_EVENT_READIUMCSS, str); // .getWebContents()
+    _webview2.send(R2_EVENT_READIUMCSS, str); // .getWebContents()
 }, 500);
 
 (electronStore as any).onDidChange("styling.readiumcss", (newValue: any, oldValue: any) => {
@@ -186,6 +185,10 @@ window.onerror = (err) => {
 };
 
 const unhideWebView = (forced: boolean) => {
+    if (_viewHideInterval) {
+        clearInterval(_viewHideInterval);
+        _viewHideInterval = undefined;
+    }
     const hidePanel = document.getElementById("reader_chrome_HIDE") as HTMLElement;
     if (hidePanel.style.display === "none") {
         return;
@@ -385,8 +388,11 @@ const initFontSelector = () => {
             (tag.opts as IRiotOptsMenuSelect).selected = newSelectedID;
             tag.update();
         }
-    }, 5000);
+    }, 100);
 };
+
+// window.addEventListener("load", () => {
+// });
 
 window.addEventListener("DOMContentLoaded", () => {
 
@@ -589,6 +595,8 @@ window.addEventListener("DOMContentLoaded", () => {
     const buttonOpenSettings = document.getElementById("buttonOpenSettings") as HTMLElement;
     buttonOpenSettings.addEventListener("click", () => {
         electronStore.openInEditor();
+        electronStoreLCP.openInEditor();
+        // electronStoreLSD.openInEditor();
     });
 
     // const buttonDevTools = document.getElementById("buttonDevTools") as HTMLElement;
@@ -703,12 +711,8 @@ const adjustResize = (webview: Electron.WebviewTag) => {
 };
 
 window.addEventListener("resize", debounce(() => {
-    if (_webview1) {
-        adjustResize(_webview1);
-    }
-    if (_webview2) {
-        adjustResize(_webview2);
-    }
+    adjustResize(_webview1);
+    adjustResize(_webview2);
 }, 200));
 
 export function handleLink(href: string, previous: boolean | undefined, useGoto: boolean) {
@@ -727,18 +731,13 @@ export function handleLink(href: string, previous: boolean | undefined, useGoto:
     }
 }
 
+let _viewHideInterval: NodeJS.Timer | undefined;
+
 function loadLink(hrefFull: string, previous: boolean | undefined, useGoto: boolean) {
 
-    if (!_publication || !_webview1 || !_webview2) {
+    if (!_publication) {
         return;
     }
-
-    const hidePanel = document.getElementById("reader_chrome_HIDE") as HTMLElement;
-    hidePanel.style.display = "block";
-
-    setTimeout(() => {
-        unhideWebView(true);
-    }, 5000);
 
     const rcssJsonstr = computeReadiumCssJsonMessage();
     // const str = window.atob(base64);
@@ -791,44 +790,143 @@ function loadLink(hrefFull: string, previous: boolean | undefined, useGoto: bool
     }
 
     const activeWebView = getActiveWebView();
-    const wv = activeWebView;
+    const wv1AlreadyLoaded = (_webview1 as any).READIUM2_LINK === pubLink;
+    const wv2AlreadyLoaded = (_webview2 as any).READIUM2_LINK === pubLink;
+    if (wv1AlreadyLoaded || wv2AlreadyLoaded) {
+        const msgJson = {
+            goto: useGoto ? linkUri.search("readiumgoto") : undefined,
+            hash: useGoto ? undefined : linkUri.fragment(),
+            previous,
+        };
+        const msgStr = JSON.stringify(msgJson);
 
-    (wv as any).READIUM2_LINK = pubLink;
+        console.log("ALREADY LOADED: " + pubLink.Href);
+        console.log(msgStr);
+
+        const webviewToReuse = wv1AlreadyLoaded ? _webview1 : _webview2;
+        // const otherWebview = webviewToReuse === _webview2 ? _webview1 : _webview2;
+        if (webviewToReuse !== activeWebView) {
+
+            console.log("INTO VIEW ...");
+
+            const slidingView = document.getElementById("sliding_viewport") as HTMLElement;
+            let animate = true;
+            if (msgJson.goto || msgJson.hash) {
+                console.log("DISABLE ANIM");
+                animate = false;
+            } else if (previous) {
+                if (!slidingView.classList.contains("shiftedLeft")) {
+                    console.log("DISABLE ANIM");
+                    animate = false;
+                }
+            }
+            if (animate) {
+                if (!slidingView.classList.contains("animated")) {
+                    slidingView.classList.add("animated");
+                }
+            } else {
+                if (slidingView.classList.contains("animated")) {
+                    slidingView.classList.remove("animated");
+                }
+            }
+            if (slidingView.classList.contains("shiftedLeft")) {
+                slidingView.classList.remove("shiftedLeft");
+
+                // if (_webview1.classList.contains("posRight")) {
+                //     // activeWebView === _webview1;
+                // } else {
+                //     // activeWebView === _webview2;
+                // }
+            } else {
+                slidingView.classList.add("shiftedLeft");
+
+                // if (_webview2.classList.contains("posRight")) {
+                //     // activeWebView === _webview1;
+                // } else {
+                //     // activeWebView === _webview2;
+                // }
+            }
+        }
+
+        webviewToReuse.send(R2_EVENT_SCROLLTO, msgStr); // .getWebContents()
+
+        return;
+    }
+
+    const hidePanel = document.getElementById("reader_chrome_HIDE") as HTMLElement;
+    hidePanel.style.display = "block";
+    _viewHideInterval = setInterval(() => {
+        unhideWebView(true);
+    }, 5000);
+
     const uriStr = linkUri.toString();
-    // console.log("####### >>> ---");
-    // console.log(uriStr);
-    wv.setAttribute("src", uriStr);
+    console.log("####### >>> ---");
+    console.log((activeWebView as any).readiumwebviewid);
+    console.log(pubLink.Href);
+    console.log(linkUri.hash());
+    // tslint:disable-next-line:no-string-literal
+    console.log(linkUri.search(true)["readiumgoto"]);
+    // tslint:disable-next-line:no-string-literal
+    console.log(linkUri.search(true)["readiumprevious"]);
+    console.log("####### >>> ---");
+    (activeWebView as any).READIUM2_LINK = pubLink;
+    activeWebView.setAttribute("src", uriStr);
     // wv.getWebContents().loadURL(uriStr, { extraHeaders: "pragma: no-cache\n" });
     // wv.loadURL(uriStr, { extraHeaders: "pragma: no-cache\n" });
 
-    let inSpine = true;
-    let index = _publication.Spine.indexOf(pubLink);
-    if (!index) {
-        inSpine = false;
-        index = _publication.Resources.indexOf(pubLink);
-    }
-    if (index >= 0 &&
-        (index + 1) < (inSpine ? _publication.Spine.length : _publication.Resources.length)) {
-        const nextPubLink = (inSpine ? _publication.Spine[index + 1] : _publication.Resources[index + 1]);
-
-        const linkUriNext = new URI(publicationJsonUrl + "/../" + nextPubLink.Href);
-        linkUriNext.normalizePath();
-        const uriStrNext = linkUriNext.toString();
-        _webview2.setAttribute("src", uriStrNext);
-    }
-
-    const slidingViewport = document.getElementById("sliding_viewport") as HTMLElement;
-    setTimeout(() => {
-        slidingViewport.classList.add("shiftedLeft");
+    const enableOffScreenRenderPreload = false;
+    if (enableOffScreenRenderPreload) {
         setTimeout(() => {
-            slidingViewport.classList.remove("shiftedLeft");
-        }, 4000);
-    }, 4000);
+            if (!_publication || !pubLink) {
+                return;
+            }
+
+            const otherWebview = activeWebView === _webview2 ? _webview1 : _webview2;
+
+            // let inSpine = true;
+            const index = _publication.Spine.indexOf(pubLink);
+            // if (!index) {
+            //     inSpine = false;
+            //     index = _publication.Resources.indexOf(pubLink);
+            // }
+            if (index >= 0 &&
+                previous && (index - 1) >= 0 ||
+                !previous && (index + 1) < _publication.Spine.length
+                // (index + 1) < (inSpine ? _publication.Spine.length : _publication.Resources.length)
+            ) {
+                const nextPubLink = _publication.Spine[previous ? (index - 1) : (index + 1)];
+                // (inSpine ? _publication.Spine[index + 1] : _publication.Resources[index + 1]);
+
+                if ((otherWebview as any).READIUM2_LINK !== nextPubLink) {
+                    const linkUriNext = new URI(publicationJsonUrl + "/../" + nextPubLink.Href);
+                    linkUriNext.normalizePath();
+                    linkUriNext.search((data: any) => {
+                        // overrides existing (leaves others intact)
+                        data.readiumcss = rcssJsonstrBase64;
+                    });
+                    const uriStrNext = linkUriNext.toString();
+
+                    console.log("####### ======");
+                    console.log((otherWebview as any).readiumwebviewid);
+                    console.log(nextPubLink.Href);
+                    console.log(linkUriNext.hash());
+                    // tslint:disable-next-line:no-string-literal
+                    console.log(linkUriNext.search(true)["readiumgoto"]);
+                    // tslint:disable-next-line:no-string-literal
+                    console.log(linkUriNext.search(true)["readiumprevious"]);
+                    console.log("####### ======");
+                    (otherWebview as any).READIUM2_LINK = nextPubLink;
+                    otherWebview.setAttribute("src", uriStrNext);
+                }
+            }
+        }, 300);
+    }
 }
 
 const getActiveWebView = (): Electron.WebviewTag => {
 
     let activeWebView: Electron.WebviewTag;
+
     const slidingViewport = document.getElementById("sliding_viewport") as HTMLElement;
     if (slidingViewport.classList.contains("shiftedLeft")) {
         if (_webview1.classList.contains("posRight")) {
@@ -852,11 +950,16 @@ let _publicationJSON: any | undefined;
 
 function startNavigatorExperiment() {
 
+    const drawerButton = document.getElementById("drawerButton") as HTMLElement;
+    drawerButton.focus();
+
     _webview1 = createWebView();
+    (_webview1 as any).readiumwebviewid = 1;
     _webview1.setAttribute("id", "webview1");
     _webview1.setAttribute("class", "full");
 
     _webview2 = createWebView();
+    (_webview2 as any).readiumwebviewid = 2;
     _webview2.setAttribute("id", "webview2");
     _webview2.setAttribute("class", "full posRight");
 
@@ -1067,7 +1170,9 @@ function startNavigatorExperiment() {
                 }
             }
         }
+
         setTimeout(() => {
+            drawer.open = true; // necessary otherwise focus steal for links in publication documents!
             if (linkToLoad) {
                 const hrefToLoad = publicationJsonUrl + "/../" + linkToLoad.Href +
                     (linkToLoadGoto ? ("?readiumgoto=" + encodeURIComponent_RFC3986(linkToLoadGoto)) : "");
@@ -1078,9 +1183,10 @@ function startNavigatorExperiment() {
 }
 
 function navLeftOrRight(left: boolean) {
-    if (!_publication || !_webview1) {
+    if (!_publication) {
         return;
     }
+    const activeWebView = getActiveWebView();
     const isRTL = _publication.Metadata &&
         _publication.Metadata.Direction &&
         _publication.Metadata.Direction.toLowerCase() === "rtl"; //  any other value is LTR
@@ -1090,5 +1196,5 @@ function navLeftOrRight(left: boolean) {
         go: goPREVIOUS ? "PREVIOUS" : "NEXT",
     };
     const messageStr = JSON.stringify(messageJson);
-    _webview1.send(R2_EVENT_PAGE_TURN, messageStr); // .getWebContents()
+    activeWebView.send(R2_EVENT_PAGE_TURN, messageStr); // .getWebContents()
 }

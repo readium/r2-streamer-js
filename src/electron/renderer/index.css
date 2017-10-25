@@ -111,7 +111,7 @@ body.flex {
   display: block;
   position: absolute;
   left: 0;
-  right: -100%;
+  width: 200%;
   top: 0;
   bottom: 0;
   margin: 0;
@@ -121,10 +121,17 @@ body.flex {
   overflow: hidden;
 }
 #sliding_viewport.shiftedLeft {
-  transform: translateX(-50%);
+  transformxxx: translateX(-50%);
+  left: -100%;
+}
+#sliding_viewport.half {
+  width: 100%;
+}
+#sliding_viewport.half.shiftedLeft {
+  left: -50%;
 }
 #sliding_viewport.animated {
-  transition: transform 1s ease-in-out;
+  transition: left 500ms ease-in-out;
 }
 webview {
   display: flex;
@@ -139,12 +146,12 @@ webview.full {
   bottom: 0;
   top: 0;
 }
-#webview1 {
+/* #webview1 {
   background: red;
 }
 #webview2 {
   background: blue;
-}
+} */
 #webview1.posRight, #webview2.posRight {
   left: 50%;
 }

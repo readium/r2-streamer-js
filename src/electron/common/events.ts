@@ -13,6 +13,10 @@ export const R2_EVENT_READIUMCSS = "R2_EVENT_READIUMCSS";
 
 // in RENDERER: webview.send()
 // in WEBVIEW: ipcRenderer.on()
+export const R2_EVENT_SCROLLTO = "R2_EVENT_SCROLLTO";
+
+// in RENDERER: webview.send()
+// in WEBVIEW: ipcRenderer.on()
 export const R2_EVENT_PAGE_TURN = "R2_EVENT_PAGE_TURN";
 
 // in WEBVIEW: ipcRenderer.sendToHost()

@@ -12,6 +12,7 @@ import {
     R2_EVENT_PAGE_TURN_RES,
     R2_EVENT_READING_LOCATION,
     R2_EVENT_READIUMCSS,
+    R2_EVENT_SCROLLTO,
     R2_EVENT_WEBVIEW_READY,
 } from "../common/events";
 
@@ -24,7 +25,7 @@ const urlRootReadiumCSS = win.location.origin + "/readium-css/iOS/";
 
 const DEBUG_VISUALS = false;
 
-const queryParams = win.location.search ? getURLQueryParams(win.location.search) : undefined;
+let queryParams = win.location.search ? getURLQueryParams(win.location.search) : undefined;
 
 // console.log("-----");
 // console.log(win.location.href);
@@ -51,6 +52,48 @@ const ensureHead = () => {
 ipcRenderer.on(R2_EVENT_READIUMCSS, (_event: any, messageString: any) => {
     const messageJson = JSON.parse(messageString);
     readiumCSS(messageJson);
+});
+
+ipcRenderer.on(R2_EVENT_SCROLLTO, (_event: any, messageString: any) => {
+    console.log("R2_EVENT_SCROLLTO");
+    console.log(messageString);
+
+    const messageJson = JSON.parse(messageString);
+    if (!queryParams) {
+        queryParams = {};
+    }
+    if (messageJson.previous) {
+        // tslint:disable-next-line:no-string-literal
+        queryParams["readiumprevious"] = "true";
+    } else {
+        // tslint:disable-next-line:no-string-literal
+        if (typeof queryParams["readiumprevious"] !== "undefined") {
+            // tslint:disable-next-line:no-string-literal
+            delete queryParams["readiumprevious"];
+        }
+    }
+    if (messageJson.goto) {
+        // tslint:disable-next-line:no-string-literal
+        queryParams["readiumgoto"] = "true";
+    } else {
+        // tslint:disable-next-line:no-string-literal
+        if (typeof queryParams["readiumgoto"] !== "undefined") {
+            // tslint:disable-next-line:no-string-literal
+            delete queryParams["readiumgoto"];
+        }
+    }
+    if (messageJson.hash) {
+        _hashElement = win.document.getElementById(messageJson.hash);
+    } else {
+        _hashElement = null;
+    }
+
+    _readyEventSent = false;
+    _locationHashOverride = undefined;
+    scrollToHashRaw(false);
+
+    // ipcRenderer.sendToHost(R2_EVENT_WEBVIEW_READY, win.location.href);
+    // notifyReadingLocation();
 });
 
 ipcRenderer.on(R2_EVENT_PAGE_TURN, (_event: any, messageString: any) => {
@@ -582,7 +625,7 @@ const scrollToHashRaw = (firstCall: boolean) => {
                 const isPreviousNavDirection = previous === "true";
                 if (isPreviousNavDirection) {
 
-                    console.log("_hashElement");
+                    console.log("readiumprevious");
 
                     const maxHeightShift = win.document.body.scrollHeight - win.document.documentElement.clientHeight;
 
@@ -592,6 +635,10 @@ const scrollToHashRaw = (firstCall: boolean) => {
 
                     _locationHashOverride = undefined;
                     _locationHashOverrideCSSselector = undefined;
+                    processXYRaw(0, win.document.documentElement.clientHeight - 1);
+
+                    console.log("BOTTOM (previous):");
+                    console.log(_locationHashOverride);
 
                     notifyReady();
                     notifyReadingLocation();
@@ -795,7 +842,7 @@ outline-style: none !important;
     }
 });
 
-const processXY = debounce((x: number, y: number) => {
+const processXYRaw = (x: number, y: number) => {
     console.log("processXY");
 
     // const elems = document.elementsFromPoint(x, y);
@@ -862,6 +909,9 @@ const processXY = debounce((x: number, y: number) => {
             // });
         }
     }
+};
+const processXY = debounce((x: number, y: number) => {
+    processXYRaw(x, y);
 }, 300);
 
 const notifyReadingLocation = () => {
