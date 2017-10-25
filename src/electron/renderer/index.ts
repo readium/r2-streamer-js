@@ -959,7 +959,7 @@ function startNavigatorExperiment() {
     _webview2 = createWebView();
     (_webview2 as any).readiumwebviewid = 2;
     _webview2.setAttribute("id", "webview2");
-    _webview2.setAttribute("class", "full posRight");
+    _webview2.setAttribute("class", "full");
 
     const slidingViewport = document.getElementById("sliding_viewport") as HTMLElement;
     slidingViewport.appendChild(_webview1);
@@ -1017,6 +1017,15 @@ function startNavigatorExperiment() {
         // const pubJson = global.JSON.parse(publicationStr);
 
         _publication = TAJSON.deserialize<Publication>(_publicationJSON, Publication);
+
+        const isRTL = _publication.Metadata &&
+        _publication.Metadata.Direction &&
+        _publication.Metadata.Direction.toLowerCase() === "rtl"; //  any other value is LTR
+        if (isRTL) {
+            _webview1.classList.add("posRight");
+        } else {
+            _webview2.classList.add("posRight");
+        }
 
         if (_publication.Metadata && _publication.Metadata.Title) {
             let title: string | undefined;
