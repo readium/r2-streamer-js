@@ -4,20 +4,16 @@ import debounce = require("debounce");
 import ElectronStore = require("electron-store");
 import URI = require("urijs");
 
-import { shell } from "electron";
-import { ipcRenderer } from "electron";
-import * as path from "path";
-import { JSON as TAJSON } from "ta-json";
-
 import { encodeURIComponent_RFC3986 } from "@r2-streamer-js/_utils/http/UrlUtils";
 import { initGlobals } from "@r2-streamer-js/init-globals";
 import { IStringMap } from "@r2-streamer-js/models/metadata-multilang";
 import { Publication } from "@r2-streamer-js/models/publication";
 import { Link } from "@r2-streamer-js/models/publication-link";
 import { setLcpNativePluginPath } from "@r2-streamer-js/parser/epub/lcp";
-
-// import { electronStoreLSD } from "../main/lsd";
-
+import { shell } from "electron";
+import { ipcRenderer } from "electron";
+import * as path from "path";
+import { JSON as TAJSON } from "ta-json";
 import {
     R2_EVENT_LINK,
     R2_EVENT_PAGE_TURN,
@@ -55,6 +51,8 @@ import {
     IRiotTagMenuSelect,
     riotMountMenuSelect,
 } from "./riots/menuselect/index_";
+
+// import { electronStoreLSD } from "../main/lsd";
 
 // console.log(window.location);
 // console.log(document.baseURI);

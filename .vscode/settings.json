@@ -40,5 +40,6 @@
   "editor.tabSize": 4,
   "editor.insertSpaces": true,
   "editor.minimap.enabled": false,
-  "sortImports.onSave": false
+  "sortImports.onSave": false,
+  "sort-imports.on-save": false
 }

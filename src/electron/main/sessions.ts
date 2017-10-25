@@ -1,6 +1,5 @@
 import * as debug_ from "debug";
 import { app, session } from "electron";
-
 import { R2_SESSION_WEBVIEW } from "../common/sessions";
 
 const debug = debug_("r2:electron:main");

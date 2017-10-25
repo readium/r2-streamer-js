@@ -2,10 +2,6 @@ import debounce = require("debounce");
 import ResizeSensor = require("resize-sensor/ResizeSensor");
 
 import { ipcRenderer } from "electron";
-import { animateProperty } from "./animateProperty";
-import { easings } from "./easings";
-import { getURLQueryParams } from "./querystring";
-
 import {
     R2_EVENT_LINK,
     R2_EVENT_PAGE_TURN,
@@ -15,8 +11,10 @@ import {
     R2_EVENT_SCROLLTO,
     R2_EVENT_WEBVIEW_READY,
 } from "../common/events";
-
+import { animateProperty } from "./animateProperty";
 import { fullQualifiedSelector } from "./cssselector";
+import { easings } from "./easings";
+import { getURLQueryParams } from "./querystring";
 
 const win = (global as any).window as Window;
 

@@ -1,6 +1,5 @@
 import * as xpath from "xpath";
-
-import { ObjectDefinition, getTypedInheritanceChain, objectDefinitions } from "../classes/object-definition";
+import { getTypedInheritanceChain, ObjectDefinition, objectDefinitions } from "../classes/object-definition";
 import { PropertyDefinition } from "../classes/property-definition";
 import { propertyConverters } from "../converters/converter";
 import { IDynamicObject, IParseOptions } from "../types";

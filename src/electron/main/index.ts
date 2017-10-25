@@ -13,19 +13,17 @@
 // https://github.com/electron/electron/blob/master/docs/api/dialog.md
 // https://github.com/electron/electron/blob/master/docs/api/ipc-renderer.md
 
-import * as fs from "fs";
-import * as path from "path";
-
 import { encodeURIComponent_RFC3986 } from "@r2-streamer-js/_utils/http/UrlUtils";
 import { Server } from "@r2-streamer-js/http/server";
 import { initGlobals } from "@r2-streamer-js/init-globals";
 import { Publication } from "@r2-streamer-js/models/publication";
 import { setLcpNativePluginPath } from "@r2-streamer-js/parser/epub/lcp";
 import * as debug_ from "debug";
-import { BrowserWindow, Menu, app, dialog, ipcMain, webContents } from "electron";
+import { app, BrowserWindow, dialog, ipcMain, Menu, webContents } from "electron";
 import * as filehound from "filehound";
+import * as fs from "fs";
+import * as path from "path";
 import * as portfinder from "portfinder";
-
 import { R2_EVENT_DEVTOOLS } from "../common/events";
 import { trackBrowserWindow } from "./browser-window-tracker";
 import { downloadFromLCPL, installLcpHandler } from "./lcp";

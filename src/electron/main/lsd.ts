@@ -1,17 +1,16 @@
-import * as fs from "fs";
-
-import ElectronStore = require("electron-store");
-
 import { streamToBufferPromise } from "@r2-streamer-js/_utils/stream/BufferUtils";
 import { injectBufferInZip } from "@r2-streamer-js/_utils/zip/zipInjector";
 import { Publication } from "@r2-streamer-js/models/publication";
 import { LCP } from "@r2-streamer-js/parser/epub/lcp";
 import * as debug_ from "debug";
+import * as fs from "fs";
 import * as moment from "moment";
 import * as request from "request";
 import * as requestPromise from "request-promise-native";
 import { JSON as TAJSON } from "ta-json";
 import * as uuid from "uuid";
+
+import ElectronStore = require("electron-store");
 
 const debug = debug_("r2:electron:main:lsd");
 

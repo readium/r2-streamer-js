@@ -1,16 +1,14 @@
-import * as crypto from "crypto";
-import * as fs from "fs";
-import * as path from "path";
-
 import { injectFileInZip } from "@r2-streamer-js/_utils/zip/zipInjector";
 import { Server } from "@r2-streamer-js/http/server";
 import { LCP } from "@r2-streamer-js/parser/epub/lcp";
+import * as crypto from "crypto";
 import * as debug_ from "debug";
 import { ipcMain } from "electron";
+import * as fs from "fs";
+import * as path from "path";
 import * as request from "request";
 import * as requestPromise from "request-promise-native";
 import { JSON as TAJSON } from "ta-json";
-
 import { R2_EVENT_TRY_LCP_PASS, R2_EVENT_TRY_LCP_PASS_RES } from "../common/events";
 
 const debug = debug_("r2:electron:main:lcp");
