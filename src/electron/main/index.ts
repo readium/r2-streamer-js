@@ -27,7 +27,8 @@ import * as portfinder from "portfinder";
 import { R2_EVENT_DEVTOOLS } from "../common/events";
 import { trackBrowserWindow } from "./browser-window-tracker";
 import { downloadFromLCPL, installLcpHandler } from "./lcp";
-import { deviceIDManager, launchStatusDocumentProcessing } from "./lsd";
+import { launchStatusDocumentProcessing } from "./lsd";
+import { deviceIDManager } from "./lsd-deviceid-manager";
 import { setupReadiumCSS } from "./readium-css";
 import { initSessions } from "./sessions";
 

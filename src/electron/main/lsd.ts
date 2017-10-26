@@ -8,90 +8,161 @@ import * as moment from "moment";
 import * as request from "request";
 import * as requestPromise from "request-promise-native";
 import { JSON as TAJSON } from "ta-json";
-import * as uuid from "uuid";
+import { IDeviceIDManager } from "./lsd-deviceid-manager";
 
-import ElectronStore = require("electron-store");
+import URITemplate = require("urijs/src/URITemplate");
+
+// import URI = require("urijs");
 
 const debug = debug_("r2:electron:main:lsd");
 
-const defaultsLSD = {
-};
-export const electronStoreLSD = new ElectronStore({
-    defaults: defaultsLSD,
-    name: "readium2-navigator-lsd",
-});
+async function tryRegister(
+    lsdJson: any,
+    _publication: Publication,
+    _publicationPath: string,
+    deviceIDManager: IDeviceIDManager,
+    onStatusDocumentProcessingComplete: () => void) {
 
-const LSD_STORE_DEVICEID_ENTRY_PREFIX = "deviceID_";
-
-export interface IDeviceIDManager {
-    getDeviceNAME(): string;
-
-    getDeviceID(): string;
-
-    checkDeviceID(key: string): string | undefined;
-
-    recordDeviceID(key: string): void;
-}
-
-export const deviceIDManager: IDeviceIDManager = {
-
-    checkDeviceID: (key: string): string | undefined => {
-
-        const entry = LSD_STORE_DEVICEID_ENTRY_PREFIX + key;
-
-        const lsdStore = electronStoreLSD.get("lsd");
-        if (!lsdStore || !lsdStore[entry]) {
-            return undefined;
+    if (!lsdJson.links) {
+        if (onStatusDocumentProcessingComplete) {
+            onStatusDocumentProcessingComplete();
         }
+        return;
+    }
 
-        return lsdStore[entry];
-    },
+    const licenseRegister = lsdJson.links.find((link: any) => {
+        return link.rel === "register";
+    });
+    if (!licenseRegister) {
+        debug("LSD register link is not available.");
+        if (onStatusDocumentProcessingComplete) {
+            onStatusDocumentProcessingComplete();
+        }
+        return;
+    }
 
-    getDeviceID: (): string => {
+    const deviceID = deviceIDManager.getDeviceID();
+    const deviceNAME = deviceIDManager.getDeviceNAME();
 
-        let id = uuid.v4();
+    let doRegister = false;
+    if (lsdJson.status === "ready") {
+        doRegister = true;
+    } else if (lsdJson.status === "active") {
+        const deviceIDForStatusDoc = deviceIDManager.checkDeviceID(lsdJson.id);
+        if (!deviceIDForStatusDoc) {
+            doRegister = true;
+        } else if (deviceIDForStatusDoc !== deviceID) {
+            debug("LSD registered device ID is different?");
+            // this should really never happen ... but let's ensure anyway.
+            doRegister = true;
+        }
+    }
 
-        const lsdStore = electronStoreLSD.get("lsd");
-        if (!lsdStore) {
-            electronStoreLSD.set("lsd", {
-                deviceID: id,
-            });
-        } else {
-            if (lsdStore.deviceID) {
-                id = lsdStore.deviceID;
-            } else {
-                lsdStore.deviceID = id;
-                electronStoreLSD.set("lsd", lsdStore);
+    if (!doRegister) {
+        if (onStatusDocumentProcessingComplete) {
+            onStatusDocumentProcessingComplete();
+        }
+        return;
+    }
+
+    let registerURL = licenseRegister.href;
+    if (licenseRegister.templated === true || licenseRegister.templated === "true") {
+        const urlTemplate = new URITemplate(registerURL);
+        registerURL = (urlTemplate as any).expand({ id: deviceID, name: deviceNAME }, { strict: true });
+
+        // url = url.replace("{?id,name}", ""); // TODO: smarter regexp?
+        // url = new URI(url).setQuery("id", deviceID).setQuery("name", deviceNAME).toString();
+
+        const failure = (err: any) => {
+            debug(err);
+            if (onStatusDocumentProcessingComplete) {
+                onStatusDocumentProcessingComplete();
             }
+        };
+
+        const success = async (response: request.RequestResponse) => {
+            if (response.statusCode && (response.statusCode < 200 || response.statusCode >= 300)) {
+                failure("HTTP CODE " + response.statusCode);
+                return;
+            }
+
+            let responseData: Buffer | undefined;
+            try {
+                responseData = await streamToBufferPromise(response);
+            } catch (err) {
+                debug(err);
+                if (onStatusDocumentProcessingComplete) {
+                    onStatusDocumentProcessingComplete();
+                }
+                return;
+            }
+            if (!responseData) {
+                if (onStatusDocumentProcessingComplete) {
+                    onStatusDocumentProcessingComplete();
+                }
+                return;
+            }
+            const responseStr = responseData.toString("utf8");
+            debug(responseStr);
+            const responseJson = global.JSON.parse(responseStr);
+            debug(responseJson);
+
+            if (responseJson.status === "active") {
+                deviceIDManager.recordDeviceID(responseJson.id);
+            }
+
+            if (onStatusDocumentProcessingComplete) {
+                onStatusDocumentProcessingComplete();
+            }
+        };
+
+        const headers = {
+            "Accept-Language": "en-UK,en-US;q=0.7,en;q=0.5",
+        };
+
+        // No response streaming! :(
+        // https://github.com/request/request-promise/issues/90
+        const needsStreamingResponse = true;
+        if (needsStreamingResponse) {
+            request.post({
+                headers,
+                method: "GET",
+                uri: registerURL,
+            })
+                .on("response", success)
+                .on("error", failure);
+        } else {
+            let response: requestPromise.FullResponse | undefined;
+            try {
+                // tslint:disable-next-line:await-promise no-floating-promises
+                response = await requestPromise({
+                    headers,
+                    method: "POST",
+                    resolveWithFullResponse: true,
+                    uri: registerURL,
+                });
+            } catch (err) {
+                failure(err);
+                return;
+            }
+
+            // To please the TypeScript compiler :(
+            response = response as requestPromise.FullResponse;
+            await success(response);
         }
 
-        return id;
-    },
+        return;
+    }
 
-    getDeviceNAME: (): string => {
-        return "Readium2 Electron desktop app";
-    },
-
-    recordDeviceID: (key: string) => {
-
-        const id = this.getDeviceID();
-
-        const lsdStore = electronStoreLSD.get("lsd");
-        if (!lsdStore) {
-            // Should be init'ed at this.getDeviceID()
-            debug("LSD store problem?!");
-            return;
-        }
-
-        const entry = LSD_STORE_DEVICEID_ENTRY_PREFIX + key;
-        lsdStore[entry] = id;
-    },
-};
+    if (onStatusDocumentProcessingComplete) {
+        onStatusDocumentProcessingComplete();
+    }
+}
 
 export async function launchStatusDocumentProcessing(
     publication: Publication,
     publicationPath: string,
-    _deviceIDManager: IDeviceIDManager,
+    deviceIDManager: IDeviceIDManager,
     onStatusDocumentProcessingComplete: () => void) {
 
     if (!publication.LCP || !publication.LCP.Links) {
@@ -114,7 +185,9 @@ export async function launchStatusDocumentProcessing(
 
     const failure = (err: any) => {
         debug(err);
-        onStatusDocumentProcessingComplete();
+        if (onStatusDocumentProcessingComplete) {
+            onStatusDocumentProcessingComplete();
+        }
     };
 
     const success = async (response: request.RequestResponse) => {
@@ -128,27 +201,31 @@ export async function launchStatusDocumentProcessing(
             responseData = await streamToBufferPromise(response);
         } catch (err) {
             debug(err);
-            onStatusDocumentProcessingComplete();
+            if (onStatusDocumentProcessingComplete) {
+                onStatusDocumentProcessingComplete();
+            }
             return;
         }
         if (!responseData) {
-            onStatusDocumentProcessingComplete();
+            if (onStatusDocumentProcessingComplete) {
+                onStatusDocumentProcessingComplete();
+            }
             return;
         }
         const responseStr = responseData.toString("utf8");
         debug(responseStr);
-        const responseJson = global.JSON.parse(responseStr);
-        debug(responseJson);
+        const lsdJson = global.JSON.parse(responseStr);
+        debug(lsdJson);
 
-        // debug(responseJson.id);
-        // debug(responseJson.status); // revoked, returned, cancelled, expired
-        // debug(responseJson.message);
-        // if (responseJson.updated) {
-        //     debug(responseJson.updated.license);
-        //     debug(responseJson.updated.status);
+        // debug(lsdJson.id);
+        // debug(lsdJson.status); // revoked, returned, cancelled, expired
+        // debug(lsdJson.message);
+        // if (lsdJson.updated) {
+        //     debug(lsdJson.updated.license);
+        //     debug(lsdJson.updated.status);
         // }
-        // if (responseJson.links) {
-        //     responseJson.links.forEach((link: any) => {
+        // if (lsdJson.links) {
+        //     lsdJson.links.forEach((link: any) => {
         //         debug(link.rel); // license, register, return, renew
         //         debug(link.href);
         //         debug(link.type);
@@ -157,11 +234,11 @@ export async function launchStatusDocumentProcessing(
         //         debug(link.profile);
         //     });
         // }
-        // if (responseJson.potential_rights) {
-        //     debug(responseJson.potential_rights.end);
+        // if (lsdJson.potential_rights) {
+        //     debug(lsdJson.potential_rights.end);
         // }
-        // if (responseJson.events) {
-        //     responseJson.events.forEach((event: any) => {
+        // if (lsdJson.events) {
+        //     lsdJson.events.forEach((event: any) => {
         //         debug(event.type);
         //         debug(event.name);
         //         debug(event.timestamp); // ISO 8601 time and date
@@ -169,20 +246,23 @@ export async function launchStatusDocumentProcessing(
         //     });
         // }
 
-        if (responseJson.updated && responseJson.updated.license &&
+        if (lsdJson.updated && lsdJson.updated.license &&
             (publication.LCP.Updated || publication.LCP.Issued)) {
-            const updatedLicenseLSD = moment(responseJson.updated.license);
+            const updatedLicenseLSD = moment(lsdJson.updated.license);
             const updatedLicense = moment(publication.LCP.Updated || publication.LCP.Issued);
             const forceUpdate = false;
-            if (forceUpdate || updatedLicense.isBefore(updatedLicenseLSD)) {
+            if (forceUpdate || // just for testing!
+                updatedLicense.isBefore(updatedLicenseLSD)) {
                 debug("LSD license updating...");
-                if (responseJson.links) {
-                    const licenseLink = responseJson.links.find((link: any) => {
+                if (lsdJson.links) {
+                    const licenseLink = lsdJson.links.find((link: any) => {
                         return link.rel === "license";
                     });
                     if (!licenseLink) {
                         debug("LSD license link is missing.");
-                        onStatusDocumentProcessingComplete();
+                        if (onStatusDocumentProcessingComplete) {
+                            onStatusDocumentProcessingComplete();
+                        }
                         return;
                     }
                     await fetchAndInjectUpdatedLicense(publication, publicationPath,
@@ -191,120 +271,23 @@ export async function launchStatusDocumentProcessing(
                 }
             }
         }
-        onStatusDocumentProcessingComplete();
 
-        // private void registerDevice(final DoneCallback doneCallback_registerDevice) {
+        if (lsdJson.status === "revoked"
+            || lsdJson.status === "returned"
+            || lsdJson.status === "cancelled"
+            || lsdJson.status === "expired") {
 
-        //             String deviceID = m_deviceIDManager.getDeviceID();
-        //             String deviceNAME = m_deviceIDManager.getDeviceNAME();
+            debug("What?! LSD " + lsdJson.status);
+            // This should really never happen,
+            // as the LCP license should not even pass validation
+            // due to passed end date / expired timestamp
+            if (onStatusDocumentProcessingComplete) {
+                onStatusDocumentProcessingComplete();
+            }
+            return;
+        }
 
-        //             boolean doRegister = false;
-        //             if (m_statusDocument_LINK_REGISTER == null) {
-        //                 doRegister = false;
-        //             } else if (m_statusDocument_STATUS.equals("ready")) {
-        //                 doRegister = true;
-        //             } else if (m_statusDocument_STATUS.equals("active")) {
-
-        //                 String deviceIDForStatusDoc = m_deviceIDManager.checkDeviceID(m_statusDocument_ID);
-
-        //                 if (deviceIDForStatusDoc == null) {
-        //                     doRegister = true;
-        //                 } else if (!deviceIDForStatusDoc.equals(deviceID)) {
-        // // this should really never happen ... but let's ensure anyway.
-        //                     doRegister = true;
-        //                 }
-        //             }
-
-        //             if (!doRegister) {
-        //                 doneCallback_registerDevice.Done(false);
-        //                 return;
-        //             }
-        //             String url = m_statusDocument_LINK_REGISTER.m_href;
-        //             if (m_statusDocument_LINK_REGISTER.m_templated.equals("true")) {
-
-        //     // URLEncoder.encode() doesn't generate %20 for space character (instead: '+')
-        //     // So we use android.net.Uri's appendQueryParameter() instead (see below)
-        //     //        try {
-        //     //            deviceID = URLEncoder.encode(deviceID, "UTF-8");
-        //     //            deviceNAME = URLEncoder.encode(deviceNAME, "UTF-8");
-        //     //        } catch (Exception ex) {
-        //     //            // noop
-        //     //        }
-        //     //        url = url.replace("{?id,name}", "?id=" + deviceID + "&name=" + deviceNAME);
-
-        //                 url = url.replace("{?id,name}", ""); // TODO: smarter regexp?
-        //                 url = Uri.parse(url).buildUpon()
-        //                         .appendQueryParameter("id", deviceID)
-        //                         .appendQueryParameter("name", deviceNAME)
-        //                         .build().toString();
-        //             }
-
-        //             Locale currentLocale = getCurrentLocale();
-        //             String langCode = currentLocale.toString().replace('_', '-');
-        //             langCode = langCode + ",en-US;q=0.7,en;q=0.5";
-
-        //             Future<Response<InputStream>> request = Ion.with(m_context)
-        //                     .load("POST", url)
-        //                     .setLogging("Readium Ion", Log.VERBOSE)
-
-        //                     //.setTimeout(AsyncHttpRequest.DEFAULT_TIMEOUT) //30000
-        //                     .setTimeout(6000)
-
-        //                     // TODO: comment this in production! (this is only for testing a local HTTP server)
-        //                     //.setHeader("X-Add-Delay", "2s")
-
-        //                     // LCP / LSD server with message localization
-        //                     .setHeader("Accept-Language", langCode)
-
-        //     // QUERY params (templated URI)
-        //     //                        .setBodyParameter("id", dID)
-        //     //                        .setBodyParameter("name", dNAME)
-
-        //                     .asInputStream()
-        //                     .withResponse()
-
-        //                     // UI thread
-        //                     .setCallback(new FutureCallback<Response<InputStream>>() {
-        //                         @Override
-        //                         public void onCompleted(Exception e, Response<InputStream> response) {
-
-        //                             InputStream inputStream = response != null ? response.getResult() : null;
-        //                             int httpResponseCode = response != null ? response.getHeaders().code() : 0;
-        //                             if (e != null || inputStream == null
-        //                                     || httpResponseCode < 200 || httpResponseCode >= 300) {
-
-        //                                 doneCallback_registerDevice.Done(false);
-        //                                 return;
-        //                             }
-
-        //                             try {
-
-        //                                 StringWriter writer = new StringWriter();
-        //                                 IOUtils.copy(inputStream, writer, "UTF-8");
-        //                                 String json = writer.toString().trim();
-
-        //                                 boolean okay = parseStatusDocumentJson(json);
-
-        //                                 if (okay && m_statusDocument_STATUS.equals("active")) {
-        //                                     m_deviceIDManager.recordDeviceID(m_statusDocument_ID);
-        //                                 }
-
-        //                                 doneCallback_registerDevice.Done(true);
-
-        //                             } catch (Exception ex) {
-        //                                 ex.printStackTrace();
-        //                                 doneCallback_registerDevice.Done(false);
-        //                             } finally {
-        //                                 try {
-        //                                     inputStream.close();
-        //                                 } catch (IOException ex) {
-        //                                     ex.printStackTrace();
-        //                                     // ignore
-        //                                 }
-        //                             }
-        //                         }
-        //                     });
-        //         }
+        await tryRegister(lsdJson, publication, publicationPath, deviceIDManager, onStatusDocumentProcessingComplete);
     };
 
     const headers = {
@@ -353,7 +336,9 @@ async function fetchAndInjectUpdatedLicense(
 
     const failure = (err: any) => {
         debug(err);
-        onStatusDocumentProcessingComplete();
+        if (onStatusDocumentProcessingComplete) {
+            onStatusDocumentProcessingComplete();
+        }
     };
 
     const success = async (response: request.RequestResponse) => {
@@ -374,11 +359,15 @@ async function fetchAndInjectUpdatedLicense(
             responseData = await streamToBufferPromise(response);
         } catch (err) {
             debug(err);
-            onStatusDocumentProcessingComplete();
+            if (onStatusDocumentProcessingComplete) {
+                onStatusDocumentProcessingComplete();
+            }
             return;
         }
         if (!responseData) {
-            onStatusDocumentProcessingComplete();
+            if (onStatusDocumentProcessingComplete) {
+                onStatusDocumentProcessingComplete();
+            }
             return;
         }
         const lcplStr = responseData.toString("utf8");
@@ -393,11 +382,15 @@ async function fetchAndInjectUpdatedLicense(
             lcpl = TAJSON.deserialize<LCP>(lcplJson, LCP);
         } catch (erorz) {
             debug(erorz);
-            onStatusDocumentProcessingComplete();
+            if (onStatusDocumentProcessingComplete) {
+                onStatusDocumentProcessingComplete();
+            }
             return;
         }
         if (!lcpl) {
-            onStatusDocumentProcessingComplete();
+            if (onStatusDocumentProcessingComplete) {
+                onStatusDocumentProcessingComplete();
+            }
             return;
         }
         lcpl.ZipPath = zipEntryPath;
@@ -411,7 +404,9 @@ async function fetchAndInjectUpdatedLicense(
         injectBufferInZip(publicationPath, newPublicationPath, responseData, zipEntryPath,
             (err) => {
                 debug(err);
-                onStatusDocumentProcessingComplete();
+                if (onStatusDocumentProcessingComplete) {
+                    onStatusDocumentProcessingComplete();
+                }
             },
             () => {
                 debug("EPUB license.lcpl injected.");
@@ -420,7 +415,9 @@ async function fetchAndInjectUpdatedLicense(
                     fs.unlinkSync(publicationPath);
                     setTimeout(() => {
                         fs.renameSync(newPublicationPath, publicationPath);
-                        onStatusDocumentProcessingComplete();
+                        if (onStatusDocumentProcessingComplete) {
+                            onStatusDocumentProcessingComplete();
+                        }
                     }, 500);
                 }, 500);
             });
