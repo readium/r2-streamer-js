@@ -1036,8 +1036,8 @@ function startNavigatorExperiment() {
         _publication = TAJSON.deserialize<Publication>(_publicationJSON, Publication);
 
         const isRTL = _publication.Metadata &&
-        _publication.Metadata.Direction &&
-        _publication.Metadata.Direction.toLowerCase() === "rtl"; //  any other value is LTR
+            _publication.Metadata.Direction &&
+            _publication.Metadata.Direction.toLowerCase() === "rtl"; //  any other value is LTR
         if (isRTL) {
             _webview1.classList.add("posRight");
         } else {
@@ -1166,23 +1166,25 @@ function startNavigatorExperiment() {
         const readStore = electronStore.get("readingLocation");
         let linkToLoad: Link | undefined;
         let linkToLoadGoto: string | undefined;
-        const obj = readStore[pathDecoded];
-        if (obj && obj.doc) {
-            if (_publication.Spine && _publication.Spine.length) {
-                linkToLoad = _publication.Spine.find((spineLink) => {
-                    return spineLink.Href === obj.doc;
-                });
-                if (linkToLoad && obj.loc) {
-                    linkToLoadGoto = obj.loc;
+        if (readStore) {
+            const obj = readStore[pathDecoded];
+            if (obj && obj.doc) {
+                if (_publication.Spine && _publication.Spine.length) {
+                    linkToLoad = _publication.Spine.find((spineLink) => {
+                        return spineLink.Href === obj.doc;
+                    });
+                    if (linkToLoad && obj.loc) {
+                        linkToLoadGoto = obj.loc;
+                    }
                 }
-            }
-            if (!linkToLoad &&
-                _publication.Resources && _publication.Resources.length) {
-                linkToLoad = _publication.Resources.find((resLink) => {
-                    return resLink.Href === obj.doc;
-                });
-                if (linkToLoad && obj.loc) {
-                    linkToLoadGoto = obj.loc;
+                if (!linkToLoad &&
+                    _publication.Resources && _publication.Resources.length) {
+                    linkToLoad = _publication.Resources.find((resLink) => {
+                        return resLink.Href === obj.doc;
+                    });
+                    if (linkToLoad && obj.loc) {
+                        linkToLoadGoto = obj.loc;
+                    }
                 }
             }
         }
