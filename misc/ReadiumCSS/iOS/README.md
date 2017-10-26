@@ -1,6 +1,6 @@
 Downloaded from:
 https://github.com/readium/readium-css/tree/develop/prototype/iOS-implem/dist
-commit a4920b0ed5b5c102f589f1644835acda304f8f0d
+commit d0294491e1bb2c8cee240e1369c7dc7ae0b101f8
 
 ===== MODIFICATIONS:
 
@@ -16,6 +16,8 @@ in ReadiumCSS-before.css:
   -ms-user-select: none;
   user-select: none;
 ```
+
+in ReadiumCSS-after.css:
 
 
 -- REMOVED MEDIA QUERY (KEEP RULES) --

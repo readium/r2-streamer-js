@@ -1,3 +1,3 @@
 Downloaded from:
 https://github.com/readium/readium-css/tree/develop/prototype/src
-commit 5da08612c14232b2942e25ab0b3d5b336578ae9a
+commit d0294491e1bb2c8cee240e1369c7dc7ae0b101f8
