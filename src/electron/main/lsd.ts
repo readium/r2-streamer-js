@@ -1,14 +1,67 @@
 import { streamToBufferPromise } from "@r2-streamer-js/_utils/stream/BufferUtils";
+import { Server } from "@r2-streamer-js/http/server";
 import { Publication } from "@r2-streamer-js/models/publication";
 import * as debug_ from "debug";
+import { ipcMain } from "electron";
 import * as moment from "moment";
 import * as request from "request";
 import * as requestPromise from "request-promise-native";
+import {
+    R2_EVENT_LCP_LSD_RENEW,
+    R2_EVENT_LCP_LSD_RENEW_RES,
+    R2_EVENT_LCP_LSD_RETURN,
+    R2_EVENT_LCP_LSD_RETURN_RES,
+} from "../common/events";
 import { IDeviceIDManager } from "./lsd-deviceid-manager";
-import { fetchAndInjectUpdatedLicense } from "./lsd-injectlcpl";
-import { tryRegister } from "./lsd-register";
+import { lsdLcpUpdate, lsdLcpUpdateInject } from "./lsd-injectlcpl";
+import { lsdRegister } from "./lsd-register";
+import { lsdRenew } from "./lsd-renew";
+import { lsdReturn } from "./lsd-return";
 
 const debug = debug_("r2:electron:main:lsd");
+
+export function installLsdHandler(publicationsServer: Server, deviceIDManager: IDeviceIDManager) {
+
+    ipcMain.on(R2_EVENT_LCP_LSD_RETURN, async (event: any, publicationFilePath: string) => {
+
+        const publication = publicationsServer.cachedPublication(publicationFilePath);
+        if (!publication || !publication.LCP || !publication.LCP.LSDJson) {
+            event.sender.send(R2_EVENT_LCP_LSD_RETURN_RES, false, "Internal error!");
+            return;
+        }
+
+        let renewResponseJson: any;
+        try {
+            renewResponseJson = await lsdReturn(publication.LCP.LSDJson, deviceIDManager);
+            publication.LCP.LSDJson = renewResponseJson;
+            event.sender.send(R2_EVENT_LCP_LSD_RETURN_RES, true, "Returned.");
+            return;
+        } catch (err) {
+            debug(err);
+            event.sender.send(R2_EVENT_LCP_LSD_RETURN_RES, false, err);
+        }
+    });
+
+    ipcMain.on(R2_EVENT_LCP_LSD_RENEW, async (event: any, publicationFilePath: string, endDateStr: string) => {
+        const publication = publicationsServer.cachedPublication(publicationFilePath);
+        if (!publication || !publication.LCP || !publication.LCP.LSDJson) {
+            event.sender.send(R2_EVENT_LCP_LSD_RENEW_RES, false, "Internal error!");
+            return;
+        }
+
+        const endDate = endDateStr.length ? moment(endDateStr).toDate() : undefined;
+        let renewResponseJson: any;
+        try {
+            renewResponseJson = await lsdRenew(endDate, publication.LCP.LSDJson, deviceIDManager);
+            publication.LCP.LSDJson = renewResponseJson;
+            event.sender.send(R2_EVENT_LCP_LSD_RENEW_RES, true, "Renewed.");
+            return;
+        } catch (err) {
+            debug(err);
+            event.sender.send(R2_EVENT_LCP_LSD_RENEW_RES, false, err);
+        }
+    });
+}
 
 export async function launchStatusDocumentProcessing(
     publication: Publication,
@@ -47,7 +100,7 @@ export async function launchStatusDocumentProcessing(
             return;
         }
 
-        let responseData: Buffer | undefined;
+        let responseData: Buffer;
         try {
             responseData = await streamToBufferPromise(response);
         } catch (err) {
@@ -67,6 +120,8 @@ export async function launchStatusDocumentProcessing(
         debug(responseStr);
         const lsdJson = global.JSON.parse(responseStr);
         debug(lsdJson);
+
+        publication.LCP.LSDJson = lsdJson;
 
         // debug(lsdJson.id);
         // debug(lsdJson.status); // revoked, returned, cancelled, expired
@@ -97,30 +152,28 @@ export async function launchStatusDocumentProcessing(
         //     });
         // }
 
-        if (lsdJson.updated && lsdJson.updated.license &&
-            (publication.LCP.Updated || publication.LCP.Issued)) {
-            const updatedLicenseLSD = moment(lsdJson.updated.license);
-            const updatedLicense = moment(publication.LCP.Updated || publication.LCP.Issued);
-            const forceUpdate = false;
-            if (forceUpdate || // just for testing!
-                updatedLicense.isBefore(updatedLicenseLSD)) {
-                debug("LSD license updating...");
-                if (lsdJson.links) {
-                    const licenseLink = lsdJson.links.find((link: any) => {
-                        return link.rel === "license";
-                    });
-                    if (!licenseLink) {
-                        debug("LSD license link is missing.");
-                        if (onStatusDocumentProcessingComplete) {
-                            onStatusDocumentProcessingComplete();
-                        }
-                        return;
-                    }
-                    await fetchAndInjectUpdatedLicense(publication, publicationPath,
-                        licenseLink.href, onStatusDocumentProcessingComplete);
-                    return;
-                }
+        let licenseUpdateResponseJson: string | undefined;
+        try {
+            licenseUpdateResponseJson = await lsdLcpUpdate(lsdJson, publication);
+        } catch (err) {
+            debug(err);
+            // if (onStatusDocumentProcessingComplete) {
+            //     onStatusDocumentProcessingComplete();
+            // }
+            // return;
+        }
+        if (licenseUpdateResponseJson) {
+            let res: string;
+            try {
+                res = await lsdLcpUpdateInject(licenseUpdateResponseJson, publication, publicationPath);
+                debug("EPUB SAVED: " + res);
+            } catch (err) {
+                debug(err);
             }
+            if (onStatusDocumentProcessingComplete) {
+                onStatusDocumentProcessingComplete();
+            }
+            return;
         }
 
         if (lsdJson.status === "revoked"
@@ -138,7 +191,16 @@ export async function launchStatusDocumentProcessing(
             return;
         }
 
-        await tryRegister(lsdJson, publication, publicationPath, deviceIDManager, onStatusDocumentProcessingComplete);
+        let registerResponseJson: any;
+        try {
+            registerResponseJson = await lsdRegister(lsdJson, deviceIDManager);
+            publication.LCP.LSDJson = registerResponseJson;
+        } catch (err) {
+            debug(err);
+        }
+        if (onStatusDocumentProcessingComplete) {
+            onStatusDocumentProcessingComplete();
+        }
     };
 
     const headers = {
@@ -157,7 +219,7 @@ export async function launchStatusDocumentProcessing(
             .on("response", success)
             .on("error", failure);
     } else {
-        let response: requestPromise.FullResponse | undefined;
+        let response: requestPromise.FullResponse;
         try {
             // tslint:disable-next-line:await-promise no-floating-promises
             response = await requestPromise({
@@ -171,8 +233,6 @@ export async function launchStatusDocumentProcessing(
             return;
         }
 
-        // To please the TypeScript compiler :(
-        response = response as requestPromise.FullResponse;
         await success(response);
     }
 }

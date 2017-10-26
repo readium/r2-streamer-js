@@ -1,7 +1,22 @@
-
 // in RENDERER: ipcRenderer.send()
 // in MAIN: ipcMain.on()
 export const R2_EVENT_TRY_LCP_PASS = "R2_EVENT_TRY_LCP_PASS";
+
+// in RENDERER: ipcRenderer.send()
+// in MAIN: ipcMain.on()
+export const R2_EVENT_LCP_LSD_RETURN = "R2_EVENT_LCP_LSD_RETURN";
+
+// in MAIN: event.sender.send(), where event is from the above ipcMain.on()
+// in RENDERER: ipcRenderer.on()
+export const R2_EVENT_LCP_LSD_RETURN_RES = "R2_EVENT_LCP_LSD_RETURN_RES";
+
+// in RENDERER: ipcRenderer.send()
+// in MAIN: ipcMain.on()
+export const R2_EVENT_LCP_LSD_RENEW = "R2_EVENT_LCP_LSD_RENEW";
+
+// in MAIN: event.sender.send(), where event is from the above ipcMain.on()
+// in RENDERER: ipcRenderer.on()
+export const R2_EVENT_LCP_LSD_RENEW_RES = "R2_EVENT_LCP_LSD_RENEW_RES";
 
 // in MAIN: event.sender.send(), where event is from the above ipcMain.on()
 // in RENDERER: ipcRenderer.on()

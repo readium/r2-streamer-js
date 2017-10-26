@@ -82,13 +82,11 @@ async function createElectronBrowserWindow(publicationFilePath: string, publicat
     // const fileName = path.basename(publicationFilePath);
     // const ext = path.extname(fileName).toLowerCase();
 
-    let publication: Publication | undefined;
+    let publication: Publication;
     try {
         publication = await _publicationsServer.loadOrGetCachedPublication(publicationFilePath);
     } catch (err) {
         debug(err);
-    }
-    if (!publication) {
         return;
     }
 
@@ -182,10 +180,14 @@ app.on("ready", () => {
 
     // tslint:disable-next-line:no-floating-promises
     (async () => {
-        _publicationsFilePaths = await filehound.create()
-            .paths(DEFAULT_BOOK_PATH)
-            .ext([".epub", ".epub3", ".cbz", ".lcpl"])
-            .find();
+        try {
+            _publicationsFilePaths = await filehound.create()
+                .paths(DEFAULT_BOOK_PATH)
+                .ext([".epub", ".epub3", ".cbz", ".lcpl"])
+                .find();
+        } catch (err) {
+            debug(err);
+        }
         debug(_publicationsFilePaths);
 
         _publicationsServer = new Server({
@@ -193,7 +195,7 @@ app.on("ready", () => {
             disableReaders: false,
         });
 
-        installLcpHandler(_publicationsServer);
+        installLcpHandler(_publicationsServer, deviceIDManager);
 
         setupReadiumCSS(_publicationsServer, "dist/ReadiumCSS");
 
@@ -275,7 +277,11 @@ app.on("ready", () => {
 
         const pubPaths = _publicationsServer.addPublications(_publicationsFilePaths);
 
-        _publicationsServerPort = await portfinder.getPortPromise();
+        try {
+            _publicationsServerPort = await portfinder.getPortPromise();
+        } catch (err) {
+            debug(err);
+        }
         _publicationsRootUrl = _publicationsServer.start(_publicationsServerPort);
 
         _publicationsUrls = pubPaths.map((pubPath) => {
@@ -447,7 +453,7 @@ async function openFileDownload(filePath: string) {
     const filename = path.basename(filePath);
     const destFileName = filename + ".epub";
     if (ext === ".lcpl") {
-        let epubFilePath: string[] | undefined;
+        let epubFilePath: string[];
         try {
             epubFilePath = await downloadFromLCPL(filePath, dir, destFileName);
         } catch (err) {
@@ -471,31 +477,30 @@ async function openFileDownload(filePath: string) {
                     debug("ok");
                 }
             });
+            return;
         }
 
-        if (epubFilePath) {
-            const result = epubFilePath as string[];
-            process.nextTick(async () => {
-                const detail = result[0] + " ---- [" + result[1] + "]";
-                const message = "LCP EPUB file download success [" + destFileName + "]";
-                const res = dialog.showMessageBox({
-                    buttons: ["&OK"],
-                    cancelId: 0,
-                    defaultId: 0,
-                    detail,
-                    message,
-                    noLink: true,
-                    normalizeAccessKeys: true,
-                    title: "Readium2 Electron streamer / navigator",
-                    type: "info",
-                });
-                if (res === 0) {
-                    debug("ok");
-                }
-
-                await openFile(result[0]);
+        const result = epubFilePath as string[];
+        process.nextTick(async () => {
+            const detail = result[0] + " ---- [" + result[1] + "]";
+            const message = "LCP EPUB file download success [" + destFileName + "]";
+            const res = dialog.showMessageBox({
+                buttons: ["&OK"],
+                cancelId: 0,
+                defaultId: 0,
+                detail,
+                message,
+                noLink: true,
+                normalizeAccessKeys: true,
+                title: "Readium2 Electron streamer / navigator",
+                type: "info",
             });
-        }
+            if (res === 0) {
+                debug("ok");
+            }
+
+            await openFile(result[0]);
+        });
     } else {
         await openFile(filePath);
     }

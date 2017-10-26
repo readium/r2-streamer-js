@@ -10,10 +10,13 @@ import * as request from "request";
 import * as requestPromise from "request-promise-native";
 import { JSON as TAJSON } from "ta-json";
 import { R2_EVENT_TRY_LCP_PASS, R2_EVENT_TRY_LCP_PASS_RES } from "../common/events";
+import { installLsdHandler } from "./lsd";
+import { IDeviceIDManager } from "./lsd-deviceid-manager";
 
 const debug = debug_("r2:electron:main:lcp");
 
-export function installLcpHandler(_publicationsServer: Server) {
+export function installLcpHandler(publicationsServer: Server, deviceIDManager: IDeviceIDManager) {
+    installLsdHandler(publicationsServer, deviceIDManager);
 
     ipcMain.on(R2_EVENT_TRY_LCP_PASS, async (
         event: any,
@@ -52,7 +55,7 @@ export function installLcpHandler(_publicationsServer: Server) {
     });
 
     async function tryLcpPass(publicationFilePath: string, lcpPass: string, isSha256Hex: boolean): Promise<boolean> {
-        const publication = _publicationsServer.cachedPublication(publicationFilePath);
+        const publication = publicationsServer.cachedPublication(publicationFilePath);
         if (!publication) {
             return false;
         }
@@ -69,7 +72,13 @@ export function installLcpHandler(_publicationsServer: Server) {
             // const lcpPassHex = new Buffer(lcpPass64, "base64").toString("utf8");
         }
 
-        const okay = await publication.LCP.setUserPassphrase(lcpPassHex);
+        let okay = false;
+        try {
+            okay = await publication.LCP.setUserPassphrase(lcpPassHex);
+        } catch (err) {
+            debug(err);
+            okay = false;
+        }
         if (!okay) {
             debug("FAIL publication.LCP.setUserPassphrase()");
         }
@@ -128,7 +137,7 @@ export async function downloadFromLCPL(filePath: string, dir: string, destFileNa
                         injectFileInZip(destPathTMP, destPathFINAL, filePath, zipEntryPath, zipError, doneCallback);
                     });
 
-                    // let responseData: Buffer | undefined;
+                    // let responseData: Buffer;
                     // try {
                     //     responseData = await streamToBufferPromise(response);
                     // } catch (err) {
@@ -150,7 +159,7 @@ export async function downloadFromLCPL(filePath: string, dir: string, destFileNa
                         .on("response", success)
                         .on("error", failure);
                 } else {
-                    let response: requestPromise.FullResponse | undefined;
+                    let response: requestPromise.FullResponse;
                     try {
                         // tslint:disable-next-line:await-promise no-floating-promises
                         response = await requestPromise({
@@ -164,8 +173,6 @@ export async function downloadFromLCPL(filePath: string, dir: string, destFileNa
                         return;
                     }
 
-                    // To please the TypeScript compiler :(
-                    response = response as requestPromise.FullResponse;
                     await success(response);
                 }
             }

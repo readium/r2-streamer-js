@@ -14,6 +14,10 @@ import { ipcRenderer } from "electron";
 import * as path from "path";
 import { JSON as TAJSON } from "ta-json";
 import {
+    R2_EVENT_LCP_LSD_RENEW,
+    R2_EVENT_LCP_LSD_RENEW_RES,
+    R2_EVENT_LCP_LSD_RETURN,
+    R2_EVENT_LCP_LSD_RETURN_RES,
     R2_EVENT_LINK,
     R2_EVENT_PAGE_TURN,
     R2_EVENT_PAGE_TURN_RES,
@@ -25,6 +29,8 @@ import {
     R2_EVENT_WEBVIEW_READY,
 } from "../common/events";
 import { R2_SESSION_WEBVIEW } from "../common/sessions";
+import { IStore } from "../common/store";
+import { StoreElectron } from "../common/store-electron";
 import { getURLQueryParams } from "./querystring";
 import {
     IRiotOptsLinkList,
@@ -50,9 +56,6 @@ import {
     IRiotTagMenuSelect,
     riotMountMenuSelect,
 } from "./riots/menuselect/index_";
-
-import { IStore } from "../common/store";
-import { StoreElectron } from "../common/store-electron";
 
 const electronStore: IStore = new StoreElectron("readium2-navigator", {
     basicLinkTitles: true,
@@ -591,10 +594,32 @@ window.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    const buttonLSDRenew = document.getElementById("buttonLSDRenew") as HTMLElement;
+    buttonLSDRenew.addEventListener("click", () => {
+        ipcRenderer.send(R2_EVENT_LCP_LSD_RENEW, pathDecoded, ""); // no explicit end date
+    });
+
+    const buttonLSDReturn = document.getElementById("buttonLSDReturn") as HTMLElement;
+    buttonLSDReturn.addEventListener("click", () => {
+        ipcRenderer.send(R2_EVENT_LCP_LSD_RETURN, pathDecoded);
+    });
+
     // const buttonDevTools = document.getElementById("buttonDevTools") as HTMLElement;
     //     buttonDevTools.addEventListener("click", () => {
     //         ipcRenderer.send(R2_EVENT_DEVTOOLS, "test");
     //     });
+});
+
+ipcRenderer.on(R2_EVENT_LCP_LSD_RENEW_RES, (_event: any, okay: boolean, msg: string) => {
+    console.log("R2_EVENT_LCP_LSD_RENEW_RES");
+    console.log(okay);
+    console.log(msg);
+});
+
+ipcRenderer.on(R2_EVENT_LCP_LSD_RETURN_RES, (_event: any, okay: boolean, msg: string) => {
+    console.log("R2_EVENT_LCP_LSD_RETURN_RES");
+    console.log(okay);
+    console.log(msg);
 });
 
 const saveReadingLocation = (doc: string, loc: string) => {
@@ -984,13 +1009,11 @@ function startNavigatorExperiment() {
     // tslint:disable-next-line:no-floating-promises
     (async () => {
 
-        let response: Response | undefined;
+        let response: Response;
         try {
             response = await fetch(publicationJsonUrl);
         } catch (e) {
             console.log(e);
-        }
-        if (!response) {
             return;
         }
         if (!response.ok) {

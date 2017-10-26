@@ -8,7 +8,7 @@ import URITemplate = require("urijs/src/URITemplate");
 
 const debug = debug_("r2:electron:main:lsd");
 
-export async function lsdRegister(
+export async function lsdReturn(
     lsdJson: any,
     deviceIDManager: IDeviceIDManager): Promise<any> {
 
@@ -16,45 +16,28 @@ export async function lsdRegister(
         return Promise.reject("No LSD links!");
     }
 
-    const licenseRegister = lsdJson.links.find((link: any) => {
-        return link.rel === "register";
+    const licenseReturn = lsdJson.links.find((link: any) => {
+        return link.rel === "return";
     });
-    if (!licenseRegister) {
-        return Promise.reject("No LSD register link!");
+    if (!licenseReturn) {
+        return Promise.reject("No LSD return link!");
     }
 
     const deviceID = deviceIDManager.getDeviceID();
     const deviceNAME = deviceIDManager.getDeviceNAME();
 
-    let doRegister = false;
-    if (lsdJson.status === "ready") {
-        doRegister = true;
-    } else if (lsdJson.status === "active") {
-        const deviceIDForStatusDoc = deviceIDManager.checkDeviceID(lsdJson.id);
-        if (!deviceIDForStatusDoc) {
-            doRegister = true;
-        } else if (deviceIDForStatusDoc !== deviceID) {
-            debug("LSD registered device ID is different?");
-            // this should really never happen ... but let's ensure anyway.
-            doRegister = true;
-        }
-    }
+    let returnURL = licenseReturn.href;
+    if (licenseReturn.templated === true || licenseReturn.templated === "true") {
+        const urlTemplate = new URITemplate(returnURL);
+        returnURL = (urlTemplate as any).expand({ id: deviceID, name: deviceNAME }, { strict: true });
 
-    if (!doRegister) {
-        return Promise.reject("No need to LSD register.");
-    }
-
-    let registerURL = licenseRegister.href;
-    if (licenseRegister.templated === true || licenseRegister.templated === "true") {
-        const urlTemplate = new URITemplate(registerURL);
-        registerURL = (urlTemplate as any).expand({ id: deviceID, name: deviceNAME }, { strict: true });
-
-        // url = url.replace("{?id,name}", ""); // TODO: smarter regexp?
+        // url = url.replace("{?end,id,name}", ""); // TODO: smarter regexp?
         // url = new URI(url).setQuery("id", deviceID).setQuery("name", deviceNAME).toString();
     }
-    debug("REGISTER: " + registerURL);
+    debug("RETURN: " + returnURL);
 
     return new Promise<any>(async (resolve, reject) => {
+
         const failure = (err: any) => {
             reject(err);
         };
@@ -80,10 +63,6 @@ export async function lsdRegister(
             const responseJson = global.JSON.parse(responseStr);
             debug(responseJson);
 
-            if (responseJson.status === "active") {
-                deviceIDManager.recordDeviceID(responseJson.id);
-            }
-
             resolve(responseJson);
         };
 
@@ -95,10 +74,10 @@ export async function lsdRegister(
         // https://github.com/request/request-promise/issues/90
         const needsStreamingResponse = true;
         if (needsStreamingResponse) {
-            request.post({
+            request.put({
                 headers,
-                method: "POST",
-                uri: registerURL,
+                method: "PUT",
+                uri: returnURL,
             })
                 .on("response", success)
                 .on("error", failure);
@@ -108,9 +87,9 @@ export async function lsdRegister(
                 // tslint:disable-next-line:await-promise no-floating-promises
                 response = await requestPromise({
                     headers,
-                    method: "POST",
+                    method: "PUT",
                     resolveWithFullResponse: true,
-                    uri: registerURL,
+                    uri: returnURL,
                 });
             } catch (err) {
                 failure(err);
