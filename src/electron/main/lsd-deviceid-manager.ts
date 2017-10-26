@@ -1,16 +1,12 @@
 import * as debug_ from "debug";
 import * as uuid from "uuid";
 
-import ElectronStore = require("electron-store");
+import { IStore } from "../common/store";
+import { StoreElectron } from "../common/store-electron";
+
+export const electronStoreLSD: IStore = new StoreElectron("readium2-navigator-lsd", {});
 
 const debug = debug_("r2:electron:main:lsd");
-
-const defaultsLSD = {
-};
-export const electronStoreLSD = new ElectronStore({
-    defaults: defaultsLSD,
-    name: "readium2-navigator-lsd",
-});
 
 const LSD_STORE_DEVICEID_ENTRY_PREFIX = "deviceID_";
 

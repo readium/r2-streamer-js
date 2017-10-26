@@ -1,7 +1,6 @@
 import SystemFonts = require("system-font-families");
 
 import debounce = require("debounce");
-import ElectronStore = require("electron-store");
 import URI = require("urijs");
 
 import { encodeURIComponent_RFC3986 } from "@r2-streamer-js/_utils/http/UrlUtils";
@@ -52,7 +51,22 @@ import {
     riotMountMenuSelect,
 } from "./riots/menuselect/index_";
 
-// import { electronStoreLSD } from "../main/lsd";
+import { IStore } from "../common/store";
+import { StoreElectron } from "../common/store-electron";
+
+const electronStore: IStore = new StoreElectron("readium2-navigator", {
+    basicLinkTitles: true,
+    styling: {
+        dark: false,
+        font: "DEFAULT",
+        invert: false,
+        night: false,
+        readiumcss: false,
+        sepia: false,
+    },
+});
+
+const electronStoreLCP: IStore = new StoreElectron("readium2-navigator-lcp", {});
 
 // console.log(window.location);
 // console.log(document.baseURI);
@@ -77,31 +91,7 @@ const pathFileName = pathDecoded.substr(
 // tslint:disable-next-line:no-string-literal
 const lcpHint = queryParams["lcpHint"];
 
-const defaultsStyling = {
-    dark: false,
-    font: "DEFAULT",
-    invert: false,
-    night: false,
-    readiumcss: false,
-    sepia: false,
-};
-const defaults = {
-    basicLinkTitles: true,
-    styling: defaultsStyling,
-};
-const electronStore = new ElectronStore({
-    defaults,
-    name: "readium2-navigator",
-});
-
-const defaultsLCP = {
-};
-const electronStoreLCP = new ElectronStore({
-    defaults: defaultsLCP,
-    name: "readium2-navigator-lcp",
-});
-
-(electronStore as any).onDidChange("styling.night", (newValue: any, oldValue: any) => {
+electronStore.onChanged("styling.night", (newValue: any, oldValue: any) => {
     if (typeof newValue === "undefined" || typeof oldValue === "undefined") {
         return;
     }
@@ -150,7 +140,7 @@ const readiumCssOnOff = debounce(() => {
     _webview2.send(R2_EVENT_READIUMCSS, str); // .getWebContents()
 }, 500);
 
-(electronStore as any).onDidChange("styling.readiumcss", (newValue: any, oldValue: any) => {
+electronStore.onChanged("styling.readiumcss", (newValue: any, oldValue: any) => {
     if (typeof newValue === "undefined" || typeof oldValue === "undefined") {
         return;
     }
@@ -167,7 +157,7 @@ const readiumCssOnOff = debounce(() => {
     }
 });
 
-(electronStore as any).onDidChange("basicLinkTitles", (newValue: any, oldValue: any) => {
+electronStore.onChanged("basicLinkTitles", (newValue: any, oldValue: any) => {
     if (typeof newValue === "undefined" || typeof oldValue === "undefined") {
         return;
     }
@@ -333,7 +323,7 @@ const initFontSelector = () => {
         electronStore.set("styling.font", val);
     });
 
-    (electronStore as any).onDidChange("styling.font", (newValue: any, oldValue: any) => {
+    electronStore.onChanged("styling.font", (newValue: any, oldValue: any) => {
         if (typeof newValue === "undefined" || typeof oldValue === "undefined") {
             return;
         }
@@ -344,7 +334,7 @@ const initFontSelector = () => {
         readiumCssOnOff();
     });
 
-    (electronStore as any).onDidChange("styling.readiumcss", (newValue: any, oldValue: any) => {
+    electronStore.onChanged("styling.readiumcss", (newValue: any, oldValue: any) => {
         if (typeof newValue === "undefined" || typeof oldValue === "undefined") {
             return;
         }
@@ -549,7 +539,8 @@ window.addEventListener("DOMContentLoaded", () => {
     const buttonClearSettings = document.getElementById("buttonClearSettings") as HTMLElement;
     buttonClearSettings.addEventListener("click", () => {
         // electronStore.clear();
-        electronStore.store = defaults;
+        // electronStore.store = electronStore.getDefaults();
+        electronStore.set(undefined, electronStore.getDefaults());
 
         drawer.open = false;
         setTimeout(() => {
@@ -571,7 +562,7 @@ window.addEventListener("DOMContentLoaded", () => {
     const buttonClearSettingsStyle = document.getElementById("buttonClearSettingsStyle") as HTMLElement;
     buttonClearSettingsStyle.addEventListener("click", () => {
 
-        electronStore.set("styling", defaultsStyling);
+        electronStore.set("styling", electronStore.getDefaults().styling);
 
         drawer.open = false;
         setTimeout(() => {
@@ -592,9 +583,12 @@ window.addEventListener("DOMContentLoaded", () => {
 
     const buttonOpenSettings = document.getElementById("buttonOpenSettings") as HTMLElement;
     buttonOpenSettings.addEventListener("click", () => {
-        electronStore.openInEditor();
-        electronStoreLCP.openInEditor();
-        // electronStoreLSD.openInEditor();
+        if ((electronStore as any).reveal) {
+            (electronStore as any).reveal();
+        }
+        if ((electronStoreLCP as any).reveal) {
+            (electronStoreLCP as any).reveal();
+        }
     });
 
     // const buttonDevTools = document.getElementById("buttonDevTools") as HTMLElement;
@@ -1075,7 +1069,7 @@ function startNavigatorExperiment() {
             };
             const tag = riotMountLinkTree("#reader_controls_TOC", opts)[0] as IRiotTagLinkTree;
 
-            (electronStore as any).onDidChange("basicLinkTitles", (newValue: any, oldValue: any) => {
+            electronStore.onChanged("basicLinkTitles", (newValue: any, oldValue: any) => {
                 if (typeof newValue === "undefined" || typeof oldValue === "undefined") {
                     return;
                 }
@@ -1091,7 +1085,7 @@ function startNavigatorExperiment() {
             };
             const tag = riotMountLinkList("#reader_controls_PAGELIST", opts)[0] as IRiotTagLinkList;
 
-            (electronStore as any).onDidChange("basicLinkTitles", (newValue: any, oldValue: any) => {
+            electronStore.onChanged("basicLinkTitles", (newValue: any, oldValue: any) => {
                 if (typeof newValue === "undefined" || typeof oldValue === "undefined") {
                     return;
                 }
@@ -1138,7 +1132,7 @@ function startNavigatorExperiment() {
             };
             const tag = riotMountLinkListGroup("#reader_controls_LANDMARKS", opts)[0] as IRiotTagLinkListGroup;
 
-            (electronStore as any).onDidChange("basicLinkTitles", (newValue: any, oldValue: any) => {
+            electronStore.onChanged("basicLinkTitles", (newValue: any, oldValue: any) => {
                 if (typeof newValue === "undefined" || typeof oldValue === "undefined") {
                     return;
                 }
