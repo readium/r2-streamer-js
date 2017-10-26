@@ -120,7 +120,7 @@ export class Zip2 extends Zip {
 
                         // debug(filePath);
                         // debug(res.headers);
-                        let buffer: Buffer | undefined;
+                        let buffer: Buffer;
                         try {
                             buffer = await streamToBufferPromise(ress);
                         } catch (err) {
@@ -177,7 +177,7 @@ export class Zip2 extends Zip {
                             .on("response", success_)
                             .on("error", failure_);
                     } else {
-                        let ress: requestPromise.FullResponse | undefined;
+                        let ress: requestPromise.FullResponse;
                         try {
                             // tslint:disable-next-line:await-promise no-floating-promises
                             ress = await requestPromise({
@@ -191,8 +191,6 @@ export class Zip2 extends Zip {
                             return;
                         }
 
-                        // To please the TypeScript compiler :(
-                        ress = ress as requestPromise.FullResponse;
                         await success_(ress);
                     }
 
@@ -251,7 +249,7 @@ export class Zip2 extends Zip {
             } else {
                 // TODO: instead of a HEAD request, if not supported then
                 // GET with immediate req.abort() in the response callback
-                let res: requestPromise.FullResponse | undefined;
+                let res: requestPromise.FullResponse;
                 try {
                     // tslint:disable-next-line:await-promise no-floating-promises
                     res = await requestPromise({
@@ -265,8 +263,6 @@ export class Zip2 extends Zip {
                     return;
                 }
 
-                // To please the TypeScript compiler :(
-                res = res as requestPromise.FullResponse;
                 await success(res);
             }
         });

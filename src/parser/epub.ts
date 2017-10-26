@@ -53,33 +53,34 @@ const reflowableMeta = "reflowable";
 export const mediaOverlayURLPath = "media-overlay.json";
 export const mediaOverlayURLParam = "resource";
 
-export const addCoverDimensions = async (publication: Publication, coverLink: Link): Promise<void> => {
+export const addCoverDimensions = async (publication: Publication, coverLink: Link) => {
 
     const zipInternal = publication.findFromInternal("zip");
     if (zipInternal) {
         const zip = zipInternal.Value as IZip;
         if (zip.hasEntry(coverLink.Href)) {
-            let zipStream: IStreamAndLength | undefined;
+            let zipStream: IStreamAndLength;
             try {
                 zipStream = await zip.entryStreamPromise(coverLink.Href);
+            } catch (err) {
+                debug(err);
+                return;
+            }
 
-                let zipData: Buffer | undefined;
-                try {
-                    zipData = await streamToBufferPromise(zipStream.stream);
+            let zipData: Buffer;
+            try {
+                zipData = await streamToBufferPromise(zipStream.stream);
 
-                    const imageInfo = sizeOf(zipData);
-                    if (imageInfo) {
-                        coverLink.Width = imageInfo.width;
-                        coverLink.Height = imageInfo.height;
+                const imageInfo = sizeOf(zipData);
+                if (imageInfo) {
+                    coverLink.Width = imageInfo.width;
+                    coverLink.Height = imageInfo.height;
 
-                        if (coverLink.TypeLink &&
-                            coverLink.TypeLink.replace("jpeg", "jpg").replace("+xml", "")
-                            !== ("image/" + imageInfo.type)) {
-                                debug(`Wrong image type? ${coverLink.TypeLink} -- ${imageInfo.type}`);
-                        }
+                    if (coverLink.TypeLink &&
+                        coverLink.TypeLink.replace("jpeg", "jpg").replace("+xml", "")
+                        !== ("image/" + imageInfo.type)) {
+                        debug(`Wrong image type? ${coverLink.TypeLink} -- ${imageInfo.type}`);
                     }
-                } catch (err) {
-                    debug(err);
                 }
             } catch (err) {
                 debug(err);
@@ -89,8 +90,13 @@ export const addCoverDimensions = async (publication: Publication, coverLink: Li
 };
 
 export async function EpubParsePromise(filePath: string): Promise<Publication> {
-
-    const zip = await zipLoadPromise(filePath);
+    let zip: IZip;
+    try {
+        zip = await zipLoadPromise(filePath);
+    } catch (err) {
+        debug(err);
+        return Promise.reject(err);
+    }
 
     if (!zip.hasEntries()) {
         return Promise.reject("EPUB zip empty");
@@ -110,9 +116,22 @@ export async function EpubParsePromise(filePath: string): Promise<Publication> {
     let lcpl: LCP | undefined;
     const lcplZipPath = "META-INF/license.lcpl";
     if (zip.hasEntry(lcplZipPath)) {
-        const lcplZipStream_ = await zip.entryStreamPromise(lcplZipPath);
+        let lcplZipStream_: IStreamAndLength;
+        try {
+            lcplZipStream_ = await zip.entryStreamPromise(lcplZipPath);
+        } catch (err) {
+            debug(err);
+            return Promise.reject(err);
+        }
         const lcplZipStream = lcplZipStream_.stream;
-        const lcplZipData = await streamToBufferPromise(lcplZipStream);
+
+        let lcplZipData: Buffer;
+        try {
+            lcplZipData = await streamToBufferPromise(lcplZipStream);
+        } catch (err) {
+            debug(err);
+            return Promise.reject(err);
+        }
 
         const lcplStr = lcplZipData.toString("utf8");
         const lcplJson = global.JSON.parse(lcplStr);
@@ -120,12 +139,12 @@ export async function EpubParsePromise(filePath: string): Promise<Publication> {
         lcpl = TAJSON.deserialize<LCP>(lcplJson, LCP);
         lcpl.ZipPath = lcplZipPath;
         lcpl.JsonSource = lcplStr;
+        lcpl.init();
 
         // breakLength: 100  maxArrayLength: undefined
         // console.log(util.inspect(lcpl,
         //     { showHidden: false, depth: 1000, colors: true, customInspect: true }));
 
-        lcpl.init();
         publication.LCP = lcpl;
 
         // // breakLength: 100  maxArrayLength: undefined
@@ -139,9 +158,24 @@ export async function EpubParsePromise(filePath: string): Promise<Publication> {
     let encryption: Encryption | undefined;
     const encZipPath = "META-INF/encryption.xml";
     if (zip.hasEntry(encZipPath)) {
-        const encryptionXmlZipStream_ = await zip.entryStreamPromise(encZipPath);
+
+        let encryptionXmlZipStream_: IStreamAndLength;
+        try {
+            encryptionXmlZipStream_ = await zip.entryStreamPromise(encZipPath);
+        } catch (err) {
+            debug(err);
+            return Promise.reject(err);
+        }
         const encryptionXmlZipStream = encryptionXmlZipStream_.stream;
-        const encryptionXmlZipData = await streamToBufferPromise(encryptionXmlZipStream);
+
+        let encryptionXmlZipData: Buffer;
+        try {
+            encryptionXmlZipData = await streamToBufferPromise(encryptionXmlZipStream);
+        } catch (err) {
+            debug(err);
+            return Promise.reject(err);
+        }
+
         const encryptionXmlStr = encryptionXmlZipData.toString("utf8");
         const encryptionXmlDoc = new xmldom.DOMParser().parseFromString(encryptionXmlStr);
 
@@ -154,9 +188,24 @@ export async function EpubParsePromise(filePath: string): Promise<Publication> {
     }
 
     const containerZipPath = "META-INF/container.xml";
-    const containerXmlZipStream_ = await zip.entryStreamPromise(containerZipPath);
+
+    let containerXmlZipStream_: IStreamAndLength;
+    try {
+        containerXmlZipStream_ = await zip.entryStreamPromise(containerZipPath);
+    } catch (err) {
+        debug(err);
+        return Promise.reject(err);
+    }
     const containerXmlZipStream = containerXmlZipStream_.stream;
-    const containerXmlZipData = await streamToBufferPromise(containerXmlZipStream);
+
+    let containerXmlZipData: Buffer;
+    try {
+        containerXmlZipData = await streamToBufferPromise(containerXmlZipStream);
+    } catch (err) {
+        debug(err);
+        return Promise.reject(err);
+    }
+
     const containerXmlStr = containerXmlZipData.toString("utf8");
     const containerXmlDoc = new xmldom.DOMParser().parseFromString(containerXmlStr);
 
@@ -177,14 +226,26 @@ export async function EpubParsePromise(filePath: string): Promise<Publication> {
 
     // let timeBegin = process.hrtime();
 
-    const opfZipStream_ = await zip.entryStreamPromise(rootfile.Path);
+    let opfZipStream_: IStreamAndLength;
+    try {
+        opfZipStream_ = await zip.entryStreamPromise(rootfile.Path);
+    } catch (err) {
+        debug(err);
+        return Promise.reject(err);
+    }
     const opfZipStream = opfZipStream_.stream;
 
     // const timeElapsed1 = process.hrtime(timeBegin);
     // debug(`1) ${timeElapsed1[0]} seconds + ${timeElapsed1[1]} nanoseconds`);
     // timeBegin = process.hrtime();
 
-    const opfZipData = await streamToBufferPromise(opfZipStream);
+    let opfZipData: Buffer;
+    try {
+        opfZipData = await  streamToBufferPromise(opfZipStream);
+    } catch (err) {
+        debug(err);
+        return Promise.reject(err);
+    }
 
     // debug(`${opfZipData.length} bytes`);
 
@@ -244,9 +305,24 @@ export async function EpubParsePromise(filePath: string): Promise<Publication> {
             //     + ncxManItem.Href
             //     + " -- "
             //     + ncxFilePath);
-            const ncxZipStream_ = await zip.entryStreamPromise(ncxFilePath);
+
+            let ncxZipStream_: IStreamAndLength;
+            try {
+                ncxZipStream_ = await zip.entryStreamPromise(ncxFilePath);
+            } catch (err) {
+                debug(err);
+                return Promise.reject(err);
+            }
             const ncxZipStream = ncxZipStream_.stream;
-            const ncxZipData = await streamToBufferPromise(ncxZipStream);
+
+            let ncxZipData: Buffer;
+            try {
+                ncxZipData = await streamToBufferPromise(ncxZipStream);
+            } catch (err) {
+                debug(err);
+                return Promise.reject(err);
+            }
+
             const ncxStr = ncxZipData.toString("utf8");
             const ncxDoc = new xmldom.DOMParser().parseFromString(ncxStr);
             ncx = XML.deserialize<NCX>(ncxDoc, NCX);
@@ -343,8 +419,7 @@ export async function EpubParsePromise(filePath: string): Promise<Publication> {
 // }
 
 const fillMediaOverlay =
-    async (publication: Publication, rootfile: Rootfile, opf: OPF, zip: IZip)
-        : Promise<void> => {
+    async (publication: Publication, rootfile: Rootfile, opf: OPF, zip: IZip) => {
 
         if (!publication.Resources) {
             return;
@@ -418,9 +493,23 @@ const fillMediaOverlay =
                 }
             });
 
-            const smilZipStream_ = await zip.entryStreamPromise(smilFilePath);
+            let smilZipStream_: IStreamAndLength;
+            try {
+                smilZipStream_ = await zip.entryStreamPromise(smilFilePath);
+            } catch (err) {
+                debug(err);
+                return Promise.reject(err);
+            }
             const smilZipStream = smilZipStream_.stream;
-            const smilZipData = await streamToBufferPromise(smilZipStream);
+
+            let smilZipData: Buffer;
+            try {
+                smilZipData = await streamToBufferPromise(smilZipStream);
+            } catch (err) {
+                debug(err);
+                return Promise.reject(err);
+            }
+
             const smilStr = smilZipData.toString("utf8");
             const smilXmlDoc = new xmldom.DOMParser().parseFromString(smilStr);
             const smil = XML.deserialize<SMIL>(smilXmlDoc, SMIL);
@@ -748,8 +837,7 @@ const addTitle = (publication: Publication, rootfile: Rootfile, opf: OPF) => {
 };
 
 const addRelAndPropertiesToLink =
-    async (publication: Publication, link: Link, linkEpub: Manifest, rootfile: Rootfile, opf: OPF)
-        : Promise<void> => {
+    async (publication: Publication, link: Link, linkEpub: Manifest, rootfile: Rootfile, opf: OPF) => {
 
         if (linkEpub.Properties) {
             await addToLinkFromProperties(publication, link, linkEpub.Properties);
@@ -760,8 +848,7 @@ const addRelAndPropertiesToLink =
         }
     };
 
-const addToLinkFromProperties = async (publication: Publication, link: Link, propertiesString: string)
-    : Promise<void> => {
+const addToLinkFromProperties = async (publication: Publication, link: Link, propertiesString: string) => {
 
     const properties = propertiesString.split(" ");
 
@@ -981,8 +1068,7 @@ const addRendition = (publication: Publication, _rootfile: Rootfile, opf: OPF) =
     }
 };
 
-const fillSpineAndResource = async (publication: Publication, rootfile: Rootfile, opf: OPF)
-    : Promise<void> => {
+const fillSpineAndResource = async (publication: Publication, rootfile: Rootfile, opf: OPF) => {
 
     if (opf.Spine && opf.Spine.Items && opf.Spine.Items.length) {
         // no forEach(), because of await/async within the iteration body
@@ -991,11 +1077,12 @@ const fillSpineAndResource = async (publication: Publication, rootfile: Rootfile
 
             if (!item.Linear || item.Linear === "yes") {
 
-                let linkItem: Link | undefined;
+                let linkItem: Link;
                 try {
                     linkItem = await findInManifestByID(publication, rootfile, opf, item.IDref);
                 } catch (err) {
                     debug(err);
+                    continue;
                 }
 
                 if (linkItem && linkItem.Href) {
@@ -1199,8 +1286,7 @@ const fillCalibreSerieInfo = (publication: Publication, _rootfile: Rootfile, opf
     }
 };
 
-const fillTOCFromNavDoc = async (publication: Publication, _rootfile: Rootfile, _opf: OPF, zip: IZip)
-    : Promise<void> => {
+const fillTOCFromNavDoc = async (publication: Publication, _rootfile: Rootfile, _opf: OPF, zip: IZip) => {
 
     const navLink = publication.GetNavDoc();
     if (!navLink) {
@@ -1211,9 +1297,24 @@ const fillTOCFromNavDoc = async (publication: Publication, _rootfile: Rootfile, 
     if (!zip.hasEntry(navDocFilePath)) {
         return;
     }
-    const navDocZipStream_ = await zip.entryStreamPromise(navDocFilePath);
+
+    let navDocZipStream_: IStreamAndLength;
+    try {
+        navDocZipStream_ = await zip.entryStreamPromise(navDocFilePath);
+    } catch (err) {
+        debug(err);
+        return Promise.reject(err);
+    }
     const navDocZipStream = navDocZipStream_.stream;
-    const navDocZipData = await streamToBufferPromise(navDocZipStream);
+
+    let navDocZipData: Buffer;
+    try {
+        navDocZipData = await streamToBufferPromise(navDocZipStream);
+    } catch (err) {
+        debug(err);
+        return Promise.reject(err);
+    }
+
     const navDocStr = navDocZipData.toString("utf8");
     const navXmlDoc = new xmldom.DOMParser().parseFromString(navDocStr);
 
@@ -1330,8 +1431,7 @@ const fillTOCFromNavDocWithOL = (select: any, olElems: Element[], node: Link[], 
     });
 };
 
-const addCoverRel = async (publication: Publication, rootfile: Rootfile, opf: OPF)
-    : Promise<void> => {
+const addCoverRel = async (publication: Publication, rootfile: Rootfile, opf: OPF) => {
 
     let coverID: string | undefined;
 
@@ -1346,11 +1446,12 @@ const addCoverRel = async (publication: Publication, rootfile: Rootfile, opf: OP
     }
 
     if (coverID) {
-        let manifestInfo: Link | undefined;
+        let manifestInfo: Link;
         try {
             manifestInfo = await findInManifestByID(publication, rootfile, opf, coverID);
         } catch (err) {
             debug(err);
+            return;
         }
         if (manifestInfo && manifestInfo.Href && publication.Resources && publication.Resources.length) {
 

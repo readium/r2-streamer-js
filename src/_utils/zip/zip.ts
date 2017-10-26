@@ -26,13 +26,12 @@ export abstract class Zip implements IZip {
 
     public async entryStreamRangePromise(entryPath: string, begin: number, end: number): Promise<IStreamAndLength> {
 
-        let streamAndLength: IStreamAndLength | undefined;
+        let streamAndLength: IStreamAndLength;
         try {
             streamAndLength = await this.entryStreamPromise(entryPath);
         } catch (err) {
             console.log(err);
-            // throw new Error(err);
-            throw err;
+            return Promise.reject(err);
         }
         // necessary for TypeScript compiler :(
         streamAndLength = streamAndLength as IStreamAndLength;

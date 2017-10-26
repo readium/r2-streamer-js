@@ -56,7 +56,7 @@ export class HttpReadableStream extends Readable {
             // debug(`HTTP response content-range: ${res.headers["content-range"]}`);
             // debug(`HTTP response content-length: ${res.headers["content-length"]}`);
 
-            let buffer: Buffer | undefined;
+            let buffer: Buffer;
             try {
                 buffer = await streamToBufferPromise(res);
             } catch (err) {
@@ -87,7 +87,7 @@ export class HttpReadableStream extends Readable {
                 .on("error", failure);
         } else {
             (async () => {
-                let res: requestPromise.FullResponse | undefined;
+                let res: requestPromise.FullResponse;
                 try {
                     // tslint:disable-next-line:await-promise no-floating-promises
                     res = await requestPromise({
@@ -101,8 +101,6 @@ export class HttpReadableStream extends Readable {
                     return;
                 }
 
-                // To please the TypeScript compiler :(
-                res = res as requestPromise.FullResponse;
                 await success(res);
             })();
         }

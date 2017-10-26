@@ -78,7 +78,7 @@ export function serverOPDS(_server: Server, topRouter: express.Application) {
                 return;
             }
 
-            let responseData: Buffer | undefined;
+            let responseData: Buffer;
             try {
                 responseData = await streamToBufferPromise(response);
             } catch (err) {
@@ -242,7 +242,7 @@ export function serverOPDS(_server: Server, topRouter: express.Application) {
                 .on("response", success)
                 .on("error", failure);
         } else {
-            let response: requestPromise.FullResponse | undefined;
+            let response: requestPromise.FullResponse;
             try {
                 // tslint:disable-next-line:await-promise no-floating-promises
                 response = await requestPromise({
@@ -256,8 +256,6 @@ export function serverOPDS(_server: Server, topRouter: express.Application) {
                 return;
             }
 
-            // To please the TypeScript compiler :(
-            response = response as requestPromise.FullResponse;
             await success(response);
         }
     });

@@ -79,7 +79,7 @@ export class HttpZipReader implements RandomAccessReader {
                 // //     debug("END");
                 // // });
             } else {
-                let buffer: Buffer | undefined;
+                let buffer: Buffer;
                 try {
                     buffer = await streamToBufferPromise(res);
                 } catch (err) {
@@ -112,7 +112,7 @@ export class HttpZipReader implements RandomAccessReader {
         } else {
             // tslint:disable-next-line:no-floating-promises
             (async () => {
-                let res: requestPromise.FullResponse | undefined;
+                let res: requestPromise.FullResponse;
                 try {
                     // tslint:disable-next-line:await-promise no-floating-promises
                     res = await requestPromise({
@@ -126,8 +126,6 @@ export class HttpZipReader implements RandomAccessReader {
                     return;
                 }
 
-                // To please the TypeScript compiler :(
-                res = res as requestPromise.FullResponse;
                 await success(res);
             })()
                 // .then(() => {

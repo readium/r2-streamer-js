@@ -290,9 +290,7 @@ export class Server {
                 publication = await PublicationParsePromise(filePath);
             } catch (err) {
                 debug(err);
-                // return Promise.reject(err);
-                // return Promise.reject(new Error(err));
-                throw new Error(err);
+                return Promise.reject(err);
             }
 
             this.cachePublication(filePath, publication);

@@ -140,8 +140,12 @@ export class TransformerLCP implements ITransformer {
                 cypherBlockPadding = link.Properties.Encrypted.CypherBlockPadding;
             } else {
                 // const timeBegin = process.hrtime();
-
-                cryptoInfo = await this.getDecryptedSizeStream(publication, link, stream);
+                try {
+                    cryptoInfo = await this.getDecryptedSizeStream(publication, link, stream);
+                } catch (err) {
+                    debug(err);
+                    return Promise.reject(err);
+                }
                 plainTextSize = cryptoInfo.length;
                 cypherBlockPadding = cryptoInfo.padding;
 
@@ -149,7 +153,12 @@ export class TransformerLCP implements ITransformer {
                 link.Properties.Encrypted.DecryptedLengthBeforeInflate = plainTextSize;
                 link.Properties.Encrypted.CypherBlockPadding = cypherBlockPadding;
 
-                stream = await stream.reset();
+                try {
+                    stream = await stream.reset();
+                } catch (err) {
+                    debug(err);
+                    return Promise.reject(err);
+                }
 
                 // const timeElapsed = process.hrtime(timeBegin);
                 // debug(`LCP transformStream() ---- getDecryptedSizeStream():` +
@@ -204,14 +213,25 @@ export class TransformerLCP implements ITransformer {
                 //     debug(err);
                 //     return Promise.reject("OUCH!");
                 // }
-                // stream = await stream.reset();
+                // try {
+                //     stream = await stream.reset();
+                // } catch (err) {
+                //     debug(err);
+                //     return Promise.reject(err);
+                // }
 
                 // debug("D1");
                 // debug(ivBuffer.length);
                 // debug(ivBuffer.toString("hex"));
 
                 // ivBuffer = stream.stream.read(AES_BLOCK_SIZE) as Buffer;
-                ivBuffer = await readStream(stream.stream, AES_BLOCK_SIZE);
+
+                try {
+                    ivBuffer = await readStream(stream.stream, AES_BLOCK_SIZE);
+                } catch (err) {
+                    debug(err);
+                    return Promise.reject(err);
+                }
 
                 // debug("D2");
                 // debug(ivBuffer.length);
@@ -366,7 +386,18 @@ export class TransformerLCP implements ITransformer {
         const sal: IStreamAndLength = {
             length: l,
             reset: async () => {
-                const resetedStream = await stream.reset();
+
+                let resetedStream: IStreamAndLength;
+                try {
+                    resetedStream = await stream.reset();
+                } catch (err) {
+                    debug(err);
+                    return Promise.reject(err);
+                }
+                if (!resetedStream) {
+                    return Promise.reject("??");
+                }
+
                 return this.transformStream(
                     publication, link,
                     resetedStream,
@@ -407,7 +438,7 @@ export class TransformerLCP implements ITransformer {
             const cypherRangeStream = new RangeStream(readPos, readPos + TWO_AES_BLOCK_SIZE - 1, stream.length);
             stream.stream.pipe(cypherRangeStream);
 
-            // let buff: Buffer | undefined;
+            // let buff: Buffer;
             // try {
             //     buff = await streamToBufferPromise(cypherRangeStream);
             // } catch (err) {

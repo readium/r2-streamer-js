@@ -55,7 +55,7 @@ if (fs.existsSync(opdsJsonFilePath)) {
         // const ext = path.extname(fileName).toLowerCase();
 
         debug(`OPDS parsing: ${pathBase64Str}`);
-        let publication: Publication | undefined;
+        let publication: Publication;
         try {
             publication = await PublicationParsePromise(pathBase64Str);
         } catch (err) {

@@ -65,6 +65,8 @@ export class LCP {
     public ZipPath: string;
     public JsonSource: string;
 
+    public LSDJson: any;
+
     // JS impl
     public ContentKey: Buffer | undefined;
 

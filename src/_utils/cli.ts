@@ -47,7 +47,7 @@ const ext = path.extname(fileName).toLowerCase();
 // tslint:disable-next-line:no-floating-promises
 (async () => {
 
-    let publication: Publication | undefined;
+    let publication: Publication;
     try {
         publication = await PublicationParsePromise(filePath);
     } catch (err) {

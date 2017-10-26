@@ -479,7 +479,7 @@ export class TransformerLCPAlt extends TransformerLCP {
 
     //     const rangeStream = new RangeStream(readPosition, readPosition + toRead - 1, stream.length);
     //     stream.stream.pipe(rangeStream);
-    //     let buff: Buffer | undefined;
+    //     let buff: Buffer;
     //     try {
     //         buff = await streamToBufferPromise(rangeStream);
     //     } catch (err) {

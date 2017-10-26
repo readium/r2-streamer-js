@@ -77,7 +77,7 @@ export function serverMediaOverlays(server: Server, routerPathBase64: express.Ro
             // const fileName = path.basename(pathBase64Str);
             // const ext = path.extname(fileName).toLowerCase();
 
-            let publication: Publication | undefined;
+            let publication: Publication;
             try {
                 publication = await server.loadOrGetCachedPublication(pathBase64Str);
             } catch (err) {

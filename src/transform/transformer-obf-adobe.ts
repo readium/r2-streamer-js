@@ -16,8 +16,19 @@ export class TransformerObfAdobe implements ITransformer {
         _isPartialByteRangeRequest: boolean,
         _partialByteBegin: number, _partialByteEnd: number): Promise<IStreamAndLength> {
 
-        const data = await streamToBufferPromise(stream.stream);
-        const buff = await this.transformBuffer(publication, link, data);
+        let data: Buffer;
+        try {
+            data = await streamToBufferPromise(stream.stream);
+        } catch (err) {
+            return Promise.reject(err);
+        }
+
+        let buff: Buffer;
+        try {
+            buff = await this.transformBuffer(publication, link, data);
+        } catch (err) {
+            return Promise.reject(err);
+        }
 
         const sal: IStreamAndLength = {
             length: buff.length,
@@ -58,7 +69,7 @@ export class TransformerObfAdobe implements ITransformer {
     // public async getDecryptedSizeStream(
     //     publication: Publication, link: Link,
     //     stream: IStreamAndLength): Promise<number> {
-    //     let sal: IStreamAndLength | undefined;
+    //     let sal: IStreamAndLength;
     //     try {
     //         sal = await this.transformStream(publication, link, stream, false, 0, 0);
     //     } catch (err) {
@@ -69,7 +80,7 @@ export class TransformerObfAdobe implements ITransformer {
     // }
 
     // public async getDecryptedSizeBuffer(publication: Publication, link: Link, data: Buffer): Promise<number> {
-    //     let buff: Buffer | undefined;
+    //     let buff: Buffer;
     //     try {
     //         buff = await this.transformBuffer(publication, link, data);
     //     } catch (err) {

@@ -87,8 +87,8 @@ const filePathToTitle = (filePath: string): string => {
     return slugify(fileName, "_").replace(/[\.]/g, "_");
 };
 
-const comicRackMetadata = async (zip: IZip, entryName: string, publication: Publication): Promise<void> => {
-    let comicZipStream_: IStreamAndLength | undefined;
+const comicRackMetadata = async (zip: IZip, entryName: string, publication: Publication) => {
+    let comicZipStream_: IStreamAndLength;
     try {
         comicZipStream_ = await zip.entryStreamPromise(entryName);
     } catch (err) {
@@ -96,7 +96,7 @@ const comicRackMetadata = async (zip: IZip, entryName: string, publication: Publ
         return;
     }
     const comicZipStream = comicZipStream_.stream;
-    let comicZipData: Buffer | undefined;
+    let comicZipData: Buffer;
     try {
         comicZipData = await streamToBufferPromise(comicZipStream);
     } catch (err) {

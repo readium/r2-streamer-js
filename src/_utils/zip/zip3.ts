@@ -17,7 +17,7 @@ export class Zip3 extends Zip {
         }
 
         return new Promise<IZip>(async (resolve, reject) => {
-            let zip: any | undefined;
+            let zip: any;
             try {
                 zip = await unzipper.Open.file(filePath);
             } catch (err) {
@@ -33,7 +33,7 @@ export class Zip3 extends Zip {
     private static async loadPromiseHTTP(filePath: string): Promise<IZip> {
 
         return new Promise<IZip>(async (resolve, reject) => {
-            let zip: any | undefined;
+            let zip: any;
             try {
                 zip = await unzipper.Open.url(request.get,
                     {

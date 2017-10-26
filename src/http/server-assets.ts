@@ -48,7 +48,7 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
             // const fileName = path.basename(pathBase64Str);
             // const ext = path.extname(fileName).toLowerCase();
 
-            let publication: Publication | undefined;
+            let publication: Publication;
             try {
                 publication = await server.loadOrGetCachedPublication(pathBase64Str);
             } catch (err) {
@@ -177,7 +177,7 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
             }
 
             // debug(`${pathInZip} >> ${partialByteBegin}-${partialByteEnd}`);
-            let zipStream_: IStreamAndLength | undefined;
+            let zipStream_: IStreamAndLength;
             try {
                 zipStream_ = isPartialByteRangeRequest && !isEncrypted ?
                     await zip.entryStreamRangePromise(pathInZip, partialByteBegin, partialByteEnd) :
@@ -194,7 +194,7 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                 link) {
 
                 let decryptFail = false;
-                let transformedStream: IStreamAndLength | undefined;
+                let transformedStream: IStreamAndLength;
                 try {
                     transformedStream = await Transformers.tryStream(
                         publication, link,
@@ -202,6 +202,9 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                         isPartialByteRangeRequest, partialByteBegin, partialByteEnd);
                 } catch (err) {
                     debug(err);
+                    res.status(500).send("<html><body><p>Internal Server Error</p><p>"
+                        + err + "</p></body></html>");
+                    return;
                 }
                 if (transformedStream) {
                     zipStream_ = transformedStream;
@@ -227,7 +230,7 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                 zipStream_.length;
 
             if (isShow) {
-                let zipData: Buffer | undefined;
+                let zipData: Buffer;
                 try {
                     zipData = await streamToBufferPromise(zipStream_.stream);
                 } catch (err) {
@@ -284,7 +287,7 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                 res.end();
                 // } else if (zipStream_.length === 2) {
                 //     debug("===> BUFFER SEND (short stream)");
-                //     let zipData: Buffer | undefined;
+                //     let zipData: Buffer;
                 //     try {
                 //         zipData = await streamToBufferPromise(zipStream_.stream);
                 //     } catch (err) {
