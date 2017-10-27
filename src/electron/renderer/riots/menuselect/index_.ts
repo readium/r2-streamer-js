@@ -4,6 +4,7 @@
 export interface IRiotOptsMenuSelectItem {
     id: string;
     label: string;
+    style?: string;
 }
 export interface IRiotOptsMenuSelect {
     options: IRiotOptsMenuSelectItem[];

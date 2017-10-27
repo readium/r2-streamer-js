@@ -434,7 +434,10 @@ outline-style: none !important;
                             (font === "MODERN" ? "var(--RS__modernTf)" :
                                 (font === "SANS" ? "var(--RS__sansTf)" :
                                     (font === "HUMAN" ? "var(--RS__humanistTf)" :
-                                        (font ? font : "var(--RS__oldStyleTf)"))
+                                        (font === "MONO" ? "var(--RS__monospaceTf)" :
+                                            (font ? font : "var(--RS__oldStyleTf)")
+                                        )
+                                    )
                                 )
                             )
                         )
