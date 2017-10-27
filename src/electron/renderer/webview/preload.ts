@@ -3,9 +3,10 @@ import ResizeSensor = require("resize-sensor/ResizeSensor");
 
 import {
     DEBUG_VISUALS,
+    injectDefaultCSS,
     injectReadPosCSS,
-    injectSelectionAndFocusCSS,
-    readiumCSS } from "@r2-streamer-js/electron/renderer/webview/readium-css";
+    readiumCSS,
+} from "@r2-streamer-js/electron/renderer/webview/readium-css";
 import { ipcRenderer } from "electron";
 
 import {
@@ -293,6 +294,13 @@ const scrollToHashRaw = (firstCall: boolean) => {
             });
         }
 
+        // _hashElement.classList.add("readium2-hash");
+        // setTimeout(() => {
+        //     if (_hashElement) {
+        //         _hashElement.classList.remove("readium2-hash");
+        //     }
+        // }, 1000);
+
         return;
     } else {
         if (win.document.body) {
@@ -421,7 +429,7 @@ win.addEventListener("DOMContentLoaded", () => {
 
     resetInitialState();
 
-    injectSelectionAndFocusCSS();
+    injectDefaultCSS();
 
     if (DEBUG_VISUALS) {
         injectReadPosCSS();
