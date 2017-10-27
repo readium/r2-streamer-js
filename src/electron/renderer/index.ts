@@ -63,6 +63,7 @@ const electronStore: IStore = new StoreElectron("readium2-navigator", {
         align: "left",
         dark: false,
         font: "DEFAULT",
+        fontSize: "100%",
         invert: false,
         night: false,
         readiumcss: false,
@@ -130,6 +131,7 @@ const computeReadiumCssJsonMessage = (): string => {
         const align = electronStore.get("styling.align");
         const dark = electronStore.get("styling.dark");
         const font = electronStore.get("styling.font");
+        const fontSize = electronStore.get("styling.fontSize");
         const invert = electronStore.get("styling.invert");
         const night = electronStore.get("styling.night");
         const sepia = electronStore.get("styling.sepia");
@@ -137,6 +139,7 @@ const computeReadiumCssJsonMessage = (): string => {
             align,
             dark,
             font,
+            fontSize,
             invert,
             night,
             sepia,
@@ -157,10 +160,25 @@ const readiumCssOnOff = debounce(() => {
     _webview2.send(R2_EVENT_READIUMCSS, str); // .getWebContents()
 }, 500);
 
+// super hacky, but necessary :(
+// https://github.com/material-components/material-components-web/issues/1017#issuecomment-340068426
+function ensureSliderLayout() {
+    setTimeout(() => {
+        const fontSizeSelector = document.getElementById("fontSizeSelector") as HTMLElement;
+        (fontSizeSelector as any).mdcSlider.layout();
+    }, 100);
+}
+
 electronStore.onChanged("styling.readiumcss", (newValue: any, oldValue: any) => {
     if (typeof newValue === "undefined" || typeof oldValue === "undefined") {
         return;
     }
+    const stylingWrapper = document.getElementById("stylingWrapper") as HTMLElement;
+    stylingWrapper.style.display = newValue ? "block" : "none";
+    if (newValue) {
+        ensureSliderLayout();
+    }
+
     const readiumcssSwitch = document.getElementById("readiumcss_switch-input") as HTMLInputElement;
     readiumcssSwitch.checked = newValue;
 
@@ -294,6 +312,69 @@ function installKeyboardMouseFocusHandler() {
     });
 }
 
+const initFontSizeSelector = () => {
+
+    const fontSizeSelector = document.getElementById("fontSizeSelector") as HTMLElement;
+    const slider = new (window as any).mdc.slider.MDCSlider(fontSizeSelector);
+    (fontSizeSelector as any).mdcSlider = slider;
+
+    // const drawerElement = document.getElementById("drawer") as HTMLElement;
+    // const funcClose = () => {
+    //     drawerElement.removeEventListener("MDCTemporaryDrawer:close", funcClose);
+    //     console.log("MDCTemporaryDrawer:close");
+
+    //     const funcOpen = () => {
+    //         drawerElement.removeEventListener("MDCTemporaryDrawer:open", funcOpen);
+    //         console.log("MDCTemporaryDrawer:open");
+
+    //         setTimeout(() => {
+    //             console.log("SLIDER LAYOUT");
+    //             slider.layout();
+    //         }, 1000);
+    //     };
+    //     drawerElement.addEventListener("MDCTemporaryDrawer:open", funcOpen);
+    // };
+    // drawerElement.addEventListener("MDCTemporaryDrawer:close", funcClose);
+
+    slider.disabled = !electronStore.get("styling.readiumcss");
+    const val = electronStore.get("styling.fontSize");
+    if (val) {
+        slider.value = parseInt(val.replace("%", ""), 10);
+    } else {
+        slider.value = 100;
+    }
+
+    // console.log(slider.min);
+    // console.log(slider.max);
+    // console.log(slider.value);
+    // console.log(slider.step);
+
+    electronStore.onChanged("styling.readiumcss", (newValue: any, oldValue: any) => {
+        if (typeof newValue === "undefined" || typeof oldValue === "undefined") {
+            return;
+        }
+        slider.disabled = !newValue;
+    });
+
+    // slider.listen("MDCSlider:input", (event: any) => {
+    //     console.log(event.detail.value);
+    // });
+    slider.listen("MDCSlider:change", (event: any) => {
+        // console.log(event.detail.value);
+        electronStore.set("styling.fontSize", event.detail.value + "%");
+    });
+
+    electronStore.onChanged("styling.fontSize", (newValue: any, oldValue: any) => {
+        if (typeof newValue === "undefined" || typeof oldValue === "undefined") {
+            return;
+        }
+
+        slider.value = parseInt(newValue.replace("%", ""), 10);
+
+        readiumCssOnOff();
+    });
+};
+
 const initFontSelector = () => {
 
     const ID_PREFIX = "fontselect_";
@@ -301,7 +382,7 @@ const initFontSelector = () => {
     const options: IRiotOptsMenuSelectItem[] =
         [{
             id: ID_PREFIX + "DEFAULT",
-            label: "Default",
+            label: "Default font",
         }, {
             id: ID_PREFIX + "OLD",
             label: "Old Style",
@@ -442,13 +523,6 @@ window.addEventListener("DOMContentLoaded", () => {
         document.body.classList.remove("mdc-theme--dark");
     }
 
-    initFontSelector();
-
-    const snackBarElem = document.getElementById("snackbar") as HTMLElement;
-    snackBar = new (window as any).mdc.snackbar.MDCSnackbar(snackBarElem);
-    (snackBarElem as any).mdcSnackbar = snackBar;
-    snackBar.dismissesOnAction = true;
-
     const drawerElement = document.getElementById("drawer") as HTMLElement;
     drawer = new (window as any).mdc.drawer.MDCTemporaryDrawer(drawerElement);
     (drawerElement as any).mdcTemporaryDrawer = drawer;
@@ -456,7 +530,6 @@ window.addEventListener("DOMContentLoaded", () => {
     drawerButton.addEventListener("click", () => {
         drawer.open = true;
     });
-
     drawerElement.addEventListener("click", (ev) => {
         const allMenus = drawerElement.querySelectorAll(".mdc-simple-menu");
         const openedMenus: Node[] = [];
@@ -490,6 +563,49 @@ window.addEventListener("DOMContentLoaded", () => {
         }
     }, true);
 
+    initFontSelector();
+    initFontSizeSelector();
+
+    const nightSwitch = document.getElementById("night_switch-input") as HTMLInputElement;
+    nightSwitch.checked = electronStore.get("styling.night");
+    nightSwitch.addEventListener("change", (_event) => {
+        const checked = nightSwitch.checked;
+        electronStore.set("styling.night", checked);
+    });
+    nightSwitch.disabled = !electronStore.get("styling.readiumcss");
+
+    const justifySwitch = document.getElementById("justify_switch-input") as HTMLInputElement;
+    justifySwitch.checked = electronStore.get("styling.align") === "justify";
+    justifySwitch.addEventListener("change", (_event) => {
+        const checked = justifySwitch.checked;
+        electronStore.set("styling.align", checked ? "justify" : "left");
+    });
+    justifySwitch.disabled = !electronStore.get("styling.readiumcss");
+
+    const readiumcssSwitch = document.getElementById("readiumcss_switch-input") as HTMLInputElement;
+    readiumcssSwitch.checked = electronStore.get("styling.readiumcss");
+    const stylingWrapper = document.getElementById("stylingWrapper") as HTMLElement;
+    stylingWrapper.style.display = readiumcssSwitch.checked ? "block" : "none";
+    if (readiumcssSwitch.checked) {
+        ensureSliderLayout();
+    }
+    readiumcssSwitch.addEventListener("change", (_event) => {
+        const checked = readiumcssSwitch.checked;
+        electronStore.set("styling.readiumcss", checked);
+    });
+
+    const basicSwitch = document.getElementById("nav_basic_switch-input") as HTMLInputElement;
+    basicSwitch.checked = !electronStore.get("basicLinkTitles");
+    basicSwitch.addEventListener("change", (_event) => {
+        const checked = basicSwitch.checked;
+        electronStore.set("basicLinkTitles", !checked);
+    });
+
+    const snackBarElem = document.getElementById("snackbar") as HTMLElement;
+    snackBar = new (window as any).mdc.snackbar.MDCSnackbar(snackBarElem);
+    (snackBarElem as any).mdcSnackbar = snackBar;
+    snackBar.dismissesOnAction = true;
+
     //     drawerElement.addEventListener("MDCTemporaryDrawer:open", () => {
     //         console.log("MDCTemporaryDrawer:open");
     //     });
@@ -520,6 +636,11 @@ window.addEventListener("DOMContentLoaded", () => {
         const newActivePanel = document.querySelector(".tabPanel:nth-child(" + (ev.detail.selectedIndex + 1) + ")");
         if (newActivePanel) {
             newActivePanel.classList.add("active");
+
+            const div = document.getElementById("reader_controls_STYLES") as HTMLElement;
+            if (newActivePanel === div) {
+                ensureSliderLayout();
+            }
         }
     });
 
@@ -1033,36 +1154,6 @@ function startNavigatorExperiment() {
     const slidingViewport = document.getElementById("sliding_viewport") as HTMLElement;
     slidingViewport.appendChild(_webview1);
     slidingViewport.appendChild(_webview2);
-
-    const nightSwitch = document.getElementById("night_switch-input") as HTMLInputElement;
-    nightSwitch.checked = electronStore.get("styling.night");
-    nightSwitch.addEventListener("change", (_event) => {
-        const checked = nightSwitch.checked;
-        electronStore.set("styling.night", checked);
-    });
-    nightSwitch.disabled = !electronStore.get("styling.readiumcss");
-
-    const justifySwitch = document.getElementById("justify_switch-input") as HTMLInputElement;
-    justifySwitch.checked = electronStore.get("styling.align") === "justify";
-    justifySwitch.addEventListener("change", (_event) => {
-        const checked = justifySwitch.checked;
-        electronStore.set("styling.align", checked ? "justify" : "left");
-    });
-    justifySwitch.disabled = !electronStore.get("styling.readiumcss");
-
-    const readiumcssSwitch = document.getElementById("readiumcss_switch-input") as HTMLInputElement;
-    readiumcssSwitch.checked = electronStore.get("styling.readiumcss");
-    readiumcssSwitch.addEventListener("change", (_event) => {
-        const checked = readiumcssSwitch.checked;
-        electronStore.set("styling.readiumcss", checked);
-    });
-
-    const basicSwitch = document.getElementById("nav_basic_switch-input") as HTMLInputElement;
-    basicSwitch.checked = !electronStore.get("basicLinkTitles");
-    basicSwitch.addEventListener("change", (_event) => {
-        const checked = basicSwitch.checked;
-        electronStore.set("basicLinkTitles", !checked);
-    });
 
     // tslint:disable-next-line:no-floating-promises
     (async () => {

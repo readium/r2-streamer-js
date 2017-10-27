@@ -263,6 +263,7 @@ function readiumCSSSet(messageJson: any) {
         let invert = false;
         let paged = false;
         let font: string | undefined;
+        let fontSize: string | undefined;
         let align: string | undefined;
         if (typeof messageJson.setCSS === "object") {
             if (messageJson.setCSS.dark) {
@@ -282,6 +283,9 @@ function readiumCSSSet(messageJson: any) {
             }
             if (typeof messageJson.setCSS.font === "string") {
                 font = messageJson.setCSS.font;
+            }
+            if (typeof messageJson.setCSS.fontSize === "string") {
+                fontSize = messageJson.setCSS.fontSize;
             }
             if (typeof messageJson.setCSS.align === "string") {
                 align = messageJson.setCSS.align;
@@ -350,14 +354,14 @@ function readiumCSSSet(messageJson: any) {
                     (align === "left" ? "left" :
                         (align === "center" ? "center" : "left"))));
 
+        // 75% | 87.5% | 100% | 112.5% | 137.5% | 150% | 162.5% | 175% | 200% | 225% | 250%
+        docElement.style.setProperty("--USER__fontSize", fontSize ? fontSize : "100%");
+
         // // auto | none
         // docElement.style.setProperty("--USER__bodyHyphens", "auto");
 
         // // 1 | 2 | auto
         // docElement.style.setProperty("--USER__colCount", "2");
-
-        // // 75% | 87.5% | 100% | 112.5% | 137.5% | 150% | 162.5% | 175% | 200% | 225% | 250%
-        // docElement.style.setProperty("--USER__fontSize", "112.5%");
 
         // // 1 | 1.067 | 1.125 | 1.2 (suggested default) | 1.25 | 1.333 | 1.414 | 1.5 | 1.618
         // docElement.style.setProperty("--USER__typeScale", "1.2");

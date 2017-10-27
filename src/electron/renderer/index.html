@@ -82,7 +82,7 @@
               <div class="tabPanel" id="reader_controls_SPINE" data-is="riot-linklist"> </div>
               <div class="tabPanel" id="reader_controls_STYLES">
 
-                <div style="padding:0;padding-top:1em;padding-bottom:1em">
+                <div style="padding:0;padding-bottom:1em">
                   <div class="mdc-switch">
                     <input type="checkbox" id="readiumcss_switch-input" class="mdc-switch__native-control" />
                     <div class="mdc-switch__background">
@@ -92,11 +92,11 @@
                   <label for="readiumcss_switch-input" class="mdc-switch-label">Enable styling</label>
                 </div>
 
-                <hr class="mdc-list-divider" role="presentation">
+                <!-- <hr class="mdc-list-divider" role="presentation"> -->
 
-                <div style="margin-left: 1em; padding-left: 1em; border-left: 1px solid silver;">
+                <div id="stylingWrapper" style="margin-left: 1em; padding-left: 1em; margin-bottom: 1em;">
 
-                  <div style="padding:0;padding-top:0.6em;padding-bottom:1em">
+                  <div style="padding:0;padding-top:0.6em;">
                     <i class="material-icons" style="vertical-align: bottom; display: inline;" role="presentation" aria-hidden="true">brightness_4</i> <!-- invert_colors -->
                     <div class="mdc-switch">
                       <input type="checkbox" id="night_switch-input" class="mdc-switch__native-control" />
@@ -118,18 +118,36 @@
                     <label for="justify_switch-input" class="mdc-switch-label">Justify text</label>
                   </div>
 
-                  <span class="mdc-typography--text">Font: </span>
+                  <div data-is="riot-menuselect" id="fontSelect" style="margin-bottom: 1em;"> </div>
 
-                  <div data-is="riot-menuselect" id="fontSelect"> </div>
+                  <!-- <i class="material-icons" role="presentation" style="vertical-align: top;" aria-label="font size" aria-hidden>format_size</i> -->
+                  <span class="mdc-typography--text" style="display: block;">%</span>
+
+                  <div id="fontSizeSelector" class="mdc-slider mdc-slider--discrete mdc-slider--display-markers" tabindex="0" role="slider" aria-valuemin="75" aria-valuemax="250" aria-valuenow="100" data-step="25" aria-label="Font size (%)">
+                    <div class="mdc-slider__track-container">
+                      <div class="mdc-slider__track"></div>
+                      <div class="mdc-slider__track-marker-container"></div>
+                    </div>
+                    <div class="mdc-slider__thumb-container">
+                      <div class="mdc-slider__pin">
+                        <span class="mdc-slider__pin-value-marker"></span>
+                      </div>
+                      <svg class="mdc-slider__thumb" width="21" height="21">
+                        <circle cx="10.5" cy="10.5" r="7.875"></circle>
+                      </svg>
+                      <div class="mdc-slider__focus-ring"></div>
+                    </div>
+                  </div>
+
 
                 </div>
 
-                <button id="buttonClearSettingsStyle" class="mdc-button mdc-button--raised mdc-ripple-surfacexx" data-mdc-auto-initxx="MDCRipple" style="margin:0;margin-top:1em;">Restore defaults</button>
+                <button id="buttonClearSettingsStyle" class="mdc-button mdc-button--raised mdc-ripple-surfacexx" data-mdc-auto-initxx="MDCRipple" style="display: block; position: absolute; bottom: 10px; right: 10px;">Restore defaults</button>
 
               </div>
               <div class="tabPanel" id="reader_controls_ADVANCED">
 
-                <div style="padding:0;padding-top:1em;padding-bottom:1em">
+                <div style="padding:0;padding-bottom:1em">
                   <div class="mdc-switch">
                     <input type="checkbox" id="nav_basic_switch-input" class="mdc-switch__native-control" />
                     <div class="mdc-switch__background">

@@ -250,12 +250,6 @@ form {
   vertical-align: middle;
   font-size: 36px;
 }
-.tabPanel {
-  display: none;
-}
-.tabPanel.active {
-  display: block;
-}
 /* .mdc-simple-menu,
 .mdc-simple-menu--animating,
 .mdc-simple-menu--animating .mdc-simple-menu__items > *,
@@ -272,15 +266,20 @@ form {
 /* #nav-select */
 .mdc-select {
   width: 100% !important;
+}
+#nav-select-menu.mdc-select__menu {
+  width: 100% !important;
+}
+#fontSelect .mdc-select__menu {
+  /* left: 0 !important; */
+  width: 80%;
+}
+.mdc-select {
   background-position-x: 96%;
 }
 /* #nav-select-text */
 .mdc-select__selected-text {
   padding-left: 1em;
-}
-/* #nav-select-menu */
-.mdc-select__menu {
-  width: 100% !important;
 }
 #drawerNav {
   height: 100%;
@@ -293,8 +292,14 @@ form {
   display: inline-flex;
 }
 .tabPanel {
-  overflow: auto;
+  display: none;
+
+  overflow-x: hidden;
+  overflow-y: auto;
   width: 100%;
+}
+.tabPanel.active {
+  display: block;
 }
 #reader_controls_ADVANCED, #reader_controls_TOOLS, #reader_controls_STYLES {
   padding: 1em;
@@ -366,6 +371,43 @@ form {
 .mdc-theme--dark ::-webkit-scrollbar-track:vertical {
   border-left: 1px solid black;
 }
+#tabsPanels .mdc-list-item__text {
+  max-width: 100%;
+}
+#tabsPanels .mdc-list-item__text__secondary {
+  word-wrap: break-word;
+}
+
+#fontSizeSelector {
+  margin-top: -22px;
+}
+#fontSelect .mdc-select__selected-text {
+  padding-left: 6px;
+}
+#fontSelect .mdc-select__selected-text::before {
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+
+  vertical-align: bottom;
+
+  display: inline-block;
+  position: relative;
+  left: -6px;
+  top: -3px;
+
+  content: "\E245";
+  /* format_size */
+}
 
 #nav-select-menu > ul {
   padding-top: 2px;
@@ -409,7 +451,7 @@ form {
     content: "\E260"; /* linear_scale */
 }
 #selectStyles::after {
-    content: "\E245"; /* format_size */
+    content: "\E8F4"; /* format_color_text */
 }
 #selectAdvanced::after {
     content: "\E8B8"; /* settings */
