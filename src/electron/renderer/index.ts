@@ -655,7 +655,7 @@ function createWebView(): Electron.WebviewTag {
         "contextIsolation=0, webSecurity=1, allowRunningInsecureContent=0");
     wv.setAttribute("partition", R2_SESSION_WEBVIEW);
     wv.setAttribute("httpreferrer", publicationJsonUrl);
-    wv.setAttribute("preload", "./preload.js");
+    wv.setAttribute("preload", "./webview/preload.js");
     wv.setAttribute("disableguestresize", "");
 
     wv.addEventListener("dom-ready", () => {
