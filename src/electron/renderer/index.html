@@ -38,7 +38,7 @@
 
     <h3 class="mdc-typography--subheading1" id="pubTitle">TITLE</h3>
 
-    <button id="drawerButton" class="mdc-button mdc-ripple-surfacexxx" data-mdc-auto-initxxx="MDCRipple"><i class="material-icons md-36">menu</i></button>
+    <button id="drawerButton" class="mdc-button mdc-ripple-surfacexxx" data-mdc-auto-initxxx="MDCRipple"><i class="material-icons md-36" aria-label="Menu">menu</i></button>
 
     <aside id="drawer" class="mdc-temporary-drawer">
       <nav id="drawerNav" class="mdc-temporary-drawer__drawer">
@@ -47,29 +47,30 @@
             <span id="nav-select-text" class="mdc-select__selected-text">Table of contents</span>
             <div id="nav-select-menu" class="mdc-simple-menu mdc-select__menu">
               <ul class="mdc-list mdc-simple-menu__items">
-                  <li class="mdc-list-item" role="option" id="selectTOC" tabindex="0" aria-selected>
-                    Table of contents
-                  </li>
-                  <li class="mdc-list-item" role="option" id="selectLandmarks" tabindex="0">
-                    Landmarks
-                  </li>
-                  <li class="mdc-list-item" role="option" id="selectPageList" tabindex="0">
-                    Page list
-                  </li>
-                  <li class="mdc-list-item" role="option" id="selectSpine" tabindex="0">
-                    Publication spine
-                  </li>
+
+                  <!-- <i class="material-icons" style="vertical-align: bottom; display: inline; padding-right: 0.5em;" role="presentation" aria-hidden="true">home</i>  -->
+                  <li class="mdc-list-item" role="option" id="selectTOC" tabindex="0" aria-selected>Table of contents</li>
+
+                  <!-- <i class="material-icons" style="vertical-align: bottom; display: inline; padding-right: 0.5em;" role="presentation" aria-hidden="true">place</i>  -->
+                  <li class="mdc-list-item" role="option" id="selectLandmarks" tabindex="0">Landmarks</li>
+
+                  <!-- <i class="material-icons" style="vertical-align: bottom; display: inline; padding-right: 0.5em;" role="presentation" aria-hidden="true">format_list_bulleted</i>  -->
+                  <li class="mdc-list-item" role="option" id="selectPageList" tabindex="0">Page list</li>
+
+                  <!-- <i class="material-icons" style="vertical-align: bottom; display: inline; padding-right: 0.5em;" role="presentation" aria-hidden="true">linear_scale</i>  -->
+                  <li class="mdc-list-item" role="option" id="selectSpine" tabindex="0">Publication spine</li>
+
                   <li class="mdc-list-divider" role="presentation" disabled> </li>
-                  <li class="mdc-list-item" role="option" id="selectTools" tabindex="0">
-                    Styles
-                  </li>
-                  <li class="mdc-list-item" role="option" id="selectTools" tabindex="0">
-                    Advanced
-                  </li>
+
+                  <!-- <i class="material-icons" style="vertical-align: bottom; display: inline; padding-right: 0.5em;" role="presentation" aria-hidden="true">tune</i>  -->
+                  <li class="mdc-list-item" role="option" id="selectStyles" tabindex="0">Styles</li>
+
+                  <!-- <i class="material-icons" style="vertical-align: bottom; display: inline; padding-right: 0.5em;" role="presentation" aria-hidden="true">settings</i>  -->
+                  <li class="mdc-list-item" role="option" id="selectAdvanced" tabindex="0">Advanced</li>
+
                   <li class="mdc-list-divider" role="presentation" disabled> </li>
-                  <li class="mdc-list-item" role="option" id="selectTools" tabindex="0">
-                    Developer tools
-                  </li>
+
+                  <li class="mdc-list-item" role="option" id="selectTools" tabindex="0">Developer tools</li>
               </ul>
             </div>
           </div>
@@ -96,6 +97,7 @@
                 <div style="margin-left: 1em; padding-left: 1em; border-left: 1px solid silver;">
 
                   <div style="padding:0;padding-top:0.6em;padding-bottom:1em">
+                    <i class="material-icons" style="vertical-align: bottom; display: inline;" role="presentation" aria-hidden="true">brightness_4</i> <!-- invert_colors -->
                     <div class="mdc-switch">
                       <input type="checkbox" id="night_switch-input" class="mdc-switch__native-control" />
                       <div class="mdc-switch__background">
@@ -105,9 +107,21 @@
                     <label for="night_switch-input" class="mdc-switch-label">Night mode</label>
                   </div>
 
+                  <div style="padding:0;padding-top:1em;padding-bottom:1em">
+                    <i class="material-icons" style="vertical-align: bottom; display: inline;" role="presentation" aria-hidden="true">format_align_justify</i> <!-- view_headline -->
+                    <div class="mdc-switch">
+                      <input type="checkbox" id="justify_switch-input" class="mdc-switch__native-control" />
+                      <div class="mdc-switch__background">
+                        <div class="mdc-switch__knob"></div>
+                      </div>
+                    </div>
+                    <label for="justify_switch-input" class="mdc-switch-label">Justify text</label>
+                  </div>
+
                   <span class="mdc-typography--text">Font: </span>
 
                   <div data-is="riot-menuselect" id="fontSelect"> </div>
+
                 </div>
 
                 <button id="buttonClearSettingsStyle" class="mdc-button mdc-button--raised mdc-ripple-surfacexx" data-mdc-auto-initxx="MDCRipple" style="margin:0;margin-top:1em;">Restore defaults</button>
@@ -152,8 +166,8 @@
         </div>
       </div>
 
-      <button id="buttonNavLeft" class="mdc-button mdc-ripple-surface" data-mdc-auto-init="MDCRipple"><i class="material-icons md-36">keyboard_arrow_left</i></button>
-      <button id="buttonNavRight" class="mdc-button mdc-ripple-surface" data-mdc-auto-init="MDCRipple"><i class="material-icons md-36">keyboard_arrow_right</i></button>
+      <button id="buttonNavLeft" class="mdc-button mdc-ripple-surface" data-mdc-auto-init="MDCRipple"><i class="material-icons md-36" aria-label="Left arrow">chevron_left</i></button>
+      <button id="buttonNavRight" class="mdc-button mdc-ripple-surface" data-mdc-auto-init="MDCRipple"><i class="material-icons md-36" aria-label="Right arrow">chevron_right</i></button>
 
     </main>
 

@@ -1,4 +1,9 @@
-
+@font-face {
+  font-family: "AccessibleDfa";
+  font-style: normal;
+  font-weight: normal;
+  src: local("AccessibleDfa"), url("./AccessibleDfA.otf") format("opentype");
+}
 @font-face {
   font-family: 'Material Icons';
   font-style: normal;
@@ -28,7 +33,7 @@
   --mdc-theme-secondary: #0051ff;
   overflow: hidden;
 }
-html, body {
+:root, body {
   height: 100%;
   width: 100%;
   min-height: 100%;
@@ -261,7 +266,7 @@ form {
 .mdc-select__selected-text {
   transition: all 0s ease 0s !important;
 } */
-.mdc-simple-menu {
+.mdc-simple-menu--animating {
   overflow: hidden;
 }
 /* #nav-select */
@@ -362,6 +367,53 @@ form {
   border-left: 1px solid black;
 }
 
+#nav-select-menu > ul {
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+#nav-select-menu > ul > li.mdc-list-item {
+  padding-left: 46px;
+}
+#nav-select-menu > ul > li.mdc-list-item::after {
+
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;  /* Preferred icon size */
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+
+  vertical-align: bottom;
+
+  display: inline-block;
+  position: absolute;
+  left: 8px;
+  top: 11px;
+}
+#selectTOC::after {
+    content: "\E88A"; /* home */
+}
+#selectLandmarks::after {
+    content: "\E55F"; /* place */
+}
+#selectPageList::after {
+    content: "\E241"; /* format_list_bulleted */
+}
+#selectSpine::after {
+    content: "\E260"; /* linear_scale */
+}
+#selectStyles::after {
+    content: "\E245"; /* format_size */
+}
+#selectAdvanced::after {
+    content: "\E8B8"; /* settings */
+}
 
 ::selection {
   background-color: rgb(155, 179, 240) !important;
