@@ -251,6 +251,19 @@ form {
 .tabPanel.active {
   display: block;
 }
+/* .mdc-simple-menu,
+.mdc-simple-menu--animating,
+.mdc-simple-menu--animating .mdc-simple-menu__items > *,
+.mdc-list,
+.mdc-list-item,
+.mdc-list-item::before,
+.mdc-select,
+.mdc-select__selected-text {
+  transition: all 0s ease 0s !important;
+} */
+.mdc-simple-menu {
+  overflow: hidden;
+}
 /* #nav-select */
 .mdc-select {
   width: 100% !important;

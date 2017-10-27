@@ -398,6 +398,8 @@ const initFontSelector = () => {
 
 window.addEventListener("DOMContentLoaded", () => {
 
+    (window as any).mdc.menu.MDCSimpleMenuFoundation.numbers.TRANSITION_DURATION_MS = 200;
+
     window.document.addEventListener("keydown", (ev: KeyboardEvent) => {
         if (ev.keyCode === 37) { // left
             navLeftOrRight(true);
@@ -549,6 +551,27 @@ window.addEventListener("DOMContentLoaded", () => {
     } else {
         startNavigatorExperiment();
     }
+
+    const buttonClearReadingLocations = document.getElementById("buttonClearReadingLocations") as HTMLElement;
+    buttonClearReadingLocations.addEventListener("click", () => {
+        electronStore.set("readingLocation", {});
+
+        drawer.open = false;
+        setTimeout(() => {
+            const message = "Reading locations reset.";
+            const data = {
+                actionHandler: () => {
+                    // console.log("SnackBar OK");
+                },
+                actionOnBottom: false,
+                actionText: "OK",
+                message,
+                multiline: false,
+                timeout: 2000,
+            };
+            snackBar.show(data);
+        }, 500);
+    });
 
     const buttonClearSettings = document.getElementById("buttonClearSettings") as HTMLElement;
     buttonClearSettings.addEventListener("click", () => {
