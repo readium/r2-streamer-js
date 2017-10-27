@@ -10,11 +10,11 @@ import {
     R2_EVENT_READIUMCSS,
     R2_EVENT_SCROLLTO,
     R2_EVENT_WEBVIEW_READY,
-} from "../common/events";
-import { animateProperty } from "./animateProperty";
-import { fullQualifiedSelector } from "./cssselector";
-import { easings } from "./easings";
-import { getURLQueryParams } from "./querystring";
+} from "../../common/events";
+import { animateProperty } from "../common/animateProperty";
+import { fullQualifiedSelector } from "../common/cssselector";
+import { easings } from "../common/easings";
+import { getURLQueryParams } from "../common/querystring";
 
 const win = (global as any).window as Window;
 

@@ -31,7 +31,7 @@ import {
 import { R2_SESSION_WEBVIEW } from "../common/sessions";
 import { IStore } from "../common/store";
 import { StoreElectron } from "../common/store-electron";
-import { getURLQueryParams } from "./querystring";
+import { getURLQueryParams } from "./common/querystring";
 import {
     IRiotOptsLinkList,
     IRiotOptsLinkListItem,
