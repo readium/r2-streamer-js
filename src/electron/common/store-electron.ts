@@ -10,6 +10,7 @@ export class StoreElectron implements IStore {
             defaults,
             name,
         });
+        (this._electronStore as any).events.setMaxListeners(0);
     }
 
     public getDefaults(): any {
