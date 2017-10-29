@@ -65,6 +65,7 @@ const electronStore: IStore = new StoreElectron("readium2-navigator", {
         font: "DEFAULT",
         fontSize: "100%",
         invert: false,
+        lineHeight: "1.5",
         night: false,
         readiumcss: false,
         sepia: false,
@@ -132,6 +133,7 @@ const computeReadiumCssJsonMessage = (): string => {
         const dark = electronStore.get("styling.dark");
         const font = electronStore.get("styling.font");
         const fontSize = electronStore.get("styling.fontSize");
+        const lineHeight = electronStore.get("styling.lineHeight");
         const invert = electronStore.get("styling.invert");
         const night = electronStore.get("styling.night");
         const sepia = electronStore.get("styling.sepia");
@@ -141,12 +143,12 @@ const computeReadiumCssJsonMessage = (): string => {
             font,
             fontSize,
             invert,
+            lineHeight,
             night,
             sepia,
         };
         const jsonMsg = { injectCSS: "yes", setCSS: cssJson };
         return JSON.stringify(jsonMsg, null, 0);
-
     } else {
         const jsonMsg = { injectCSS: "rollback", setCSS: "rollback" };
         return JSON.stringify(jsonMsg, null, 0);
@@ -166,6 +168,9 @@ function ensureSliderLayout() {
     setTimeout(() => {
         const fontSizeSelector = document.getElementById("fontSizeSelector") as HTMLElement;
         (fontSizeSelector as any).mdcSlider.layout();
+
+        const lineHeightSelector = document.getElementById("lineHeightSelector") as HTMLElement;
+        (lineHeightSelector as any).mdcSlider.layout();
     }, 100);
 }
 
@@ -311,6 +316,55 @@ function installKeyboardMouseFocusHandler() {
         dateLastKeyboardEvent = new Date();
     });
 }
+
+const initLineHeightSelector = () => {
+
+    const lineHeightSelector = document.getElementById("lineHeightSelector") as HTMLElement;
+    const slider = new (window as any).mdc.slider.MDCSlider(lineHeightSelector);
+    (lineHeightSelector as any).mdcSlider = slider;
+    // const step = lineHeightSelector.getAttribute("data-step") as string;
+    // console.log("step: " + step);
+    // slider.step = parseFloat(step);
+    // console.log("slider.step: " + slider.step);
+
+    slider.disabled = !electronStore.get("styling.readiumcss");
+    const val = electronStore.get("styling.lineHeight");
+    if (val) {
+        slider.value = parseFloat(val) * 100;
+    } else {
+        slider.value = 1.5 * 100;
+    }
+
+    // console.log(slider.min);
+    // console.log(slider.max);
+    // console.log(slider.value);
+    // console.log(slider.step);
+
+    electronStore.onChanged("styling.readiumcss", (newValue: any, oldValue: any) => {
+        if (typeof newValue === "undefined" || typeof oldValue === "undefined") {
+            return;
+        }
+        slider.disabled = !newValue;
+    });
+
+    // slider.listen("MDCSlider:input", (event: any) => {
+    //     console.log(event.detail.value);
+    // });
+    slider.listen("MDCSlider:change", (event: any) => {
+        electronStore.set("styling.lineHeight",
+            "" + (event.detail.value / 100));
+    });
+
+    electronStore.onChanged("styling.lineHeight", (newValue: any, oldValue: any) => {
+        if (typeof newValue === "undefined" || typeof oldValue === "undefined") {
+            return;
+        }
+
+        slider.value = parseFloat(newValue) * 100;
+
+        readiumCssOnOff();
+    });
+};
 
 const initFontSizeSelector = () => {
 
@@ -497,7 +551,15 @@ window.addEventListener("DOMContentLoaded", () => {
 
     (window as any).mdc.menu.MDCSimpleMenuFoundation.numbers.TRANSITION_DURATION_MS = 200;
 
+    // TODO this seems to hijack MDC slider thumb change
     window.document.addEventListener("keydown", (ev: KeyboardEvent) => {
+        if (drawer.open) {
+            return;
+        }
+        if ((ev.target as any).mdcSlider) {
+            return;
+        }
+
         if (ev.keyCode === 37) { // left
             navLeftOrRight(true);
         } else if (ev.keyCode === 39) { // right
@@ -565,6 +627,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
     initFontSelector();
     initFontSizeSelector();
+    initLineHeightSelector();
 
     const nightSwitch = document.getElementById("night_switch-input") as HTMLInputElement;
     nightSwitch.checked = electronStore.get("styling.night");

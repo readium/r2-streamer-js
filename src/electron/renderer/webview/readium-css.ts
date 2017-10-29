@@ -264,6 +264,7 @@ function readiumCSSSet(messageJson: any) {
         let paged = false;
         let font: string | undefined;
         let fontSize: string | undefined;
+        let lineHeight: string | undefined;
         let align: string | undefined;
         if (typeof messageJson.setCSS === "object") {
             if (messageJson.setCSS.dark) {
@@ -286,6 +287,9 @@ function readiumCSSSet(messageJson: any) {
             }
             if (typeof messageJson.setCSS.fontSize === "string") {
                 fontSize = messageJson.setCSS.fontSize;
+            }
+            if (typeof messageJson.setCSS.lineHeight === "string") {
+                lineHeight = messageJson.setCSS.lineHeight;
             }
             if (typeof messageJson.setCSS.align === "string") {
                 align = messageJson.setCSS.align;
@@ -357,6 +361,10 @@ function readiumCSSSet(messageJson: any) {
         // 75% | 87.5% | 100% | 112.5% | 137.5% | 150% | 162.5% | 175% | 200% | 225% | 250%
         docElement.style.setProperty("--USER__fontSize", fontSize ? fontSize : "100%");
 
+        console.log("lineHeight: " + lineHeight);
+        // 1 | 1.125 | 1.25 | 1.35 | 1.5 | 1.65 | 1.75 | 2
+        docElement.style.setProperty("--USER__lineHeight", lineHeight ? lineHeight : "2");
+
         // // auto | none
         // docElement.style.setProperty("--USER__bodyHyphens", "auto");
 
@@ -365,9 +373,6 @@ function readiumCSSSet(messageJson: any) {
 
         // // 1 | 1.067 | 1.125 | 1.2 (suggested default) | 1.25 | 1.333 | 1.414 | 1.5 | 1.618
         // docElement.style.setProperty("--USER__typeScale", "1.2");
-
-        // // 1 | 1.125 | 1.25 | 1.35 | 1.5 | 1.65 | 1.75 | 2
-        // docElement.style.setProperty("--USER__lineHeight", "2");
 
         // // 0 | 0.375rem | 0.75rem | 1rem | 1.125rem | 1.25rem | 1.35rem | 1.5rem | 1.65rem | 1.75rem | 2rem
         // docElement.style.setProperty("--USER__paraSpacing", "1rem");

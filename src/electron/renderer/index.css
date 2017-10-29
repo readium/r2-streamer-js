@@ -377,7 +377,9 @@ form {
 #tabsPanels .mdc-list-item__text__secondary {
   word-wrap: break-word;
 }
-
+#lineHeightSelector {
+  margin-top: -22px;
+}
 #fontSizeSelector {
   margin-top: -22px;
 }
