@@ -61,12 +61,14 @@ const electronStore: IStore = new StoreElectron("readium2-navigator", {
     basicLinkTitles: true,
     styling: {
         align: "left",
+        colCount: "auto",
         dark: false,
         font: "DEFAULT",
         fontSize: "100%",
         invert: false,
         lineHeight: "1.5",
         night: false,
+        paged: false,
         readiumcss: false,
         sepia: false,
     },
@@ -125,26 +127,41 @@ electronStore.onChanged("styling.align", (newValue: any, oldValue: any) => {
     readiumCssOnOff();
 });
 
+electronStore.onChanged("styling.paged", (newValue: any, oldValue: any) => {
+    if (typeof newValue === "undefined" || typeof oldValue === "undefined") {
+        return;
+    }
+
+    const paginateSwitch = document.getElementById("paginate_switch-input") as HTMLInputElement;
+    paginateSwitch.checked = newValue;
+
+    readiumCssOnOff();
+});
+
 const computeReadiumCssJsonMessage = (): string => {
 
     const on = electronStore.get("styling.readiumcss");
     if (on) {
         const align = electronStore.get("styling.align");
+        const colCount = electronStore.get("styling.colCount");
         const dark = electronStore.get("styling.dark");
         const font = electronStore.get("styling.font");
         const fontSize = electronStore.get("styling.fontSize");
         const lineHeight = electronStore.get("styling.lineHeight");
         const invert = electronStore.get("styling.invert");
         const night = electronStore.get("styling.night");
+        const paged = electronStore.get("styling.paged");
         const sepia = electronStore.get("styling.sepia");
         const cssJson = {
             align,
+            colCount,
             dark,
             font,
             fontSize,
             invert,
             lineHeight,
             night,
+            paged,
             sepia,
         };
         const jsonMsg = { injectCSS: "yes", setCSS: cssJson };
@@ -191,6 +208,9 @@ electronStore.onChanged("styling.readiumcss", (newValue: any, oldValue: any) => 
 
     const justifySwitch = document.getElementById("justify_switch-input") as HTMLInputElement;
     justifySwitch.disabled = !newValue;
+
+    const paginateSwitch = document.getElementById("paginate_switch-input") as HTMLInputElement;
+    paginateSwitch.disabled = !newValue;
 
     const nightSwitch = document.getElementById("night_switch-input") as HTMLInputElement;
     nightSwitch.disabled = !newValue;
@@ -644,6 +664,14 @@ window.addEventListener("DOMContentLoaded", () => {
         electronStore.set("styling.align", checked ? "justify" : "left");
     });
     justifySwitch.disabled = !electronStore.get("styling.readiumcss");
+
+    const paginateSwitch = document.getElementById("paginate_switch-input") as HTMLInputElement;
+    paginateSwitch.checked = electronStore.get("styling.paged");
+    paginateSwitch.addEventListener("change", (_event) => {
+        const checked = paginateSwitch.checked;
+        electronStore.set("styling.paged", checked);
+    });
+    paginateSwitch.disabled = !electronStore.get("styling.readiumcss");
 
     const readiumcssSwitch = document.getElementById("readiumcss_switch-input") as HTMLInputElement;
     readiumcssSwitch.checked = electronStore.get("styling.readiumcss");

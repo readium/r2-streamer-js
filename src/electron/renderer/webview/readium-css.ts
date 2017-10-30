@@ -265,6 +265,7 @@ function readiumCSSSet(messageJson: any) {
         let font: string | undefined;
         let fontSize: string | undefined;
         let lineHeight: string | undefined;
+        let colCount: string | undefined;
         let align: string | undefined;
         if (typeof messageJson.setCSS === "object") {
             if (messageJson.setCSS.dark) {
@@ -290,6 +291,9 @@ function readiumCSSSet(messageJson: any) {
             }
             if (typeof messageJson.setCSS.lineHeight === "string") {
                 lineHeight = messageJson.setCSS.lineHeight;
+            }
+            if (typeof messageJson.setCSS.colCount === "string") {
+                colCount = messageJson.setCSS.colCount;
             }
             if (typeof messageJson.setCSS.align === "string") {
                 align = messageJson.setCSS.align;
@@ -327,6 +331,9 @@ function readiumCSSSet(messageJson: any) {
             paged ? "readium-paged-on" : "readium-scroll-on");
         if (paged) {
             docElement.style.overflow = "hidden";
+            docElement.classList.add("readium-paginated");
+        } else {
+            docElement.classList.remove("readium-paginated");
         }
 
         const needsFontOverride = typeof font !== "undefined" && font !== "DEFAULT";
@@ -361,15 +368,14 @@ function readiumCSSSet(messageJson: any) {
         // 75% | 87.5% | 100% | 112.5% | 137.5% | 150% | 162.5% | 175% | 200% | 225% | 250%
         docElement.style.setProperty("--USER__fontSize", fontSize ? fontSize : "100%");
 
-        console.log("lineHeight: " + lineHeight);
         // 1 | 1.125 | 1.25 | 1.35 | 1.5 | 1.65 | 1.75 | 2
         docElement.style.setProperty("--USER__lineHeight", lineHeight ? lineHeight : "2");
 
+        // 1 | 2 | auto
+        docElement.style.setProperty("--USER__colCount", colCount ? colCount : "auto");
+
         // // auto | none
         // docElement.style.setProperty("--USER__bodyHyphens", "auto");
-
-        // // 1 | 2 | auto
-        // docElement.style.setProperty("--USER__colCount", "2");
 
         // // 1 | 1.067 | 1.125 | 1.2 (suggested default) | 1.25 | 1.333 | 1.414 | 1.5 | 1.618
         // docElement.style.setProperty("--USER__typeScale", "1.2");

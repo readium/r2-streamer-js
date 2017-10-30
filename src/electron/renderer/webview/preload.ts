@@ -17,7 +17,7 @@ import {
     R2_EVENT_SCROLLTO,
     R2_EVENT_WEBVIEW_READY,
 } from "../../common/events";
-import { animateProperty } from "../common/animateProperty";
+import { animateProperty, IPropertyAnimationState } from "../common/animateProperty";
 import { fullQualifiedSelector } from "../common/cssselector";
 import { easings } from "../common/easings";
 import { getURLQueryParams } from "../common/querystring";
@@ -36,8 +36,8 @@ let queryParams = win.location.search ? getURLQueryParams(win.location.search) :
 let _hashElement: Element | null;
 
 ipcRenderer.on(R2_EVENT_SCROLLTO, (_event: any, messageString: any) => {
-    console.log("R2_EVENT_SCROLLTO");
-    console.log(messageString);
+    // console.log("R2_EVENT_SCROLLTO");
+    // console.log(messageString);
 
     const messageJson = JSON.parse(messageString);
     if (!queryParams) {
@@ -77,31 +77,34 @@ ipcRenderer.on(R2_EVENT_SCROLLTO, (_event: any, messageString: any) => {
     // notifyReadingLocation();
 });
 
+let _lastAnimState: IPropertyAnimationState | undefined;
+
 ipcRenderer.on(R2_EVENT_PAGE_TURN, (_event: any, messageString: any) => {
-    const element = win.document.body;
-    if (!element) {
+    if (!win.document.body) {
+        ipcRenderer.sendToHost(R2_EVENT_PAGE_TURN_RES, messageString);
         return;
     }
+
     // console.log("---");
     // console.log("webview.innerWidth: " + win.innerWidth);
     // console.log("document.offsetWidth: " + win.document.documentElement.offsetWidth);
     // console.log("document.clientWidth: " + win.document.documentElement.clientWidth);
     // console.log("document.scrollWidth: " + win.document.documentElement.scrollWidth);
     // console.log("document.scrollLeft: " + win.document.documentElement.scrollLeft);
-    // console.log("body.offsetWidth: " + element.offsetWidth);
-    // console.log("body.clientWidth: " + element.clientWidth);
-    // console.log("body.scrollWidth: " + element.scrollWidth);
-    // console.log("body.scrollLeft: " + element.scrollLeft);
+    // console.log("body.offsetWidth: " + win.document.body.offsetWidth);
+    // console.log("body.clientWidth: " + win.document.body.clientWidth);
+    // console.log("body.scrollWidth: " + win.document.body.scrollWidth);
+    // console.log("body.scrollLeft: " + win.document.body.scrollLeft);
     // console.log("---");
     // console.log("webview.innerHeight: " + win.innerHeight);
     // console.log("document.offsetHeight: " + win.document.documentElement.offsetHeight);
     // console.log("document.clientHeight: " + win.document.documentElement.clientHeight);
     // console.log("document.scrollHeight: " + win.document.documentElement.scrollHeight);
     // console.log("document.scrollTop: " + win.document.documentElement.scrollTop);
-    // console.log("body.offsetHeight: " + element.offsetHeight);
-    // console.log("body.clientHeight: " + element.clientHeight);
-    // console.log("body.scrollHeight: " + element.scrollHeight);
-    // console.log("body.scrollTop: " + element.scrollTop);
+    // console.log("body.offsetHeight: " + win.document.body.offsetHeight);
+    // console.log("body.clientHeight: " + win.document.body.clientHeight);
+    // console.log("body.scrollHeight: " + win.document.body.scrollHeight);
+    // console.log("body.scrollTop: " + win.document.body.scrollTop);
     // console.log("---");
 
     // win.document.body.offsetWidth === single column width (takes into account column gap?)
@@ -115,7 +118,18 @@ ipcRenderer.on(R2_EVENT_PAGE_TURN, (_event: any, messageString: any) => {
     // win.document.body.scrollLeft === positive number for horizontal shift
     // win.document.body.scrollTop === positive number for vertical shift
 
-    const maxHeightShift = element.scrollHeight - win.document.documentElement.clientHeight;
+    const isPaged = win.document.documentElement.classList.contains("readium-paginated");
+    // console.log("isPaged: " + isPaged);
+    // const isTwoPage = isPaged && (win.document.documentElement.offsetWidth === (win.document.body.offsetWidth * 2));
+    const isTwoPage = isPaged && (win.document.documentElement.offsetWidth > win.document.body.offsetWidth);
+    // console.log("isTwoPage: " + isTwoPage);
+    const nColumns = isPaged ? (win.document.body.offsetHeight / win.document.body.scrollHeight) : 0;
+    // console.log("nColumns: " + nColumns);
+
+    const maxHeightShift = isPaged ?
+        win.document.body.scrollWidth - win.document.documentElement.offsetWidth :
+        win.document.body.scrollHeight - win.document.documentElement.clientHeight;
+    // console.log("maxHeightShift: " + maxHeightShift);
 
     const messageJson = JSON.parse(messageString);
     // const isRTL = messageJson.direction === "RTL"; //  any other value is LTR
@@ -124,40 +138,102 @@ ipcRenderer.on(R2_EVENT_PAGE_TURN, (_event: any, messageString: any) => {
     // console.log(JSON.stringify(messageJson, null, "  "));
 
     if (!goPREVIOUS) { // goPREVIOUS && isRTL || !goPREVIOUS && !isRTL) { // right
-        if (element.scrollTop < maxHeightShift) { // not at bottom
-            animateProperty(
-                win.cancelAnimationFrame,
-                undefined,
-                // (cancelled: boolean) => {
-                //     console.log(cancelled);
-                // },
-                "scrollTop",
-                300,
-                element,
-                element.scrollTop + win.document.documentElement.clientHeight,
-                win.requestAnimationFrame,
-                easings.easeInOutQuad,
-            );
-            // element.scrollTop += win.document.documentElement.clientHeight;
-            return;
+        if (isPaged) {
+            // console.log("element.scrollLeft: " + win.document.body.scrollLeft);
+            if (win.document.body.scrollLeft < maxHeightShift) { // not at end
+                if (_lastAnimState && _lastAnimState.animating) {
+                    win.cancelAnimationFrame(_lastAnimState.id);
+                    _lastAnimState.object[_lastAnimState.property] = _lastAnimState.destVal;
+                }
+                const newVal = win.document.body.scrollLeft + win.document.documentElement.offsetWidth;
+                // console.log("element.scrollLeft NEW: " + newVal);
+                _lastAnimState = animateProperty(
+                    win.cancelAnimationFrame,
+                    undefined,
+                    // (cancelled: boolean) => {
+                    //     console.log(cancelled);
+                    // },
+                    "scrollLeft",
+                    300,
+                    win.document.body,
+                    newVal,
+                    win.requestAnimationFrame,
+                    easings.easeInOutQuad,
+                );
+                return;
+            }
+        } else {
+            // console.log("element.scrollTop: " + win.document.body.scrollTop);
+            if (win.document.body.scrollTop < maxHeightShift) { // not at bottom
+                if (_lastAnimState && _lastAnimState.animating) {
+                    win.cancelAnimationFrame(_lastAnimState.id);
+                    _lastAnimState.object[_lastAnimState.property] = _lastAnimState.destVal;
+                }
+                const newVal = win.document.body.scrollTop + win.document.documentElement.clientHeight;
+                // console.log("element.scrollTop NEW: " + newVal);
+                _lastAnimState = animateProperty(
+                    win.cancelAnimationFrame,
+                    undefined,
+                    // (cancelled: boolean) => {
+                    //     console.log(cancelled);
+                    // },
+                    "scrollTop",
+                    300,
+                    win.document.body,
+                    newVal,
+                    win.requestAnimationFrame,
+                    easings.easeInOutQuad,
+                );
+                return;
+            }
         }
     } else if (goPREVIOUS) { //  && !isRTL || !goPREVIOUS && isRTL) { // left
-        if (element.scrollTop > 0) { // not at top
-            animateProperty(
-                win.cancelAnimationFrame,
-                undefined,
-                // (cancelled: boolean) => {
-                //     console.log(cancelled);
-                // },
-                "scrollTop",
-                300,
-                element,
-                element.scrollTop - win.document.documentElement.clientHeight,
-                win.requestAnimationFrame,
-                easings.easeInOutQuad,
-            );
-            // element.scrollTop -= win.document.documentElement.clientHeight;
-            return;
+        if (isPaged) {
+            if (win.document.body.scrollLeft > 0) { // not at begin
+                if (_lastAnimState && _lastAnimState.animating) {
+                    win.cancelAnimationFrame(_lastAnimState.id);
+                    _lastAnimState.object[_lastAnimState.property] = _lastAnimState.destVal;
+                }
+                const newVal = win.document.body.scrollLeft - win.document.documentElement.offsetWidth;
+                // console.log("element.scrollLeft NEW: " + newVal);
+                _lastAnimState = animateProperty(
+                    win.cancelAnimationFrame,
+                    undefined,
+                    // (cancelled: boolean) => {
+                    //     console.log(cancelled);
+                    // },
+                    "scrollLeft",
+                    300,
+                    win.document.body,
+                    newVal,
+                    win.requestAnimationFrame,
+                    easings.easeInOutQuad,
+                );
+                return;
+            }
+        } else {
+            if (win.document.body.scrollTop > 0) { // not at top
+                if (_lastAnimState && _lastAnimState.animating) {
+                    win.cancelAnimationFrame(_lastAnimState.id);
+                    _lastAnimState.object[_lastAnimState.property] = _lastAnimState.destVal;
+                }
+                const newVal = win.document.body.scrollTop - win.document.documentElement.clientHeight;
+                // console.log("element.scrollTop NEW: " + newVal);
+                _lastAnimState = animateProperty(
+                    win.cancelAnimationFrame,
+                    undefined,
+                    // (cancelled: boolean) => {
+                    //     console.log(cancelled);
+                    // },
+                    "scrollTop",
+                    300,
+                    win.document.body,
+                    newVal,
+                    win.requestAnimationFrame,
+                    easings.easeInOutQuad,
+                );
+                return;
+            }
         }
     }
 
@@ -250,13 +326,44 @@ const notifyReady = () => {
     ipcRenderer.sendToHost(R2_EVENT_WEBVIEW_READY, win.location.href);
 };
 
+function scrollIntoView(element: HTMLElement) {
+    if (!win.document.body) {
+        return;
+    }
+    // console.log("element.offsetTop: " + element.offsetTop);
+    // console.log("win.document.body.scrollHeight: " + win.document.body.scrollHeight);
+
+    // TODO: element.offsetTop probably breaks in nested DOM / CSS box contexts (relative to...)
+
+    let colIndex = element.offsetTop / win.document.body.scrollHeight;
+    // console.log("colIndex: " + colIndex);
+    colIndex = Math.floor(colIndex);
+
+    const isTwoPage = win.document.documentElement.offsetWidth > win.document.body.offsetWidth;
+    const spreadIndex = isTwoPage ? Math.floor(colIndex / 2) : colIndex;
+
+    // console.log("element.getBoundingClientRect().top: " + element.getBoundingClientRect().top);
+    // console.log("element.getBoundingClientRect().left: " + element.getBoundingClientRect().left);
+
+    // const top = (colIndex * win.document.body.scrollHeight) + element.getBoundingClientRect().top;
+    // console.log("top: " + top);
+
+    // const left = (colIndex * win.document.body.offsetWidth);
+    const left = (spreadIndex * win.document.documentElement.offsetWidth);
+    // console.log("left: " + left);
+
+    win.document.body.scrollLeft = left;
+}
+
 const scrollToHashRaw = (firstCall: boolean) => {
 
-    console.log("scrollToHash: " + firstCall);
+    // console.log("scrollToHash: " + firstCall);
+
+    const isPaged = win.document.documentElement.classList.contains("readium-paginated");
 
     if (_locationHashOverride) {
 
-        console.log("_locationHashOverride");
+        // console.log("_locationHashOverride");
 
         if (_locationHashOverride === win.document.body) {
             console.log("body...");
@@ -268,11 +375,15 @@ const scrollToHashRaw = (firstCall: boolean) => {
         notifyReadingLocation();
 
         _ignoreScrollEvent = true;
-        _locationHashOverride.scrollIntoView({
-            behavior: "instant",
-            block: "start",
-            inline: "nearest",
-        });
+        if (isPaged) {
+            scrollIntoView(_locationHashOverride as HTMLElement);
+        } else {
+            _locationHashOverride.scrollIntoView({
+                behavior: "instant",
+                block: "start",
+                inline: "start",
+            });
+        }
 
         return;
     } else if (_hashElement) {
@@ -287,11 +398,15 @@ const scrollToHashRaw = (firstCall: boolean) => {
 
         if (!firstCall) {
             _ignoreScrollEvent = true;
-            _hashElement.scrollIntoView({
-                behavior: "instant",
-                block: "start",
-                inline: "nearest",
-            });
+            if (isPaged) {
+                scrollIntoView(_hashElement as HTMLElement);
+            } else {
+                _hashElement.scrollIntoView({
+                    behavior: "instant",
+                    block: "start",
+                    inline: "start",
+                });
+            }
         }
 
         // _hashElement.classList.add("readium2-hash");
@@ -313,15 +428,26 @@ const scrollToHashRaw = (firstCall: boolean) => {
 
                     console.log("readiumprevious");
 
-                    const maxHeightShift = win.document.body.scrollHeight - win.document.documentElement.clientHeight;
+                    const maxHeightShift = isPaged ?
+                        win.document.body.scrollWidth - win.document.documentElement.offsetWidth :
+                        win.document.body.scrollHeight - win.document.documentElement.clientHeight;
 
                     _ignoreScrollEvent = true;
-                    win.document.body.scrollLeft = 0;
-                    win.document.body.scrollTop = maxHeightShift;
+                    if (isPaged) {
+                        win.document.body.scrollLeft = maxHeightShift;
+                        win.document.body.scrollTop = 0;
+                    } else {
+                        win.document.body.scrollLeft = 0;
+                        win.document.body.scrollTop = maxHeightShift;
+                    }
 
                     _locationHashOverride = undefined;
                     _locationHashOverrideCSSselector = undefined;
-                    processXYRaw(0, win.document.documentElement.clientHeight - 1);
+                    processXYRaw(0,
+                        (isPaged ?
+                            win.document.documentElement.offsetHeight :
+                            win.document.documentElement.clientHeight)
+                        - 1);
 
                     console.log("BOTTOM (previous):");
                     console.log(_locationHashOverride);
@@ -344,7 +470,7 @@ const scrollToHashRaw = (firstCall: boolean) => {
                     }
                     if (selected) {
 
-                        console.log("readiumgoto");
+                        // console.log("readiumgoto");
 
                         _locationHashOverride = selected;
                         _locationHashOverrideCSSselector = gotoCssSelector;
@@ -353,11 +479,15 @@ const scrollToHashRaw = (firstCall: boolean) => {
                         notifyReadingLocation();
 
                         _ignoreScrollEvent = true;
-                        selected.scrollIntoView({
-                            behavior: "instant",
-                            block: "start",
-                            inline: "nearest",
-                        });
+                        if (isPaged) {
+                            scrollIntoView(selected as HTMLElement);
+                        } else {
+                            selected.scrollIntoView({
+                                behavior: "instant",
+                                block: "start",
+                                inline: "start",
+                            });
+                        }
 
                         return;
                     }
@@ -435,6 +565,15 @@ win.addEventListener("DOMContentLoaded", () => {
         injectReadPosCSS();
     }
 
+    win.document.body.addEventListener("focusin", (ev: any) => {
+        const isPaged = win.document.documentElement.classList.contains("readium-paginated");
+        if (isPaged) {
+            setTimeout(() => {
+                scrollIntoView(ev.target as HTMLElement);
+            }, 30);
+        }
+    });
+
     win.document.addEventListener("click", (e) => {
         const href = (e.target as any).href;
         if (!href) {
@@ -487,7 +626,7 @@ win.addEventListener("DOMContentLoaded", () => {
 });
 
 const processXYRaw = (x: number, y: number) => {
-    console.log("processXY");
+    // console.log("processXY");
 
     // const elems = document.elementsFromPoint(x, y);
     // // console.log(elems);
@@ -534,6 +673,11 @@ const processXYRaw = (x: number, y: number) => {
     if (element) {
         _locationHashOverride = element;
         notifyReadingLocation();
+
+        // console.log("element.offsetTop: " + (element as HTMLElement).offsetTop);
+        // console.log("element.getBoundingClientRect().top: " + element.getBoundingClientRect().top);
+        // console.log("element.offsetLeft: " + (element as HTMLElement).offsetLeft);
+        // console.log("element.getBoundingClientRect().left: " + element.getBoundingClientRect().left);
 
         if (DEBUG_VISUALS) {
             element.classList.add("readium2-read-pos2");
