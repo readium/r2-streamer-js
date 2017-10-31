@@ -121,9 +121,9 @@ ipcRenderer.on(R2_EVENT_PAGE_TURN, (_event: any, messageString: any) => {
     const isPaged = win.document.documentElement.classList.contains("readium-paginated");
     // console.log("isPaged: " + isPaged);
     // const isTwoPage = isPaged && (win.document.documentElement.offsetWidth === (win.document.body.offsetWidth * 2));
-    const isTwoPage = isPaged && (win.document.documentElement.offsetWidth > win.document.body.offsetWidth);
+    // const isTwoPage = isPaged && (win.document.documentElement.offsetWidth > win.document.body.offsetWidth);
     // console.log("isTwoPage: " + isTwoPage);
-    const nColumns = isPaged ? (win.document.body.offsetHeight / win.document.body.scrollHeight) : 0;
+    // const nColumns = isPaged ? (win.document.body.offsetHeight / win.document.body.scrollHeight) : 0;
     // console.log("nColumns: " + nColumns);
 
     const maxHeightShift = isPaged ?
