@@ -9,7 +9,7 @@ import { initGlobals } from "../init-globals";
 import { Server } from "./server";
 
 initGlobals();
-setLcpNativePluginPath(path.join(process.cwd(), "LCP/lcp.node"));
+setLcpNativePluginPath(path.join(process.cwd(), "LCP", "lcp.node"));
 
 const debug = debug_("r2:server:cli");
 

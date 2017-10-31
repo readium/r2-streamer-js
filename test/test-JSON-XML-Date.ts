@@ -18,7 +18,7 @@ import {
 } from "./helpers";
 
 initGlobals();
-setLcpNativePluginPath(path.join(process.cwd(), "LCP/lcp.node"));
+setLcpNativePluginPath(path.join(process.cwd(), "LCP", "lcp.node"));
 
 // ==========================
 

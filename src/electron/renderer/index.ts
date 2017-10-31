@@ -81,9 +81,17 @@ const electronStoreLCP: IStore = new StoreElectron("readium2-navigator-lcp", {})
 // console.log(document.URL);
 
 initGlobals();
-setLcpNativePluginPath(path.join(process.cwd(), "LCP/lcp.node"));
 
 const queryParams = getURLQueryParams();
+
+// tslint:disable-next-line:no-string-literal
+const lcpPluginBase64 = queryParams["lcpPlugin"];
+if (lcpPluginBase64) {
+    const lcpPlugin = window.atob(lcpPluginBase64);
+    setLcpNativePluginPath(lcpPlugin);
+} else {
+    setLcpNativePluginPath(path.join(process.cwd(), "LCP", "lcp.node"));
+}
 
 // tslint:disable-next-line:no-string-literal
 const publicationJsonUrl = queryParams["pub"];

@@ -10,7 +10,7 @@ import { setLcpNativePluginPath } from "@parser/epub/lcp";
 import { initGlobals } from "../init-globals";
 
 initGlobals();
-setLcpNativePluginPath(path.join(process.cwd(), "LCP/lcp.node"));
+setLcpNativePluginPath(path.join(process.cwd(), "LCP", "lcp.node"));
 
 console.log("process.cwd():");
 console.log(process.cwd());

@@ -22,7 +22,7 @@ const AES_BLOCK_SIZE = 16;
 
 const debug = debug_("r2:publication:lcp");
 
-let LCP_NATIVE_PLUGIN_PATH = path.join(process.cwd(), "LCP/lcp.node");
+let LCP_NATIVE_PLUGIN_PATH = path.join(process.cwd(), "LCP", "lcp.node");
 export function setLcpNativePluginPath(filepath: string): boolean {
     LCP_NATIVE_PLUGIN_PATH = filepath;
     debug(LCP_NATIVE_PLUGIN_PATH);
