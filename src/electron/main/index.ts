@@ -155,7 +155,7 @@ async function createElectronBrowserWindow(publicationFilePath: string, publicat
     if (lcpHint) {
         fullUrl = fullUrl + "&lcpHint=" + encodeURIComponent_RFC3986(lcpHint);
     }
-    fullUrl = fullUrl + "&lcpPlugin=" + encodeURIComponent_RFC3986(Buffer.from(lcpPluginPath).toString("base64"));
+    // fullUrl = fullUrl + "&lcpPlugin=" + encodeURIComponent_RFC3986(Buffer.from(lcpPluginPath).toString("base64"));
 
     // `file://${process.cwd()}/src/electron/renderer/index.html`;
     // `file://${__dirname}/../../../../src/electron/renderer/index.html`

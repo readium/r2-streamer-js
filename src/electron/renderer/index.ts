@@ -8,10 +8,8 @@ import { initGlobals } from "@r2-streamer-js/init-globals";
 import { IStringMap } from "@r2-streamer-js/models/metadata-multilang";
 import { Publication } from "@r2-streamer-js/models/publication";
 import { Link } from "@r2-streamer-js/models/publication-link";
-import { setLcpNativePluginPath } from "@r2-streamer-js/parser/epub/lcp";
 import { shell } from "electron";
 import { ipcRenderer } from "electron";
-import * as path from "path";
 import { JSON as TAJSON } from "ta-json";
 import {
     R2_EVENT_LCP_LSD_RENEW,
@@ -84,14 +82,16 @@ initGlobals();
 
 const queryParams = getURLQueryParams();
 
-// tslint:disable-next-line:no-string-literal
-const lcpPluginBase64 = queryParams["lcpPlugin"];
-if (lcpPluginBase64) {
-    const lcpPlugin = window.atob(lcpPluginBase64);
-    setLcpNativePluginPath(lcpPlugin);
-} else {
-    setLcpNativePluginPath(path.join(process.cwd(), "LCP", "lcp.node"));
-}
+// import * as path from "path";
+// import { setLcpNativePluginPath } from "@r2-streamer-js/parser/epub/lcp";
+// // tslint:disable-next-line:no-string-literal
+// const lcpPluginBase64 = queryParams["lcpPlugin"];
+// if (lcpPluginBase64) {
+//     const lcpPlugin = window.atob(lcpPluginBase64);
+//     setLcpNativePluginPath(lcpPlugin);
+// } else {
+//     setLcpNativePluginPath(path.join(process.cwd(), "LCP", "lcp.node"));
+// }
 
 // tslint:disable-next-line:no-string-literal
 const publicationJsonUrl = queryParams["pub"];
