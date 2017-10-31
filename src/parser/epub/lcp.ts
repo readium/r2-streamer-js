@@ -1,3 +1,4 @@
+import * as bind from "bindings";
 import * as crypto from "crypto";
 import * as fs from "fs";
 import * as path from "path";
@@ -16,8 +17,6 @@ import { Link } from "./lcp-link";
 import { Rights } from "./lcp-rights";
 import { Signature } from "./lcp-signature";
 import { User } from "./lcp-user";
-
-// import * as bind from "bindings";
 
 const AES_BLOCK_SIZE = 16;
 
@@ -105,24 +104,15 @@ export class LCP {
             const fileName = path.basename(LCP_NATIVE_PLUGIN_PATH);
             debug(filePath);
             debug(fileName);
-            try {
-                this._lcpNative = require(LCP_NATIVE_PLUGIN_PATH);
-            } catch (ex) {
-                debug("LCP JS impl fallback :(");
-                debug(ex);
-                this._usesNativeNodePlugin = false;
-                this._lcpNative = undefined;
-                return;
-            }
             this._usesNativeNodePlugin = true;
-            // this._lcpNative = bind({
-            //     bindings: fileName,
-            //     module_root: filePath,
-            //     try: [[
-            //         "module_root",
-            //         "bindings",
-            //     ]],
-            // });
+            this._lcpNative = bind({
+                bindings: fileName,
+                module_root: filePath,
+                try: [[
+                    "module_root",
+                    "bindings",
+                ]],
+            });
         } else {
             debug("LCP JS impl");
             this._usesNativeNodePlugin = false;
