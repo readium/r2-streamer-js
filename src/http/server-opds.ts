@@ -73,6 +73,11 @@ export function serverOPDS(_server: Server, topRouter: express.Application) {
         };
 
         const success = async (response: request.RequestResponse) => {
+
+            // Object.keys(response.headers).forEach((header: string) => {
+            //     debug(header + " => " + response.headers[header]);
+            // });
+
             if (response.statusCode && (response.statusCode < 200 || response.statusCode >= 300)) {
                 failure("HTTP CODE " + response.statusCode);
                 return;

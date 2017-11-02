@@ -183,8 +183,8 @@ const computeReadiumCssJsonMessage = (): string => {
 const readiumCssOnOff = debounce(() => {
 
     const str = computeReadiumCssJsonMessage();
-    _webview1.send(R2_EVENT_READIUMCSS, str); // .getWebContents()
-    _webview2.send(R2_EVENT_READIUMCSS, str); // .getWebContents()
+    (_webview1 as any).send(R2_EVENT_READIUMCSS, str); // .getWebContents()
+    (_webview2 as any).send(R2_EVENT_READIUMCSS, str); // .getWebContents()
 }, 500);
 
 // super hacky, but necessary :(
@@ -904,11 +904,16 @@ const saveReadingLocation = (doc: string, loc: string) => {
     electronStore.set("readingLocation", obj);
 };
 
-let _webview1: Electron.WebviewTag;
-let _webview2: Electron.WebviewTag;
+// CAN'T USE Electron.WebviewTag !! :(
+// https://github.com/electron/electron-typescript-definitions/pull/81
+// TypeScript compiler with strictFunctionTypes =>
+// node_modules/electron/electron.d.ts(5390,13):
+// error TS2430: Interface 'WebviewTag' incorrectly extends interface 'HTMLElement'.
+let _webview1: HTMLElement; // Electron.WebviewTag;
+let _webview2: HTMLElement; // Electron.WebviewTag;
 
-function createWebView(): Electron.WebviewTag {
-    const wv = document.createElement("webview");
+function createWebView(): HTMLElement { // Electron.WebviewTag
+    const wv = document.createElement("webview") as HTMLElement;
     wv.setAttribute("webpreferences",
         "nodeIntegration=0, nodeIntegrationInWorker=0, sandbox=0, javascript=1, " +
         "contextIsolation=0, webSecurity=1, allowRunningInsecureContent=0");
@@ -920,11 +925,11 @@ function createWebView(): Electron.WebviewTag {
     wv.addEventListener("dom-ready", () => {
         // wv.openDevTools();
 
-        wv.clearHistory();
+        (wv as any).clearHistory();
     });
 
-    wv.addEventListener("ipc-message", (event) => {
-        const webview = event.currentTarget as Electron.WebviewTag;
+    wv.addEventListener("ipc-message", (event: any) => { // Electron.IpcMessageEvent
+        const webview = event.currentTarget as HTMLElement; // Electron.WebviewTag;
         const activeWebView = getActiveWebView();
         if (webview !== activeWebView) {
             return;
@@ -983,10 +988,10 @@ function createWebView(): Electron.WebviewTag {
     return wv;
 }
 
-const adjustResize = (webview: Electron.WebviewTag) => {
+const adjustResize = (webview: HTMLElement) => { // Electron.WebviewTag
     const width = webview.clientWidth;
     const height = webview.clientHeight;
-    const wc = webview.getWebContents();
+    const wc = (webview as any).getWebContents();
     if (wc && width && height) {
         wc.setSize({
             normal: {
@@ -1135,7 +1140,7 @@ function loadLink(hrefFull: string, previous: boolean | undefined, useGoto: bool
             }
         }
 
-        webviewToReuse.send(R2_EVENT_SCROLLTO, msgStr); // .getWebContents()
+        (webviewToReuse as any).send(R2_EVENT_SCROLLTO, msgStr); // .getWebContents()
 
         return;
     }
@@ -1210,9 +1215,9 @@ function loadLink(hrefFull: string, previous: boolean | undefined, useGoto: bool
     }
 }
 
-const getActiveWebView = (): Electron.WebviewTag => {
+const getActiveWebView = (): HTMLElement => { // Electron.WebviewTag
 
-    let activeWebView: Electron.WebviewTag;
+    let activeWebView: HTMLElement; // Electron.WebviewTag
 
     const slidingViewport = document.getElementById("sliding_viewport") as HTMLElement;
     if (slidingViewport.classList.contains("shiftedLeft")) {
@@ -1251,8 +1256,8 @@ function startNavigatorExperiment() {
     _webview2.setAttribute("class", "full");
 
     const slidingViewport = document.getElementById("sliding_viewport") as HTMLElement;
-    slidingViewport.appendChild(_webview1);
-    slidingViewport.appendChild(_webview2);
+    slidingViewport.appendChild(_webview1 as Node);
+    slidingViewport.appendChild(_webview2 as Node);
 
     // tslint:disable-next-line:no-floating-promises
     (async () => {
@@ -1470,5 +1475,5 @@ function navLeftOrRight(left: boolean) {
         go: goPREVIOUS ? "PREVIOUS" : "NEXT",
     };
     const messageStr = JSON.stringify(messageJson);
-    activeWebView.send(R2_EVENT_PAGE_TURN, messageStr); // .getWebContents()
+    (activeWebView as any).send(R2_EVENT_PAGE_TURN, messageStr); // .getWebContents()
 }

@@ -642,20 +642,20 @@ const processXYRaw = (x: number, y: number) => {
     //     console.log("caretRangeFromPoint");
     // }
 
-    let textNode: Node | undefined;
-    let textNodeOffset = 0;
+    // let textNode: Node | undefined;
+    // let textNodeOffset = 0;
 
     const range = document.caretRangeFromPoint(x, y);
     if (range) {
         const node = range.startContainer;
-        const offset = range.startOffset;
+        // const offset = range.startOffset;
 
         if (node) {
             if (node.nodeType === Node.ELEMENT_NODE) {
                 element = node as Element;
             } else if (node.nodeType === Node.TEXT_NODE) {
-                textNode = node;
-                textNodeOffset = offset;
+                // textNode = node;
+                // textNodeOffset = offset;
                 if (node.parentNode && node.parentNode.nodeType === Node.ELEMENT_NODE) {
                     element = node.parentNode as Element;
                 }

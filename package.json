@@ -110,7 +110,7 @@
     "sorcery": "^0.10.0",
     "tslint": "^5.8.0",
     "tslint-language-service": "^0.9.6",
-    "typescript": "^2.5.3",
+    "typescript": "^2.6.1",
     "uglify-es": "^3.1.6"
   },
   "main": "dist/es6-es2015/src/index.js",
@@ -187,7 +187,7 @@
     "lint": "npm run lint:all && npm run lint:typescript:full",
     "lint:all": "eclint check \"**/*\" \"!**/*.node\" \"!.git/**/*\" \"!node_modules*/**/*\" \"!dist/**/*\" \"!misc/**/*\" \"!now/**/*\" \"!.vscode/**/*\" \"!.history/**/*\" \"!**/.DS_Store\" \"!**/*.epub\" \"!**/*.cbz\"  \"!**/*.jpg\"  \"!**/*.jpeg\"  \"!**/*.png\"  \"!**/*.log\"",
     "lint:typescript": "tslint -c \"./tslint.json\" \"./src/**/*.ts\" \"./test/**/*.ts\"",
-    "lint:typescript:full": "tslint --type-check --project \"./tsconfig.json\" -c \"./tslint.json\" \"./src/**/*.ts\" \"./test/**/*.ts\"",
+    "lint:typescript:full": "tslint --project \"./tsconfig.json\" -c \"./tslint.json\" \"./src/**/*.ts\" \"./test/**/*.ts\"",
     "lintfix": "sed -i \"\" \"s/let normalizedPath = path\\.normalize(documentPath);/let normalizedPath = path.normalize(documentPath).toLowerCase();/g\" ./node_modules/tslint-language-service/out/src/index.js",
     "pretranspile:typescript": "npm run clean",
     "transpile:typescript": "tsc -p \"./tsconfig.json\"",

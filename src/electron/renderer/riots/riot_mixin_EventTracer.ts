@@ -8,6 +8,7 @@ export const riot_mixin_EventTracer = { // : RiotMixinWithOpts
         console.log(opts);
         console.log(this);
 
+        // @ts-ignore: TS2352 (Type of 'this' [init(opts: any) function] cannot be converted to RiotTag)
         const that = this as RiotTag;
 
         that.on("*", (evName: string) => {

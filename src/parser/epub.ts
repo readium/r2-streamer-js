@@ -63,6 +63,8 @@ export const addCoverDimensions = async (publication: Publication, coverLink: Li
             try {
                 zipStream = await zip.entryStreamPromise(coverLink.Href);
             } catch (err) {
+                debug(coverLink.Href);
+                debug(coverLink.TypeLink);
                 debug(err);
                 return;
             }
@@ -83,6 +85,8 @@ export const addCoverDimensions = async (publication: Publication, coverLink: Li
                     }
                 }
             } catch (err) {
+                debug(coverLink.Href);
+                debug(coverLink.TypeLink);
                 debug(err);
             }
         }
@@ -1286,7 +1290,8 @@ const fillCalibreSerieInfo = (publication: Publication, _rootfile: Rootfile, opf
     }
 };
 
-const fillTOCFromNavDoc = async (publication: Publication, _rootfile: Rootfile, _opf: OPF, zip: IZip) => {
+const fillTOCFromNavDoc = async (publication: Publication, _rootfile: Rootfile, _opf: OPF, zip: IZip):
+    Promise<void> => {
 
     const navLink = publication.GetNavDoc();
     if (!navLink) {
@@ -1323,7 +1328,7 @@ const fillTOCFromNavDoc = async (publication: Publication, _rootfile: Rootfile, 
         xhtml: "http://www.w3.org/1999/xhtml",
     });
 
-    const navs = select("/xhtml:html/xhtml:body//xhtml:nav", navXmlDoc);
+    const navs = select("/xhtml:html/xhtml:body//xhtml:nav", navXmlDoc) as Element[];
     if (navs && navs.length) {
 
         navs.forEach((navElement: Element) => {
