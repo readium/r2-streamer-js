@@ -108,6 +108,7 @@ export class OPDSPublicationMetadata {
 
     @OnDeserialized()
     // tslint:disable-next-line:no-unused-variable
+    // @ts-ignore: TS6133 (is declared but its value is never read.)
     private _OnDeserialized() {
         if (!this.Title) {
             console.log("OPDSPublicationMetadata.Title is not set!");

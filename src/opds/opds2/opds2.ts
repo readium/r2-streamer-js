@@ -238,6 +238,7 @@ export class OPDSFeed {
 
     @OnDeserialized()
     // tslint:disable-next-line:no-unused-variable
+    // @ts-ignore: TS6133 (is declared but its value is never read.)
     private _OnDeserialized() {
         if (!this.Metadata) {
             console.log("OPDS2Feed.Metadata is not set!");

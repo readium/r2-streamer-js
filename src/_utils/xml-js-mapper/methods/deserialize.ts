@@ -201,7 +201,7 @@ function deserializeRootObject(
                 // console.log(namespaces);
                 // console.log(p.xpathSelector);
                 const select = xpath.useNamespaces(p.namespaces || {});
-                const xPathSelected = select(p.xpathSelector, objectInstance);
+                const xPathSelected = select(p.xpathSelector, objectInstance) as Node[];
 
                 if (xPathSelected && xPathSelected.length) {
 

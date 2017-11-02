@@ -12,9 +12,12 @@ export const riot_mixin_RecursivePropertySetter: RiotMixinWithRecursivePropertyS
 
     setPropertyRecursively(name: string, val: any, childTagName: string) {
 
+        // @ts-ignore: TS7017 (Element implicitly has an 'any' type because no index signature)
         this[name] = val;
 
+        // @ts-ignore: TS2352 (Type of 'this' [setPropertyRecursively(...) function] cannot be converted to RiotTag)
         const that = this as RiotTag;
+
         const children = that.tags[childTagName] as any;
 
         if (!children) {

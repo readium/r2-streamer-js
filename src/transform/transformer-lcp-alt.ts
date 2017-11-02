@@ -157,6 +157,7 @@ export class TransformerLCPAlt extends TransformerLCP {
 
         const TWO_AES_BLOCK_SIZE = 2 * AES_BLOCK_SIZE;
 
+        // @ts-ignore: TS2345 strictFunctionTypes
         const decryptStream = new Transform({
             flush(callback: () => void): void {
                 debugx("LcpDecryptStream FLUSH");
@@ -210,7 +211,7 @@ export class TransformerLCPAlt extends TransformerLCP {
                     }
                     decryptStreamBytesSent += newBuff.length;
                     debugx("LcpDecryptStream FLUSH decryptStreamBytesSent: " + decryptStreamBytesSent);
-                    this.push(newBuff);
+                    decryptStream.push(newBuff);
                 }
 
                 if (decryptStreamBytesSent !== plainTextSize) {
@@ -234,10 +235,10 @@ export class TransformerLCPAlt extends TransformerLCP {
                     if (!decryptStreamClosed) {
                         debugx("???? LcpDecryptStream CLOSING...");
                         decryptStreamClosed = true;
-                        this.push(null);
+                        decryptStream.push(null);
                     } else {
                         debugx("???? LcpDecryptStream STILL PIPE CALLING _transform ??!");
-                        this.end();
+                        decryptStream.end();
                     }
                 } else {
                     if (decryptStreamBytesReceived > decryptStreamStreamBegin) {
@@ -337,14 +338,14 @@ export class TransformerLCPAlt extends TransformerLCP {
                             }
                             decryptStreamBytesSent += newBuff.length;
                             debugx("LcpDecryptStream TRANSFORM decryptStreamBytesSent: " + decryptStreamBytesSent);
-                            this.push(newBuff);
+                            decryptStream.push(newBuff);
                         }
 
                         if (decryptStreamFinished) {
                             debugx("LcpDecryptStream FINISHING...");
                             decryptStreamClosed = true;
-                            this.push(null);
-                            this.end();
+                            decryptStream.push(null);
+                            decryptStream.end();
                         }
                     } else {
                         // NOOP

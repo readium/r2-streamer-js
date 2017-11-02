@@ -30,6 +30,7 @@ export class OPDSGroup {
 
     @OnDeserialized()
     // tslint:disable-next-line:no-unused-variable
+    // @ts-ignore: TS6133 (is declared but its value is never read.)
     private _OnDeserialized() {
         if (!this.Metadata) {
             console.log("OPDSGroup.Metadata is not set!");

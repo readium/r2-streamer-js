@@ -16,6 +16,7 @@ export class OPDSPrice {
 
     @OnDeserialized()
     // tslint:disable-next-line:no-unused-variable
+    // @ts-ignore: TS6133 (is declared but its value is never read.)
     private _OnDeserialized() {
         if (!this.Currency) {
             console.log("OPDSPrice.Currency is not set!");

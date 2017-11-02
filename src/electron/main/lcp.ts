@@ -109,6 +109,11 @@ export async function downloadFromLCPL(filePath: string, dir: string, destFileNa
                 };
 
                 const success = async (response: request.RequestResponse) => {
+
+                    Object.keys(response.headers).forEach((header: string) => {
+                        debug(header + " => " + response.headers[header]);
+                    });
+
                     if (response.statusCode && (response.statusCode < 200 || response.statusCode >= 300)) {
                         failure("HTTP CODE " + response.statusCode);
                         return;
@@ -136,15 +141,6 @@ export async function downloadFromLCPL(filePath: string, dir: string, destFileNa
 
                         injectFileInZip(destPathTMP, destPathFINAL, filePath, zipEntryPath, zipError, doneCallback);
                     });
-
-                    // let responseData: Buffer;
-                    // try {
-                    //     responseData = await streamToBufferPromise(response);
-                    // } catch (err) {
-                    //     debug(err);
-                    //     return;
-                    // }
-                    // const responseStr = responseData.toString("utf8");
                 };
 
                 // No response streaming! :(

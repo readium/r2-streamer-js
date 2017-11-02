@@ -2,7 +2,7 @@
 
 export function startServiceWorkerExperiment(publicationJsonUrl: string) {
 
-    const webview2 = document.createElement("webview");
+    const webview2 = document.createElement("webview") as HTMLElement;
     webview2.setAttribute("id", "webview2");
     webview2.setAttribute("webpreferences",
         "nodeIntegration=0, nodeIntegrationInWorker=0, sandbox=0, " +
@@ -10,7 +10,7 @@ export function startServiceWorkerExperiment(publicationJsonUrl: string) {
     webview2.setAttribute("preload", "./sw/preload_service-worker.js");
     const readerChrome = document.getElementById("reader_chrome");
     if (readerChrome) {
-        readerChrome.appendChild(webview2);
+        readerChrome.appendChild(webview2 as Node);
     }
     // webview2.addEventListener('did-start-loading', () => {
     // });
@@ -20,7 +20,7 @@ export function startServiceWorkerExperiment(publicationJsonUrl: string) {
     // });
     webview2.addEventListener("dom-ready", () => {
 
-        webview2.openDevTools();
+        (webview2 as any).openDevTools();
         // const wc = webview2.getWebContents();
 
         setTimeout(async () => {
