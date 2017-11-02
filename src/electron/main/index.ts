@@ -200,7 +200,7 @@ app.on("ready", () => {
 
         installLcpHandler(_publicationsServer, deviceIDManager);
 
-        setupReadiumCSS(_publicationsServer, "dist/ReadiumCSS");
+        setupReadiumCSS(_publicationsServer, path.join(process.cwd(), "dist/ReadiumCSS"));
 
         // _publicationsServer.expressGet(["/resize-sensor.js"],
         //     (req: express.Request, res: express.Response) => {
