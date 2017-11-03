@@ -94,6 +94,8 @@ export class MediaOverlayNode {
 
     public SmilPathInZip: string;
 
+    public initialized: boolean;
+
     // public inspect(depth: number, opts: any): string | null | undefined {
     //     return "MediaOverlay: " + this.SmilPathInZip;
     // }
