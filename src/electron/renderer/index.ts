@@ -1065,7 +1065,7 @@ function loadLink(hrefFull: string, previous: boolean | undefined, useGoto: bool
     const pathPrefix = pubUri.path().replace("manifest.json", "");
 
     // "/pub/BASE64_PATH/epub/chapter.html" ==> "epub/chapter.html"
-    const linkPath = linkUri.normalizePath().path().replace(pathPrefix, "");
+    const linkPath = decodeURIComponent(linkUri.normalizePath().path().replace(pathPrefix, ""));
 
     let pubLink = _publication.Spine.find((spineLink) => {
         return spineLink.Href === linkPath;
@@ -1077,7 +1077,7 @@ function loadLink(hrefFull: string, previous: boolean | undefined, useGoto: bool
     }
 
     if (!pubLink) {
-        console.log("FATAL WEBVIEW READIUM2_LINK ??!!");
+        console.log("FATAL WEBVIEW READIUM2_LINK ??!! " + hrefFull + " ==> " + linkPath);
         return;
     }
 
