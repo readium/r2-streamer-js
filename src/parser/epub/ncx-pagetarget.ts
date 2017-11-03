@@ -6,6 +6,7 @@ import { Content } from "./ncx-content";
 
 @XmlObject({
     ncx: "http://www.daisy.org/z3986/2005/ncx/",
+    xml: "http://www.w3.org/XML/1998/namespace",
 })
 export class PageTarget {
 
@@ -23,7 +24,7 @@ export class PageTarget {
     @XmlXPathSelector("@playOrder")
     public PlayOrder: number;
 
-    @XmlXPathSelector("@id")
+    @XmlXPathSelector("@id | @xml:id")
     public ID: string;
 
     @XmlXPathSelector("ncx:content")

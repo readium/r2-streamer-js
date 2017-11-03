@@ -6,12 +6,13 @@ import {
 @XmlObject({
     dc: "http://purl.org/dc/elements/1.1/",
     opf: "http://www.idpf.org/2007/opf",
+    xml: "http://www.w3.org/XML/1998/namespace",
 })
 export class Manifest {
 
     // XPATH ROOT: /opf:package/opf:manifest/opf:item
 
-    @XmlXPathSelector("@id")
+    @XmlXPathSelector("@id | @xml:id")
     public ID: string;
 
     @XmlXPathSelector("@href")

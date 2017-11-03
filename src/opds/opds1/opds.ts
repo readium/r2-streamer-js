@@ -18,6 +18,7 @@ import { Link } from "./opds-link";
     relevance: "http://a9.com/-/opensearch/extensions/relevance/1.0/",
     schema: "http://schema.org",
     thr: "http://purl.org/syndication/thread/1.0",
+    xml: "http://www.w3.org/XML/1998/namespace",
     xsi: "http://www.w3.org/2001/XMLSchema-instance",
 })
 export class OPDS {
@@ -49,7 +50,7 @@ export class OPDS {
     @XmlItemType(Author)
     public Authors: Author[];
 
-    @XmlXPathSelector("@lang")
+    @XmlXPathSelector("@lang | @xml:lang")
     public Lang: string;
 
     @XmlXPathSelector("atom:link")
