@@ -127,8 +127,12 @@ ipcRenderer.on(R2_EVENT_PAGE_TURN, (_event: any, messageString: any) => {
     // console.log("nColumns: " + nColumns);
 
     const maxHeightShift = isPaged ?
-        win.document.body.scrollWidth - win.document.documentElement.offsetWidth :
-        win.document.body.scrollHeight - win.document.documentElement.clientHeight;
+        ((_isVerticalWritingMode ?
+            (win.document.body.scrollHeight - win.document.documentElement.offsetHeight) :
+            (win.document.body.scrollWidth - win.document.documentElement.offsetWidth))) :
+        ((_isVerticalWritingMode ?
+            (win.document.body.scrollWidth - win.document.documentElement.clientWidth) :
+            (win.document.body.scrollHeight - win.document.documentElement.clientHeight)));
     // console.log("maxHeightShift: " + maxHeightShift);
 
     const messageJson = JSON.parse(messageString);
@@ -164,12 +168,15 @@ ipcRenderer.on(R2_EVENT_PAGE_TURN, (_event: any, messageString: any) => {
             }
         } else {
             // console.log("element.scrollTop: " + win.document.body.scrollTop);
-            if (win.document.body.scrollTop < maxHeightShift) { // not at bottom
+            if (_isVerticalWritingMode && (win.document.body.scrollLeft < maxHeightShift) ||
+                !_isVerticalWritingMode && (win.document.body.scrollTop < maxHeightShift)) { // not at bottom / left
                 if (_lastAnimState && _lastAnimState.animating) {
                     win.cancelAnimationFrame(_lastAnimState.id);
                     _lastAnimState.object[_lastAnimState.property] = _lastAnimState.destVal;
                 }
-                const newVal = win.document.body.scrollTop + win.document.documentElement.clientHeight;
+                const newVal = _isVerticalWritingMode ?
+                    (win.document.body.scrollLeft + win.document.documentElement.clientWidth) :
+                    (win.document.body.scrollTop + win.document.documentElement.clientHeight);
                 // console.log("element.scrollTop NEW: " + newVal);
                 _lastAnimState = animateProperty(
                     win.cancelAnimationFrame,
@@ -177,7 +184,7 @@ ipcRenderer.on(R2_EVENT_PAGE_TURN, (_event: any, messageString: any) => {
                     // (cancelled: boolean) => {
                     //     console.log(cancelled);
                     // },
-                    "scrollTop",
+                    _isVerticalWritingMode ? "scrollLeft" : "scrollTop",
                     300,
                     win.document.body,
                     newVal,
@@ -212,12 +219,15 @@ ipcRenderer.on(R2_EVENT_PAGE_TURN, (_event: any, messageString: any) => {
                 return;
             }
         } else {
-            if (win.document.body.scrollTop > 0) { // not at top
+            if (_isVerticalWritingMode && (win.document.body.scrollLeft > 0) ||
+                !_isVerticalWritingMode && (win.document.body.scrollTop > 0)) { // not at top / right
                 if (_lastAnimState && _lastAnimState.animating) {
                     win.cancelAnimationFrame(_lastAnimState.id);
                     _lastAnimState.object[_lastAnimState.property] = _lastAnimState.destVal;
                 }
-                const newVal = win.document.body.scrollTop - win.document.documentElement.clientHeight;
+                const newVal = _isVerticalWritingMode ?
+                    (win.document.body.scrollLeft - win.document.documentElement.clientWidth) :
+                    (win.document.body.scrollTop - win.document.documentElement.clientHeight);
                 // console.log("element.scrollTop NEW: " + newVal);
                 _lastAnimState = animateProperty(
                     win.cancelAnimationFrame,
@@ -225,7 +235,7 @@ ipcRenderer.on(R2_EVENT_PAGE_TURN, (_event: any, messageString: any) => {
                     // (cancelled: boolean) => {
                     //     console.log(cancelled);
                     // },
-                    "scrollTop",
+                    _isVerticalWritingMode ? "scrollLeft" : "scrollTop",
                     300,
                     win.document.body,
                     newVal,
@@ -539,10 +549,38 @@ const resetInitialState = () => {
     _readyEventSent = false;
 };
 
+let _isVerticalWritingMode = false;
+
 // after DOMContentLoaded
 win.addEventListener("load", () => {
     // console.log("PRELOAD WIN LOAD");
     checkReadyPass();
+
+    const htmlStyle = window.getComputedStyle(win.document.documentElement);
+    if (htmlStyle) {
+        let prop = htmlStyle.getPropertyValue("writing-mode");
+        if (!prop) {
+            prop = htmlStyle.getPropertyValue("-epub-writing-mode");
+        }
+        if (prop && prop.indexOf("vertical") >= 0) {
+            _isVerticalWritingMode = true;
+        }
+    }
+    if (!_isVerticalWritingMode && win.document.body) {
+        const bodyStyle = window.getComputedStyle(win.document.body);
+        if (bodyStyle) {
+            let prop = bodyStyle.getPropertyValue("writing-mode");
+            if (!prop) {
+                prop = bodyStyle.getPropertyValue("-epub-writing-mode");
+            }
+            if (prop && prop.indexOf("vertical") >= 0) {
+                _isVerticalWritingMode = true;
+            }
+        }
+    }
+    if (_isVerticalWritingMode) {
+        console.log("isVerticalWritingMode: " + _isVerticalWritingMode);
+    }
 });
 
 // // does not occur when re-using same webview (src="href")
