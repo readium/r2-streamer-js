@@ -8,6 +8,7 @@ import {
 
 import { BelongsTo } from "./metadata-belongsto";
 import { Contributor } from "./metadata-contributor";
+import { MediaOverlay } from "./metadata-media-overlay";
 import { IStringMap } from "./metadata-multilang";
 import { Properties } from "./metadata-properties";
 import { Subject } from "./metadata-subject";
@@ -123,8 +124,8 @@ export class Metadata {
     @JsonProperty("duration")
     public Duration: number;
 
-    @JsonProperty("mediaActiveClass")
-    public MediaActiveClass: string;
+    @JsonProperty("media-overlay")
+    public MediaOverlay: MediaOverlay;
 
     // public OtherMetadata: IMeta[];
 

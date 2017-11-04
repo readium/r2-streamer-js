@@ -7,6 +7,7 @@ import { BelongsTo } from "@models/metadata-belongsto";
 import { Collection } from "@models/metadata-collection";
 import { Contributor } from "@models/metadata-contributor";
 import { Encrypted } from "@models/metadata-encrypted";
+import { MediaOverlay } from "@models/metadata-media-overlay";
 import { IStringMap } from "@models/metadata-multilang";
 import { Properties } from "@models/metadata-properties";
 import { Subject } from "@models/metadata-subject";
@@ -381,6 +382,7 @@ export async function EpubParsePromise(filePath: string): Promise<Publication> {
             const metasDuration: Metafield[] = [];
             const metasNarrator: Metafield[] = [];
             const metasActiveClass: Metafield[] = [];
+            const metasPlaybackActiveClass: Metafield[] = [];
 
             opf.Metadata.Meta.forEach((metaTag) => {
                 if (metaTag.Property === "media:duration") {
@@ -391,6 +393,9 @@ export async function EpubParsePromise(filePath: string): Promise<Publication> {
                 }
                 if (metaTag.Property === "media:active-class") {
                     metasActiveClass.push(metaTag);
+                }
+                if (metaTag.Property === "media:playback-active-class") {
+                    metasPlaybackActiveClass.push(metaTag);
                 }
             });
 
@@ -408,7 +413,16 @@ export async function EpubParsePromise(filePath: string): Promise<Publication> {
                 });
             }
             if (metasActiveClass.length) {
-                publication.Metadata.MediaActiveClass = metasActiveClass[0].Data;
+                if (!publication.Metadata.MediaOverlay) {
+                    publication.Metadata.MediaOverlay = new MediaOverlay();
+                }
+                publication.Metadata.MediaOverlay.ActiveClass = metasActiveClass[0].Data;
+            }
+            if (metasPlaybackActiveClass.length) {
+                if (!publication.Metadata.MediaOverlay) {
+                    publication.Metadata.MediaOverlay = new MediaOverlay();
+                }
+                publication.Metadata.MediaOverlay.PlaybackActiveClass = metasPlaybackActiveClass[0].Data;
             }
         }
     }
