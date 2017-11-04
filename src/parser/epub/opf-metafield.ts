@@ -24,6 +24,9 @@ export class Metafield {
     @XmlXPathSelector("@refines")
     public Refine: string;
 
+    @XmlXPathSelector("@scheme")
+    public Scheme: string;
+
     @XmlXPathSelector("@property")
     public Property: string;
 

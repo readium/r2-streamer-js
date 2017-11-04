@@ -123,6 +123,9 @@ export class Metadata {
     @JsonProperty("duration")
     public Duration: number;
 
+    @JsonProperty("mediaActiveClass")
+    public MediaActiveClass: string;
+
     // public OtherMetadata: IMeta[];
 
     @OnDeserialized()

@@ -376,6 +376,41 @@ export async function EpubParsePromise(filePath: string): Promise<Publication> {
                 addContributor(publication, rootfile, opf, cont, "aut");
             });
         }
+
+        if (opf.Metadata.Meta) {
+            const metasDuration: Metafield[] = [];
+            const metasNarrator: Metafield[] = [];
+            const metasActiveClass: Metafield[] = [];
+
+            opf.Metadata.Meta.forEach((metaTag) => {
+                if (metaTag.Property === "media:duration") {
+                    metasDuration.push(metaTag);
+                }
+                if (metaTag.Property === "media:narrator") {
+                    metasNarrator.push(metaTag);
+                }
+                if (metaTag.Property === "media:active-class") {
+                    metasActiveClass.push(metaTag);
+                }
+            });
+
+            if (metasDuration.length) {
+                publication.Metadata.Duration = timeStrToSeconds(metasDuration[0].Data);
+            }
+            if (metasNarrator.length) {
+                if (!publication.Metadata.Narrator) {
+                    publication.Metadata.Narrator = [];
+                }
+                metasNarrator.forEach((metaNarrator) => {
+                    const cont = new Contributor();
+                    cont.Name = metaNarrator.Data;
+                    publication.Metadata.Narrator.push(cont);
+                });
+            }
+            if (metasActiveClass.length) {
+                publication.Metadata.MediaActiveClass = metasActiveClass[0].Data;
+            }
+        }
     }
 
     if (opf.Spine && opf.Spine.PageProgression) {
