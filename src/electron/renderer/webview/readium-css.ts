@@ -134,6 +134,83 @@ export const injectReadPosCSS = () => {
     appendCSSInline("electron-readPos", readPosCssStyles);
 };
 
+let _isVerticalWritingMode = false;
+export function isVerticalWritingMode(): boolean {
+    return _isVerticalWritingMode;
+}
+
+let _isRTL = false;
+export function isRTL(): boolean {
+    return _isRTL;
+}
+
+function computeVerticalRTL() {
+
+    let dirAttr = win.document.documentElement.getAttribute("dir");
+    if (dirAttr === "rtl") {
+        _isRTL = true;
+    }
+    if (!_isRTL && win.document.body) {
+        dirAttr = win.document.body.getAttribute("dir");
+        if (dirAttr === "rtl") {
+            _isRTL = true;
+        }
+    }
+
+    const htmlStyle = window.getComputedStyle(win.document.documentElement);
+    if (htmlStyle) {
+        let prop = htmlStyle.getPropertyValue("writing-mode");
+        if (!prop) {
+            prop = htmlStyle.getPropertyValue("-epub-writing-mode");
+        }
+        if (prop && prop.indexOf("vertical") >= 0) {
+            _isVerticalWritingMode = true;
+        }
+        if (prop && prop.indexOf("-rl") > 0) {
+            _isRTL = true;
+        }
+        if (!_isRTL) {
+            prop = htmlStyle.getPropertyValue("direction");
+            if (prop && prop.indexOf("rtl") >= 0) {
+                _isRTL = true;
+            }
+        }
+    }
+    if ((!_isVerticalWritingMode || !_isRTL) && win.document.body) {
+        const bodyStyle = window.getComputedStyle(win.document.body);
+        if (bodyStyle) {
+            let prop: string;
+            if (!_isVerticalWritingMode) {
+                prop = bodyStyle.getPropertyValue("writing-mode");
+                if (!prop) {
+                    prop = bodyStyle.getPropertyValue("-epub-writing-mode");
+                }
+                if (prop && prop.indexOf("vertical") >= 0) {
+                    _isVerticalWritingMode = true;
+                }
+                if (prop && prop.indexOf("-rl") > 0) {
+                    _isRTL = true;
+                }
+            }
+            if (!_isRTL) {
+                prop = htmlStyle.getPropertyValue("direction");
+                if (prop && prop.indexOf("rtl") >= 0) {
+                    _isRTL = true;
+                }
+            }
+        }
+    }
+    console.log("_isVerticalWritingMode: " + _isVerticalWritingMode);
+    console.log("_isRTL: " + _isRTL);
+}
+
+// after DOMContentLoaded
+win.addEventListener("load", () => {
+    // console.log("R-CSS WIN LOAD");
+
+    computeVerticalRTL();
+});
+
 const ensureHead = () => {
     const docElement = win.document.documentElement;
 
@@ -256,6 +333,8 @@ function readiumCSSSet(messageJson: any) {
         toRemove.forEach((item) => {
             docElement.style.removeProperty(item);
         });
+
+        docElement.classList.remove("mdc-theme--dark");
     } else {
         let dark = false;
         let night = false;
@@ -363,7 +442,11 @@ function readiumCSSSet(messageJson: any) {
             align === "justify" ? "justify" :
                 (align === "right" ? "right" :
                     (align === "left" ? "left" :
-                        (align === "center" ? "center" : "left"))));
+                        (align === "center" ? "center" :
+                            (align === "initial" ? "initial" : "inherit")
+                        )
+                    )
+                ));
 
         // 75% | 87.5% | 100% | 112.5% | 137.5% | 150% | 162.5% | 175% | 200% | 225% | 250%
         docElement.style.setProperty("--USER__fontSize", fontSize ? fontSize : "100%");

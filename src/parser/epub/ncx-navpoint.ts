@@ -7,6 +7,7 @@ import { Content } from "./ncx-content";
 
 @XmlObject({
     ncx: "http://www.daisy.org/z3986/2005/ncx/",
+    xml: "http://www.w3.org/XML/1998/namespace",
 })
 export class NavPoint {
 
@@ -25,6 +26,6 @@ export class NavPoint {
     @XmlXPathSelector("@playOrder")
     public PlayerOrder: number;
 
-    @XmlXPathSelector("@id")
+    @XmlXPathSelector("@id | @xml:id")
     public ID: string;
 }

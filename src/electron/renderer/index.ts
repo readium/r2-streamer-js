@@ -324,6 +324,28 @@ function showLcpDialog(message?: string) {
 function installKeyboardMouseFocusHandler() {
     let dateLastKeyboardEvent = new Date();
     let dateLastMouseEvent = new Date();
+
+    // // DEBUG
+    // document.body.addEventListener("focus", (ev: any) => {
+    //     console.log("focus:");
+    //     console.log(ev.target);
+    //     if (ev.target.tagName.toLowerCase() === "webview") {
+    //         console.log("preventing...");
+    //         ev.preventDefault();
+    //         ev.stopPropagation();
+    //     }
+    // }, true);
+    // document.body.addEventListener("focusin", (ev: any) => {
+    //     console.log("focusin:");
+    //     console.log(ev.target);
+    //     if (ev.target.tagName.toLowerCase() === "webview") {
+    //         console.log("preventing...");
+    //         ev.preventDefault();
+    //         ev.stopPropagation();
+    //     }
+    // });
+    // // DEBUG
+
     document.body.addEventListener("focusin", debounce((ev: any) => {
         const focusWasTriggeredByMouse = dateLastMouseEvent > dateLastKeyboardEvent;
         if (focusWasTriggeredByMouse) {
@@ -669,7 +691,7 @@ window.addEventListener("DOMContentLoaded", () => {
     justifySwitch.checked = electronStore.get("styling.align") === "justify";
     justifySwitch.addEventListener("change", (_event) => {
         const checked = justifySwitch.checked;
-        electronStore.set("styling.align", checked ? "justify" : "left");
+        electronStore.set("styling.align", checked ? "justify" : "initial");
     });
     justifySwitch.disabled = !electronStore.get("styling.readiumcss");
 
@@ -921,10 +943,12 @@ function createWebView(): HTMLElement { // Electron.WebviewTag
     wv.setAttribute("httpreferrer", publicationJsonUrl);
     wv.setAttribute("preload", "./webview/preload.js");
     wv.setAttribute("disableguestresize", "");
+    setTimeout(() => {
+        wv.removeAttribute("tabindex");
+    }, 500);
 
     wv.addEventListener("dom-ready", () => {
         // wv.openDevTools();
-
         (wv as any).clearHistory();
     });
 
@@ -1002,10 +1026,24 @@ const adjustResize = (webview: HTMLElement) => { // Electron.WebviewTag
     }
 };
 
-window.addEventListener("resize", debounce(() => {
+const onResizeDebounced = debounce(() => {
     adjustResize(_webview1);
     adjustResize(_webview2);
-}, 200));
+    setTimeout(() => {
+        unhideWebView(false);
+    }, 1000);
+}, 200);
+
+window.addEventListener("resize", () => {
+    const hidePanel = document.getElementById("reader_chrome_HIDE") as HTMLElement;
+    if (hidePanel.style.display !== "block") {
+        hidePanel.style.display = "block";
+        _viewHideInterval = setInterval(() => {
+            unhideWebView(true);
+        }, 5000);
+    }
+    onResizeDebounced();
+});
 
 export function handleLink(href: string, previous: boolean | undefined, useGoto: boolean) {
     const prefix = publicationJsonUrl.replace("manifest.json", "");
@@ -1065,7 +1103,7 @@ function loadLink(hrefFull: string, previous: boolean | undefined, useGoto: bool
     const pathPrefix = pubUri.path().replace("manifest.json", "");
 
     // "/pub/BASE64_PATH/epub/chapter.html" ==> "epub/chapter.html"
-    const linkPath = linkUri.normalizePath().path().replace(pathPrefix, "");
+    const linkPath = decodeURIComponent(linkUri.normalizePath().path().replace(pathPrefix, ""));
 
     let pubLink = _publication.Spine.find((spineLink) => {
         return spineLink.Href === linkPath;
@@ -1077,7 +1115,7 @@ function loadLink(hrefFull: string, previous: boolean | undefined, useGoto: bool
     }
 
     if (!pubLink) {
-        console.log("FATAL WEBVIEW READIUM2_LINK ??!!");
+        console.log("FATAL WEBVIEW READIUM2_LINK ??!! " + hrefFull + " ==> " + linkPath);
         return;
     }
 

@@ -11,7 +11,6 @@ import {
 } from "ta-json";
 
 import { IInternal } from "./internal";
-import { MediaOverlayNode } from "./media-overlay";
 import { Metadata } from "./metadata";
 import { Link } from "./publication-link";
 
@@ -183,38 +182,6 @@ export class Publication {
             this.Links = [];
         }
         this.Links.push(link);
-    }
-
-    public FindAllMediaOverlay(): MediaOverlayNode[] {
-        const mos: MediaOverlayNode[] = [];
-
-        if (this.Spine) {
-            this.Spine.forEach((link) => {
-                if (link.MediaOverlays) {
-                    link.MediaOverlays.forEach((mo) => {
-                        mos.push(mo);
-                    });
-                }
-            });
-        }
-
-        return mos;
-    }
-
-    public FindMediaOverlayByHref(href: string): MediaOverlayNode[] {
-        const mos: MediaOverlayNode[] = [];
-
-        if (this.Spine) {
-            this.Spine.forEach((link) => {
-                if (link.MediaOverlays && link.Href.indexOf(href) >= 0) {
-                    link.MediaOverlays.forEach((mo) => {
-                        mos.push(mo);
-                    });
-                }
-            });
-        }
-
-        return mos;
     }
 
     public GetPreFetchResources(): Link[] {

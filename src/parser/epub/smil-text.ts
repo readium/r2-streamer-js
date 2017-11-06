@@ -13,4 +13,7 @@ export class Text {
 
     @XmlXPathSelector("@src")
     public Src: string;
+
+    @XmlXPathSelector("@epub:type")
+    public EpubType: string;
 }

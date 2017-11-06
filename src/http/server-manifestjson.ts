@@ -1,7 +1,11 @@
 import * as crypto from "crypto";
 import * as path from "path";
 
-import { mediaOverlayURLParam, mediaOverlayURLPath } from "@parser/epub";
+import {
+    getAllMediaOverlays,
+    mediaOverlayURLParam,
+    mediaOverlayURLPath,
+} from "@parser/epub";
 import { encodeURIComponent_RFC3986, isHTTP } from "@utils/http/UrlUtils";
 import { sortObject, traverseJsonObjects } from "@utils/JsonUtils";
 import * as css2json from "css2json";
@@ -198,7 +202,14 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
                             break;
                         }
                         case "mediaoverlays": {
-                            objToSerialize = publication.FindAllMediaOverlay();
+                            try {
+                                objToSerialize = await getAllMediaOverlays(publication);
+                            } catch (err) {
+                                debug(err);
+                                res.status(500).send("<html><body><p>Internal Server Error</p><p>"
+                                    + err + "</p></body></html>");
+                                return;
+                            }
                             break;
                         }
                         case "spine": {

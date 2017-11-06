@@ -19,4 +19,7 @@ export class Audio {
 
     @XmlXPathSelector("@clipEnd")
     public ClipEnd: string;
+
+    @XmlXPathSelector("@epub:type")
+    public EpubType: string;
 }

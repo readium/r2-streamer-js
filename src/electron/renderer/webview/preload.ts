@@ -5,6 +5,8 @@ import {
     DEBUG_VISUALS,
     injectDefaultCSS,
     injectReadPosCSS,
+    isRTL,
+    isVerticalWritingMode,
     readiumCSS,
 } from "@r2-streamer-js/electron/renderer/webview/readium-css";
 import { ipcRenderer } from "electron";
@@ -110,11 +112,11 @@ ipcRenderer.on(R2_EVENT_PAGE_TURN, (_event: any, messageString: any) => {
     // win.document.body.offsetWidth === single column width (takes into account column gap?)
     // win.document.body.clientWidth === same
     // win.document.body.scrollWidth === full document width (all columns)
-    //
+
     // win.document.body.offsetHeight === full document height (sum of all columns minus trailing blank space?)
     // win.document.body.clientHeight === same
     // win.document.body.scrollHeight === visible viewport height
-    //
+
     // win.document.body.scrollLeft === positive number for horizontal shift
     // win.document.body.scrollTop === positive number for vertical shift
 
@@ -127,25 +129,30 @@ ipcRenderer.on(R2_EVENT_PAGE_TURN, (_event: any, messageString: any) => {
     // console.log("nColumns: " + nColumns);
 
     const maxHeightShift = isPaged ?
-        win.document.body.scrollWidth - win.document.documentElement.offsetWidth :
-        win.document.body.scrollHeight - win.document.documentElement.clientHeight;
+        ((isVerticalWritingMode() ?
+            (win.document.body.scrollHeight - win.document.documentElement.offsetHeight) :
+            (win.document.body.scrollWidth - win.document.documentElement.offsetWidth))) :
+        ((isVerticalWritingMode() ?
+            (win.document.body.scrollWidth - win.document.documentElement.clientWidth) :
+            (win.document.body.scrollHeight - win.document.documentElement.clientHeight)));
     // console.log("maxHeightShift: " + maxHeightShift);
 
     const messageJson = JSON.parse(messageString);
-    // const isRTL = messageJson.direction === "RTL"; //  any other value is LTR
     const goPREVIOUS = messageJson.go === "PREVIOUS"; // any other value is NEXT
 
+    // const isRTL = messageJson.direction === "RTL"; //  any other value is LTR
     // console.log(JSON.stringify(messageJson, null, "  "));
 
-    if (!goPREVIOUS) { // goPREVIOUS && isRTL || !goPREVIOUS && !isRTL) { // right
+    if (!goPREVIOUS) { // goPREVIOUS && isRTL() || !goPREVIOUS && !isRTL()) { // right
         if (isPaged) {
             // console.log("element.scrollLeft: " + win.document.body.scrollLeft);
-            if (win.document.body.scrollLeft < maxHeightShift) { // not at end
+            if (Math.abs(win.document.body.scrollLeft) < maxHeightShift) { // not at end
                 if (_lastAnimState && _lastAnimState.animating) {
                     win.cancelAnimationFrame(_lastAnimState.id);
                     _lastAnimState.object[_lastAnimState.property] = _lastAnimState.destVal;
                 }
-                const newVal = win.document.body.scrollLeft + win.document.documentElement.offsetWidth;
+                const newVal = win.document.body.scrollLeft +
+                    (isRTL() ? -1 : 1) * win.document.documentElement.offsetWidth;
                 // console.log("element.scrollLeft NEW: " + newVal);
                 _lastAnimState = animateProperty(
                     win.cancelAnimationFrame,
@@ -164,12 +171,17 @@ ipcRenderer.on(R2_EVENT_PAGE_TURN, (_event: any, messageString: any) => {
             }
         } else {
             // console.log("element.scrollTop: " + win.document.body.scrollTop);
-            if (win.document.body.scrollTop < maxHeightShift) { // not at bottom
+            if (isVerticalWritingMode() && (Math.abs(win.document.body.scrollLeft) < maxHeightShift) ||
+                !isVerticalWritingMode() && (Math.abs(win.document.body.scrollTop) < maxHeightShift)) {
                 if (_lastAnimState && _lastAnimState.animating) {
                     win.cancelAnimationFrame(_lastAnimState.id);
                     _lastAnimState.object[_lastAnimState.property] = _lastAnimState.destVal;
                 }
-                const newVal = win.document.body.scrollTop + win.document.documentElement.clientHeight;
+                const newVal = isVerticalWritingMode() ?
+                    (win.document.body.scrollLeft +
+                        (isRTL() ? -1 : 1) * win.document.documentElement.clientWidth) :
+                    (win.document.body.scrollTop +
+                        win.document.documentElement.clientHeight);
                 // console.log("element.scrollTop NEW: " + newVal);
                 _lastAnimState = animateProperty(
                     win.cancelAnimationFrame,
@@ -177,7 +189,7 @@ ipcRenderer.on(R2_EVENT_PAGE_TURN, (_event: any, messageString: any) => {
                     // (cancelled: boolean) => {
                     //     console.log(cancelled);
                     // },
-                    "scrollTop",
+                    isVerticalWritingMode() ? "scrollLeft" : "scrollTop",
                     300,
                     win.document.body,
                     newVal,
@@ -187,14 +199,15 @@ ipcRenderer.on(R2_EVENT_PAGE_TURN, (_event: any, messageString: any) => {
                 return;
             }
         }
-    } else if (goPREVIOUS) { //  && !isRTL || !goPREVIOUS && isRTL) { // left
+    } else if (goPREVIOUS) { //  && !isRTL() || !goPREVIOUS && isRTL()) { // left
         if (isPaged) {
-            if (win.document.body.scrollLeft > 0) { // not at begin
+            if (Math.abs(win.document.body.scrollLeft) > 0) { // not at begin
                 if (_lastAnimState && _lastAnimState.animating) {
                     win.cancelAnimationFrame(_lastAnimState.id);
                     _lastAnimState.object[_lastAnimState.property] = _lastAnimState.destVal;
                 }
-                const newVal = win.document.body.scrollLeft - win.document.documentElement.offsetWidth;
+                const newVal = win.document.body.scrollLeft -
+                    (isRTL() ? -1 : 1) * win.document.documentElement.offsetWidth;
                 // console.log("element.scrollLeft NEW: " + newVal);
                 _lastAnimState = animateProperty(
                     win.cancelAnimationFrame,
@@ -212,12 +225,17 @@ ipcRenderer.on(R2_EVENT_PAGE_TURN, (_event: any, messageString: any) => {
                 return;
             }
         } else {
-            if (win.document.body.scrollTop > 0) { // not at top
+            if (isVerticalWritingMode() && (Math.abs(win.document.body.scrollLeft) > 0) ||
+                !isVerticalWritingMode() && (Math.abs(win.document.body.scrollTop) > 0)) {
                 if (_lastAnimState && _lastAnimState.animating) {
                     win.cancelAnimationFrame(_lastAnimState.id);
                     _lastAnimState.object[_lastAnimState.property] = _lastAnimState.destVal;
                 }
-                const newVal = win.document.body.scrollTop - win.document.documentElement.clientHeight;
+                const newVal = isVerticalWritingMode() ?
+                    (win.document.body.scrollLeft -
+                        (isRTL() ? -1 : 1) * win.document.documentElement.clientWidth) :
+                    (win.document.body.scrollTop -
+                        win.document.documentElement.clientHeight);
                 // console.log("element.scrollTop NEW: " + newVal);
                 _lastAnimState = animateProperty(
                     win.cancelAnimationFrame,
@@ -225,7 +243,7 @@ ipcRenderer.on(R2_EVENT_PAGE_TURN, (_event: any, messageString: any) => {
                     // (cancelled: boolean) => {
                     //     console.log(cancelled);
                     // },
-                    "scrollTop",
+                    isVerticalWritingMode() ? "scrollLeft" : "scrollTop",
                     300,
                     win.document.body,
                     newVal,
@@ -253,7 +271,8 @@ const checkReadyPass = () => {
     }
 
     win.addEventListener("resize", () => {
-        scrollToHash();
+        scrollToHashRaw(false);
+        // scrollToHash(); // debounced
     });
 
     // const docElement = win.document.documentElement;
@@ -274,7 +293,8 @@ const checkReadyPass = () => {
             //     return;
             // }
 
-            processXY(0, 0);
+            const x = (isRTL() ? win.document.documentElement.offsetWidth - 1 : 0);
+            processXY(x, 0);
         });
 
     }, 800);
@@ -335,12 +355,13 @@ function scrollIntoView(element: HTMLElement) {
 
     // TODO: element.offsetTop probably breaks in nested DOM / CSS box contexts (relative to...)
 
-    let colIndex = element.offsetTop / win.document.body.scrollHeight;
+    let colIndex = (element.offsetTop + (isRTL() ? -20 : +20)) / win.document.body.scrollHeight;
     // console.log("colIndex: " + colIndex);
-    colIndex = Math.floor(colIndex);
+    colIndex = Math.ceil(colIndex); // 1-based index
 
     const isTwoPage = win.document.documentElement.offsetWidth > win.document.body.offsetWidth;
-    const spreadIndex = isTwoPage ? Math.floor(colIndex / 2) : colIndex;
+    const spreadIndex = isTwoPage ? Math.ceil(colIndex / 2) : colIndex;
+    // console.log("spreadIndex: " + spreadIndex);
 
     // console.log("element.getBoundingClientRect().top: " + element.getBoundingClientRect().top);
     // console.log("element.getBoundingClientRect().left: " + element.getBoundingClientRect().left);
@@ -349,10 +370,10 @@ function scrollIntoView(element: HTMLElement) {
     // console.log("top: " + top);
 
     // const left = (colIndex * win.document.body.offsetWidth);
-    const left = (spreadIndex * win.document.documentElement.offsetWidth);
+    const left = ((spreadIndex - 1) * win.document.documentElement.offsetWidth);
     // console.log("left: " + left);
 
-    win.document.body.scrollLeft = left;
+    win.document.body.scrollLeft = (isRTL() ? -1 : 1) * left;
 }
 
 const scrollToHashRaw = (firstCall: boolean) => {
@@ -429,24 +450,43 @@ const scrollToHashRaw = (firstCall: boolean) => {
                     console.log("readiumprevious");
 
                     const maxHeightShift = isPaged ?
-                        win.document.body.scrollWidth - win.document.documentElement.offsetWidth :
-                        win.document.body.scrollHeight - win.document.documentElement.clientHeight;
+                    ((isVerticalWritingMode() ?
+                        (win.document.body.scrollHeight - win.document.documentElement.offsetHeight) :
+                        (win.document.body.scrollWidth - win.document.documentElement.offsetWidth))) :
+                    ((isVerticalWritingMode() ?
+                        (win.document.body.scrollWidth - win.document.documentElement.clientWidth) :
+                        (win.document.body.scrollHeight - win.document.documentElement.clientHeight)));
+                    // console.log("maxHeightShift: " + maxHeightShift);
 
                     _ignoreScrollEvent = true;
                     if (isPaged) {
-                        win.document.body.scrollLeft = maxHeightShift;
-                        win.document.body.scrollTop = 0;
+                        if (isVerticalWritingMode()) {
+                            win.document.body.scrollLeft = 0;
+                            win.document.body.scrollTop = maxHeightShift;
+                        } else {
+                            win.document.body.scrollLeft = (isRTL() ? -1 : 1) * maxHeightShift;
+                            win.document.body.scrollTop = 0;
+                        }
                     } else {
-                        win.document.body.scrollLeft = 0;
-                        win.document.body.scrollTop = maxHeightShift;
+                        if (isVerticalWritingMode()) {
+                            win.document.body.scrollLeft = (isRTL() ? -1 : 1) * maxHeightShift;
+                            win.document.body.scrollTop = 0;
+                        } else {
+                            win.document.body.scrollLeft = 0;
+                            win.document.body.scrollTop = maxHeightShift;
+                        }
                     }
 
                     _locationHashOverride = undefined;
                     _locationHashOverrideCSSselector = undefined;
                     processXYRaw(0,
                         (isPaged ?
-                            win.document.documentElement.offsetHeight :
-                            win.document.documentElement.clientHeight)
+                            (isVerticalWritingMode() ?
+                                win.document.documentElement.offsetWidth :
+                                win.document.documentElement.offsetHeight) :
+                            (isVerticalWritingMode() ?
+                                win.document.documentElement.clientWidth :
+                                win.document.documentElement.clientHeight))
                         - 1);
 
                     console.log("BOTTOM (previous):");
@@ -565,10 +605,22 @@ win.addEventListener("DOMContentLoaded", () => {
         injectReadPosCSS();
     }
 
+    // // DEBUG
+    // win.document.body.addEventListener("focus", (ev: any) => {
+    //     console.log("focus:");
+    //     console.log(ev.target);
+    // }, true);
+    // win.document.body.addEventListener("focusin", (ev: any) => {
+    //     console.log("focusin:");
+    //     console.log(ev.target);
+    // });
+    // // DEBUG
+
     win.document.body.addEventListener("focusin", (ev: any) => {
         const isPaged = win.document.documentElement.classList.contains("readium-paginated");
         if (isPaged) {
             setTimeout(() => {
+                _locationHashOverride = ev.target;
                 scrollIntoView(ev.target as HTMLElement);
             }, 30);
         }
@@ -626,7 +678,7 @@ win.addEventListener("DOMContentLoaded", () => {
 });
 
 const processXYRaw = (x: number, y: number) => {
-    // console.log("processXY");
+    // console.log("processXY: " + x + ", " + y);
 
     // const elems = document.elementsFromPoint(x, y);
     // // console.log(elems);
@@ -706,6 +758,11 @@ const notifyReadingLocation = () => {
     if (!_locationHashOverride) {
         return;
     }
+
+    if (DEBUG_VISUALS) {
+        _locationHashOverride.classList.add("readium2-read-pos");
+    }
+
     _locationHashOverrideCSSselector = fullQualifiedSelector(_locationHashOverride, false);
     ipcRenderer.sendToHost(R2_EVENT_READING_LOCATION, _locationHashOverrideCSSselector);
 };
