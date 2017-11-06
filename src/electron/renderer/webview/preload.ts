@@ -359,7 +359,7 @@ function scrollIntoView(element: HTMLElement) {
     colIndex = Math.floor(colIndex);
 
     const isTwoPage = win.document.documentElement.offsetWidth > win.document.body.offsetWidth;
-    const spreadIndex = isTwoPage ? Math.floor(colIndex / 2) : colIndex;
+    const spreadIndex = isTwoPage ? Math.ceil(colIndex / 2) : colIndex;
 
     // console.log("element.getBoundingClientRect().top: " + element.getBoundingClientRect().top);
     // console.log("element.getBoundingClientRect().left: " + element.getBoundingClientRect().left);
