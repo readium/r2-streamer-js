@@ -271,7 +271,8 @@ const checkReadyPass = () => {
     }
 
     win.addEventListener("resize", () => {
-        scrollToHash();
+        scrollToHashRaw(false);
+        // scrollToHash(); // debounced
     });
 
     // const docElement = win.document.documentElement;

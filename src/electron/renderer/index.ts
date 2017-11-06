@@ -1002,10 +1002,24 @@ const adjustResize = (webview: HTMLElement) => { // Electron.WebviewTag
     }
 };
 
-window.addEventListener("resize", debounce(() => {
+const onResizeDebounced = debounce(() => {
     adjustResize(_webview1);
     adjustResize(_webview2);
-}, 200));
+    setTimeout(() => {
+        unhideWebView(false);
+    }, 1000);
+}, 200);
+
+window.addEventListener("resize", () => {
+    const hidePanel = document.getElementById("reader_chrome_HIDE") as HTMLElement;
+    if (hidePanel.style.display !== "block") {
+        hidePanel.style.display = "block";
+        _viewHideInterval = setInterval(() => {
+            unhideWebView(true);
+        }, 5000);
+    }
+    onResizeDebounced();
+});
 
 export function handleLink(href: string, previous: boolean | undefined, useGoto: boolean) {
     const prefix = publicationJsonUrl.replace("manifest.json", "");
