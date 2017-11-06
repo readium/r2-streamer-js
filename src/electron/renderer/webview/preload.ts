@@ -355,12 +355,13 @@ function scrollIntoView(element: HTMLElement) {
 
     // TODO: element.offsetTop probably breaks in nested DOM / CSS box contexts (relative to...)
 
-    let colIndex = element.offsetTop / win.document.body.scrollHeight;
+    let colIndex = (element.offsetTop + (isRTL() ? -20 : +20)) / win.document.body.scrollHeight;
     // console.log("colIndex: " + colIndex);
-    colIndex = Math.floor(colIndex);
+    colIndex = Math.ceil(colIndex); // 1-based index
 
     const isTwoPage = win.document.documentElement.offsetWidth > win.document.body.offsetWidth;
     const spreadIndex = isTwoPage ? Math.ceil(colIndex / 2) : colIndex;
+    // console.log("spreadIndex: " + spreadIndex);
 
     // console.log("element.getBoundingClientRect().top: " + element.getBoundingClientRect().top);
     // console.log("element.getBoundingClientRect().left: " + element.getBoundingClientRect().left);
@@ -369,7 +370,7 @@ function scrollIntoView(element: HTMLElement) {
     // console.log("top: " + top);
 
     // const left = (colIndex * win.document.body.offsetWidth);
-    const left = (spreadIndex * win.document.documentElement.offsetWidth);
+    const left = ((spreadIndex - 1) * win.document.documentElement.offsetWidth);
     // console.log("left: " + left);
 
     win.document.body.scrollLeft = (isRTL() ? -1 : 1) * left;
@@ -604,10 +605,22 @@ win.addEventListener("DOMContentLoaded", () => {
         injectReadPosCSS();
     }
 
+    // // DEBUG
+    // win.document.body.addEventListener("focus", (ev: any) => {
+    //     console.log("focus:");
+    //     console.log(ev.target);
+    // }, true);
+    // win.document.body.addEventListener("focusin", (ev: any) => {
+    //     console.log("focusin:");
+    //     console.log(ev.target);
+    // });
+    // // DEBUG
+
     win.document.body.addEventListener("focusin", (ev: any) => {
         const isPaged = win.document.documentElement.classList.contains("readium-paginated");
         if (isPaged) {
             setTimeout(() => {
+                _locationHashOverride = ev.target;
                 scrollIntoView(ev.target as HTMLElement);
             }, 30);
         }
@@ -745,6 +758,11 @@ const notifyReadingLocation = () => {
     if (!_locationHashOverride) {
         return;
     }
+
+    if (DEBUG_VISUALS) {
+        _locationHashOverride.classList.add("readium2-read-pos");
+    }
+
     _locationHashOverrideCSSselector = fullQualifiedSelector(_locationHashOverride, false);
     ipcRenderer.sendToHost(R2_EVENT_READING_LOCATION, _locationHashOverrideCSSselector);
 };

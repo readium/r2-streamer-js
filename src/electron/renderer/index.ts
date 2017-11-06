@@ -324,6 +324,28 @@ function showLcpDialog(message?: string) {
 function installKeyboardMouseFocusHandler() {
     let dateLastKeyboardEvent = new Date();
     let dateLastMouseEvent = new Date();
+
+    // // DEBUG
+    // document.body.addEventListener("focus", (ev: any) => {
+    //     console.log("focus:");
+    //     console.log(ev.target);
+    //     if (ev.target.tagName.toLowerCase() === "webview") {
+    //         console.log("preventing...");
+    //         ev.preventDefault();
+    //         ev.stopPropagation();
+    //     }
+    // }, true);
+    // document.body.addEventListener("focusin", (ev: any) => {
+    //     console.log("focusin:");
+    //     console.log(ev.target);
+    //     if (ev.target.tagName.toLowerCase() === "webview") {
+    //         console.log("preventing...");
+    //         ev.preventDefault();
+    //         ev.stopPropagation();
+    //     }
+    // });
+    // // DEBUG
+
     document.body.addEventListener("focusin", debounce((ev: any) => {
         const focusWasTriggeredByMouse = dateLastMouseEvent > dateLastKeyboardEvent;
         if (focusWasTriggeredByMouse) {
@@ -921,10 +943,12 @@ function createWebView(): HTMLElement { // Electron.WebviewTag
     wv.setAttribute("httpreferrer", publicationJsonUrl);
     wv.setAttribute("preload", "./webview/preload.js");
     wv.setAttribute("disableguestresize", "");
+    setTimeout(() => {
+        wv.removeAttribute("tabindex");
+    }, 500);
 
     wv.addEventListener("dom-ready", () => {
         // wv.openDevTools();
-
         (wv as any).clearHistory();
     });
 
