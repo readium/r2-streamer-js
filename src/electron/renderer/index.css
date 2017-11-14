@@ -179,10 +179,10 @@ webview.full {
 form {
   margin: 0; padding: 0;
 }
-#lcpDialog .mdc-textfield__input {
+#lcpDialog .mdc-text-field__input {
   width: 50%;
 }
-#lcpDialog .mdc-form-field, #lcpDialog .mdc-textfield {
+#lcpDialog .mdc-form-field, #lcpDialog .mdc-text-field {
   width: 100%;
 }
 /* form#lcpPassForm {
