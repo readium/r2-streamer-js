@@ -68,7 +68,7 @@
     "request-promise-native": "^1.0.5",
     "resize-sensor": "github:normanzb/resize-sensor#master",
     "riot": "^3.7.4",
-    "slugify": "^1.2.2",
+    "slugify": "^1.2.3",
     "system-font-families": "^0.5.0",
     "ta-json": "github:danielweck/ta-json#dist",
     "tmp": "^0.0.33",
