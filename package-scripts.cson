@@ -61,7 +61,7 @@
     npm run browserify:es8-es2017
   '
 
-  '__browserify:es5': '
+  'browserify:es5': '
     echo "Browserify skipped."
   '
 
@@ -69,7 +69,7 @@
     mkdirp ./dist/es5/electron/
   '
 
-  'browserify:es5': '
+  '__browserify:es5': '
     browserify
       ./dist/es5/src/electron/renderer/index.js
       --require
@@ -126,7 +126,7 @@
     rimraf ./dist/es5/electron/renderer-browserify-with-sourcemap.js
   '
 
-  '__browserify:es6-es2015': '
+  'browserify:es6-es2015': '
     echo "Browserify skipped."
   '
 
@@ -134,7 +134,7 @@
     mkdirp ./dist/es6-es2015/electron/
   '
 
-  'browserify:es6-es2015': '
+  '__browserify:es6-es2015': '
     browserify
       ./dist/es6-es2015/src/electron/renderer/index.js
       --require
@@ -192,7 +192,7 @@
     rimraf ./dist/es6-es2015/electron/renderer-browserify-with-sourcemap.js
   '
 
-  '__browserify:es7-es2016': '
+  'browserify:es7-es2016': '
     echo "Browserify skipped."
   '
 
@@ -200,7 +200,7 @@
     mkdirp ./dist/es7-es2016/electron/
   '
 
-  'browserify:es7-es2016': '
+  '__browserify:es7-es2016': '
     browserify
       ./dist/es7-es2016/src/electron/renderer/index.js
       --require
@@ -258,7 +258,7 @@
     rimraf ./dist/es7-es2016/electron/renderer-browserify-with-sourcemap.js
   '
 
-  '__browserify:es8-es2017': '
+  'browserify:es8-es2017': '
     echo "Browserify skipped."
   '
 
@@ -273,7 +273,7 @@
     npm run browserify-uglifyjs:es8-es2017_
   '
 
-  'browserify-do:es8-es2017': '
+  '__browserify-do:es8-es2017': '
     browserify
       ./dist/es8-es2017/src/electron/renderer/index.js
       --xxlist
