@@ -102,7 +102,7 @@
     "cross-env": "^5.1.1",
     "eclint": "^2.5.0",
     "electron": "1.7.*",
-    "electron-builder": "^19.45.7",
+    "electron-builder": "^19.46.1",
     "exorcist": "^1.0.0",
     "git-rev-sync": "^1.9.1",
     "mkdirp": "^0.5.1",
