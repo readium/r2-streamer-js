@@ -100,6 +100,7 @@
     "browserify": "^14.5.0",
     "cpy-cli": "^1.0.1",
     "cross-env": "^5.1.1",
+    "cson": "^4.1.0",
     "eclint": "^2.5.0",
     "electron": "1.7.*",
     "electron-builder": "^19.46.1",
@@ -165,6 +166,7 @@
     }
   },
   "scripts": {
+    "cson2json": "node node_modules/cson/bin/cson2json package-scripts.cson && echo \"\"",
     "postinstallxx": "npm rebuild --runtime=electron --target=1.7.9 --disturl=https://atom.io/download/atom-shell --build-from-source",
     "electron-app:prepare": "npm run build",
     "preelectron-app": "npm run electron-app:prepare",
@@ -187,7 +189,7 @@
     "browserify:es7-es2016": "browserify ./dist/es7-es2016/src/electron/renderer/index.js --require ./dist/es7-es2016/src/electron/renderer/riots/linklist/index.js --require ./dist/es7-es2016/src/electron/renderer/riots/linklistgroup/index.js --require ./dist/es7-es2016/src/electron/renderer/riots/linktree/index.js --require ./dist/es7-es2016/src/electron/renderer/riots/menuselect/index.js --require ./dist/es7-es2016/src/electron/renderer/material-components-web.js --require ./dist/es7-es2016/src/electron/renderer/riot.js --external \"node_modules/electron/**/*.js\" --exclude electron --no-builtins --no-commondir --ignore-missing --insert-globals --no-browser-field --xxfull-paths --debug --outfile ./dist/es7-es2016/electron/renderer-browserify-with-sourcemap.js && cat ./dist/es7-es2016/electron/renderer-browserify-with-sourcemap.js | exorcist --root ../../../ ./dist/es7-es2016/electron/renderer-browserify_.js.map > ./dist/es7-es2016/electron/renderer-browserify_.js && sorcery --input ./dist/es7-es2016/electron/renderer-browserify_.js --output ./dist/es7-es2016/electron/renderer-browserify.js && uglifyjs ./dist/es7-es2016/electron/renderer-browserify.js --output ./dist/es7-es2016/electron/renderer-browserify.min.js --compress --mangle --ecma 7 --source-map \"root='',url='browserify.min.js.map',content='./dist/es7-es2016/electron/renderer-browserify.js.map'\" && rimraf ./dist/es7-es2016/electron/renderer-browserify_.js && rimraf ./dist/es7-es2016/electron/renderer-browserify_.js.map && rimraf ./dist/es7-es2016/electron/renderer-browserify-with-sourcemap.js",
     "__browserify:es8-es2017": "echo \"Browserify skipped.\"",
     "prebrowserify:es8-es2017": "mkdirp ./dist/es8-es2017/electron/",
-    "browserify:es8-es2017": "npm run browserify-do:es8-es2017 && npm run browserify-exorcist:es8-es2017_ && browserify-sorcery:es8-es2017_ && npm run browserify-uglifyjs:es8-es2017_",
+    "browserify:es8-es2017": "npm run browserify-do:es8-es2017 && npm run browserify-exorcist:es8-es2017_ && npm run browserify-sorcery:es8-es2017_ && npm run browserify-uglifyjs:es8-es2017_",
     "browserify-do:es8-es2017": "browserify ./dist/es8-es2017/src/electron/renderer/index.js --xxlist --require ./dist/es8-es2017/src/electron/renderer/riots/linklist/index.js --require ./dist/es8-es2017/src/electron/renderer/riots/linklistgroup/index.js --require ./dist/es8-es2017/src/electron/renderer/riots/linktree/index.js --require ./dist/es8-es2017/src/electron/renderer/riots/menuselect/index.js --require ./dist/es8-es2017/src/electron/renderer/material-components-web.js --require ./dist/es8-es2017/src/electron/renderer/riot.js --external \"node_modules/electron/**/*.js\" --exclude electron --no-builtins --no-commondir --ignore-missing --insert-globals --no-browser-field --xxfull-paths --debug --outfile ./dist/es8-es2017/electron/renderer-browserify-with-sourcemap.js",
     "browserify-exorcist:es8-es2017": "cat ./dist/es8-es2017/electron/renderer-browserify-with-sourcemap.js | exorcist --root ../../../ ./dist/es8-es2017/electron/renderer-browserify_.js.map > ./dist/es8-es2017/electron/renderer-browserify_.js",
     "browserify-sorcery:es8-es2017": "sorcery --input ./dist/es8-es2017/electron/renderer-browserify_.js --output ./dist/es8-es2017/electron/renderer-browserify.js",
@@ -251,7 +253,7 @@
     "postbuild:es8-es2017": "npm run afterdist && npm run electron-renderer:es8-es2017",
     "clean": "rimraf ./dist && rimraf ./now && mkdirp ./dist",
     "lint": "npm run lint:all && npm run lint:typescript:full",
-    "lint:all": "eclint check \"**/*\" \"!**/*.node\" \"!.git/**/*\" \"!node_modules*/**/*\" \"!dist/**/*\" \"!misc/**/*\" \"!now/**/*\" \"!.vscode/**/*\" \"!.history/**/*\" \"!**/.DS_Store\" \"!**/*.epub\" \"!**/*.cbz\"  \"!**/*.jpg\"  \"!**/*.jpeg\"  \"!**/*.png\"  \"!**/*.log\"",
+    "lint:all": "eclint check \"**/*\" \"!**/*.node\" \"!.git/**/*\" \"!node_modules*/**/*\" \"!dist/**/*\" \"!misc/**/*\" \"!now/**/*\" \"!.vscode/**/*\" \"!.history/**/*\" \"!**/.DS_Store\" \"!**/*.epub\" \"!**/*.cbz\" \"!**/*.jpg\" \"!**/*.jpeg\" \"!**/*.png\" \"!**/*.log\"",
     "lint:typescript": "tslint -c \"./tslint.json\" \"./src/**/*.ts\" \"./test/**/*.ts\"",
     "lint:typescript:full": "tslint --project \"./tsconfig.json\" -c \"./tslint.json\" \"./src/**/*.ts\" \"./test/**/*.ts\"",
     "lintfix": "sed -i \"\" \"s/let normalizedPath = path\\.normalize(documentPath);/let normalizedPath = path.normalize(documentPath).toLowerCase();/g\" ./node_modules/tslint-language-service/out/src/index.js",

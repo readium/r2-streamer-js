@@ -1,0 +1,875 @@
+  'cson2json': '
+    node node_modules/cson/bin/cson2json
+      package-scripts.cson &&
+    echo ""
+  '
+
+  'postinstallxx': '
+    npm rebuild
+      --runtime=electron
+      --target=1.7.9
+      --disturl=https://atom.io/download/atom-shell
+      --build-from-source
+  '
+
+  'electron-app:prepare': '
+    npm run build
+  '
+
+  'preelectron-app': '
+    npm run electron-app:prepare
+  '
+
+  'electron-app': '
+    build
+      --publish
+      never
+  '
+
+  'preelectron-app:win': '
+    npm run electron-app:prepare
+  '
+
+  'electron-app:win': '
+    build
+      --win
+      --x64
+  '
+
+  'preelectron-app:linux': '
+    npm run electron-app:prepare
+  '
+
+  'electron-app:linux': '
+    build
+      --linux
+  '
+
+  'preelectron-app:mac': '
+    npm run electron-app:prepare
+  '
+
+  'electron-app:mac': '
+    build
+      --mac
+  '
+
+  'browserify:all': '
+    npm run browserify:es5 &&
+    npm run browserify:es6-es2015 &&
+    npm run browserify:es7-es2016 &&
+    npm run browserify:es8-es2017
+  '
+
+  '__browserify:es5': '
+    echo "Browserify skipped."
+  '
+
+  'prebrowserify:es5': '
+    mkdirp ./dist/es5/electron/
+  '
+
+  'browserify:es5': '
+    browserify
+      ./dist/es5/src/electron/renderer/index.js
+      --require
+      ./dist/es5/src/electron/renderer/riots/linklist/index.js
+      --require
+      ./dist/es5/src/electron/renderer/riots/linklistgroup/index.js
+      --require
+      ./dist/es5/src/electron/renderer/riots/linktree/index.js
+      --require
+      ./dist/es5/src/electron/renderer/riots/menuselect/index.js
+      --require
+      ./dist/es5/src/electron/renderer/material-components-web.js
+      --require
+      ./dist/es5/src/electron/renderer/riot.js
+      --external
+      "node_modules/electron/**/*.js"
+      --exclude
+      electron
+      --no-builtins
+      --no-commondir
+      --ignore-missing
+      --insert-globals
+      --no-browser-field
+      --xxfull-paths
+      --debug
+      --outfile
+      ./dist/es5/electron/renderer-browserify-with-sourcemap.js &&
+
+    cat ./dist/es5/electron/renderer-browserify-with-sourcemap.js |
+
+    exorcist
+      --root
+      ../../../
+      ./dist/es5/electron/renderer-browserify_.js.map >
+      ./dist/es5/electron/renderer-browserify_.js &&
+
+    sorcery
+      --input
+      ./dist/es5/electron/renderer-browserify_.js
+      --output ./dist/es5/electron/renderer-browserify.js &&
+
+    uglifyjs
+      ./dist/es5/electron/renderer-browserify.js
+      --output
+      ./dist/es5/electron/renderer-browserify.min.js
+      --compress
+      --mangle
+      --ecma 5
+      --source-map
+      "root=\'\',url=\'browserify.min.js.map\',content=\'./dist/es5/electron/renderer-browserify.js.map\'" &&
+
+    rimraf ./dist/es5/electron/renderer-browserify_.js &&
+    rimraf ./dist/es5/electron/renderer-browserify_.js.map &&
+    rimraf ./dist/es5/electron/renderer-browserify-with-sourcemap.js
+  '
+
+  '__browserify:es6-es2015': '
+    echo "Browserify skipped."
+  '
+
+  'prebrowserify:es6-es2015': '
+    mkdirp ./dist/es6-es2015/electron/
+  '
+
+  'browserify:es6-es2015': '
+    browserify
+      ./dist/es6-es2015/src/electron/renderer/index.js
+      --require
+      ./dist/es6-es2015/src/electron/renderer/riots/linklist/index.js
+      --require
+      ./dist/es6-es2015/src/electron/renderer/riots/linklistgroup/index.js
+      --require
+      ./dist/es6-es2015/src/electron/renderer/riots/linktree/index.js
+      --require
+      ./dist/es6-es2015/src/electron/renderer/riots/menuselect/index.js
+      --require
+      ./dist/es6-es2015/src/electron/renderer/material-components-web.js
+      --require
+      ./dist/es6-es2015/src/electron/renderer/riot.js
+      --external
+      "node_modules/electron/**/*.js"
+      --exclude
+      electron
+      --no-builtins
+      --no-commondir
+      --ignore-missing
+      --insert-globals
+      --no-browser-field
+      --xxfull-paths
+      --debug
+      --outfile
+      ./dist/es6-es2015/electron/renderer-browserify-with-sourcemap.js &&
+
+    cat ./dist/es6-es2015/electron/renderer-browserify-with-sourcemap.js |
+
+    exorcist
+      --root
+      ../../../
+      ./dist/es6-es2015/electron/renderer-browserify_.js.map >
+      ./dist/es6-es2015/electron/renderer-browserify_.js &&
+
+    sorcery
+      --input
+      ./dist/es6-es2015/electron/renderer-browserify_.js
+      --output
+      ./dist/es6-es2015/electron/renderer-browserify.js &&
+
+    uglifyjs
+      ./dist/es6-es2015/electron/renderer-browserify.js
+      --output
+      ./dist/es6-es2015/electron/renderer-browserify.min.js
+      --compress
+      --mangle
+      --ecma 6
+      --source-map
+      "root=\'\',url=\'browserify.min.js.map\',content=\'./dist/es6-es2015/electron/renderer-browserify.js.map\'" &&
+
+    rimraf ./dist/es6-es2015/electron/renderer-browserify_.js &&
+    rimraf ./dist/es6-es2015/electron/renderer-browserify_.js.map &&
+    rimraf ./dist/es6-es2015/electron/renderer-browserify-with-sourcemap.js
+  '
+
+  '__browserify:es7-es2016': '
+    echo "Browserify skipped."
+  '
+
+  'prebrowserify:es7-es2016': '
+    mkdirp ./dist/es7-es2016/electron/
+  '
+
+  'browserify:es7-es2016': '
+    browserify
+      ./dist/es7-es2016/src/electron/renderer/index.js
+      --require
+      ./dist/es7-es2016/src/electron/renderer/riots/linklist/index.js
+      --require
+      ./dist/es7-es2016/src/electron/renderer/riots/linklistgroup/index.js
+      --require
+      ./dist/es7-es2016/src/electron/renderer/riots/linktree/index.js
+      --require
+      ./dist/es7-es2016/src/electron/renderer/riots/menuselect/index.js
+      --require
+      ./dist/es7-es2016/src/electron/renderer/material-components-web.js
+      --require
+      ./dist/es7-es2016/src/electron/renderer/riot.js
+      --external
+      "node_modules/electron/**/*.js"
+      --exclude
+      electron
+      --no-builtins
+      --no-commondir
+      --ignore-missing
+      --insert-globals
+      --no-browser-field
+      --xxfull-paths
+      --debug
+      --outfile
+      ./dist/es7-es2016/electron/renderer-browserify-with-sourcemap.js &&
+
+    cat ./dist/es7-es2016/electron/renderer-browserify-with-sourcemap.js |
+
+    exorcist
+      --root
+      ../../../
+      ./dist/es7-es2016/electron/renderer-browserify_.js.map >
+      ./dist/es7-es2016/electron/renderer-browserify_.js &&
+
+    sorcery
+      --input
+      ./dist/es7-es2016/electron/renderer-browserify_.js
+      --output
+      ./dist/es7-es2016/electron/renderer-browserify.js &&
+
+    uglifyjs
+      ./dist/es7-es2016/electron/renderer-browserify.js
+      --output
+      ./dist/es7-es2016/electron/renderer-browserify.min.js
+      --compress
+      --mangle
+      --ecma 7
+      --source-map
+      "root=\'\',url=\'browserify.min.js.map\',content=\'./dist/es7-es2016/electron/renderer-browserify.js.map\'" &&
+
+    rimraf ./dist/es7-es2016/electron/renderer-browserify_.js &&
+    rimraf ./dist/es7-es2016/electron/renderer-browserify_.js.map &&
+    rimraf ./dist/es7-es2016/electron/renderer-browserify-with-sourcemap.js
+  '
+
+  '__browserify:es8-es2017': '
+    echo "Browserify skipped."
+  '
+
+  'prebrowserify:es8-es2017': '
+    mkdirp ./dist/es8-es2017/electron/
+  '
+
+  'browserify:es8-es2017': '
+    npm run browserify-do:es8-es2017 &&
+    npm run browserify-exorcist:es8-es2017_ &&
+    npm run browserify-sorcery:es8-es2017_ &&
+    npm run browserify-uglifyjs:es8-es2017_
+  '
+
+  'browserify-do:es8-es2017': '
+    browserify
+      ./dist/es8-es2017/src/electron/renderer/index.js
+      --xxlist
+      --require
+      ./dist/es8-es2017/src/electron/renderer/riots/linklist/index.js
+      --require
+      ./dist/es8-es2017/src/electron/renderer/riots/linklistgroup/index.js
+      --require
+      ./dist/es8-es2017/src/electron/renderer/riots/linktree/index.js
+      --require
+      ./dist/es8-es2017/src/electron/renderer/riots/menuselect/index.js
+      --require
+      ./dist/es8-es2017/src/electron/renderer/material-components-web.js
+      --require
+      ./dist/es8-es2017/src/electron/renderer/riot.js
+      --external
+      "node_modules/electron/**/*.js"
+      --exclude
+      electron
+      --no-builtins
+      --no-commondir
+      --ignore-missing
+      --insert-globals
+      --no-browser-field
+      --xxfull-paths
+      --debug
+      --outfile
+      ./dist/es8-es2017/electron/renderer-browserify-with-sourcemap.js
+  '
+
+  'browserify-exorcist:es8-es2017': '
+    cat ./dist/es8-es2017/electron/renderer-browserify-with-sourcemap.js |
+    exorcist
+      --root
+      ../../../
+      ./dist/es8-es2017/electron/renderer-browserify_.js.map >
+      ./dist/es8-es2017/electron/renderer-browserify_.js
+  '
+
+  'browserify-sorcery:es8-es2017': '
+    sorcery
+      --input
+      ./dist/es8-es2017/electron/renderer-browserify_.js
+      --output
+      ./dist/es8-es2017/electron/renderer-browserify.js
+  '
+
+  'browserify-uglifyjs:es8-es2017': '
+    uglifyjs
+      ./dist/es8-es2017/electron/renderer-browserify.js
+      --output
+      ./dist/es8-es2017/electron/renderer-browserify.min.js
+      --compress
+      --mangle
+      --ecma 8
+      --source-map
+      "root=\'\',url=\'browserify.min.js.map\',content=\'./dist/es8-es2017/electron/renderer-browserify.js.map\'" &&
+
+    rimraf ./dist/es8-es2017/electron/renderer-browserify_.js &&
+    rimraf ./dist/es8-es2017/electron/renderer-browserify_.js.map &&
+    rimraf ./dist/es8-es2017/electron/renderer-browserify-with-sourcemap.js
+  '
+
+  '___browserify:es8-es2017_': '
+    browserify
+      ./dist/es8-es2017/src/electron/renderer/index.js
+      --require
+      ./dist/es8-es2017/src/electron/renderer/riots/linklist/index.js
+      --require
+      ./dist/es8-es2017/src/electron/renderer/riots/linklistgroup/index.js
+      --require
+      ./dist/es8-es2017/src/electron/renderer/riots/linktree/index.js
+      --require
+      ./dist/es8-es2017/src/electron/renderer/riots/menuselect/index.js
+      --require
+      ./dist/es8-es2017/src/electron/renderer/material-components-web.js
+      --require
+      ./dist/es8-es2017/src/electron/renderer/riot.js
+      --external
+      "node_modules/electron/**/*.js"
+      --exclude
+      electron
+      --no-builtins
+      --no-commondir
+      --ignore-missing
+      --insert-globals
+      --no-browser-field
+      --xxfull-paths
+      --debug |
+
+    uglifyjs
+      --compress
+      --mangle
+      --ecma 8
+      --source-map
+      "root=\'../../../\',url=\'browserify_.min.js.map\',content=\'inline\'"
+      --output
+      ./dist/es8-es2017/electron/renderer-browserify_.min.js &&
+
+    sorcery
+      --input
+      ./dist/es8-es2017/electron/renderer-browserify_.min.js
+      --output
+      ./dist/es8-es2017/electron/renderer-browserify.min.js
+  '
+
+  'riot:all': '
+    npm run riot:es5 &&
+    npm run riot:es6-es2015 &&
+    npm run riot:es7-es2016 &&
+    npm run riot:es8-es2017
+  '
+
+  'riot:es5': '
+    cpy ./node_modules/riot/riot.js ./dist/es5/src/electron/renderer/ &&
+    riot
+      --ext html
+      --type none
+      ./dist/es5/src/electron/renderer/riots/ ./dist/es5/src/electron/renderer/riots/ &&
+    rimraf "./dist/es5/src/electron/renderer/riots/**/*.html"
+  '
+
+  'riot:es6-es2015': '
+    cpy ./node_modules/riot/riot.js ./dist/es6-es2015/src/electron/renderer/ &&
+    riot
+      --ext html
+      --type none
+      ./dist/es6-es2015/src/electron/renderer/riots/ ./dist/es6-es2015/src/electron/renderer/riots/ &&
+    rimraf "./dist/es6-es2015/src/electron/renderer/riots/**/*.html"
+  '
+
+  'riot:es7-es2016': '
+    cpy ./node_modules/riot/riot.js ./dist/es7-es2016/src/electron/renderer/ &&
+    riot
+      --ext html
+      --type none
+      ./dist/es7-es2016/src/electron/renderer/riots/
+      ./dist/es7-es2016/src/electron/renderer/riots/ &&
+    rimraf "./dist/es7-es2016/src/electron/renderer/riots/**/*.html"
+  '
+
+  'riot:es8-es2017': '
+    cpy ./node_modules/riot/riot.js ./dist/es8-es2017/src/electron/renderer/ &&
+    riot
+      --ext html
+      --type none
+      ./dist/es8-es2017/src/electron/renderer/riots/
+      ./dist/es8-es2017/src/electron/renderer/riots/ &&
+    rimraf "./dist/es8-es2017/src/electron/renderer/riots/**/*.html"
+  '
+
+  'material:es5': '
+    cpy node_modules/material-design-icons/iconfont/MaterialIcons-Regular.woff2 ./dist/es5/src/electron/renderer/ &&
+    cpy ./node_modules/material-components-web/dist/material-components-web.css ./dist/es5/src/electron/renderer/ &&
+    cpy ./node_modules/material-components-web/dist/material-components-web.js ./dist/es5/src/electron/renderer/
+  '
+
+  'material:es6-es2015': '
+    cpy node_modules/material-design-icons/iconfont/MaterialIcons-Regular.woff2 ./dist/es6-es2015/src/electron/renderer/ &&
+    cpy ./node_modules/material-components-web/dist/material-components-web.css ./dist/es6-es2015/src/electron/renderer/ &&
+    cpy ./node_modules/material-components-web/dist/material-components-web.js ./dist/es6-es2015/src/electron/renderer/
+  '
+
+  'material:es7-es2016': '
+    cpy node_modules/material-design-icons/iconfont/MaterialIcons-Regular.woff2 ./dist/es7-es2016/src/electron/renderer/ &&
+    cpy ./node_modules/material-components-web/dist/material-components-web.css ./dist/es7-es2016/src/electron/renderer/ &&
+    cpy ./node_modules/material-components-web/dist/material-components-web.js ./dist/es7-es2016/src/electron/renderer/
+  '
+
+  'material:es8-es2017': '
+    cpy node_modules/material-design-icons/iconfont/MaterialIcons-Regular.woff2 ./dist/es8-es2017/src/electron/renderer/ &&
+    cpy ./node_modules/material-components-web/dist/material-components-web.css ./dist/es8-es2017/src/electron/renderer/ &&
+    cpy ./node_modules/material-components-web/dist/material-components-web.js ./dist/es8-es2017/src/electron/renderer/
+  '
+
+  'preelectron-renderer:all': '
+    npm run preelectron-renderer:es5 &&
+    npm run preelectron-renderer:es6-es2015 &&
+    npm run preelectron-renderer:es7-es2016 &&
+    npm run preelectron-renderer:es8-es2017
+  '
+
+  'preelectron-renderer:es5': '
+    npm run material:es5 &&
+    cpy ./misc/ReadiumCSS/fonts/AccessibleDfA.otf ./dist/es5/src/electron/renderer/ &&
+    cpy "./src/electron/renderer/**/*.html" ./dist/es5/ --cwd=./ --parents &&
+    cpy "./src/electron/renderer/**/*.css" ./dist/es5/ --cwd=./ --parents
+  '
+
+  'preelectron-renderer:es6-es2015': '
+    npm run material:es6-es2015 &&
+    cpy ./misc/ReadiumCSS/fonts/AccessibleDfA.otf ./dist/es6-es2015/src/electron/renderer/ &&
+    cpy "./src/electron/renderer/**/*.html" ./dist/es6-es2015/ --cwd=./ --parents &&
+    cpy "./src/electron/renderer/**/*.css" ./dist/es6-es2015/ --cwd=./ --parents
+  '
+
+  'preelectron-renderer:es7-es2016': '
+    npm run material:es7-es2016 &&
+    cpy ./misc/ReadiumCSS/fonts/AccessibleDfA.otf ./dist/es7-es2016/src/electron/renderer/ &&
+    cpy "./src/electron/renderer/**/*.html" ./dist/es7-es2016/ --cwd=./ --parents &&
+    cpy "./src/electron/renderer/**/*.css" ./dist/es7-es2016/ --cwd=./ --parents
+  '
+
+  'preelectron-renderer:es8-es2017': '
+    npm run material:es8-es2017 &&
+    cpy ./misc/ReadiumCSS/fonts/AccessibleDfA.otf ./dist/es8-es2017/src/electron/renderer/ &&
+    cpy "./src/electron/renderer/**/*.html" ./dist/es8-es2017/ --cwd=./ --parents &&
+    cpy "./src/electron/renderer/**/*.css" ./dist/es8-es2017/ --cwd=./ --parents
+  '
+
+  'electron-renderer:all': '
+    npm run riot:all &&
+    cpy "./ReadiumCSS/**/*.*" ../dist/ --cwd=./misc --parents
+  '
+
+  'postelectron-renderer:all': '
+    npm run browserify:all
+  '
+
+  'electron-renderer:es5': '
+    npm run riot:es5 &&
+    cpy "./ReadiumCSS/**/*.*" ../dist/ --cwd=./misc --parents
+  '
+
+  'postelectron-renderer:es5': '
+    npm run browserify:es5
+  '
+
+  'electron-renderer:es6-es2015': '
+    npm run riot:es6-es2015 &&
+    cpy "./ReadiumCSS/**/*.*" ../dist/ --cwd=./misc --parents
+  '
+
+  'postelectron-renderer:es6-es2015': '
+    npm run browserify:es6-es2015
+  '
+
+  'electron-renderer:es7-es2016': '
+    npm run riot:es7-es2016 &&
+    cpy "./ReadiumCSS/**/*.*" ../dist/ --cwd=./misc --parents
+  '
+
+  'postelectron-renderer:es7-es2016': '
+    npm run browserify:es7-es2016
+  '
+
+  'electron-renderer:es8-es2017': '
+    npm run riot:es8-es2017 &&
+    cpy "./ReadiumCSS/**/*.*" ../dist/ --cwd=./misc --parents
+  '
+
+  'postelectron-renderer:es8-es2017': '
+    npm run browserify:es8-es2017
+  '
+
+  'preelectron': '
+    node tools/electronRename.js
+  '
+
+  'electron': '
+    cross-env
+    DEBUG=r2:*
+    BUILD_ENV=DEV
+    electron
+    ./dist/es8-es2017/src/electron/main/index.js
+  '
+
+  'preelectron-browserify': '
+    npm run preelectron
+  '
+
+  'electron-browserify': '
+    cross-env
+    DEBUG=r2:*
+    BUILD_ENV=DEV
+    electron
+    ./dist/es8-es2017/electron/main-browserify.js
+  '
+
+  '_pregitdist': '
+    npm run build:all
+  '
+
+  'gitdist': '
+    cd ../r2-streamer-js-dist/ &&
+    git status ||
+    echo status &&
+    (rimraf "*" && echo rimrafOK) ||
+    echo rimrafNOK &&
+    cpy ../r2-streamer-js/package.json . &&
+    cpy ../r2-streamer-js/package-lock.json . &&
+    cpy ../r2-streamer-js/LICENSE . &&
+    cpy ../r2-streamer-js/README.md . &&
+    cpy "docs/**/*.*" ../r2-streamer-js-dist/ --cwd=../r2-streamer-js/ --parents &&
+    cpy "dist/**/*.*" ../r2-streamer-js-dist/ --cwd=../r2-streamer-js/ --parents &&
+    git add * ||
+    echo add &&
+    git commit -a -m "add new dist" ||
+    echo commit &&
+    git push ||
+    echo push &&
+    git status ||
+    echo status &&
+    cd ..
+  '
+
+  'start': '
+    cross-env DEBUG=r2:*
+    node
+    "./dist/es6-es2015/src/http/server-cli.js"
+    ./misc/epubs/
+  '
+
+  'prepare_': '
+    npm run build:all &&
+    npm test
+  '
+
+  'prepublish_': '
+    npm run prepare_
+  '
+
+  'prenow': '
+    npm run clean &&
+    npm run build:es8-es2017
+  '
+
+  'now': '
+    cpy package-lock.json ./now &&
+    cpy "**/*.*" ../now/ --cwd=./dist --parents &&
+    rimraf "./now/**/*.d.ts" &&
+    rimraf "./now/**/*.js.map" &&
+    cpy "misc/readers/reader-NYPL/**/*.*" ./now/ --cwd=./ --parents &&
+    cpy "misc/readers/reader-HADRIEN/**/*.*" ./now/ --cwd=./ --parents &&
+    cpy "misc/epubs/*.epub" now/misc/epubs/ &&
+    cpy package-now.json now/ &&
+    cd now/ &&
+    mv package-now.json package.json &&
+    now &&
+    cd ..
+  '
+
+  'typescript:imports': '
+    node tools/typescript_relativize_path_mapping_imports.js
+  '
+
+  'gitrev': '
+    node tools/gitrev.js &&
+    cat dist/gitrev.json
+  '
+
+  'afterdist': '
+    npm run typescript:imports &&
+    npm run gitrev
+  '
+
+  'prebuild': '
+    npm run lint
+  '
+
+  'build': '
+    npm run transpile:typescript
+  '
+
+  'postbuild': '
+    npm run afterdist &&
+    npm run electron-renderer:es8-es2017
+  '
+
+  'prebuild:all': '
+    npm run lint
+  '
+
+  'build:all': '
+    npm run transpile:typescript:all
+  '
+
+  'postbuild:all': '
+    npm run afterdist &&
+    npm run electron-renderer:all
+  '
+
+  'prebuild:es5': '
+    npm run lint &&
+    npm run clean
+  '
+
+  'build:es5': '
+    npm run transpile:typescript:es5
+  '
+
+  'postbuild:es5': '
+    npm run afterdist &&
+    npm run electron-renderer:es5
+  '
+
+  'prebuild:es6-es2015': '
+    npm run lint &&
+    npm run clean
+  '
+
+  'build:es6-es2015': '
+    npm run transpile:typescript:es6-es2015
+  '
+
+  'postbuild:es6-es2015': '
+    npm run afterdist &&
+    npm run electron-renderer:es6-es2015
+  '
+
+  'prebuild:es7-es2016': '
+    npm run lint &&
+    npm run clean
+  '
+
+  'build:es7-es2016': '
+    npm run transpile:typescript:es7-es2016
+  '
+
+  'postbuild:es7-es2016': '
+    npm run afterdist &&
+    npm run electron-renderer:es7-es2016
+  '
+
+  'prebuild:es8-es2017': '
+    npm run lint &&
+    npm run clean
+  '
+
+  'build:es8-es2017': '
+    npm run transpile:typescript:es8-es2017
+  '
+
+  'postbuild:es8-es2017': '
+    npm run afterdist &&
+    npm run electron-renderer:es8-es2017
+  '
+
+  'clean': '
+    rimraf ./dist &&
+    rimraf ./now &&
+    mkdirp ./dist
+  '
+
+  'lint': '
+    npm run lint:all &&
+    npm run lint:typescript:full
+  '
+
+  'lint:all': '
+    eclint
+      check
+      "**/*"
+      "!**/*.node"
+      "!.git/**/*"
+      "!node_modules*/**/*"
+      "!dist/**/*"
+      "!misc/**/*"
+      "!now/**/*"
+      "!.vscode/**/*"
+      "!.history/**/*"
+      "!**/.DS_Store"
+      "!**/*.epub"
+      "!**/*.cbz"
+      "!**/*.jpg"
+      "!**/*.jpeg"
+      "!**/*.png"
+      "!**/*.log"
+  '
+
+  'lint:typescript': '
+    tslint
+      -c
+      "./tslint.json"
+      "./src/**/*.ts"
+      "./test/**/*.ts"
+  '
+
+  'lint:typescript:full': '
+    tslint
+      --project
+      "./tsconfig.json"
+      -c
+      "./tslint.json"
+      "./src/**/*.ts"
+      "./test/**/*.ts"
+  '
+
+  'lintfix': '
+    sed
+      -i
+      ""
+      "s/let normalizedPath = path\\.normalize(documentPath);/let normalizedPath = path.normalize(documentPath).toLowerCase();/g"
+      ./node_modules/tslint-language-service/out/src/index.js
+  '
+
+  'pretranspile:typescript': '
+    npm run clean
+  '
+
+  'transpile:typescript': '
+    tsc -p "./tsconfig.json"
+  '
+
+  'pretranspile:typescript:all': '
+    npm run clean
+  '
+
+  'transpile:typescript:all': '
+    npm run transpile:typescript:es5 &&
+    npm run transpile:typescript:es6-es2015 &&
+    npm run transpile:typescript:es7-es2016 &&
+    npm run transpile:typescript:es8-es2017
+  '
+
+  'transpile:typescript:es5': '
+    tsc -p "./tsconfigs/tsconfig-es5-all.json"
+  '
+
+  'transpile:typescript:es6-es2015': '
+    tsc -p "./tsconfigs/tsconfig-es6-es2015-all.json"
+  '
+
+  'transpile:typescript:es7-es2016': '
+    tsc -p "./tsconfigs/tsconfig-es7-es2016-all.json"
+  '
+
+  'transpile:typescript:es8-es2017': '
+    tsc -p "./tsconfigs/tsconfig-es8-es2017-all.json"
+  '
+
+  'transpile:typescript:es8-es2017+afterdist': '
+    npm run transpile:typescript:es8-es2017 &&
+    npm run afterdist &&
+    npm run electron-renderer:es8-es2017
+  '
+
+  'transpile:typescript:single': '
+    node tools/typescript_compile_single.js
+  '
+
+  'posttranspile:typescript:single': '
+    npm run afterdist &&
+    npm run electron-renderer:es8-es2017
+  '
+
+  'test': '
+    cross-env DEBUG=r2:*
+    ava
+      --verbose
+      --fail-fast
+      --serial
+      --color
+      "./dist/es8-es2017/test/**/test*.js"
+  '
+
+  'cli': '
+    node "./dist/es8-es2017/src/_utils/cli.js"
+  '
+
+  'cli-debug': '
+    cross-env DEBUG=r2:*
+    npm run cli
+  '
+
+  'cli-debug-x': '
+    cross-env DEBUG=*
+    npm run cli
+  '
+
+  'server': '
+    node "./dist/es8-es2017/src/http/server-cli.js"
+  '
+
+  'server-debug': '
+    cross-env DEBUG=r2:*
+    npm run server
+  '
+
+  'server-debug-x': '
+    cross-env DEBUG=*
+    npm run server
+  '
+
+  'heroku-prebuild': '
+    echo "heroku-prebuild"
+  '
+
+  'heroku-postbuild': '
+    echo "heroku-postbuild" &&
+    npm run clean &&
+    npm run transpile:typescript:es8-es2017 &&
+    npm run typescript:imports &&
+    curl
+      -s
+      -o ./dist/gitrev.json
+      https://rawgit.com/edrlab/r2-streamer-js-dist/master/dist/gitrev.json &&
+    ls ./dist
+  '
