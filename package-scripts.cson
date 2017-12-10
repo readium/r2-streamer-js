@@ -10,6 +10,7 @@
 
   'gitdist': '
     cd ../r2-streamer-js-dist/ &&
+    git checkout -B feature/refactor-navigator &&
     git status ||
     echo status &&
     (rimraf "*" && echo rimrafOK) ||
@@ -24,7 +25,7 @@
     echo add &&
     git commit -a -m "add new dist" ||
     echo commit &&
-    git push ||
+    git push --set-upstream origin feature/refactor-navigator ||
     echo push &&
     git status ||
     echo status &&
