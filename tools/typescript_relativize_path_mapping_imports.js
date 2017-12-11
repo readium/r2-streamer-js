@@ -18,6 +18,26 @@ var filehound = require("filehound");
 const tsConfigPath = "./tsconfigs/tsconfig-common.json";
 var tsconfig = require("../" + tsConfigPath);
 
+if (!tsconfig.compilerOptions.baseUrl) {
+    return;
+}
+
+const tsConfigESPath = "./tsconfigs/tsconfig-" + "es5" + ".json";
+var tsconfigES = require("../" + tsConfigESPath);
+
+if (tsconfigES.compilerOptions.paths) {
+    if (!tsconfig.compilerOptions.paths) {
+        tsconfig.compilerOptions.paths = tsconfigES.compilerOptions.paths;
+    } else {
+        // merge
+        tsconfig.compilerOptions.paths = Object.assign(tsconfig.compilerOptions.paths, tsconfigES.compilerOptions.paths);
+    }
+}
+
+if (!tsconfig.compilerOptions.paths) {
+    return;
+}
+
 const baseUrlAbsolutePath = fs.realpathSync(path.join(path.dirname(path.resolve(tsConfigPath)), tsconfig.compilerOptions.baseUrl));
 console.log(baseUrlAbsolutePath);
 
@@ -64,6 +84,11 @@ const dirPaths = await filehound.create()
 for (dirPath of dirPaths) {
     // console.log(`DIST TARGET: ${dirPath}`);
 
+    if (dirPath.indexOf("dist/es") < 0) {
+        console.log(`SKIPPED: ${dirPath}`);
+        continue;
+    }
+
     const filePaths = await filehound.create()
         .paths(dirPath) // relative to process.cwd(), not __dirname
         .ext([".js", ".ts"])
@@ -105,17 +130,34 @@ for (dirPath of dirPaths) {
 
                 // console.log(`2 == ${regex2Match[0]} (${regex2Match[1]})`);
 
-                let replacement = path.relative(
-                    path.dirname(filePath),
-                    path.join(dirPath_,
-                        path.relative(process.cwd(),
-                            path.join(pathMappings[pathMappingsKey], regex2Match[1])
-                            )
-                        )
+                let replacement = "";
+                let expanded = pathMappings[pathMappingsKey];
+                if (expanded.indexOf("/node_modules/") >= 0) {
+
+                    replacement = path.relative(process.cwd(),
+                        path.join(expanded, regex2Match[1])
                     );
-                replacement = replacement.replace(/\\/g, "/");
-                if (replacement[0] !== ".") {
-                    replacement = "./" + replacement;
+
+                    replacement = replacement.replace("node_modules/", "");
+
+                    const regex3 = /dist\/(.+)/g;
+                    let regex3Match = regex3.exec(dirPath);
+
+                    replacement = replacement.replace("/dist/es5/", "/dist/" + regex3Match[1] + "/");
+                } else {
+                    replacement = path.relative(
+                        path.dirname(filePath),
+                        path.join(dirPath_,
+                            path.relative(process.cwd(),
+                                path.join(expanded, regex2Match[1])
+                                )
+                            )
+                        );
+
+                    replacement = replacement.replace(/\\/g, "/");
+                    if (replacement[0] !== ".") {
+                        replacement = "./" + replacement;
+                    }
                 }
 
                 // console.log(`${regex1Match[2]} ==> ${replacement}`);

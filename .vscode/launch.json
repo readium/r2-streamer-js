@@ -113,36 +113,6 @@
       ]
     },
     {
-      "name": "electron",
-      "type": "node",
-      "request": "launch",
-      "program": "${workspaceRoot}/src/electron/main/index.ts",
-      "stopOnEntry": false,
-      "cwd": "${workspaceRoot}",
-      "internalConsoleOptions": "openOnSessionStart",
-      "args": [
-        "--hello"
-      ],
-      "env": {
-        "DEBUG": "r2:*",
-        "NODE_DEBUG": "1",
-        "NODE_ENV": "development",
-        "BUILD_ENV": "dev"
-      },
-      "console": "internalConsole",
-      "sourceMaps": true,
-      "outFiles": [
-        "${workspaceRoot}/dist/es8-es2017/**/*.js"
-      ],
-      "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/electron",
-      "windows": {
-        "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/electron.cmd"
-      },
-      "runtimeArgs": [
-        "--enable-logging"
-      ]
-    },
-    {
       "name": "Attach (--remote-debugging-port=9222)",
       "type": "node",
       "request": "attach",
