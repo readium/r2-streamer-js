@@ -1,5 +1,5 @@
 import { IPropertyConverter } from "../converters/converter";
-import { FunctionType, IXmlNamespaces, IXPathSelectorItem } from "../types";
+import { FunctionType, IXPathSelectorItem, IXmlNamespaces } from "../types";
 
 export class PropertyDefinition {
     public objectType: FunctionType | undefined;
