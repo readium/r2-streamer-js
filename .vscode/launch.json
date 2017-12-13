@@ -71,7 +71,7 @@
       "sourceMaps": true,
       "smartStep": true,
       "outFiles": [
-        "${workspaceRoot}/dist/bundle-es8-es2017/server-cli_.js"
+        "${workspaceRoot}/dist/bundle-es8-es2017/server-cli.js"
       ]
     },
     {
@@ -97,6 +97,31 @@
       "smartStep": true,
       "outFiles": [
         "${workspaceRoot}/dist/bundle-es8-es2017/server-cli.js"
+      ]
+    },
+    {
+      "name": "server-bundlemin_TS",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceRoot}/src/http/server-cli.ts",
+      "stopOnEntry": false,
+      "cwd": "${workspaceRoot}",
+      "internalConsoleOptions": "openOnSessionStart",
+      "args": [
+        "./misc/epubs",
+        "${file}",
+        "${workspaceRoot}/misc/epubs/wasteland-otf-obf.epub"
+      ],
+      "env": {
+        "DEBUG": "r2:*",
+        "NODE_DEBUG": "1",
+        "NODE_ENV": "development"
+      },
+      "console": "internalConsole",
+      "sourceMaps": true,
+      "smartStep": true,
+      "outFiles": [
+        "${workspaceRoot}/dist/bundle-es8-es2017/server-cli.min.js"
       ]
     },
     {

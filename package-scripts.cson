@@ -306,6 +306,20 @@
     npm run server-bundle
   '
 
+  'server-bundlemin': '
+    node "./dist/bundle-es8-es2017/server-cli.min.js"
+  '
+
+  'server-bundlemin-debug': '
+    cross-env DEBUG=r2:*
+    npm run server-bundlemin
+  '
+
+  'server-bundlemin-debug-x': '
+    cross-env DEBUG=*
+    npm run server-bundlemin
+  '
+
   'server': '
     node "./dist/es8-es2017/src/http/server-cli.js"
   '
@@ -386,11 +400,24 @@
     rimraf ./dist/bundle-es5/server-cli_.js.map
   '
 
+  'bundle-uglify:es5': '
+    uglifyjs
+      ./dist/bundle-es5/server-cli.js
+      --output
+      ./dist/bundle-es5/server-cli.min.js
+      --compress
+      --mangle
+      --ecma 5
+      --source-map
+      "root=\'\',url=\'server-cli.min.js.map\',content=\'./dist/bundle-es5/server-cli.js.map\'"
+  '
+
   'bundle:es5': '
     mkdirp ./dist/bundle-es5 &&
     npm run bundle-browserify:es5 &&
     npm run bundle-exorcist:es5 &&
-    npm run bundle-sorcery:es5
+    npm run bundle-sorcery:es5 &&
+    npm run bundle-uglify:es5
   '
 
   'bundle-browserify:es6-es2015': '
@@ -436,11 +463,24 @@
     rimraf ./dist/bundle-es6-es2015/server-cli_.js.map
   '
 
+  'bundle-uglify:es6-es2015': '
+    uglifyjs
+      ./dist/bundle-es6-es2015/server-cli.js
+      --output
+      ./dist/bundle-es6-es2015/server-cli.min.js
+      --compress
+      --mangle
+      --ecma 6
+      --source-map
+      "root=\'\',url=\'server-cli.min.js.map\',content=\'./dist/bundle-es6-es2015/server-cli.js.map\'"
+  '
+
   'bundle:es6-es2015': '
     mkdirp ./dist/bundle-es6-es2015 &&
     npm run bundle-browserify:es6-es2015 &&
     npm run bundle-exorcist:es6-es2015 &&
-    npm run bundle-sorcery:es6-es2015
+    npm run bundle-sorcery:es6-es2015 &&
+    npm run bundle-uglify:es6-es2015
   '
 
   'bundle-browserify:es7-es2016': '
@@ -486,11 +526,24 @@
     rimraf ./dist/bundle-es7-es2016/server-cli_.js.map
   '
 
+  'bundle-uglify:es7-es2016': '
+    uglifyjs
+      ./dist/bundle-es7-es2016/server-cli.js
+      --output
+      ./dist/bundle-es7-es2016/server-cli.min.js
+      --compress
+      --mangle
+      --ecma 7
+      --source-map
+      "root=\'\',url=\'server-cli.min.js.map\',content=\'./dist/bundle-es7-es2016/server-cli.js.map\'"
+  '
+
   'bundle:es7-es2016': '
     mkdirp ./dist/bundle-es7-es2016 &&
     npm run bundle-browserify:es7-es2016 &&
     npm run bundle-exorcist:es7-es2016 &&
-    npm run bundle-sorcery:es7-es2016
+    npm run bundle-sorcery:es7-es2016 &&
+    npm run bundle-uglify:es7-es2016
   '
 
   'bundle-browserify:es8-es2017': '
@@ -536,9 +589,22 @@
     rimraf ./dist/bundle-es8-es2017/server-cli_.js.map
   '
 
+  'bundle-uglify:es8-es2017': '
+    uglifyjs
+      ./dist/bundle-es8-es2017/server-cli.js
+      --output
+      ./dist/bundle-es8-es2017/server-cli.min.js
+      --compress
+      --mangle
+      --ecma 8
+      --source-map
+      "root=\'\',url=\'server-cli.min.js.map\',content=\'./dist/bundle-es8-es2017/server-cli.js.map\'"
+  '
+
   'bundle:es8-es2017': '
     mkdirp ./dist/bundle-es8-es2017 &&
     npm run bundle-browserify:es8-es2017 &&
     npm run bundle-exorcist:es8-es2017 &&
-    npm run bundle-sorcery:es8-es2017
+    npm run bundle-sorcery:es8-es2017 &&
+    npm run bundle-uglify:es8-es2017
   '
