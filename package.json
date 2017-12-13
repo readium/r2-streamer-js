@@ -79,7 +79,7 @@
     "@types/mime-types": "^2.1.0",
     "@types/morgan": "^1.7.35",
     "@types/node-forge": "^0.6.10",
-    "@types/request": "^2.0.8",
+    "@types/request": "^2.0.9",
     "@types/request-promise-native": "^1.0.10",
     "@types/tmp": "^0.0.33",
     "@types/uuid": "^3.4.3",
