@@ -1,7 +1,5 @@
   'cson2json': '
-    node node_modules/cson/bin/cson2json
-      package-scripts.cson &&
-    echo ""
+    json -I -f package.json -e "this.scripts=$(node node_modules/cson/bin/cson2json package-scripts.cson)"
   '
 
   '_pregitdist': '
@@ -91,7 +89,8 @@
   '
 
   'postbuild': '
-    npm run afterdist
+    npm run afterdist &&
+    npm run bundle:es8-es2017
   '
 
   'prebuild:all': '
@@ -103,7 +102,8 @@
   '
 
   'postbuild:all': '
-    npm run afterdist
+    npm run afterdist &&
+    npm run bundle:all
   '
 
   'prebuild:es5': '
@@ -116,7 +116,8 @@
   '
 
   'postbuild:es5': '
-    npm run afterdist
+    npm run afterdist &&
+    npm run bundle:es5
   '
 
   'prebuild:es6-es2015': '
@@ -129,7 +130,8 @@
   '
 
   'postbuild:es6-es2015': '
-    npm run afterdist
+    npm run afterdist &&
+    npm run bundle:es6-es2015
   '
 
   'prebuild:es7-es2016': '
@@ -142,7 +144,8 @@
   '
 
   'postbuild:es7-es2016': '
-    npm run afterdist
+    npm run afterdist &&
+    npm run bundle:es7-es2016
   '
 
   'prebuild:es8-es2017': '
@@ -155,7 +158,8 @@
   '
 
   'postbuild:es8-es2017': '
-    npm run afterdist
+    npm run afterdist &&
+    npm run bundle:es8-es2017
   '
 
   'clean': '
@@ -212,7 +216,7 @@
     sed
       -i
       ""
-      "s/let normalizedPath = path\\.normalize(documentPath);/let normalizedPath = path.normalize(documentPath).toLowerCase();/g"
+      "s/let normalizedPath = path\\\\.normalize(documentPath);/let normalizedPath = path.normalize(documentPath).toLowerCase();/g"
       ./node_modules/tslint-language-service/out/src/index.js
   '
 
@@ -288,6 +292,20 @@
     npm run cli
   '
 
+  'server-bundle': '
+    node "./dist/bundle-es8-es2017/server-cli.js"
+  '
+
+  'server-bundle-debug': '
+    cross-env DEBUG=r2:*
+    npm run server-bundle
+  '
+
+  'server-bundle-debug-x': '
+    cross-env DEBUG=*
+    npm run server-bundle
+  '
+
   'server': '
     node "./dist/es8-es2017/src/http/server-cli.js"
   '
@@ -316,4 +334,211 @@
       -o ./dist/gitrev.json
       https://rawgit.com/edrlab/r2-streamer-js-dist/master/dist/gitrev.json &&
     ls ./dist
+  '
+
+  'bundle:all': '
+    npm run bundle:es5 &&
+    npm run bundle:es6-es2015 &&
+    npm run bundle:es7-es2016 &&
+    npm run bundle:es8-es2017
+  '
+
+  'bundle-browserify:es5': '
+    browserify
+      ./dist/es5/src/http/server-cli.js
+      --no-builtins
+      --no-commondir
+      --ignore-missing
+      --xxinsert-globals
+      --insert-global-vars "xx__filename,xx__dirname"
+      --no-browser-field
+      --xxfull-paths
+      --xxlist
+      --xxdeps
+      --debug
+      --xxexclude mylib
+      --xxexternal ./file.js
+      --outfile
+      ./dist/bundle-es5/server-cli.inlinesourcemap.js
+  '
+
+  'bundle-exorcist:es5': '
+    cat ./dist/bundle-es5/server-cli.inlinesourcemap.js |
+    exorcist
+      --root
+      ../../
+      ./dist/bundle-es5/server-cli_.js.map >
+      ./dist/bundle-es5/server-cli_.js &&
+
+    json -I -f ./dist/bundle-es5/server-cli_.js.map -e "this.sourcesContent=false" &&
+
+    rimraf ./dist/bundle-es5/server-cli.inlinesourcemap.js
+  '
+
+  'bundle-sorcery:es5': '
+    sorcery
+      --input
+      ./dist/bundle-es5/server-cli_.js
+      --output
+      ./dist/bundle-es5/server-cli.js &&
+
+    rimraf ./dist/bundle-es5/server-cli_.js &&
+    rimraf ./dist/bundle-es5/server-cli_.js.map
+  '
+
+  'bundle:es5': '
+    mkdirp ./dist/bundle-es5 &&
+    npm run bundle-browserify:es5 &&
+    npm run bundle-exorcist:es5 &&
+    npm run bundle-sorcery:es5
+  '
+
+  'bundle-browserify:es6-es2015': '
+    browserify
+      ./dist/es6-es2015/src/http/server-cli.js
+      --no-builtins
+      --no-commondir
+      --ignore-missing
+      --xxinsert-globals
+      --insert-global-vars "xx__filename,xx__dirname"
+      --no-browser-field
+      --xxfull-paths
+      --xxlist
+      --xxdeps
+      --debug
+      --xxexclude mylib
+      --xxexternal ./file.js
+      --outfile
+      ./dist/bundle-es6-es2015/server-cli.inlinesourcemap.js
+  '
+
+  'bundle-exorcist:es6-es2015': '
+    cat ./dist/bundle-es6-es2015/server-cli.inlinesourcemap.js |
+    exorcist
+      --root
+      ../../
+      ./dist/bundle-es6-es2015/server-cli_.js.map >
+      ./dist/bundle-es6-es2015/server-cli_.js &&
+
+    json -I -f ./dist/bundle-es6-es2015/server-cli_.js.map -e "this.sourcesContent=false" &&
+
+    rimraf ./dist/bundle-es6-es2015/server-cli.inlinesourcemap.js
+  '
+
+  'bundle-sorcery:es6-es2015': '
+    sorcery
+      --input
+      ./dist/bundle-es6-es2015/server-cli_.js
+      --output
+      ./dist/bundle-es6-es2015/server-cli.js &&
+
+    rimraf ./dist/bundle-es6-es2015/server-cli_.js &&
+    rimraf ./dist/bundle-es6-es2015/server-cli_.js.map
+  '
+
+  'bundle:es6-es2015': '
+    mkdirp ./dist/bundle-es6-es2015 &&
+    npm run bundle-browserify:es6-es2015 &&
+    npm run bundle-exorcist:es6-es2015 &&
+    npm run bundle-sorcery:es6-es2015
+  '
+
+  'bundle-browserify:es7-es2016': '
+    browserify
+      ./dist/es7-es2016/src/http/server-cli.js
+      --no-builtins
+      --no-commondir
+      --ignore-missing
+      --xxinsert-globals
+      --insert-global-vars "xx__filename,xx__dirname"
+      --no-browser-field
+      --xxfull-paths
+      --xxlist
+      --xxdeps
+      --debug
+      --xxexclude mylib
+      --xxexternal ./file.js
+      --outfile
+      ./dist/bundle-es7-es2016/server-cli.inlinesourcemap.js
+  '
+
+  'bundle-exorcist:es7-es2016': '
+    cat ./dist/bundle-es7-es2016/server-cli.inlinesourcemap.js |
+    exorcist
+      --root
+      ../../
+      ./dist/bundle-es7-es2016/server-cli_.js.map >
+      ./dist/bundle-es7-es2016/server-cli_.js &&
+
+    json -I -f ./dist/bundle-es7-es2016/server-cli_.js.map -e "this.sourcesContent=false" &&
+
+    rimraf ./dist/bundle-es7-es2016/server-cli.inlinesourcemap.js
+  '
+
+  'bundle-sorcery:es7-es2016': '
+    sorcery
+      --input
+      ./dist/bundle-es7-es2016/server-cli_.js
+      --output
+      ./dist/bundle-es7-es2016/server-cli.js &&
+
+    rimraf ./dist/bundle-es7-es2016/server-cli_.js &&
+    rimraf ./dist/bundle-es7-es2016/server-cli_.js.map
+  '
+
+  'bundle:es7-es2016': '
+    mkdirp ./dist/bundle-es7-es2016 &&
+    npm run bundle-browserify:es7-es2016 &&
+    npm run bundle-exorcist:es7-es2016 &&
+    npm run bundle-sorcery:es7-es2016
+  '
+
+  'bundle-browserify:es8-es2017': '
+    browserify
+      ./dist/es8-es2017/src/http/server-cli.js
+      --no-builtins
+      --no-commondir
+      --ignore-missing
+      --xxinsert-globals
+      --insert-global-vars "xx__filename,xx__dirname"
+      --no-browser-field
+      --xxfull-paths
+      --xxlist
+      --xxdeps
+      --debug
+      --xxexclude mylib
+      --xxexternal ./file.js
+      --outfile
+      ./dist/bundle-es8-es2017/server-cli.inlinesourcemap.js
+  '
+
+  'bundle-exorcist:es8-es2017': '
+    cat ./dist/bundle-es8-es2017/server-cli.inlinesourcemap.js |
+    exorcist
+      --root
+      ../../
+      ./dist/bundle-es8-es2017/server-cli_.js.map >
+      ./dist/bundle-es8-es2017/server-cli_.js &&
+
+    json -I -f ./dist/bundle-es8-es2017/server-cli_.js.map -e "this.sourcesContent=false" &&
+
+    rimraf ./dist/bundle-es8-es2017/server-cli.inlinesourcemap.js
+  '
+
+  'bundle-sorcery:es8-es2017': '
+    sorcery
+      --input
+      ./dist/bundle-es8-es2017/server-cli_.js
+      --output
+      ./dist/bundle-es8-es2017/server-cli.js &&
+
+    rimraf ./dist/bundle-es8-es2017/server-cli_.js &&
+    rimraf ./dist/bundle-es8-es2017/server-cli_.js.map
+  '
+
+  'bundle:es8-es2017': '
+    mkdirp ./dist/bundle-es8-es2017 &&
+    npm run bundle-browserify:es8-es2017 &&
+    npm run bundle-exorcist:es8-es2017 &&
+    npm run bundle-sorcery:es8-es2017
   '
