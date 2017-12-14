@@ -401,15 +401,23 @@
   '
 
   'bundle-uglify:es5': '
+    cpy ./dist/bundle-es5/server-cli.js.map ./dist/bundle-es5/ --rename=server-cli-.js.map &&
+    json -I -f ./dist/bundle-es5/server-cli-.js.map -e "this.sourcesContent=false" &&
+
     uglifyjs
       ./dist/bundle-es5/server-cli.js
       --output
       ./dist/bundle-es5/server-cli.min.js
-      --compress
-      --mangle
-      --ecma 5
+      --xxcompress
+      --xxmangle
+      --keep-classnames
+      --keep-fnames
+      --beautify
+      "beautify=false,preserve_line=false,indent_level=0"
       --source-map
-      "root=\'\',url=\'server-cli.min.js.map\',content=\'./dist/bundle-es5/server-cli.js.map\'"
+      "root=\'\',url=\'server-cli.min.js.map\',content=\'./dist/bundle-es5/server-cli-.js.map\'" &&
+
+      rimraf ./dist/bundle-es5/server-cli-.js.map
   '
 
   'bundle:es5': '
@@ -464,15 +472,23 @@
   '
 
   'bundle-uglify:es6-es2015': '
+    cpy ./dist/bundle-es6-es2015/server-cli.js.map ./dist/bundle-es6-es2015/ --rename=server-cli-.js.map &&
+    json -I -f ./dist/bundle-es6-es2015/server-cli-.js.map -e "this.sourcesContent=false" &&
+
     uglifyjs
       ./dist/bundle-es6-es2015/server-cli.js
       --output
       ./dist/bundle-es6-es2015/server-cli.min.js
-      --compress
-      --mangle
-      --ecma 6
+      --xxcompress
+      --xxmangle
+      --keep-classnames
+      --keep-fnames
+      --beautify
+      "beautify=false,preserve_line=false,indent_level=0"
       --source-map
-      "root=\'\',url=\'server-cli.min.js.map\',content=\'./dist/bundle-es6-es2015/server-cli.js.map\'"
+      "root=\'\',url=\'server-cli.min.js.map\',content=\'./dist/bundle-es6-es2015/server-cli-.js.map\'" &&
+
+      rimraf ./dist/bundle-es6-es2015/server-cli-.js.map
   '
 
   'bundle:es6-es2015': '
@@ -527,15 +543,23 @@
   '
 
   'bundle-uglify:es7-es2016': '
+    cpy ./dist/bundle-es7-es2016/server-cli.js.map ./dist/bundle-es7-es2016/ --rename=server-cli-.js.map &&
+    json -I -f ./dist/bundle-es7-es2016/server-cli-.js.map -e "this.sourcesContent=false" &&
+
     uglifyjs
       ./dist/bundle-es7-es2016/server-cli.js
       --output
       ./dist/bundle-es7-es2016/server-cli.min.js
-      --compress
-      --mangle
-      --ecma 7
+      --xxcompress
+      --xxmangle
+      --keep-classnames
+      --keep-fnames
+      --beautify
+      "beautify=false,preserve_line=false,indent_level=0"
       --source-map
-      "root=\'\',url=\'server-cli.min.js.map\',content=\'./dist/bundle-es7-es2016/server-cli.js.map\'"
+      "root=\'\',url=\'server-cli.min.js.map\',content=\'./dist/bundle-es7-es2016/server-cli-.js.map\'" &&
+
+      rimraf ./dist/bundle-es7-es2016/server-cli-.js.map
   '
 
   'bundle:es7-es2016': '
@@ -590,15 +614,23 @@
   '
 
   'bundle-uglify:es8-es2017': '
+    cpy ./dist/bundle-es8-es2017/server-cli.js.map ./dist/bundle-es8-es2017/ --rename=server-cli-.js.map &&
+    json -I -f ./dist/bundle-es8-es2017/server-cli-.js.map -e "this.sourcesContent=false" &&
+
     uglifyjs
       ./dist/bundle-es8-es2017/server-cli.js
       --output
       ./dist/bundle-es8-es2017/server-cli.min.js
-      --compress
-      --mangle
-      --ecma 8
+      --xxcompress
+      --xxmangle
+      --keep-classnames
+      --keep-fnames
+      --beautify
+      "beautify=false,preserve_line=false,indent_level=0"
       --source-map
-      "root=\'\',url=\'server-cli.min.js.map\',content=\'./dist/bundle-es8-es2017/server-cli.js.map\'"
+      "root=\'\',url=\'server-cli.min.js.map\',content=\'./dist/bundle-es8-es2017/server-cli-.js.map\'" &&
+
+      rimraf ./dist/bundle-es8-es2017/server-cli-.js.map
   '
 
   'bundle:es8-es2017': '
