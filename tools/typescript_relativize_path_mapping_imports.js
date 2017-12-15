@@ -58,7 +58,8 @@ tsconfigCompilerOptionsPaths.forEach((tsconfigCompilerOptionsPath) => {
         tsconfigCompilerOptionsPathArray.forEach((tsconfigCompilerOptionsPathArrayItem) => {
             // console.log(`PATH VALUE: ${tsconfigCompilerOptionsPathArrayItem}`);
 
-            const p = path.join(baseUrlAbsolutePath, tsconfigCompilerOptionsPathArrayItem.replace(/\/\*/g, ""));
+            let p = path.join(baseUrlAbsolutePath, tsconfigCompilerOptionsPathArrayItem.replace(/\/\*/g, ""));
+            p = p.replace(/\\/g, "/");
             if (!pathMappings[tsconfigCompilerOptionsPathFix]) {
                 pathMappings[tsconfigCompilerOptionsPathFix] = p;
             }
@@ -84,7 +85,7 @@ const dirPaths = await filehound.create()
 for (dirPath of dirPaths) {
     // console.log(`DIST TARGET: ${dirPath}`);
 
-    if (dirPath.indexOf("dist/es") < 0) {
+    if (dirPath.indexOf("dist" + path.sep + "es") < 0) {
         console.log(`SKIPPED: ${dirPath}`);
         continue;
     }
@@ -94,6 +95,7 @@ for (dirPath of dirPaths) {
         .ext([".js", ".ts"])
         .find();
 
+    dirPath = dirPath.replace(/\\/g, "/");
     const dirPath_ = fs.realpathSync(dirPath);
     filePaths.forEach((filePath) => {
 
@@ -137,6 +139,7 @@ for (dirPath of dirPaths) {
                     replacement = path.relative(process.cwd(),
                         path.join(expanded, regex2Match[1])
                     );
+                    replacement = replacement.replace(/\\/g, "/");
 
                     replacement = replacement.replace("node_modules/", "");
 
