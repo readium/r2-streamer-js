@@ -41,7 +41,7 @@
     "noImplicitThis": true,
     "alwaysStrict": true,
     "strictNullChecks": true,
-    "strictFunctionTypes": false,
+    "strictFunctionTypes": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "noUnusedLocals": true,
