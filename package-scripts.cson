@@ -9,25 +9,19 @@
   'gitdist': '
     cd ../r2-streamer-js-dist/ &&
     git checkout -B master &&
-    git status ||
-    echo status &&
-    (rimraf "*" && echo rimrafOK) ||
-    echo rimrafNOK &&
+    (git status || echo status) &&
+    ((rimraf "*" && echo rimrafOK) || echo rimrafNOK) &&
     cpy ../r2-streamer-js/package.json . &&
     cpy ../r2-streamer-js/package-lock.json . &&
     cpy ../r2-streamer-js/LICENSE . &&
     cpy ../r2-streamer-js/README.md . &&
     cpy "docs/**/*.*" ../r2-streamer-js-dist/ --cwd=../r2-streamer-js/ --parents &&
     cpy "dist/**/*.*" ../r2-streamer-js-dist/ --cwd=../r2-streamer-js/ --parents &&
-    git add * ||
-    echo add &&
-    git commit -a -m "add new dist" ||
-    echo commit &&
-    git push --set-upstream origin master ||
-    echo push &&
-    git status ||
-    echo status &&
-    cd ..
+    (git add * || echo add) &&
+    (git commit -a -m "add new dist" || echo commit) &&
+    (git push --set-upstream origin master || echo push) &&
+    (git status || echo status) &&
+    cd ../r2-streamer-js
   '
 
   'start': '
