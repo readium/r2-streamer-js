@@ -116,7 +116,7 @@
   "scripts": {
     "cson2json": "json -I -f package.json -e \"this.scripts=$(node node_modules/cson/bin/cson2json package-scripts.cson)\"",
     "_pregitdist": "npm run build:all",
-    "gitdist": "cd ../r2-streamer-js-dist/ && git checkout -B master && (git status || echo status) && ((rimraf \"*\" && echo rimrafOK) || echo rimrafNOK) && cpy ../r2-streamer-js/package.json . && cpy ../r2-streamer-js/package-lock.json . && cpy ../r2-streamer-js/LICENSE . && cpy ../r2-streamer-js/README.md . && cpy \"docs/**/*.*\" ../r2-streamer-js-dist/ --cwd=../r2-streamer-js/ --parents && cpy \"dist/**/*.*\" ../r2-streamer-js-dist/ --cwd=../r2-streamer-js/ --parents && (git add * || echo add) && (git commit -a -m \"add new dist\" || echo commit) && (git push --set-upstream origin master || echo push) && (git status || echo status) && cd ../r2-streamer-js",
+    "gitdist": "cd ../r2-streamer-js-dist/ && git checkout -B master && git pull && (git status || echo status) && ((rimraf \"*\" && echo rimrafOK) || echo rimrafNOK) && cpy ../r2-streamer-js/package.json . && cpy ../r2-streamer-js/package-lock.json . && cpy ../r2-streamer-js/LICENSE . && cpy ../r2-streamer-js/README.md . && cpy \"docs/**/*.*\" ../r2-streamer-js-dist/ --cwd=../r2-streamer-js/ --parents && cpy \"dist/**/*.*\" ../r2-streamer-js-dist/ --cwd=../r2-streamer-js/ --parents && (git add * || echo add) && (git commit -a -m \"add new dist\" || echo commit) && (git push --set-upstream origin master || echo push) && (git status || echo status) && cd ../r2-streamer-js",
     "start": "cross-env DEBUG=r2:* node \"./dist/es6-es2015/src/http/server-cli.js\" ./misc/epubs/",
     "prepare_": "npm run build:all && npm test",
     "prepublish_": "npm run prepare_",
