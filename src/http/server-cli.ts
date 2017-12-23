@@ -5,7 +5,7 @@ import * as debug_ from "debug";
 import * as filehound from "filehound";
 
 import { setLcpNativePluginPath } from "@parser/epub/lcp";
-import { initGlobals } from "../init-globals";
+import { initGlobals } from "@r2-shared-js/init-globals";
 import { Server } from "./server";
 
 initGlobals();
