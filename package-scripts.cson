@@ -263,30 +263,6 @@
     npm run afterdist
   '
 
-  'test': '
-    cross-env DEBUG=r2:*
-    ava
-      --verbose
-      --fail-fast
-      --serial
-      --color
-      "./dist/es8-es2017/test/**/test*.js"
-  '
-
-  'cli': '
-    node "./dist/es8-es2017/src/_utils/cli.js"
-  '
-
-  'cli-debug': '
-    cross-env DEBUG=r2:*
-    npm run cli
-  '
-
-  'cli-debug-x': '
-    cross-env DEBUG=*
-    npm run cli
-  '
-
   'server-bundle': '
     node "./dist/bundle-es8-es2017/server-cli.js"
   '

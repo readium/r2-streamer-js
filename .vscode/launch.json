@@ -2,30 +2,6 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "cli",
-      "type": "node",
-      "request": "launch",
-      "program": "${workspaceRoot}/src/_utils/cli.ts",
-      "stopOnEntry": false,
-      "cwd": "${workspaceRoot}",
-      "internalConsoleOptions": "openOnSessionStart",
-      "args": [
-        "./misc/epubs",
-        "${file}",
-        "${workspaceRoot}/misc/epubs/wasteland-otf-obf.epub"
-      ],
-      "env": {
-        "DEBUG": "*",
-        "NODE_DEBUG": "1",
-        "NODE_ENV": "development"
-      },
-      "console": "internalConsole",
-      "sourceMaps": true,
-      "outFiles": [
-        "${workspaceRoot}/dist/es8-es2017/**/*.js"
-      ]
-    },
-    {
       "name": "server",
       "type": "node",
       "request": "launch",
@@ -125,69 +101,6 @@
       ]
     },
     {
-      "name": "test-ava-1",
-      "type": "node",
-      "request": "launch",
-      "program": "${workspaceRoot}/node_modules/ava/profile.js",
-      "stopOnEntry": false,
-      "cwd": "${workspaceRoot}",
-      "internalConsoleOptions": "openOnSessionStart",
-      "args": [
-        "--verbose",
-        "--fail-fast",
-        "--serial",
-        "${workspaceRoot}/dist/es8-es2017/test/test.js",
-        "${workspaceRoot}/dist/es8-es2017/test/test-JSON-Rel.js",
-        "${workspaceRoot}/dist/es8-es2017/test/test-JSON-Title.js",
-        "${workspaceRoot}/dist/es8-es2017/test/test-JSON-Contributor.js",
-        "${workspaceRoot}/dist/es8-es2017/test/test-JSON-Collection.js",
-        "${workspaceRoot}/dist/es8-es2017/test/test-JSON-Context.js",
-        "${workspaceRoot}/dist/es8-es2017/test/test-JSON-XML-Date.js"
-      ],
-      "env": {
-        "DEBUG": "r2:*",
-        "NODE_DEBUG": "1",
-        "NODE_ENV": "development"
-      },
-      "console": "internalConsole",
-      "sourceMaps": true,
-      "outFiles": [
-        "${workspaceRoot}/dist/es8-es2017/**/*.js"
-      ]
-    },
-    {
-      "name": "test-ava-2",
-      "trace": "all",
-      "type": "node",
-      "request": "launch",
-      "program": "${workspaceRoot}/test/ava.ts",
-      "stopOnEntry": false,
-      "cwd": "${workspaceRoot}",
-      "internalConsoleOptions": "openOnSessionStart",
-      "args": [
-        "--verbose",
-        "--fail-fast",
-        "--serial",
-        "${workspaceRoot}/dist/es8-es2017/test/test.js",
-        "${workspaceRoot}/dist/es8-es2017/test/test-JSON-Rel.js",
-        "${workspaceRoot}/dist/es8-es2017/test/test-JSON-Title.js",
-        "${workspaceRoot}/dist/es8-es2017/test/test-JSON-Contributor.js",
-        "${workspaceRoot}/dist/es8-es2017/test/test-JSON-Collection.js",
-        "${workspaceRoot}/dist/es8-es2017/test/test-JSON-Context.js",
-        "${workspaceRoot}/dist/es8-es2017/test/test-JSON-XML-Date.js"
-      ],
-      "env": {
-        "DEBUG": "r2:*",
-        "NODE_DEBUG": "1",
-        "NODE_ENV": "development"
-      },
-      "console": "internalConsole",
-      "sourceMaps": true,
-      "outFiles": [
-        "${workspaceRoot}/dist/es8-es2017/**/*.js"
-      ]
-    },
-    {
       "name": "Attach (--remote-debugging-port=9222)",
       "type": "node",
       "request": "attach",
@@ -196,9 +109,9 @@
   ],
   "compounds": [
     {
-      "name": "cli+server",
+      "name": "server2",
       "configurations": [
-        "cli",
+        "server-bundle_JS",
         "server"
       ]
     }
