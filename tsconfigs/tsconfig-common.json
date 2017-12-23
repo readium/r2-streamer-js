@@ -18,21 +18,6 @@
     ],
     "baseUrl": "..",
     "paths": {
-      "@utils/*": [
-        "src/_utils/*"
-      ],
-      "@parser/*": [
-        "src/parser/*"
-      ],
-      "@models/*": [
-        "src/models/*"
-      ],
-      "@transform/*": [
-        "src/transform/*"
-      ],
-      "@opds/*": [
-        "src/opds/*"
-      ],
       "@r2-streamer-js/*": [
         "src/*"
       ]
