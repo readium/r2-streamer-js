@@ -392,6 +392,10 @@
   '
 
   'bundle:es5': '
+    echo "bundle skip."
+  '
+
+  'bundle:es5_': '
     mkdirp ./dist/bundle-es5 &&
     npm run bundle-browserify:es5 &&
     npm run bundle-exorcist:es5 &&
@@ -463,6 +467,10 @@
   '
 
   'bundle:es6-es2015': '
+    echo "bundle skip."
+  '
+
+  'bundle:es6-es2015_': '
     mkdirp ./dist/bundle-es6-es2015 &&
     npm run bundle-browserify:es6-es2015 &&
     npm run bundle-exorcist:es6-es2015 &&
@@ -534,6 +542,10 @@
   '
 
   'bundle:es7-es2016': '
+    echo "bundle skip."
+  '
+
+  'bundle:es7-es2016_': '
     mkdirp ./dist/bundle-es7-es2016 &&
     npm run bundle-browserify:es7-es2016 &&
     npm run bundle-exorcist:es7-es2016 &&
@@ -605,6 +617,10 @@
   '
 
   'bundle:es8-es2017': '
+    echo "bundle skip."
+  '
+
+  'bundle:es8-es2017_': '
     mkdirp ./dist/bundle-es8-es2017 &&
     npm run bundle-browserify:es8-es2017 &&
     npm run bundle-exorcist:es8-es2017 &&

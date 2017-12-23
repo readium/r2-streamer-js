@@ -11,8 +11,17 @@
       "dom.iterable"
     ],
     "paths": {
+      "@opds/*": [
+        "node_modules/r2-opds-js/dist/es8-es2017/src/opds/*"
+      ],
+      "@r2-opds-js/*": [
+        "node_modules/r2-opds-js/dist/es8-es2017/src/*"
+      ],
       "@utils/*": [
-        "node_modules/r2-shared-js/dist/es8-es2017/src/_utils/*"
+        "node_modules/r2-utils-js/dist/es8-es2017/src/_utils/*"
+      ],
+      "@r2-utils-js/*": [
+        "node_modules/r2-utils-js/dist/es8-es2017/src/*"
       ],
       "@parser/*": [
         "node_modules/r2-shared-js/dist/es8-es2017/src/parser/*"
@@ -22,9 +31,6 @@
       ],
       "@transform/*": [
         "node_modules/r2-shared-js/dist/es8-es2017/src/transform/*"
-      ],
-      "@opds/*": [
-        "node_modules/r2-shared-js/dist/es8-es2017/src/opds/*"
       ],
       "@r2-shared-js/*": [
         "node_modules/r2-shared-js/dist/es8-es2017/src/*"

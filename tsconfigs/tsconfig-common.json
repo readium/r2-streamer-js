@@ -17,11 +17,6 @@
       "../test/"
     ],
     "baseUrl": "..",
-    "paths": {
-      "@r2-streamer-js/*": [
-        "src/*"
-      ]
-    },
     "noImplicitAny": true,
     "noImplicitThis": true,
     "alwaysStrict": true,
