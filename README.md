@@ -2,6 +2,8 @@
 
 NodeJS implementation (written in TypeScript) and HTTP micro-services (Express middleware) for https://github.com/readium/readium-2/tree/master/streamer
 
+[![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](/LICENSE)
+
 ## Build status
 
 [![NPM](https://img.shields.io/npm/v/r2-streamer-js.svg)](https://www.npmjs.com/package/r2-streamer-js) [![David](https://david-dm.org/edrlab/r2-streamer-js/status.svg)](https://david-dm.org/edrlab/r2-streamer-js) [![Travis](https://travis-ci.org/edrlab/r2-streamer-js.svg?branch=develop)](https://travis-ci.org/edrlab/r2-streamer-js) [![Heroku](https://img.shields.io/badge/app-Heroku-blue.svg)](https://readium2.herokuapp.com) [![Now.sh](https://img.shields.io/badge/app-Now.sh-lightgrey.svg)](https://readium2.now.sh)
