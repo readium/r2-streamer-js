@@ -87,7 +87,7 @@
     "tslint": "^5.8.0",
     "tslint-language-service": "^0.9.7",
     "typescript": "^2.6.2",
-    "uglify-es": "^3.2.2"
+    "uglify-es": "^3.3.4"
   },
   "main": "dist/es6-es2015/src/index.js",
   "types": "dist/es6-es2015/src/index.d.js",
