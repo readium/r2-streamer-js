@@ -103,7 +103,7 @@
     "dist/**/*"
   ],
   "scripts": {
-    "cson2json": "json -I -f package.json -e \"this.scripts=$(cat package-scripts.cson package-scripts-bundle.cson | node node_modules/cson/bin/cson2json)\"",
+    "cson2json": "sed -E \"s/#ECMASCRIPT#/es5/g\" package-scripts-bundle.cson > tmp.cson && sed -E \"s/#ECMASCRIPT#/es6-es2015/g\" package-scripts-bundle.cson >> tmp.cson && sed -E \"s/#ECMASCRIPT#/es7-es2016/g\" package-scripts-bundle.cson >> tmp.cson && sed -E \"s/#ECMASCRIPT#/es8-es2017/g\" package-scripts-bundle.cson >> tmp.cson && json -I -f package.json -e \"this.scripts=$(cat package-scripts.cson tmp.cson | node node_modules/cson/bin/cson2json)\" && rimraf tmp.cson",
     "_pregitdist": "npm run build:all",
     "gitdist": "cd ../r2-streamer-js-dist/ && git checkout -B master && git pull && (git status || echo status) && ((rimraf \"*\" && echo rimrafOK) || echo rimrafNOK) && cpy ../r2-streamer-js/package.json . && cpy ../r2-streamer-js/package-lock.json . && cpy ../r2-streamer-js/LICENSE . && cpy ../r2-streamer-js/README.md . && cpy \"docs/**/*.*\" ../r2-streamer-js-dist/ --cwd=../r2-streamer-js/ --parents && cpy \"dist/**/*.*\" ../r2-streamer-js-dist/ --cwd=../r2-streamer-js/ --parents && (git add * || echo add) && (git commit -a -m \"add new dist\" || echo commit) && (git push --set-upstream origin master || echo push) && (git status || echo status) && cd ../r2-streamer-js",
     "start": "cross-env DEBUG=r2:* node \"./dist/es6-es2015/src/http/server-cli.js\" ./misc/epubs/",

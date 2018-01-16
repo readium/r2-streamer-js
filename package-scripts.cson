@@ -1,8 +1,11 @@
   'cson2json': '
-    json -I -f package.json -e "this.scripts=$(cat package-scripts.cson package-scripts-bundle.cson | node node_modules/cson/bin/cson2json)"
+    sed -E "s/#ECMASCRIPT#/es5/g" package-scripts-bundle.cson > tmp.cson &&
+    sed -E "s/#ECMASCRIPT#/es6-es2015/g" package-scripts-bundle.cson >> tmp.cson &&
+    sed -E "s/#ECMASCRIPT#/es7-es2016/g" package-scripts-bundle.cson >> tmp.cson &&
+    sed -E "s/#ECMASCRIPT#/es8-es2017/g" package-scripts-bundle.cson >> tmp.cson &&
+    json -I -f package.json -e "this.scripts=$(cat package-scripts.cson tmp.cson | node node_modules/cson/bin/cson2json)" &&
+    rimraf tmp.cson
   '
-
-#sed -E 's/#ECMASCRIPT#/es5/g' package.cson
 
   '_pregitdist': '
     npm run build:all
