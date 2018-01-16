@@ -103,7 +103,7 @@
     "dist/**/*"
   ],
   "scripts": {
-    "cson2json": "node node_modules/cson/bin/cson2json package-scripts.cson > package-scripts.json && echo \" \" >> package-scripts.json && node node_modules/cson/bin/cson2json package-scripts-bundle.cson > package-scripts-bundle.json && cat package-scripts.json package-scripts-bundle.json | node node_modules/json/lib/json --merge > package-scripts_ALL.json && json -I -f package.json -e \"this.scripts=$(cat package-scripts_ALL.json)\" && rimraf package-scripts.json && rimraf package-scripts-bundle.json && rimraf package-scripts_ALL.json",
+    "cson2json": "json -I -f package.json -e \"this.scripts=$(cat package-scripts.cson package-scripts-bundle.cson | node node_modules/cson/bin/cson2json)\"",
     "_pregitdist": "npm run build:all",
     "gitdist": "cd ../r2-streamer-js-dist/ && git checkout -B master && git pull && (git status || echo status) && ((rimraf \"*\" && echo rimrafOK) || echo rimrafNOK) && cpy ../r2-streamer-js/package.json . && cpy ../r2-streamer-js/package-lock.json . && cpy ../r2-streamer-js/LICENSE . && cpy ../r2-streamer-js/README.md . && cpy \"docs/**/*.*\" ../r2-streamer-js-dist/ --cwd=../r2-streamer-js/ --parents && cpy \"dist/**/*.*\" ../r2-streamer-js-dist/ --cwd=../r2-streamer-js/ --parents && (git add * || echo add) && (git commit -a -m \"add new dist\" || echo commit) && (git push --set-upstream origin master || echo push) && (git status || echo status) && cd ../r2-streamer-js",
     "start": "cross-env DEBUG=r2:* node \"./dist/es6-es2015/src/http/server-cli.js\" ./misc/epubs/",
@@ -114,6 +114,7 @@
     "typescript:imports": "node tools/typescript_relativize_path_mapping_imports.js",
     "gitrev": "node tools/gitrev.js && cat dist/gitrev.json",
     "afterdist": "npm run typescript:imports && npm run gitrev",
+    "bundle:all": "npm run bundle:es5 && npm run bundle:es6-es2015 && npm run bundle:es7-es2016 && npm run bundle:es8-es2017",
     "prebuild": "npm run lint",
     "build": "npm run transpile:typescript",
     "postbuild": "npm run afterdist && npm run bundle:es8-es2017",
@@ -160,7 +161,6 @@
     "server-debug-x": "cross-env DEBUG=* npm run server",
     "heroku-prebuild": "echo \"heroku-prebuild\"",
     "heroku-postbuild": "echo \"heroku-postbuild\" && npm run clean && npm run transpile:typescript:es8-es2017 && npm run typescript:imports && curl -s -o ./dist/gitrev.json https://rawgit.com/edrlab/r2-streamer-js-dist/master/dist/gitrev.json && ls ./dist",
-    "bundle:all": "npm run bundle:es5 && npm run bundle:es6-es2015 && npm run bundle:es7-es2016 && npm run bundle:es8-es2017",
     "bundle-browserify:es5": "browserify ./dist/es5/src/http/server-cli.js --no-builtins --no-commondir --ignore-missing --xxinsert-globals --insert-global-vars \"xx__filename,xx__dirname\" --no-browser-field --xxfull-paths --xxlist --xxdeps --debug --xxexclude mylib --xxexternal ./file.js --outfile ./dist/bundle-es5/server-cli.inlinesourcemap.js",
     "bundle-exorcist:es5": "cat ./dist/bundle-es5/server-cli.inlinesourcemap.js | exorcist --root ../../ ./dist/bundle-es5/server-cli_.js.map > ./dist/bundle-es5/server-cli_.js && json -I -f ./dist/bundle-es5/server-cli_.js.map -e \"this.sourcesContent=false\" && rimraf ./dist/bundle-es5/server-cli.inlinesourcemap.js",
     "bundle-sorcery:es5": "sorcery --input ./dist/bundle-es5/server-cli_.js --output ./dist/bundle-es5/server-cli.js && rimraf ./dist/bundle-es5/server-cli_.js && rimraf ./dist/bundle-es5/server-cli_.js.map",

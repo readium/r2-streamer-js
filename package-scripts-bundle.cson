@@ -1,10 +1,3 @@
-  'bundle:all': '
-    npm run bundle:es5 &&
-    npm run bundle:es6-es2015 &&
-    npm run bundle:es7-es2016 &&
-    npm run bundle:es8-es2017
-  '
-
   'bundle-browserify:es5': '
     browserify
       ./dist/es5/src/http/server-cli.js

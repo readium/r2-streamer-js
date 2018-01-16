@@ -1,13 +1,8 @@
   'cson2json': '
-    node node_modules/cson/bin/cson2json package-scripts.cson > package-scripts.json &&
-    echo " " >> package-scripts.json &&
-    node node_modules/cson/bin/cson2json package-scripts-bundle.cson > package-scripts-bundle.json &&
-    cat package-scripts.json package-scripts-bundle.json | node node_modules/json/lib/json --merge > package-scripts_ALL.json &&
-    json -I -f package.json -e "this.scripts=$(cat package-scripts_ALL.json)" &&
-    rimraf package-scripts.json &&
-    rimraf package-scripts-bundle.json &&
-    rimraf package-scripts_ALL.json
+    json -I -f package.json -e "this.scripts=$(cat package-scripts.cson package-scripts-bundle.cson | node node_modules/cson/bin/cson2json)"
   '
+
+#sed -E 's/#ECMASCRIPT#/es5/g' package.cson
 
   '_pregitdist': '
     npm run build:all
@@ -80,6 +75,13 @@
   'afterdist': '
     npm run typescript:imports &&
     npm run gitrev
+  '
+
+  'bundle:all': '
+    npm run bundle:es5 &&
+    npm run bundle:es6-es2015 &&
+    npm run bundle:es7-es2016 &&
+    npm run bundle:es8-es2017
   '
 
   'prebuild': '
