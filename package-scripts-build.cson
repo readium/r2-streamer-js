@@ -1,0 +1,17 @@
+  'prebuild:#ECMASCRIPT#': '
+    npm run lint &&
+    npm run clean
+  '
+
+  'build:#ECMASCRIPT#': '
+    npm run transpile:typescript:#ECMASCRIPT#
+  '
+
+  'postbuild:#ECMASCRIPT#': '
+    npm run afterdist &&
+    npm run bundle:#ECMASCRIPT#
+  '
+
+  'transpile:typescript:#ECMASCRIPT#': '
+    tsc -p "./tsconfigs/tsconfig-#ECMASCRIPT#-all.json"
+  '

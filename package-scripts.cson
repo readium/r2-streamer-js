@@ -1,10 +1,14 @@
   'cson2json': '
-    sed -E "s/#ECMASCRIPT#/es5/g" package-scripts-bundle.cson > tmp.cson &&
-    sed -E "s/#ECMASCRIPT#/es6-es2015/g" package-scripts-bundle.cson >> tmp.cson &&
-    sed -E "s/#ECMASCRIPT#/es7-es2016/g" package-scripts-bundle.cson >> tmp.cson &&
-    sed -E "s/#ECMASCRIPT#/es8-es2017/g" package-scripts-bundle.cson >> tmp.cson &&
-    json -I -f package.json -e "this.scripts=$(cat package-scripts.cson tmp.cson | node node_modules/cson/bin/cson2json)" &&
-    rimraf tmp.cson
+    sed -E "s/#ECMASCRIPT#/es5/g" package-scripts-bundle.cson > tmp-bundle.cson &&
+    sed -E "s/#ECMASCRIPT#/es6-es2015/g" package-scripts-bundle.cson >> tmp-bundle.cson &&
+    sed -E "s/#ECMASCRIPT#/es7-es2016/g" package-scripts-bundle.cson >> tmp-bundle.cson &&
+    sed -E "s/#ECMASCRIPT#/es8-es2017/g" package-scripts-bundle.cson >> tmp-bundle.cson &&
+    sed -E "s/#ECMASCRIPT#/es5/g" package-scripts-build.cson > tmp-build.cson &&
+    sed -E "s/#ECMASCRIPT#/es6-es2015/g" package-scripts-build.cson >> tmp-build.cson &&
+    sed -E "s/#ECMASCRIPT#/es7-es2016/g" package-scripts-build.cson >> tmp-build.cson &&
+    sed -E "s/#ECMASCRIPT#/es8-es2017/g" package-scripts-build.cson >> tmp-build.cson &&
+    json -I -f package.json -e "this.scripts=$(cat package-scripts.cson tmp-build.cson tmp-bundle.cson | node node_modules/cson/bin/cson2json)" &&
+    rimraf tmp-*.cson
   '
 
   '_pregitdist': '
@@ -113,62 +117,6 @@
     npm run bundle:all
   '
 
-  'prebuild:es5': '
-    npm run lint &&
-    npm run clean
-  '
-
-  'build:es5': '
-    npm run transpile:typescript:es5
-  '
-
-  'postbuild:es5': '
-    npm run afterdist &&
-    npm run bundle:es5
-  '
-
-  'prebuild:es6-es2015': '
-    npm run lint &&
-    npm run clean
-  '
-
-  'build:es6-es2015': '
-    npm run transpile:typescript:es6-es2015
-  '
-
-  'postbuild:es6-es2015': '
-    npm run afterdist &&
-    npm run bundle:es6-es2015
-  '
-
-  'prebuild:es7-es2016': '
-    npm run lint &&
-    npm run clean
-  '
-
-  'build:es7-es2016': '
-    npm run transpile:typescript:es7-es2016
-  '
-
-  'postbuild:es7-es2016': '
-    npm run afterdist &&
-    npm run bundle:es7-es2016
-  '
-
-  'prebuild:es8-es2017': '
-    npm run lint &&
-    npm run clean
-  '
-
-  'build:es8-es2017': '
-    npm run transpile:typescript:es8-es2017
-  '
-
-  'postbuild:es8-es2017': '
-    npm run afterdist &&
-    npm run bundle:es8-es2017
-  '
-
   'clean': '
     rimraf ./dist &&
     rimraf ./now &&
@@ -244,22 +192,6 @@
     npm run transpile:typescript:es6-es2015 &&
     npm run transpile:typescript:es7-es2016 &&
     npm run transpile:typescript:es8-es2017
-  '
-
-  'transpile:typescript:es5': '
-    tsc -p "./tsconfigs/tsconfig-es5-all.json"
-  '
-
-  'transpile:typescript:es6-es2015': '
-    tsc -p "./tsconfigs/tsconfig-es6-es2015-all.json"
-  '
-
-  'transpile:typescript:es7-es2016': '
-    tsc -p "./tsconfigs/tsconfig-es7-es2016-all.json"
-  '
-
-  'transpile:typescript:es8-es2017': '
-    tsc -p "./tsconfigs/tsconfig-es8-es2017-all.json"
   '
 
   'transpile:typescript:es8-es2017+afterdist': '
