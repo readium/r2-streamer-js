@@ -61,7 +61,7 @@
     "request-promise-native": "^1.0.5",
     "ta-json": "github:danielweck/ta-json#dist",
     "tmp": "^0.0.33",
-    "tslib": "^1.8.1",
+    "tslib": "^1.9.0",
     "xmldom": "^0.1.27"
   },
   "devDependencies": {
