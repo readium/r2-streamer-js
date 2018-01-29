@@ -124,10 +124,10 @@ export class Server {
                 req.get(`X-Debug-${this.serverData.trustKey}`) !== this.serverData.trustVal)
                 // || (ua && (ua.indexOf("curl") >= 0 || ua.indexOf("postman") >= 0 || ua.indexOf("wget") >= 0))
             ) {
-                debug(req);
-                Object.keys(req.headers).forEach((header: string) => {
-                    debug(header + " => " + req.headers[header]);
-                });
+                // debug(req); // CIRCULAR REFS!
+                // Object.keys(req.headers).forEach((header: string) => {
+                //     debug(header + " => " + req.headers[header]);
+                // });
 
                 res.status(200);
                 // res.send("<html><body> </body></html>");
