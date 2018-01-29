@@ -17,9 +17,9 @@
 
   'gitdist': '
     cd ../r2-streamer-js-dist/ &&
-    git checkout -B feature/https &&
+    git checkout -B develop &&
     (git pull || echo "pull") &&
-    (git status || echo status) &&
+    (git --no-pager status || echo status) &&
     ((rimraf "*" && echo rimrafOK) || echo rimrafNOK) &&
     cpy ../r2-streamer-js/package.json . &&
     cpy ../r2-streamer-js/package-lock.json . &&
@@ -29,8 +29,8 @@
     cpy "dist/**/*.*" ../r2-streamer-js-dist/ --cwd=../r2-streamer-js/ --parents &&
     (git add * || echo add) &&
     (git commit -a -m "add new dist" || echo commit) &&
-    (git push --set-upstream origin feature/https || echo push) &&
-    (git status || echo status) &&
+    (git push --set-upstream origin develop || echo push) &&
+    (git --no-pager status || echo status) &&
     cd ../r2-streamer-js
   '
 
@@ -271,6 +271,6 @@
     curl
       -s
       -o ./dist/gitrev.json
-      https://rawgit.com/edrlab/r2-streamer-js-dist/master/dist/gitrev.json &&
+      https://rawgit.com/edrlab/r2-streamer-js-dist/develop/dist/gitrev.json &&
     ls ./dist
   '

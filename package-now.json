@@ -14,7 +14,7 @@
     "mime-types": "^2.1.17",
     "moment": "^2.20.1",
     "morgan": "^1.9.0",
-    "r2-shared-js": "github:edrlab/r2-shared-js-dist#master",
+    "r2-shared-js": "github:edrlab/r2-shared-js-dist#develop",
     "request": "^2.83.0",
     "request-promise-native": "^1.0.5",
     "ta-json": "github:danielweck/ta-json#dist",
