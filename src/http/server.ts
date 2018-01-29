@@ -265,7 +265,7 @@ export class Server {
             (typeof this.httpsServer !== "undefined");
     }
 
-    public async start(port: number): Promise<ServerData> {
+    public async start(port: number, secure: boolean): Promise<ServerData> {
 
         if (this.isStarted()) {
             return Promise.resolve(this.serverInfo() as ServerData);
@@ -281,7 +281,7 @@ export class Server {
         const p = port || envPort || 3000;
         debug(`PORT: ${port} || ${envPort} || 3000 => ${p}`);
 
-        if (p === 443) {
+        if (secure) {
             this.httpServer = undefined;
 
             return new Promise<ServerData>(async (resolve, reject) => {

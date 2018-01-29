@@ -66,7 +66,7 @@ if (stats.isDirectory()) {
             .find();
         const server = new Server();
         server.addPublications(files);
-        const url = await server.start(0);
+        const url = await server.start(0, false);
         debug(url);
     })();
 
@@ -92,7 +92,7 @@ if (stats.isDirectory()) {
     (async () => {
         const server = new Server();
         server.addPublications([filePath]);
-        const url = await server.start(0);
+        const url = await server.start(0, false);
         debug(url);
     })();
 }
