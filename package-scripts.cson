@@ -18,7 +18,7 @@
   'gitdist': '
     cd ../r2-streamer-js-dist/ &&
     git checkout -B feature/https &&
-    git pull &&
+    (git pull || echo "pull") &&
     (git status || echo status) &&
     ((rimraf "*" && echo rimrafOK) || echo rimrafNOK) &&
     cpy ../r2-streamer-js/package.json . &&
