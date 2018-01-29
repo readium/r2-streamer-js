@@ -5,9 +5,9 @@ export interface CertificateData {
     trustKey: string;
     trustVal: string;
 
-    clientprivate?: string;
-    clientpublic?: string;
-    clientcert?: string;
+    // clientprivate?: string;
+    // clientpublic?: string;
+    // clientcert?: string;
 
     private?: string; // https.ServerOptions.key
     public?: string;
@@ -18,8 +18,8 @@ export async function generateSelfSignedData(): Promise<CertificateData> {
     return new Promise<CertificateData>((resolve, reject) => {
         const opts = {
             algorithm: "sha256",
-            clientCertificate: true,
-            clientCertificateCN: "R2 insecure client",
+            // clientCertificate: true,
+            // clientCertificateCN: "R2 insecure client",
             days: 30,
             extensions: [{
                 altNames: [{

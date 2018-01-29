@@ -111,28 +111,30 @@ export class Server {
 
         this.expressApp.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
 
-            Object.keys(req.headers).forEach((header: string) => {
-                debug(header + " => " + req.headers[header]);
-            });
-
             if (!this.isSecured() || !this.serverData) {
                 next();
                 return;
             }
 
-            let ua = req.get("user-agent");
-            if (ua) {
-                ua = ua.toLowerCase();
-            }
+            // let ua = req.get("user-agent");
+            // if (ua) {
+            //     ua = ua.toLowerCase();
+            // }
             if ((this.serverData.trustKey && this.serverData.trustVal &&
                 req.get(`X-Debug-${this.serverData.trustKey}`) !== this.serverData.trustVal)
-                || (ua && (ua.indexOf("curl") >= 0 || ua.indexOf("postman") >= 0 || ua.indexOf("wget") >= 0))
+                // || (ua && (ua.indexOf("curl") >= 0 || ua.indexOf("postman") >= 0 || ua.indexOf("wget") >= 0))
             ) {
+                debug(req);
+                Object.keys(req.headers).forEach((header: string) => {
+                    debug(header + " => " + req.headers[header]);
+                });
+
                 res.status(200);
                 // res.send("<html><body> </body></html>");
                 res.end();
                 return;
             }
+
             next();
         });
 
