@@ -353,6 +353,13 @@ export class Server {
         if (!info) {
             return undefined;
         }
+
+        // This is important, because browsers collapse the standard HTTP and HTTPS ports,
+        // and we don't normalise this elsewhere in consumer code!
+        // (which means critical URL prefix matching / syntax comparisons would fail otherwise :(
+        if (info.urlPort === 443 || info.urlPort === 80) {
+            return `${info.urlScheme}://${info.urlHost}`;
+        }
         return `${info.urlScheme}://${info.urlHost}:${info.urlPort}`;
 
         // const port = this.httpServer ? this.httpServer.address().port :
