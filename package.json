@@ -60,9 +60,11 @@
     "r2-utils-js": "github:edrlab/r2-utils-js-dist#master",
     "request": "^2.83.0",
     "request-promise-native": "^1.0.5",
+    "selfsigned": "^1.10.2",
     "ta-json": "github:danielweck/ta-json#dist",
     "tmp": "^0.0.33",
     "tslib": "^1.9.0",
+    "uuid": "^3.2.1",
     "xmldom": "^0.1.27"
   },
   "devDependencies": {
@@ -70,10 +72,11 @@
     "@types/express": "^4.11.0",
     "@types/mime-types": "^2.1.0",
     "@types/morgan": "^1.7.35",
-    "@types/node": "^9.3.0",
+    "@types/node": "^9.4.0",
     "@types/request": "^2.0.13",
     "@types/request-promise-native": "^1.0.11",
     "@types/tmp": "^0.0.33",
+    "@types/uuid": "^3.4.3",
     "@types/xmldom": "^0.1.29",
     "browserify": "^15.2.0",
     "cpy-cli": "^1.0.1",
@@ -89,7 +92,7 @@
     "tslint": "^5.9.1",
     "tslint-language-service": "^0.9.8",
     "typescript": "^2.6.2",
-    "uglify-es": "^3.3.8"
+    "uglify-es": "^3.3.9"
   },
   "main": "dist/es6-es2015/src/index.js",
   "types": "dist/es6-es2015/src/index.d.js",
@@ -105,7 +108,7 @@
   "scripts": {
     "cson2json": "sed -E \"s/#ECMASCRIPT#/es5/g\" package-scripts-bundle.cson > tmp-bundle.cson && sed -E \"s/#ECMASCRIPT#/es6-es2015/g\" package-scripts-bundle.cson >> tmp-bundle.cson && sed -E \"s/#ECMASCRIPT#/es7-es2016/g\" package-scripts-bundle.cson >> tmp-bundle.cson && sed -E \"s/#ECMASCRIPT#/es8-es2017/g\" package-scripts-bundle.cson >> tmp-bundle.cson && sed -E \"s/#ECMASCRIPT#/es5/g\" package-scripts-build.cson > tmp-build.cson && sed -E \"s/#ECMASCRIPT#/es6-es2015/g\" package-scripts-build.cson >> tmp-build.cson && sed -E \"s/#ECMASCRIPT#/es7-es2016/g\" package-scripts-build.cson >> tmp-build.cson && sed -E \"s/#ECMASCRIPT#/es8-es2017/g\" package-scripts-build.cson >> tmp-build.cson && json -I -f package.json -e \"this.scripts=$(cat package-scripts.cson tmp-build.cson tmp-bundle.cson | node node_modules/cson/bin/cson2json)\" && rimraf tmp-*.cson",
     "_pregitdist": "npm run build:all",
-    "gitdist": "cd ../r2-streamer-js-dist/ && git checkout -B master && git pull && (git status || echo status) && ((rimraf \"*\" && echo rimrafOK) || echo rimrafNOK) && cpy ../r2-streamer-js/package.json . && cpy ../r2-streamer-js/package-lock.json . && cpy ../r2-streamer-js/LICENSE . && cpy ../r2-streamer-js/README.md . && cpy \"docs/**/*.*\" ../r2-streamer-js-dist/ --cwd=../r2-streamer-js/ --parents && cpy \"dist/**/*.*\" ../r2-streamer-js-dist/ --cwd=../r2-streamer-js/ --parents && (git add * || echo add) && (git commit -a -m \"add new dist\" || echo commit) && (git push --set-upstream origin master || echo push) && (git status || echo status) && cd ../r2-streamer-js",
+    "gitdist": "cd ../r2-streamer-js-dist/ && git checkout -B feature/https && git pull && (git status || echo status) && ((rimraf \"*\" && echo rimrafOK) || echo rimrafNOK) && cpy ../r2-streamer-js/package.json . && cpy ../r2-streamer-js/package-lock.json . && cpy ../r2-streamer-js/LICENSE . && cpy ../r2-streamer-js/README.md . && cpy \"docs/**/*.*\" ../r2-streamer-js-dist/ --cwd=../r2-streamer-js/ --parents && cpy \"dist/**/*.*\" ../r2-streamer-js-dist/ --cwd=../r2-streamer-js/ --parents && (git add * || echo add) && (git commit -a -m \"add new dist\" || echo commit) && (git push --set-upstream origin feature/https || echo push) && (git status || echo status) && cd ../r2-streamer-js",
     "start": "cross-env DEBUG=r2:* node \"./dist/es6-es2015/src/http/server-cli.js\" ./misc/epubs/",
     "prepare_": "npm run build:all && npm test",
     "prepublish_": "npm run prepare_",
@@ -143,6 +146,8 @@
     "server": "node \"./dist/es8-es2017/src/http/server-cli.js\"",
     "server-debug": "cross-env DEBUG=r2:* npm run server",
     "server-debug-x": "cross-env DEBUG=* npm run server",
+    "server-https-debug": "cross-env DEBUG=r2:* PORT=443 npm run server",
+    "server-https-debug-x": "cross-env DEBUG=* PORT=443 npm run server",
     "heroku-prebuild": "echo \"heroku-prebuild\"",
     "heroku-postbuild": "echo \"heroku-postbuild\" && npm run clean && npm run transpile:typescript:es8-es2017 && npm run typescript:imports && curl -s -o ./dist/gitrev.json https://rawgit.com/edrlab/r2-streamer-js-dist/master/dist/gitrev.json && ls ./dist",
     "prebuild:es5": "npm run lint && npm run clean",

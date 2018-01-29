@@ -17,7 +17,7 @@
 
   'gitdist': '
     cd ../r2-streamer-js-dist/ &&
-    git checkout -B master &&
+    git checkout -B feature/https &&
     git pull &&
     (git status || echo status) &&
     ((rimraf "*" && echo rimrafOK) || echo rimrafNOK) &&
@@ -29,7 +29,7 @@
     cpy "dist/**/*.*" ../r2-streamer-js-dist/ --cwd=../r2-streamer-js/ --parents &&
     (git add * || echo add) &&
     (git commit -a -m "add new dist" || echo commit) &&
-    (git push --set-upstream origin master || echo push) &&
+    (git push --set-upstream origin feature/https || echo push) &&
     (git status || echo status) &&
     cd ../r2-streamer-js
   '
@@ -246,6 +246,16 @@
 
   'server-debug-x': '
     cross-env DEBUG=*
+    npm run server
+  '
+
+  'server-https-debug': '
+    cross-env DEBUG=r2:* PORT=443
+    npm run server
+  '
+
+  'server-https-debug-x': '
+    cross-env DEBUG=* PORT=443
     npm run server
   '
 

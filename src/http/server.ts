@@ -2,6 +2,7 @@ import * as child_process from "child_process";
 import * as crypto from "crypto";
 import * as fs from "fs";
 import * as http from "http";
+import * as https from "https";
 import * as path from "path";
 
 import { Publication } from "@models/publication";
@@ -15,6 +16,7 @@ import { JSON as TAJSON } from "ta-json";
 import { tmpNameSync } from "tmp";
 
 import { PublicationParsePromise } from "@parser/publication-parser";
+import { CertificateData, generateSelfSignedData } from "../utils/self-signed";
 import { serverAssets } from "./server-assets";
 import { serverManifestJson } from "./server-manifestjson";
 import { serverMediaOverlays } from "./server-mediaoverlays";
@@ -53,14 +55,24 @@ const jsonStyle = `
 }
 `;
 
+export interface ServerData extends CertificateData {
+    urlScheme: string;
+    urlHost: string;
+    urlPort: number;
+}
+
 export interface IServerOptions {
     disableReaders?: boolean;
     disableDecryption?: boolean; /* excludes obfuscated fonts */
+    disableRemotePubUrl?: boolean;
+    disableOPDS?: boolean;
 }
 
 export class Server {
     public readonly disableReaders: boolean;
     public readonly disableDecryption: boolean;
+    public readonly disableRemotePubUrl: boolean;
+    public readonly disableOPDS: boolean;
 
     public readonly lcpBeginToken = "*-";
     public readonly lcpEndToken = "-*";
@@ -73,14 +85,18 @@ export class Server {
     private readonly opdsJsonFilePath: string;
 
     private readonly expressApp: express.Application;
-    private httpServer: http.Server;
 
-    private started: boolean;
+    private httpServer: http.Server | undefined;
+    private httpsServer: https.Server | undefined;
+
+    private serverData: ServerData | undefined;
 
     constructor(options?: IServerOptions) {
 
         this.disableReaders = options && options.disableReaders ? options.disableReaders : false;
         this.disableDecryption = options && options.disableDecryption ? options.disableDecryption : false;
+        this.disableRemotePubUrl = options && options.disableRemotePubUrl ? options.disableRemotePubUrl : false;
+        this.disableOPDS = options && options.disableOPDS ? options.disableOPDS : false;
 
         this.publications = [];
         this.pathPublicationMap = {};
@@ -90,10 +106,35 @@ export class Server {
 
         this.opdsJsonFilePath = tmpNameSync({ prefix: "readium2-OPDS2-", postfix: ".json" });
 
-        this.started = false;
-
         this.expressApp = express();
         // this.expressApp.enable('strict routing');
+
+        this.expressApp.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
+
+            Object.keys(req.headers).forEach((header: string) => {
+                debug(header + " => " + req.headers[header]);
+            });
+
+            if (!this.isSecured() || !this.serverData) {
+                next();
+                return;
+            }
+
+            let ua = req.get("user-agent");
+            if (ua) {
+                ua = ua.toLowerCase();
+            }
+            if ((this.serverData.trustKey && this.serverData.trustVal &&
+                req.get(`X-Debug-${this.serverData.trustKey}`) !== this.serverData.trustVal)
+                || (ua && (ua.indexOf("curl") >= 0 || ua.indexOf("postman") >= 0 || ua.indexOf("wget") >= 0))
+            ) {
+                res.status(200);
+                // res.send("<html><body> </body></html>");
+                res.end();
+                return;
+            }
+            next();
+        });
 
         // https://expressjs.com/en/4x/api.html#express.static
         const staticOptions = {
@@ -117,10 +158,16 @@ export class Server {
                     + "</strong><br> => <a href='./pub/" + encodeURIComponent_RFC3986(filePathBase64)
                     + "'>" + "./pub/" + filePathBase64 + "</a></p>";
             });
-            html += "<h1>OPDS2 feed</h1><p><a href='./opds2'>CLICK HERE</a></p>";
-            html += "<h1>Load HTTP publication URL</h1><p><a href='./url'>CLICK HERE</a></p>";
-            html += "<h1>Browse HTTP OPDS1 feed</h1><p><a href='./opds'>CLICK HERE</a></p>";
-            html += "<h1>Convert OPDS feed v1 to v2</h1><p><a href='./opds12'>CLICK HERE</a></p>";
+            if (!this.disableOPDS) {
+                html += "<h1>OPDS2 feed</h1><p><a href='./opds2'>CLICK HERE</a></p>";
+            }
+            if (!this.disableRemotePubUrl) {
+                html += "<h1>Load HTTP publication URL</h1><p><a href='./url'>CLICK HERE</a></p>";
+            }
+            if (!this.disableOPDS) {
+                html += "<h1>Browse HTTP OPDS1 feed</h1><p><a href='./opds'>CLICK HERE</a></p>";
+                html += "<h1>Convert OPDS feed v1 to v2</h1><p><a href='./opds12'>CLICK HERE</a></p>";
+            }
             html += "<h1>Server version</h1><p><a href='./version/show'>CLICK HERE</a></p>";
             html += "</body></html>";
 
@@ -182,10 +229,14 @@ export class Server {
                 }
             });
 
-        serverUrl(this, this.expressApp);
-        serverOPDS(this, this.expressApp);
-        serverOPDS2(this, this.expressApp);
-        serverOPDS12(this, this.expressApp);
+        if (!this.disableRemotePubUrl) {
+            serverUrl(this, this.expressApp);
+        }
+        if (!this.disableOPDS) {
+            serverOPDS(this, this.expressApp);
+            serverOPDS2(this, this.expressApp);
+            serverOPDS12(this, this.expressApp);
+        }
 
         const routerPathBase64: express.Router = serverPub(this, this.expressApp);
         serverManifestJson(this, routerPathBase64);
@@ -201,36 +252,112 @@ export class Server {
         this.expressApp.get(paths, func);
     }
 
-    public start(port: number): string {
+    public isStarted(): boolean {
+        return (typeof this.serverInfo() !== "undefined") &&
+            (typeof this.httpServer !== "undefined") ||
+            (typeof this.httpsServer !== "undefined");
+    }
 
-        if (this.started) {
-            return this.url() as string;
+    public isSecured(): boolean {
+        return (typeof this.serverInfo() !== "undefined") &&
+            (typeof this.httpsServer !== "undefined");
+    }
+
+    public async start(port: number): Promise<ServerData> {
+
+        if (this.isStarted()) {
+            return Promise.resolve(this.serverInfo() as ServerData);
         }
 
-        const p = port || process.env.PORT || 3000;
-        debug(`PORT: ${p} || ${process.env.PORT} || 3000 => ${p}`);
+        let envPort: number = 0;
+        try {
+            envPort = process.env.PORT ? parseInt(process.env.PORT as string, 10) : 0;
+        } catch (err) {
+            debug(err);
+            envPort = 0;
+        }
+        const p = port || envPort || 3000;
+        debug(`PORT: ${port} || ${envPort} || 3000 => ${p}`);
 
-        this.httpServer = this.expressApp.listen(p, () => {
-            debug(`http://localhost:${p}`);
-        });
+        if (p === 443) {
+            this.httpServer = undefined;
 
-        this.started = true;
+            return new Promise<ServerData>(async (resolve, reject) => {
+                let certData: CertificateData | undefined;
+                try {
+                    certData = await generateSelfSignedData();
+                } catch (err) {
+                    debug(err);
+                    reject("err");
+                    return;
+                }
 
-        return `http://127.0.0.1:${p}`; // this.httpServer.address().port
+                this.httpsServer = https.createServer({ key: certData.private, cert: certData.cert },
+                    this.expressApp).listen(p, () => {
+
+                        this.serverData = {
+                            ...certData,
+                            urlHost: "127.0.0.1",
+                            urlPort: p, // this.httpsServer.address().port
+                            urlScheme: "https",
+                        } as ServerData;
+                        resolve(this.serverData);
+                    });
+            });
+        } else {
+            this.httpsServer = undefined;
+
+            return new Promise<ServerData>((resolve, _reject) => {
+                this.httpServer = http.createServer(this.expressApp).listen(p, () => {
+
+                    this.serverData = {
+                        urlHost: "127.0.0.1",
+                        urlPort: p, // this.httpsServer.address().port
+                        urlScheme: "http",
+                    } as ServerData;
+                    resolve(this.serverData);
+                });
+                // this.httpServer = this.expressApp.listen(p, () => {
+                //     debug(`http://localhost:${p}`);
+                // });
+            });
+        }
     }
 
     public stop() {
-        if (this.started) {
-            this.httpServer.close();
-            this.started = false;
+        if (this.isStarted()) {
+            if (this.httpServer) {
+                this.httpServer.close();
+                this.httpServer = undefined;
+            }
+            if (this.httpsServer) {
+                this.httpsServer.close();
+                this.httpsServer = undefined;
+            }
+            this.serverData = undefined;
             this.uncachePublications();
         }
     }
 
-    public url(): string | undefined {
-        return this.started ?
-            `http://127.0.0.1:${this.httpServer.address().port}` :
-            undefined;
+    public serverInfo(): ServerData | undefined {
+        return this.serverData;
+    }
+
+    public serverUrl(): string | undefined {
+        if (!this.isStarted()) {
+            return undefined;
+        }
+        const info = this.serverInfo();
+        if (!info) {
+            return undefined;
+        }
+        return `${info.urlScheme}://${info.urlHost}:${info.urlPort}`;
+
+        // const port = this.httpServer ? this.httpServer.address().port :
+        //     (this.httpsServer ? this.httpsServer.address().port : 0);
+        // return this.isStarted() ?
+        //     `${this.httpsServer ? "https:" : "http:"}//127.0.0.1:${port}` :
+        //     undefined;
     }
 
     public setResponseCORS(res: express.Response) {
