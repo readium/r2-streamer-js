@@ -66,7 +66,8 @@ if (stats.isDirectory()) {
             .find();
         const server = new Server();
         server.addPublications(files);
-        server.start(0);
+        const url = await server.start(0);
+        debug(url);
     })();
 
     // filePaths = fs.readdirSync(filePath);
@@ -87,7 +88,11 @@ if (stats.isDirectory()) {
     //     debug(filep);
     // });
 } else {
-    const server = new Server();
-    server.addPublications([filePath]);
-    server.start(0);
+    // tslint:disable-next-line:no-floating-promises
+    (async () => {
+        const server = new Server();
+        server.addPublications([filePath]);
+        const url = await server.start(0);
+        debug(url);
+    })();
 }
