@@ -115,6 +115,13 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                 }
             }
 
+            if (server.isSecured() && !link &&
+                (pathInZip.indexOf("META-INF/") === 0 || pathInZip.endsWith(".opf"))
+            ) {
+                res.status(200).send("<html><body></body></html>");
+                return;
+            }
+
             let mediaType = mime.lookup(pathInZip);
             if (link && link.TypeLink) {
                 mediaType = link.TypeLink;
