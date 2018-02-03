@@ -120,19 +120,62 @@ export class Server {
             // if (ua) {
             //     ua = ua.toLowerCase();
             // }
-            if ((this.serverData.trustKey && this.serverData.trustVal &&
-                req.get(`X-Debug-${this.serverData.trustKey}`) !== this.serverData.trustVal)
-                // || (ua && (ua.indexOf("curl") >= 0 || ua.indexOf("postman") >= 0 || ua.indexOf("wget") >= 0))
-            ) {
-                // debug(req); // CIRCULAR REFS!
-                // Object.keys(req.headers).forEach((header: string) => {
-                //     debug(header + " => " + req.headers[header]);
-                // });
 
-                res.status(200);
-                // res.send("<html><body> </body></html>");
-                res.end();
-                return;
+            // console.log(util.inspect(req,
+            // { showHidden: false,
+            // depth: 1,
+            // colors: true,
+            // customInspect: true,
+            // breakLength: 100,
+            // maxArrayLength: undefined }));
+
+            if (this.serverData.trustKey && this.serverData.trustCheck) {
+                let doFail = true;
+
+                const base64Val = req.get("X-" + this.serverData.trustCheck);
+                if (base64Val) {
+                    const AES_BLOCK_SIZE = 16;
+
+                    const decodedVal = new Buffer(base64Val, "base64"); // .toString("utf8");
+
+                    const iv = decodedVal.slice(0, AES_BLOCK_SIZE);
+                    const encrypted = decodedVal.slice(AES_BLOCK_SIZE);
+
+                    const decrypteds: Buffer[] = [];
+                    const decryptStream = crypto.createDecipheriv("aes-256-cbc",
+                        this.serverData.trustKey,
+                        iv);
+                    decryptStream.setAutoPadding(false);
+                    const buff1 = decryptStream.update(encrypted);
+                    if (buff1) {
+                        decrypteds.push(buff1);
+                    }
+                    const buff2 = decryptStream.final();
+                    if (buff2) {
+                        decrypteds.push(buff2);
+                    }
+                    const decrypted = Buffer.concat(decrypteds);
+                    const nPaddingBytes = decrypted[decrypted.length - 1];
+                    const size = encrypted.length - nPaddingBytes;
+                    const decryptedStr = decrypted.slice(0, size).toString("utf8");
+
+                    if (decryptedStr === (this.serverUrl() + req.url)) {
+                        doFail = false;
+                    }
+                }
+
+                if (doFail) {
+                    debug("############## X-Debug- FAIL ========================== ");
+                    debug(req.url);
+                    // debug(url);
+                    // Object.keys(req.headers).forEach((header: string) => {
+                    //     debug(header + " => " + req.headers[header]);
+                    // });
+                    res.status(200);
+                    // res.send("<html><body> </body></html>");
+                    res.end();
+                    return;
+                }
             }
 
             next();

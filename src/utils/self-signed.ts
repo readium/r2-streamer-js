@@ -1,9 +1,10 @@
+import * as crypto from "crypto";
 import * as selfsigned from "selfsigned";
 import * as uuid from "uuid";
 
 export interface CertificateData {
     trustKey: string;
-    trustVal: string;
+    trustCheck: string;
 
     // clientprivate?: string;
     // clientpublic?: string;
@@ -37,8 +38,14 @@ export async function generateSelfSignedData(): Promise<CertificateData> {
                 reject(err);
                 return;
             }
-            (keys as CertificateData).trustKey = uuid.v4();
-            (keys as CertificateData).trustVal = rand;
+
+            const checkSum = crypto.createHash("sha256");
+            checkSum.update(uuid.v4());
+            const key = checkSum.digest("hex").toUpperCase();
+            (keys as CertificateData).trustKey = key;
+
+            (keys as CertificateData).trustCheck = uuid.v4();
+
             resolve(keys as CertificateData);
         });
     });
