@@ -158,8 +158,13 @@ export class Server {
                     const decrypted = Buffer.concat(decrypteds);
                     const nPaddingBytes = decrypted[decrypted.length - 1];
                     const size = encrypted.length - nPaddingBytes;
-                    const decryptedStr = decrypted.slice(0, size).toString("utf8");
+                    let decryptedStr = decrypted.slice(0, size).toString("utf8");
+                    debug(decryptedStr);
 
+                    const i = decryptedStr.lastIndexOf("#");
+                    if (i > 0) {
+                        decryptedStr = decryptedStr.substr(0, i);
+                    }
                     if (decryptedStr === (this.serverUrl() + req.url)) {
                         doFail = false;
                     }
