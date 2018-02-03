@@ -12,7 +12,7 @@ import { JSON as TAJSON } from "ta-json";
 import { Server } from "./server";
 import { trailingSlashRedirect } from "./server-trailing-slash-redirect";
 
-const debug = debug_("r2:server:opds2");
+const debug = debug_("r2:streamer#http/server-opds2");
 
 export function serverOPDS2(server: Server, topRouter: express.Application) {
 

@@ -13,7 +13,7 @@ import * as mime from "mime-types";
 import { Publication } from "@models/publication";
 import { Server } from "./server";
 
-const debug = debug_("r2:server:assets");
+const debug = debug_("r2:streamer#http/server-assets");
 
 export function serverAssets(server: Server, routerPathBase64: express.Router) {
 

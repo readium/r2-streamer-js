@@ -17,7 +17,9 @@ import { JSON as TAJSON } from "ta-json";
 import { Publication } from "@models/publication";
 import { Server } from "./server";
 
-const debug = debug_("r2:server:manifestjson");
+// import { ITryLcpUserKeyResult } from "@r2-lcp-js/parser/epub/lcp";
+
+const debug = debug_("r2:streamer#http/server-manifestjson");
 
 export function serverManifestJson(server: Server, routerPathBase64: express.Router) {
 
@@ -99,15 +101,13 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
             if (req.params.lcpPass64 && !server.disableDecryption) {
                 const lcpPass = new Buffer(req.params.lcpPass64, "base64").toString("utf8");
                 if (publication.LCP) {
-                    let okay = false;
+                    // let okay: ITryLcpUserKeyResult;
                     try {
-                        okay = await publication.LCP.setUserPassphrase(lcpPass); // hex
+                        // okay =
+                        await publication.LCP.tryUserKeys([lcpPass]); // hex
                     } catch (err) {
                         debug(err);
-                        okay = false;
-                    }
-                    if (!okay) {
-                        const errMsg = "FAIL publication.LCP.setUserPassphrase()";
+                        const errMsg = "FAIL publication.LCP.tryUserKeys(): " + err;
                         debug(errMsg);
                         res.status(500).send("<html><body><p>Internal Server Error</p><p>"
                             + errMsg + "</p></body></html>");

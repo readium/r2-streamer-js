@@ -11,7 +11,7 @@ import { Server } from "./server";
 initGlobals();
 setLcpNativePluginPath(path.join(process.cwd(), "LCP", "lcp.node"));
 
-const debug = debug_("r2:server:cli");
+const debug = debug_("r2:streamer#http/server-cli");
 
 debug(`process.cwd(): ${process.cwd()}`);
 debug(`__dirname: ${__dirname}`);

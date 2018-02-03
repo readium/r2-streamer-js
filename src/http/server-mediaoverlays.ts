@@ -18,7 +18,7 @@ import { JSON as TAJSON } from "ta-json";
 import { Publication } from "@models/publication";
 import { Server } from "./server";
 
-const debug = debug_("r2:server:mediaoverlays");
+const debug = debug_("r2:streamer#http/server-mediaoverlays");
 
 export function serverMediaOverlays(server: Server, routerPathBase64: express.Router) {
 

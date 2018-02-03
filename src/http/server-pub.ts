@@ -9,7 +9,7 @@ import { encodeURIComponent_RFC3986, isHTTP } from "@utils/http/UrlUtils";
 import { Server } from "./server";
 import { trailingSlashRedirect } from "./server-trailing-slash-redirect";
 
-const debug = debug_("r2:server:pub");
+const debug = debug_("r2:streamer#http/server-pub");
 
 export function serverPub(server: Server, topRouter: express.Application): express.Router {
 

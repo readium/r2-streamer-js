@@ -5,7 +5,7 @@ import * as morgan from "morgan";
 import { Server } from "./server";
 import { trailingSlashRedirect } from "./server-trailing-slash-redirect";
 
-const debug = debug_("r2:server:url");
+const debug = debug_("r2:streamer#http/server-url");
 
 export function serverUrl(_server: Server, topRouter: express.Application) {
 

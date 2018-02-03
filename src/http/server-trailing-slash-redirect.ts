@@ -1,7 +1,7 @@
 import * as debug_ from "debug";
 import * as express from "express";
 
-const debug = debug_("r2:server:main");
+const debug = debug_("r2:streamer#http/server-trailing-slash-redirect");
 
 // https://github.com/avinoamr/connect-slashes
 export function trailingSlashRedirect(req: express.Request, res: express.Response, next: express.NextFunction) {

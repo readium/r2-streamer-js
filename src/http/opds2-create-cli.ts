@@ -13,7 +13,7 @@ import * as debug_ from "debug";
 import * as moment from "moment";
 import { JSON as TAJSON } from "ta-json";
 
-const debug = debug_("r2:opds2create");
+const debug = debug_("r2:streamer#http/opds2-create-cli");
 
 debug(`process.cwd(): ${process.cwd()}`);
 debug(`__dirname: ${__dirname}`);

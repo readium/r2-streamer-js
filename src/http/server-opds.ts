@@ -13,7 +13,7 @@ import * as xmldom from "xmldom";
 import { Server } from "./server";
 import { trailingSlashRedirect } from "./server-trailing-slash-redirect";
 
-const debug = debug_("r2:server:opds");
+const debug = debug_("r2:streamer#http/server-opds");
 
 export function serverOPDS(_server: Server, topRouter: express.Application) {
 

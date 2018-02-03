@@ -26,7 +26,7 @@ import { serverOPDS2 } from "./server-opds2";
 import { serverPub } from "./server-pub";
 import { serverUrl } from "./server-url";
 
-const debug = debug_("r2:server:main");
+const debug = debug_("r2:streamer#http/server");
 
 interface IPathPublicationMap { [key: string]: any; }
 
