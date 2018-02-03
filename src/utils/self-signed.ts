@@ -3,8 +3,9 @@ import * as selfsigned from "selfsigned";
 import * as uuid from "uuid";
 
 export interface CertificateData {
-    trustKey: string;
+    trustKey: Buffer;
     trustCheck: string;
+    trustCheckIV: Buffer;
 
     // clientprivate?: string;
     // clientpublic?: string;
@@ -42,9 +43,14 @@ export async function generateSelfSignedData(): Promise<CertificateData> {
             const checkSum = crypto.createHash("sha256");
             checkSum.update(uuid.v4());
             const key = checkSum.digest("hex").toUpperCase();
-            (keys as CertificateData).trustKey = key;
+            (keys as CertificateData).trustKey = new Buffer(key, "hex");
 
-            (keys as CertificateData).trustCheck = uuid.v4();
+            const AES_BLOCK_SIZE = 16;
+            const ck = uuid.v4();
+            (keys as CertificateData).trustCheck = ck;
+            const ivBuff = new Buffer(ck);
+            const iv = ivBuff.slice(0, AES_BLOCK_SIZE);
+            (keys as CertificateData).trustCheckIV = iv;
 
             resolve(keys as CertificateData);
         });
