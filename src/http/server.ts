@@ -111,7 +111,7 @@ export class Server {
 
         this.expressApp.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
 
-            if (!this.isSecured() || !this.serverData) {
+            if (!this.isSecured()) {
                 next();
                 return;
             }
@@ -129,22 +129,23 @@ export class Server {
             // breakLength: 100,
             // maxArrayLength: undefined }));
 
-            if (this.serverData.trustKey && this.serverData.trustCheck) {
-                let doFail = true;
+            let doFail = true;
+
+            if (this.serverData && this.serverData.trustKey &&
+                this.serverData.trustCheck && this.serverData.trustCheckIV) {
 
                 const base64Val = req.get("X-" + this.serverData.trustCheck);
                 if (base64Val) {
-                    const AES_BLOCK_SIZE = 16;
-
                     const decodedVal = new Buffer(base64Val, "base64"); // .toString("utf8");
 
-                    const iv = decodedVal.slice(0, AES_BLOCK_SIZE);
-                    const encrypted = decodedVal.slice(AES_BLOCK_SIZE);
+                    // const AES_BLOCK_SIZE = 16;
+                    // const iv = decodedVal.slice(0, AES_BLOCK_SIZE);
+                    const encrypted = decodedVal; // .slice(AES_BLOCK_SIZE);
 
                     const decrypteds: Buffer[] = [];
                     const decryptStream = crypto.createDecipheriv("aes-256-cbc",
                         this.serverData.trustKey,
-                        iv);
+                        this.serverData.trustCheckIV);
                     decryptStream.setAutoPadding(false);
                     const buff1 = decryptStream.update(encrypted);
                     if (buff1) {
@@ -163,19 +164,19 @@ export class Server {
                         doFail = false;
                     }
                 }
+            }
 
-                if (doFail) {
-                    debug("############## X-Debug- FAIL ========================== ");
-                    debug(req.url);
-                    // debug(url);
-                    // Object.keys(req.headers).forEach((header: string) => {
-                    //     debug(header + " => " + req.headers[header]);
-                    // });
-                    res.status(200);
-                    // res.send("<html><body> </body></html>");
-                    res.end();
-                    return;
-                }
+            if (doFail) {
+                debug("############## X-Debug- FAIL ========================== ");
+                debug(req.url);
+                // debug(url);
+                // Object.keys(req.headers).forEach((header: string) => {
+                //     debug(header + " => " + req.headers[header]);
+                // });
+                res.status(200);
+                // res.send("<html><body> </body></html>");
+                res.end();
+                return;
             }
 
             next();
