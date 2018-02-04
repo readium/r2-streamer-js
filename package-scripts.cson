@@ -16,6 +16,11 @@
     cpy "dist/**/*.*" ../r2-testapp-js/node_modules/r2-streamer-js/ --cwd=./ --parents
   '
 
+  'quick-build-dist': '
+    npm run transpile:typescript:es8-es2017+afterdist &&
+    npm run copydist
+  '
+
   '_pregitdist': '
     npm run build:all
   '
