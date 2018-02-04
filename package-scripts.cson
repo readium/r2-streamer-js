@@ -11,6 +11,11 @@
     rimraf tmp-*.cson
   '
 
+  'copydist': '
+    cpy "dist/**/*.*" ../r2-navigator-js/node_modules/r2-streamer-js/ --cwd=./ --parents &&
+    cpy "dist/**/*.*" ../r2-testapp-js/node_modules/r2-streamer-js/ --cwd=./ --parents
+  '
+
   '_pregitdist': '
     npm run build:all
   '
