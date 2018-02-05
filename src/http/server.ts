@@ -143,7 +143,7 @@ export class Server {
                 if (IS_DEV) {
                     t1 = process.hrtime();
                 }
-                let time: any;
+                let delta = 0;
 
                 const urlCheck = this.serverUrl() + req.url;
 
@@ -176,14 +176,23 @@ export class Server {
                     try {
                         const decryptedJson = JSON.parse(decryptedStr);
                         let url = decryptedJson.url;
-                        time = decryptedJson.time;
+                        const time = decryptedJson.time;
 
-                        const i = url.lastIndexOf("#");
-                        if (i > 0) {
-                            url = url.substr(0, i);
-                        }
-                        if (url === urlCheck) {
-                            doFail = false;
+                        // milliseconds since epoch (midnight, 1 Jan 1970)
+                        const now = Date.now(); // +new Date()
+                        delta = now - time;
+
+                        // 1-second time window between HTTP header creation and consumption
+                        // this should account for plenty of hypothetical server load latency
+                        // (typical figures way under 100ms)
+                        if (delta <= 1000) {
+                            const i = url.lastIndexOf("#");
+                            if (i > 0) {
+                                url = url.substr(0, i);
+                            }
+                            if (url === urlCheck) {
+                                doFail = false;
+                            }
                         }
                     } catch (err) {
                         debug(err);
@@ -199,10 +208,6 @@ export class Server {
                     // const totalNanoseconds = (seconds * 1e9) + nanoseconds;
                     // const totalMilliseconds = totalNanoseconds / 1e6;
                     // const totalSeconds = totalNanoseconds / 1e9;
-
-                    // milliseconds since epoch (midnight, 1 Jan 1970)
-                    const now = Date.now(); // +new Date()
-                    const delta = time ? (now - time) : 0;
 
                     debugHttps(`< B > (${delta}ms) ${seconds}s ${milliseconds}ms [ ${urlCheck} ]`);
                 }
