@@ -27,6 +27,9 @@ import { serverPub } from "./server-pub";
 import { serverUrl } from "./server-url";
 
 const debug = debug_("r2:streamer#http/server");
+const debugHttps = debug_("r2:https");
+
+const IS_DEV = (process.env.NODE_ENV === "development" || process.env.NODE_ENV === "dev");
 
 interface IPathPublicationMap { [key: string]: any; }
 
@@ -134,6 +137,16 @@ export class Server {
             if (this.serverData && this.serverData.trustKey &&
                 this.serverData.trustCheck && this.serverData.trustCheckIV) {
 
+                // @ts-ignorexx: TS2454 (variable is used before being assigned)
+                // instead: exclamation mark "definite assignment"
+                let t1!: [number, number];
+                if (IS_DEV) {
+                    t1 = process.hrtime();
+                }
+                let time: any;
+
+                const urlCheck = this.serverUrl() + req.url;
+
                 const base64Val = req.get("X-" + this.serverData.trustCheck);
                 if (base64Val) {
                     const decodedVal = new Buffer(base64Val, "base64"); // .toString("utf8");
@@ -158,16 +171,40 @@ export class Server {
                     const decrypted = Buffer.concat(decrypteds);
                     const nPaddingBytes = decrypted[decrypted.length - 1];
                     const size = encrypted.length - nPaddingBytes;
-                    let decryptedStr = decrypted.slice(0, size).toString("utf8");
-                    debug(decryptedStr);
+                    const decryptedStr = decrypted.slice(0, size).toString("utf8");
+                    // debug(decryptedStr);
+                    try {
+                        const decryptedJson = JSON.parse(decryptedStr);
+                        let url = decryptedJson.url;
+                        time = decryptedJson.time;
 
-                    const i = decryptedStr.lastIndexOf("#");
-                    if (i > 0) {
-                        decryptedStr = decryptedStr.substr(0, i);
+                        const i = url.lastIndexOf("#");
+                        if (i > 0) {
+                            url = url.substr(0, i);
+                        }
+                        if (url === urlCheck) {
+                            doFail = false;
+                        }
+                    } catch (err) {
+                        debug(err);
+                        debug(decryptedStr);
                     }
-                    if (decryptedStr === (this.serverUrl() + req.url)) {
-                        doFail = false;
-                    }
+                }
+
+                if (IS_DEV) {
+                    const t2 = process.hrtime(t1);
+                    const seconds = t2[0];
+                    const nanoseconds = t2[1];
+                    const milliseconds = nanoseconds / 1e6;
+                    // const totalNanoseconds = (seconds * 1e9) + nanoseconds;
+                    // const totalMilliseconds = totalNanoseconds / 1e6;
+                    // const totalSeconds = totalNanoseconds / 1e9;
+
+                    // milliseconds since epoch (midnight, 1 Jan 1970)
+                    const now = Date.now(); // +new Date()
+                    const delta = time ? (now - time) : 0;
+
+                    debugHttps(`< B > (${delta}ms) ${seconds}s ${milliseconds}ms [ ${urlCheck} ]`);
                 }
             }
 
