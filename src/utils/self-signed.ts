@@ -40,15 +40,18 @@ export async function generateSelfSignedData(): Promise<CertificateData> {
                 return;
             }
 
-            const checkSum = crypto.createHash("sha256");
-            checkSum.update(uuid.v4());
-            const key = checkSum.digest("hex").toUpperCase();
-            (keys as CertificateData).trustKey = new Buffer(key, "hex");
+            const password = uuid.v4();
+            // const checkSum = crypto.createHash("sha256");
+            // checkSum.update(password);
+            // const hash = checkSum.digest("hex").toUpperCase();
+            const salt = crypto.randomBytes(16).toString("hex");
+            const hash = crypto.pbkdf2Sync(password, salt, 1000, 32, "sha256").toString("hex");
+            (keys as CertificateData).trustKey = new Buffer(hash, "hex");
+
+            (keys as CertificateData).trustCheck = uuid.v4();
 
             const AES_BLOCK_SIZE = 16;
-            const ck = uuid.v4();
-            (keys as CertificateData).trustCheck = ck;
-            const ivBuff = new Buffer(ck);
+            const ivBuff = new Buffer(uuid.v4());
             const iv = ivBuff.slice(0, AES_BLOCK_SIZE);
             (keys as CertificateData).trustCheckIV = iv;
 
