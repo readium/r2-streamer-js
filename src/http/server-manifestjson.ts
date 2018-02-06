@@ -1,6 +1,7 @@
 import * as crypto from "crypto";
 import * as path from "path";
 
+import { Publication } from "@models/publication";
 import {
     getAllMediaOverlays,
     mediaOverlayURLParam,
@@ -14,7 +15,13 @@ import * as express from "express";
 import * as jsonMarkup from "json-markup";
 import { JSON as TAJSON } from "ta-json";
 
-import { Publication } from "@models/publication";
+import {
+    IRequestPayloadExtension,
+    IRequestQueryParams,
+    _jsonPath,
+    _pathBase64,
+    _show,
+} from "./request-ext";
 import { Server } from "./server";
 
 // import { ITryLcpUserKeyResult } from "@r2-lcp-js/parser/epub/lcp";
@@ -51,19 +58,21 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
     const routerManifestJson = express.Router({ strict: false });
     // routerManifestJson.use(morgan("combined"));
 
-    routerManifestJson.get(["/", "/show/:jsonPath?"],
+    routerManifestJson.get(["/", "/" + _show + "/:" + _jsonPath + "?"],
         async (req: express.Request, res: express.Response) => {
 
-            if (!req.params.pathBase64) {
-                req.params.pathBase64 = (req as any).pathBase64;
+            const reqparams = req.params as IRequestPayloadExtension;
+
+            if (!reqparams.pathBase64) {
+                reqparams.pathBase64 = (req as IRequestPayloadExtension).pathBase64;
             }
-            if (!req.params.lcpPass64) {
-                req.params.lcpPass64 = (req as any).lcpPass64;
+            if (!reqparams.lcpPass64) {
+                reqparams.lcpPass64 = (req as IRequestPayloadExtension).lcpPass64;
             }
 
-            const isShow = req.url.indexOf("/show") >= 0 || req.query.show;
-            if (!req.params.jsonPath && req.query.show) {
-                req.params.jsonPath = req.query.show;
+            const isShow = req.url.indexOf("/show") >= 0 || (req.query as IRequestQueryParams).show;
+            if (!reqparams.jsonPath && (req.query as IRequestQueryParams).show) {
+                reqparams.jsonPath = (req.query as IRequestQueryParams).show;
             }
 
             // debug(req.method);
@@ -72,7 +81,8 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
                 debug("HEAD !!!!!!!!!!!!!!!!!!!");
             }
 
-            const isCanonical = req.query.canonical && req.query.canonical === "true";
+            const isCanonical = (req.query as IRequestQueryParams).canonical &&
+                (req.query as IRequestQueryParams).canonical === "true";
 
             const isSecureHttp = req.secure ||
                 req.protocol === "https" ||
@@ -81,7 +91,7 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
                 // (req.hostname && req.hostname.indexOf("now.sh") >= 0)
                 ;
 
-            const pathBase64Str = new Buffer(req.params.pathBase64, "base64").toString("utf8");
+            const pathBase64Str = new Buffer(reqparams.pathBase64, "base64").toString("utf8");
 
             // const fileName = path.basename(pathBase64Str);
             // const ext = path.extname(fileName).toLowerCase();
@@ -98,8 +108,8 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
 
             // dumpPublication(publication);
 
-            if (req.params.lcpPass64 && !server.disableDecryption) {
-                const lcpPass = new Buffer(req.params.lcpPass64, "base64").toString("utf8");
+            if (reqparams.lcpPass64 && !server.disableDecryption) {
+                const lcpPass = new Buffer(reqparams.lcpPass64, "base64").toString("utf8");
                 if (publication.LCP) {
                     // let okay: ITryLcpUserKeyResult;
                     try {
@@ -124,10 +134,10 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
 
             const rootUrl = (isSecureHttp ? "https://" : "http://")
                 + req.headers.host + "/pub/"
-                + (req.params.lcpPass64 ?
-                    (server.lcpBeginToken + encodeURIComponent_RFC3986(req.params.lcpPass64) + server.lcpEndToken) :
+                + (reqparams.lcpPass64 ?
+                    (server.lcpBeginToken + encodeURIComponent_RFC3986(reqparams.lcpPass64) + server.lcpEndToken) :
                     "")
-                + encodeURIComponent_RFC3986(req.params.pathBase64);
+                + encodeURIComponent_RFC3986(reqparams.pathBase64);
             const manifestURL = rootUrl + "/" + "manifest.json";
 
             const selfLink = publication.searchLinkByRel("self");
@@ -190,8 +200,8 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
             if (isShow) {
                 let objToSerialize: any = null;
 
-                if (req.params.jsonPath) {
-                    switch (req.params.jsonPath) {
+                if (reqparams.jsonPath) {
+                    switch (reqparams.jsonPath) {
 
                         case "all": {
                             objToSerialize = publication;
@@ -329,5 +339,5 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
             }
         });
 
-    routerPathBase64.use("/:pathBase64/manifest.json", routerManifestJson);
+    routerPathBase64.use("/:" + _pathBase64 + "/manifest.json", routerManifestJson);
 }

@@ -15,6 +15,7 @@ import * as requestPromise from "request-promise-native";
 import { JSON as TAJSON } from "ta-json";
 import * as xmldom from "xmldom";
 
+import { IRequestPayloadExtension, _urlEncoded } from "./request-ext";
 import { Server } from "./server";
 import { trailingSlashRedirect } from "./server-trailing-slash-redirect";
 
@@ -80,17 +81,19 @@ export function serverOPDS12(_server: Server, topRouter: express.Application) {
     });
 
     routerOPDS12.param("urlEncoded", (req, _res, next, value, _name) => {
-        (req as any).urlEncoded = value;
+        (req as IRequestPayloadExtension).urlEncoded = value;
         next();
     });
 
-    routerOPDS12.get("/:urlEncoded(*)", async (req: express.Request, res: express.Response) => {
+    routerOPDS12.get("/:" + _urlEncoded + "(*)", async (req: express.Request, res: express.Response) => {
 
-        if (!req.params.urlEncoded) {
-            req.params.urlEncoded = (req as any).urlEncoded;
+        const reqparams = req.params as IRequestPayloadExtension;
+
+        if (!reqparams.urlEncoded) {
+            reqparams.urlEncoded = (req as IRequestPayloadExtension).urlEncoded;
         }
 
-        const urlDecoded = req.params.urlEncoded;
+        const urlDecoded = reqparams.urlEncoded;
         // if (urlDecoded.substr(-1) === "/") {
         //     urlDecoded = urlDecoded.substr(0, urlDecoded.length - 1);
         // }

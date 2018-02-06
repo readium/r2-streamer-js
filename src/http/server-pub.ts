@@ -1,11 +1,12 @@
 import * as path from "path";
 import * as querystring from "querystring";
 
+import { encodeURIComponent_RFC3986, isHTTP } from "@utils/http/UrlUtils";
 import * as debug_ from "debug";
 import * as express from "express";
 import * as morgan from "morgan";
 
-import { encodeURIComponent_RFC3986, isHTTP } from "@utils/http/UrlUtils";
+import { IRequestPayloadExtension, _pathBase64 } from "./request-ext";
 import { Server } from "./server";
 import { trailingSlashRedirect } from "./server-trailing-slash-redirect";
 
@@ -50,14 +51,16 @@ export function serverPub(server: Server, topRouter: express.Application): expre
 
     routerPathBase64.param("pathBase64", (req, res, next, value, _name) => {
 
+        const reqparams = req.params as IRequestPayloadExtension;
+
         if (value.indexOf(server.lcpBeginToken) === 0 && value.indexOf(server.lcpEndToken) > 0) {
             const i = value.indexOf(server.lcpEndToken);
             const pass64 = value.substr(server.lcpBeginToken.length, i - server.lcpBeginToken.length);
             // const pass = new Buffer(pass64, "base64").toString("utf8");
-            (req as any).lcpPass64 = pass64;
+            (req as IRequestPayloadExtension).lcpPass64 = pass64;
 
             value = value.substr(i + server.lcpEndToken.length);
-            req.params.pathBase64 = value;
+            reqparams.pathBase64 = value;
             debug(value);
         }
 
@@ -66,7 +69,7 @@ export function serverPub(server: Server, topRouter: express.Application): expre
         if (isHTTP(valueStr)) {
             // debug(`Publication URL: ${valueStr}`);
 
-            (req as any).pathBase64 = value;
+            (req as IRequestPayloadExtension).pathBase64 = value;
             next();
             return;
         }
@@ -77,22 +80,24 @@ export function serverPub(server: Server, topRouter: express.Application): expre
         });
 
         if (found) {
-            (req as any).pathBase64 = value;
+            (req as IRequestPayloadExtension).pathBase64 = value;
             next();
         } else {
             res.status(403).send("<html><body><p>Forbidden</p><p>INVALID parameter: <code>"
-                + req.params.pathBase64 + "</code></p></body></html>");
+                + reqparams.pathBase64 + "</code></p></body></html>");
             // next(new Error("INVALID file param"));
         }
     });
 
-    routerPathBase64.get("/:pathBase64", (req: express.Request, res: express.Response) => {
+    routerPathBase64.get("/:" + _pathBase64, (req: express.Request, res: express.Response) => {
 
-        if (!req.params.pathBase64) {
-            req.params.pathBase64 = (req as any).pathBase64;
+        const reqparams = req.params as IRequestPayloadExtension;
+
+        if (!reqparams.pathBase64) {
+            reqparams.pathBase64 = (req as IRequestPayloadExtension).pathBase64;
         }
 
-        const pathBase64Str = new Buffer(req.params.pathBase64, "base64").toString("utf8");
+        const pathBase64Str = new Buffer(reqparams.pathBase64, "base64").toString("utf8");
         debug(`Publication: ${pathBase64Str}`);
 
         const isSecureHttp = req.secure ||
@@ -111,7 +116,7 @@ export function serverPub(server: Server, topRouter: express.Application): expre
         res.status(200).send(htmlLanding
             // .replace("<body>", "<body><p>" + debug + "</p>")
             .replace(/PATH_STR/g, path.basename(pathBase64Str))
-            .replace(/PATH_BASE64/g, encodeURIComponent_RFC3986(req.params.pathBase64))
+            .replace(/PATH_BASE64/g, encodeURIComponent_RFC3986(reqparams.pathBase64))
             .replace(/PREFIX/g,
             (isSecureHttp ?
                 querystring.escape("https://") : querystring.escape("http://"))

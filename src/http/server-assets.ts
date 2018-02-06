@@ -1,5 +1,6 @@
 import * as path from "path";
 
+import { Publication } from "@models/publication";
 import { Link } from "@models/publication-link";
 import { Transformers } from "@transform/transformer";
 import { parseRangeHeader } from "@utils/http/RangeUtils";
@@ -10,7 +11,7 @@ import * as debug_ from "debug";
 import * as express from "express";
 import * as mime from "mime-types";
 
-import { Publication } from "@models/publication";
+import { IRequestPayloadExtension, IRequestQueryParams, _asset, _pathBase64 } from "./request-ext";
 import { Server } from "./server";
 
 const debug = debug_("r2:streamer#http/server-assets");
@@ -25,17 +26,19 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
     routerAssets.get("/",
         async (req: express.Request, res: express.Response) => {
 
-            if (!req.params.pathBase64) {
-                req.params.pathBase64 = (req as any).pathBase64;
+            const reqparams = req.params as IRequestPayloadExtension;
+
+            if (!reqparams.pathBase64) {
+                reqparams.pathBase64 = (req as IRequestPayloadExtension).pathBase64;
             }
-            if (!req.params.asset) {
-                req.params.asset = (req as any).asset;
+            if (!reqparams.asset) {
+                reqparams.asset = (req as IRequestPayloadExtension).asset;
             }
-            if (!req.params.lcpPass64) {
-                req.params.lcpPass64 = (req as any).lcpPass64;
+            if (!reqparams.lcpPass64) {
+                reqparams.lcpPass64 = (req as IRequestPayloadExtension).lcpPass64;
             }
 
-            const isShow = req.query.show;
+            const isShow = (req.query as IRequestQueryParams).show;
 
             // debug(req.method);
             const isHead = req.method.toLowerCase() === "head";
@@ -43,7 +46,7 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                 debug("HEAD !!!!!!!!!!!!!!!!!!!");
             }
 
-            const pathBase64Str = new Buffer(req.params.pathBase64, "base64").toString("utf8");
+            const pathBase64Str = new Buffer(reqparams.pathBase64, "base64").toString("utf8");
 
             // const fileName = path.basename(pathBase64Str);
             // const ext = path.extname(fileName).toLowerCase();
@@ -70,7 +73,7 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
             }
             const zip = zipInternal.Value as IZip;
 
-            const pathInZip = req.params.asset;
+            const pathInZip = reqparams.asset;
 
             if (!zip.hasEntry(pathInZip)) {
                 const err = "Asset not in zip! " + pathInZip;
@@ -410,9 +413,9 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
         });
 
     routerPathBase64.param("asset", (req, _res, next, value, _name) => {
-        (req as any).asset = value;
+        (req as IRequestPayloadExtension).asset = value;
         next();
     });
 
-    routerPathBase64.use("/:pathBase64/:asset(*)", routerAssets);
+    routerPathBase64.use("/:" + _pathBase64 + "/:" + _asset + "(*)", routerAssets);
 }

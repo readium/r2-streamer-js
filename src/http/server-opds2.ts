@@ -9,6 +9,7 @@ import * as express from "express";
 import * as jsonMarkup from "json-markup";
 import { JSON as TAJSON } from "ta-json";
 
+import { IRequestPayloadExtension, IRequestQueryParams, _jsonPath, _show } from "./request-ext";
 import { Server } from "./server";
 import { trailingSlashRedirect } from "./server-trailing-slash-redirect";
 
@@ -44,15 +45,18 @@ export function serverOPDS2(server: Server, topRouter: express.Application) {
     const routerOPDS2 = express.Router({ strict: false });
     // routerOPDS2.use(morgan("combined"));
 
-    routerOPDS2.get(["/", "/show/:jsonPath?"],
+    routerOPDS2.get(["/", "/" + _show + "/:" + _jsonPath + "?"],
         (req: express.Request, res: express.Response) => {
 
-            const isShow = req.url.indexOf("/show") >= 0 || req.query.show;
-            if (!req.params.jsonPath && req.query.show) {
-                req.params.jsonPath = req.query.show;
+            const reqparams = req.params as IRequestPayloadExtension;
+
+            const isShow = req.url.indexOf("/show") >= 0 || (req.query as IRequestQueryParams).show;
+            if (!reqparams.jsonPath && (req.query as IRequestQueryParams).show) {
+                reqparams.jsonPath = (req.query as IRequestQueryParams).show;
             }
 
-            const isCanonical = req.query.canonical && req.query.canonical === "true";
+            const isCanonical = (req.query as IRequestQueryParams).canonical &&
+                (req.query as IRequestQueryParams).canonical === "true";
 
             const isSecureHttp = req.secure ||
                 req.protocol === "https" ||
@@ -101,8 +105,8 @@ export function serverOPDS2(server: Server, topRouter: express.Application) {
             if (isShow) {
                 let objToSerialize: any = null;
 
-                if (req.params.jsonPath) {
-                    switch (req.params.jsonPath) {
+                if (reqparams.jsonPath) {
+                    switch (reqparams.jsonPath) {
 
                         case "all": {
                             objToSerialize = feed;

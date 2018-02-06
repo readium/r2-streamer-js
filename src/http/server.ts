@@ -7,6 +7,7 @@ import * as path from "path";
 
 import { Publication } from "@models/publication";
 import { OPDSFeed } from "@opds/opds2/opds2";
+import { PublicationParsePromise } from "@parser/publication-parser";
 import { encodeURIComponent_RFC3986, isHTTP } from "@utils/http/UrlUtils";
 import * as css2json from "css2json";
 import * as debug_ from "debug";
@@ -15,8 +16,8 @@ import * as jsonMarkup from "json-markup";
 import { JSON as TAJSON } from "ta-json";
 import { tmpNameSync } from "tmp";
 
-import { PublicationParsePromise } from "@parser/publication-parser";
 import { CertificateData, generateSelfSignedData } from "../utils/self-signed";
+import { IRequestPayloadExtension, IRequestQueryParams, _jsonPath, _show, _version } from "./request-ext";
 import { serverAssets } from "./server-assets";
 import { serverManifestJson } from "./server-manifestjson";
 import { serverMediaOverlays } from "./server-mediaoverlays";
@@ -267,12 +268,14 @@ export class Server {
             res.status(200).send(html);
         });
 
-        this.expressApp.get(["/version", "/version/show/:jsonPath?"],
+        this.expressApp.get(["/" + _version, "/" + _version + "/" + _show + "/:" + _jsonPath + "?"],
             (req: express.Request, res: express.Response) => {
 
-                const isShow = req.url.indexOf("/show") >= 0 || req.query.show;
-                if (!req.params.jsonPath && req.query.show) {
-                    req.params.jsonPath = req.query.show;
+                const reqparams = req.params as IRequestPayloadExtension;
+
+                const isShow = req.url.indexOf("/show") >= 0 || (req.query as IRequestQueryParams).show;
+                if (!reqparams.jsonPath && (req.query as IRequestQueryParams).show) {
+                    reqparams.jsonPath = (req.query as IRequestQueryParams).show;
                 }
 
                 const gitRevJson = "../../../gitrev.json";
