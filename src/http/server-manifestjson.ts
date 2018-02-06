@@ -24,8 +24,6 @@ import {
 } from "./request-ext";
 import { Server } from "./server";
 
-// import { ITryLcpUserKeyResult } from "@r2-lcp-js/parser/epub/lcp";
-
 const debug = debug_("r2:streamer#http/server-manifestjson");
 
 export function serverManifestJson(server: Server, routerPathBase64: express.Router) {
@@ -111,9 +109,7 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
             if (reqparams.lcpPass64 && !server.disableDecryption) {
                 const lcpPass = new Buffer(reqparams.lcpPass64, "base64").toString("utf8");
                 if (publication.LCP) {
-                    // let okay: ITryLcpUserKeyResult;
                     try {
-                        // okay =
                         await publication.LCP.tryUserKeys([lcpPass]); // hex
                     } catch (err) {
                         debug(err);
