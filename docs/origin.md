@@ -27,3 +27,13 @@ For example, a URL such as `SCHEME://IP:PORT/pub/ID/PATH/TO/RESOURCE` (let's say
 ## Electron
 
 See: https://github.com/edrlab/r2-navigator-js/issues/2
+
+Key APIs:
+
+`protocol.registerStandardSchemes()` called from the main process to ensure the necessary privileges. Note that we use the URL scheme / custom protocol `httpsr2`, but this could be any other name.
+
+`registerHttpProtocol()` called from the main process for both the default renderer process Electron "session" (`session.defaultSession.protocol.registerHttpProtocol()`), and for the webview-specific persistent "session" which holds the publication's data (`session.fromPartition("persist:readium2pubwebview").protocol.registerHttpProtocol()`).
+
+`webFrame.registerURLSchemeAsPrivileged()` called from the renderer process (including the webview "preload" runtime) also to ensure the necessary privileges (Service Worker, Content Security Policy, HTTP CORS, secure mode, fetch API).
+
+Note that as the publication resources are served from the publication's own unique "origin", any injected content ; such as ReadiumCSS files and fonts ; now gets served across origins (because the HTTP route `/readium-css/` is rooted at the usual `https://127.0.0.1:3000` URL). Thus, the Express configuration for the route `/readium-css/` (static folder / file hosting) is configured with HTTP CORS headers appropriately.
