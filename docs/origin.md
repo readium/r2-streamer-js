@@ -40,9 +40,9 @@ Note that as the publication resources are served from the publication's own uni
 
 The current implementation maps the URL syntax as follows in order to generate unique origins for each publication:
 
-`https://127.0.0.1:8000/pub/PUB_ID/contents/chapter1.html`
+`https://127.0.0.1:8000/pub/PUB_ID/contents/chapter1.html?param=value&p=v#anchor`
 (`PUB_ID` is the base64-encoded publication's normalized filesystem path)
 
 ...becomes:
-`httpsr2://PUB_ID_MOD/xhttps/ip127.0.0.1/p8000/contents/chapter1.html`
+`httpsr2://PUB_ID_MOD/xhttps/ip127.0.0.1/p8000/contents/chapter1.html?param=value&p=v#anchor`
 (`PUB_ID_MOD` is an alphanumerical string of characters derived from the original base64 encoding of `PUB_ID`, which works around lower-case domain normalization in URLs, and to prevent the use of the equal sign which otherwise gets percent-encoded)
