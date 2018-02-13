@@ -37,3 +37,12 @@ Key APIs:
 `webFrame.registerURLSchemeAsPrivileged()` called from the renderer process (including the webview "preload" runtime) also to ensure the necessary privileges (Service Worker, Content Security Policy, HTTP CORS, secure mode, fetch API).
 
 Note that as the publication resources are served from the publication's own unique "origin", any injected content ; such as ReadiumCSS files and fonts ; now gets served across origins (because the HTTP route `/readium-css/` is rooted at the usual `https://127.0.0.1:3000` URL). Thus, the Express configuration for the route `/readium-css/` (static folder / file hosting) is configured with HTTP CORS headers appropriately.
+
+The current implementation maps the URL syntax as follows in order to generate unique origins for each publication:
+
+`https://127.0.0.1:8000/pub/PUB_ID/contents/chapter1.html`
+(`PUB_ID` is the base64-encoded publication's normalized filesystem path)
+
+...becomes:
+`httpsr2://PUB_ID_MOD/xhttps/ip127.0.0.1/p8000/contents/chapter1.html`
+(`PUB_ID_MOD` is an alphanumerical string of characters derived from the original base64 encoding of `PUB_ID`, which works around lower-case domain normalization in URLs, and to prevent the use of the equal sign which otherwise gets percent-encoded)
