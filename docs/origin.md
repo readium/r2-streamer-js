@@ -12,11 +12,11 @@ So, the full "origin" of *all* publications looks like (for example): `https://1
 
 ## Problem description
 
-The fact that all served publications share the same web "origin" is problematic, because HTML documents from a given publication (e.g. EPUB3 fixed-layout ebook with interactive pages that store user/reader preferences or activity progress) can access ; via Javascript ; the `localStorage` / `indexedDB` / etc. contents of any other publication. Because of that, there is a potential risk of data collision (e.g. concurrent access to same-name properties in a `localStorage` object), and of course this has privacy implications too.
+The fact that all served publications share the same web "origin" is problematic, because HTML documents from a given publication (e.g. EPUB3 fixed-layout ebook with interactive pages that store user/reader preferences or activity progress) can access ; via Javascript ; the `localStorage` / `indexedDB` / etc. contents of any other publication. Because of that, there is a potential risk of data collision (e.g. concurrent access to same-name properties in a `localStorage` object, total reset because of `localStorage.clear()`), and of course this has privacy implications too. The possible occurence of such "cross-origin" data tampering / corruption is concerning, irrespective of whether it would be a targeted malicious act, or an unintentional side-effect.
 
 Furthermore, the fact that the HTTP port can change from one reading session to another (depending on the available ports on the user's device, or because of randomization) means that user data can suddenly vanish. For example, users might be forced to re-enter their name at the begining of an interactive book, their "read aloud to me" preference might be lost in their favourite audio book, or their game progress might be reset.
 
-This is not a hypothetical problem. The issue is reproducible with existing commercial fixed-layout EPUB3 publications, and it may also exist with complex reflowable documents (such as in the education sector).
+This is not a hypothetical problem. The issue is reproducible with existing commercial fixed-layout EPUB3 publications, and it may also exist with complex reflowable documents (such as in the education sector). A likely scenario is that users would acquire and read several publications from the same publisher, in which case the probability of data collision is high.
 
 ## Possible solutions
 
