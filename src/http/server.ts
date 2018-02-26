@@ -183,10 +183,10 @@ export class Server {
                         const now = Date.now(); // +new Date()
                         delta = now - time;
 
-                        // 1-second time window between HTTP header creation and consumption
-                        // this should account for plenty of hypothetical server load latency
-                        // (typical figures way under 100ms)
-                        if (delta <= 1000) {
+                        // 3-second time window between HTTP header creation and consumption
+                        // this should account for plenty of hypothetical server latency
+                        // (typical figures way under 100ms, but there are occasional high-load spikes)
+                        if (delta <= 3000) {
                             const i = url.lastIndexOf("#");
                             if (i > 0) {
                                 url = url.substr(0, i);
