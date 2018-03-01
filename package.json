@@ -151,7 +151,7 @@
     "server-https-debug": "cross-env DEBUG=r2:* PORT=443 npm run server",
     "server-https-debug-x": "cross-env DEBUG=* PORT=443 npm run server",
     "heroku-prebuild": "echo \"heroku-prebuild\"",
-    "heroku-postbuild": "echo \"heroku-postbuild\" && npm run clean && npm run transpile:typescript:es8-es2017 && npm run typescript:imports && curl -s -o ./dist/gitrev.json https://rawgit.com/edrlab/r2-streamer-js-dist/develop/dist/gitrev.json && ls ./dist",
+    "heroku-postbuild": "echo \"heroku-postbuild\" && npm run clean && npm run transpile:typescript:es8-es2017 && npm run typescript:imports && curl -s -o ./dist/gitrev.json https://raw.githubusercontent.com/edrlab/r2-streamer-js-dist/develop/dist/gitrev.json && ls ./dist && cat ./dist/gitrev.json",
     "prebuild:es5": "npm run lint && npm run clean",
     "build:es5": "npm run transpile:typescript:es5",
     "postbuild:es5": "npm run afterdist && npm run bundle:es5",
