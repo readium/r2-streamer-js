@@ -53,7 +53,10 @@ if (!stats.isFile() && !stats.isDirectory()) {
     process.exit(1);
 }
 
-if (stats.isDirectory()) {
+// /\.epub[3]?$/.test(ext)
+const isEPUB = fs.existsSync(path.join(filePath, "META-INF", "container.xml"));
+
+if (stats.isDirectory() && !isEPUB) {
     debug("Analysing directory...");
 
     // tslint:disable-next-line:no-floating-promises
