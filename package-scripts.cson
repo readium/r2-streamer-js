@@ -281,8 +281,8 @@
     curl
       -s
       -o ./dist/gitrev.json
-      https://raw.githubusercontent.com/edrlab/r2-streamer-js-dist/develop/dist/gitrev.json &&
+      https://raw.githubusercontent.com/readium/r2-streamer-js-dist/develop/dist/gitrev.json &&
     ls ./dist &&
     cat ./dist/gitrev.json
   '
-# https://rawgit.com/edrlab/r2-streamer-js-dist/develop/dist/gitrev.json
+# https://rawgit.com/readium/r2-streamer-js-dist/develop/dist/gitrev.json
