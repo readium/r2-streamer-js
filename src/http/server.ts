@@ -347,6 +347,17 @@ export class Server {
         serverAssets(this, routerPathBase64);
     }
 
+    public preventRobots() {
+        this.expressApp.get("/robots.txt", (_req: express.Request, res: express.Response) => {
+
+            const robotsTxt = `User-agent: *
+Disallow: /
+`;
+            res.header("Content-Type", "text/plain");
+            res.status(200).send(robotsTxt);
+        });
+    }
+
     public expressUse(pathf: string, func: express.Handler) {
         this.expressApp.use(pathf, func);
     }

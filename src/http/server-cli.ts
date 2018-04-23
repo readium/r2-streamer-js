@@ -75,6 +75,7 @@ if (stats.isDirectory() && !isEPUB) {
             .ext([".epub", ".epub3", ".cbz"])
             .find();
         const server = new Server();
+        server.preventRobots();
         server.addPublications(files);
         const url = await server.start(0, false);
         debug(url);
@@ -101,6 +102,7 @@ if (stats.isDirectory() && !isEPUB) {
     // tslint:disable-next-line:no-floating-promises
     (async () => {
         const server = new Server();
+        server.preventRobots();
         server.addPublications([filePath]);
         const url = await server.start(0, false);
         debug(url);
