@@ -9,7 +9,6 @@ import * as fs from "fs";
 
 import { Publication } from "@models/publication";
 import { OPDSFeed } from "@opds/opds2/opds2";
-import { OPDSContributor } from "@opds/opds2/opds2-contributor";
 import { OPDSLink } from "@opds/opds2/opds2-link";
 import { OPDSMetadata } from "@opds/opds2/opds2-metadata";
 import { OPDSPublication } from "@opds/opds2/opds2-publication";
@@ -104,7 +103,8 @@ if (fs.existsSync(opdsJsonFilePath)) {
         if (publication.Metadata) {
             try {
                 const publicationMetadataJson = TAJSON.serialize(publication.Metadata);
-                publi.Metadata = TAJSON.deserialize<OPDSPublicationMetadata>(publicationMetadataJson, OPDSPublicationMetadata);
+                publi.Metadata = TAJSON.deserialize<OPDSPublicationMetadata>(
+                    publicationMetadataJson, OPDSPublicationMetadata);
             } catch (err) {
                 debug(err);
                 continue;
