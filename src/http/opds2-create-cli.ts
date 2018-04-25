@@ -74,12 +74,15 @@ if (fs.existsSync(opdsJsonFilePath)) {
         const filePathBase64Encoded = encodeURIComponent_RFC3986(pathBase64);
 
         const publi = new OPDSPublication();
+
         publi.Links = [];
         const linkSelf = new OPDSLink();
         linkSelf.Href = filePathBase64Encoded + "/manifest.json";
         linkSelf.TypeLink = "application/webpub+json";
         linkSelf.AddRel("self");
         publi.Links.push(linkSelf);
+
+        feed.Publications.push(publi);
 
         publi.Images = [];
         const coverLink = publication.GetCover();
@@ -98,33 +101,15 @@ if (fs.existsSync(opdsJsonFilePath)) {
             publi.Images.push(linkCover);
         }
 
-        if (feed.Metadata) {
-            publi.Metadata = new OPDSPublicationMetadata();
-            // TODO copy metadata (many more!!!)
-            // There must be a more effective and elegant way to do this!!
-            // ==> implement shared data model, clone the common parts
-            if (publication.Metadata.Artist) {
-                publi.Metadata.Artist = [];
-                publication.Metadata.Artist.forEach((contributor) => {
-                    const c = new OPDSContributor();
-                    if (contributor.Identifier) {
-                        c.Identifier = contributor.Identifier;
-                    }
-                    if (contributor.Name) {
-                        c.Name = contributor.Name;
-                    }
-                    if (contributor.Role) {
-                        c.Role = contributor.Role;
-                    }
-                    if (contributor.SortAs) {
-                        c.SortAs = contributor.SortAs;
-                    }
-                    publi.Metadata.Artist.push(c);
-                });
+        if (publication.Metadata) {
+            try {
+                const publicationMetadataJson = TAJSON.serialize(publication.Metadata);
+                publi.Metadata = TAJSON.deserialize<OPDSPublicationMetadata>(publicationMetadataJson, OPDSPublicationMetadata);
+            } catch (err) {
+                debug(err);
+                continue;
             }
         }
-
-        feed.Publications.push(publi);
     }
 
     feed.Metadata.NumberOfItems = nPubs;
