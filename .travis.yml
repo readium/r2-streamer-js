@@ -21,8 +21,10 @@ before_script:
 - 'npm --version'
 - 'npm install'
 script:
-- 'npm run build:es8-es2017'
+- 'npm run now'
 - 'npm test'
+- 'npm i -D now'
+- 'now alias --token=$NOW_TOKEN $(now ./now --static --no-clipboard --token=$NOW_TOKEN --public) readium2.now.sh'
 after_success:
 - 'pwd && ls -als'
 - 'ls dist'
