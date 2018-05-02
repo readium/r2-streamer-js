@@ -22,8 +22,7 @@ before_script:
 - 'npm install'
 script:
 - 'npm run now'
-- 'npm test'
-- 'npm i -D now'
+- 'npm install --global now'
 - 'now alias --token=$NOW_TOKEN $(now ./now --static --no-clipboard --token=$NOW_TOKEN --public) readium2.now.sh'
 after_success:
 - 'pwd && ls -als'

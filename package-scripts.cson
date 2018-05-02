@@ -52,8 +52,7 @@
   '
 
   'prepare_': '
-    npm run build:all &&
-    npm test
+    npm run build:all
   '
 
   'prepublish_': '

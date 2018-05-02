@@ -122,8 +122,7 @@ Command line steps (default NPM):
 4) `npm install` (initialize local `node_modules` packages from dependencies declared in `package-lock.json`)
 5) `npm update` (sync local packages)
 6) `npm run build:all` (invoke the main build script: clean, lint, compile)
-7) `npm test` (run the unit tests)
-8) `npm run server-debug {PATH_TO_EPUB_OR_DIR}` (path is relative or absolute)
+7) `npm run server-debug {PATH_TO_EPUB_OR_DIR}` (path is relative or absolute)
 
 Command line steps (optional Yarn):
 
