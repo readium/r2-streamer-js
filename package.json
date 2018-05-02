@@ -115,7 +115,7 @@
     "prepare_": "npm run build:all && npm test",
     "prepublish_": "npm run prepare_",
     "prenow": "npm run clean && npm run build:es8-es2017",
-    "now": "cpy ./package-lock.json ./now && cpy \"./**/*\" ../now/ --cwd=./dist --parents && rimraf \"./now/**/*.d.ts\" && rimraf \"./now/**/*.js.map\" && cpy \"./misc/readers/reader-NYPL/**/*\" ./now/ --cwd=./ --parents --no-dir && cpy \"./misc/readers/reader-HADRIEN/**/*\" ./now/ --cwd=./ --parents --no-dir && cpy \"./misc/epubs/*.epub\" now/misc/epubs/ && cpy ./package-now.json now/ && cd now/ && mv package-now.json package.json && now && cd ..",
+    "now": "cpy ./package-lock.json ./now && cpy \"./**/*\" ../now/ --cwd=./dist --parents && rimraf \"./now/**/*.d.ts\" && rimraf \"./now/**/*.js.map\" && cpy \"./misc/readers/reader-NYPL/**/*\" ./now/ --cwd=./ --parents --no-dir && cpy \"./misc/readers/reader-HADRIEN/**/*\" ./now/ --cwd=./ --parents --no-dir && cpy \"./misc/epubs/*.epub\" now/misc/epubs/ && cpy ./package-now.json now/ && cd now/ && mv package-now.json package.json && cd ..",
     "typescript:imports": "node tools/typescript_relativize_path_mapping_imports.js",
     "gitrev": "node tools/gitrev.js && cat dist/gitrev.json",
     "afterdist": "npm run typescript:imports && npm run gitrev",

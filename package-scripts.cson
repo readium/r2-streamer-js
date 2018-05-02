@@ -76,7 +76,6 @@
     cpy ./package-now.json now/ &&
     cd now/ &&
     mv package-now.json package.json &&
-    now &&
     cd ..
   '
 
