@@ -22,7 +22,7 @@ before_script:
 - 'npm install'
 script:
 - 'npm run now'
-- 'npx now alias --token=$NOW_TOKEN $(npx now ./now --static --no-clipboard --token=$NOW_TOKEN --public) readium2.now.sh'
+- 'npx now alias --token=$NOW_TOKEN $(npx now ./now --no-clipboard --token=$NOW_TOKEN --public) readium2.now.sh'
 after_success:
 - 'pwd && ls -als'
 - 'ls dist'
