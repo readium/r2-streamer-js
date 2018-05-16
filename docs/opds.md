@@ -18,6 +18,11 @@ http://oacontent.librarysimplified.org/
 =>
 https://readium2.herokuapp.com/opds/http%3A%2F%2Foacontent.librarysimplified.org
 
+FRAMABOOKIN:
+http://framabookin.org/b/opds/
+=>
+https://readium2.herokuapp.com/opds/http%3A%2F%2Fframabookin.org%2Fb%2Fopds%2F
+
 QUEBEC LIBRARY:
 http://quebec.pretnumerique.ca/catalog/root.atom
 =>
