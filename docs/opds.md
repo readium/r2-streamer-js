@@ -18,6 +18,16 @@ http://oacontent.librarysimplified.org/
 =>
 https://readium2.herokuapp.com/opds/http%3A%2F%2Foacontent.librarysimplified.org
 
+NYPL CIRCULATION:
+https://circulation.librarysimplified.org/
+=>
+https://readium2.herokuapp.com/opds/https%3A%2F%2Fcirculation.librarysimplified.org
+
+LIBRARY FOR ALL:
+https://books.libraryforall.org/catalog
+=>
+https://readium2.herokuapp.com/opds/https%3A%2F%2Fbooks.libraryforall.org/catalog
+
 FRAMABOOKIN:
 http://framabookin.org/b/opds/
 =>
