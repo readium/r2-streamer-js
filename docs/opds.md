@@ -24,9 +24,9 @@ https://circulation.librarysimplified.org/
 https://readium2.herokuapp.com/opds/https%3A%2F%2Fcirculation.librarysimplified.org
 
 LIBRARY FOR ALL:
-https://books.libraryforall.org/catalog
+https://books.libraryforall.org/urms
 =>
-https://readium2.herokuapp.com/opds/https%3A%2F%2Fbooks.libraryforall.org/catalog
+https://readium2.herokuapp.com/opds/https%3A%2F%2Fbooks.libraryforall.org/urms
 
 FRAMABOOKIN:
 http://framabookin.org/b/opds/
