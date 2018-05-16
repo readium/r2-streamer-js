@@ -9,14 +9,24 @@ The EPUB files referenced from the OPDS feeds are remotely accessed using HTTP p
 ## A selection of public OPDS feeds:
 
 NYPL INSTANT CLASSICS:
-https://instantclassics-beta.librarysimplified.org/index.xml
+https://instantclassics.librarysimplified.org/index.xml
 =>
-https://readium2.herokuapp.com/opds/https%3A%2F%2Finstantclassics-beta.librarysimplified.org%2Findex.xml
+https://readium2.herokuapp.com/opds/https%3A%2F%2Finstantclassics.librarysimplified.org%2Findex.xml
 
 NYPL OPEN ACCESS:
 http://oacontent.librarysimplified.org/
 =>
 https://readium2.herokuapp.com/opds/http%3A%2F%2Foacontent.librarysimplified.org
+
+QUEBEC LIBRARY:
+http://quebec.pretnumerique.ca/catalog/root.atom
+=>
+https://readium2.herokuapp.com/opds/http%3A%2F%2Fquebec.pretnumerique.ca%2Fcatalog%2Froot.atom
+
+MONTREAL LIBRARY:
+http://montreal.pretnumerique.ca/catalog/root.atom
+=>
+https://readium2.herokuapp.com/opds/http%3A%2F%2Fmontreal.pretnumerique.ca%2Fcatalog%2Froot.atom
 
 FEEDBOOKS:
 https://www.feedbooks.com/catalog.atom
