@@ -59,6 +59,10 @@
     npm run prepare_
   '
 
+  'now-start': '
+    node "./es8-es2017/src/http/server-cli.js" ./misc/epubs
+  '
+
   'prenow': '
     npm run clean &&
     npm run build:es8-es2017
@@ -72,9 +76,19 @@
     cpy "./misc/readers/reader-NYPL/**/*" ./now/ --cwd=./ --parents --no-dir &&
     cpy "./misc/readers/reader-HADRIEN/**/*" ./now/ --cwd=./ --parents --no-dir &&
     cpy "./misc/epubs/*.epub" now/misc/epubs/ &&
-    cpy ./package-now.json now/ &&
+    cpy ./package.json now/ &&
     cd now/ &&
-    mv package-now.json package.json &&
+    json -I -f ./package.json -e "this.build=undefined" &&
+    json -I -f ./package.json -e "this.importSort=undefined" &&
+    json -I -f ./package.json -e "this.devDependencies=undefined" &&
+    json -I -f ./package.json -e "this.optionalDependencies=undefined" &&
+    json -I -f ./package.json -e "this.peerDependencies=undefined" &&
+    json -I -f ./package.json -e "this.bundleDependencies=undefined" &&
+    json -I -f ./package.json -e "this.types=undefined" &&
+    json -I -f ./package.json -e "this.bin=undefined" &&
+    json -I -f ./package.json -e "this.main=undefined" &&
+    json -I -f ./package.json -e "this.files=undefined" &&
+    json -I -f ./package.json -e "this.scripts={\\"now-start\\":\\"node ./es8-es2017/src/http/server-cli.js ./misc/epubs\\"}" &&
     cd ..
   '
 
