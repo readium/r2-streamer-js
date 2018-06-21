@@ -18,7 +18,7 @@ const debug = debug_("r2:streamer#http/server-url");
 export function serverUrl(_server: Server, topRouter: express.Application) {
 
     const routerUrl = express.Router({ strict: false });
-    routerUrl.use(morgan("combined"));
+    routerUrl.use(morgan("combined", { stream: { write: (msg: any) => debug(msg) } }));
 
     routerUrl.use(trailingSlashRedirect);
 

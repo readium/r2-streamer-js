@@ -26,7 +26,7 @@ const debug = debug_("r2:streamer#http/server-opds");
 export function serverOPDS(_server: Server, topRouter: express.Application) {
 
     const routerOPDS = express.Router({ strict: false });
-    routerOPDS.use(morgan("combined"));
+    routerOPDS.use(morgan("combined", { stream: { write: (msg: any) => debug(msg) } }));
 
     routerOPDS.use(trailingSlashRedirect);
 

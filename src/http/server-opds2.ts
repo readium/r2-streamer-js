@@ -50,7 +50,7 @@ export function serverOPDS2(server: Server, topRouter: express.Application) {
 `;
 
     const routerOPDS2 = express.Router({ strict: false });
-    // routerOPDS2.use(morgan("combined"));
+    // routerOPDS2.use(morgan("combined", { stream: { write: (msg: any) => debug(msg) } }));
 
     routerOPDS2.get(["/", "/" + _show + "/:" + _jsonPath + "?"],
         (req: express.Request, res: express.Response) => {
@@ -193,7 +193,7 @@ export function serverOPDS2(server: Server, topRouter: express.Application) {
         });
 
     const routerOPDS2_ = express.Router({ strict: false });
-    // routerOPDS2_.use(morgan("combined"));
+    // routerOPDS2_.use(morgan("combined", { stream: { write: (msg: any) => debug(msg) } }));
 
     routerOPDS2_.use(trailingSlashRedirect);
 

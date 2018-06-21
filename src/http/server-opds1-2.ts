@@ -56,7 +56,7 @@ export function serverOPDS12(_server: Server, topRouter: express.Application) {
 `;
 
     const routerOPDS12 = express.Router({ strict: false });
-    routerOPDS12.use(morgan("combined"));
+    routerOPDS12.use(morgan("combined", { stream: { write: (msg: any) => debug(msg) } }));
 
     routerOPDS12.use(trailingSlashRedirect);
 

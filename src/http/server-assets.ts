@@ -28,7 +28,7 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
     // let streamCounter = 0;
 
     const routerAssets = express.Router({ strict: false });
-    // routerAssets.use(morgan("combined"));
+    // routerAssets.use(morgan("combined"), { stream: { write: (msg: any) => debug(msg) } }));
 
     routerAssets.get("/",
         async (req: express.Request, res: express.Response) => {

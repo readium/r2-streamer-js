@@ -61,7 +61,7 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
 `;
 
     const routerManifestJson = express.Router({ strict: false });
-    // routerManifestJson.use(morgan("combined"));
+    // routerManifestJson.use(morgan("combined", { stream: { write: (msg: any) => debug(msg) } }));
 
     routerManifestJson.get(["/", "/" + _show + "/:" + _jsonPath + "?"],
         async (req: express.Request, res: express.Response) => {

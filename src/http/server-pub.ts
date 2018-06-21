@@ -52,7 +52,7 @@ export function serverPub(server: Server, topRouter: express.Application): expre
         "</body></html>";
 
     const routerPathBase64 = express.Router({ strict: false });
-    routerPathBase64.use(morgan("combined"));
+    routerPathBase64.use(morgan("combined", { stream: { write: (msg: any) => debug(msg) } }));
 
     routerPathBase64.use(trailingSlashRedirect);
 
