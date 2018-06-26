@@ -63,8 +63,8 @@
     "selfsigned": "^1.10.3",
     "ta-json": "github:danielweck/ta-json#dist",
     "tmp": "^0.0.33",
-    "tslib": "^1.9.2",
-    "uuid": "^3.2.1",
+    "tslib": "^1.9.3",
+    "uuid": "^3.3.0",
     "xmldom": "^0.1.27"
   },
   "devDependencies": {
