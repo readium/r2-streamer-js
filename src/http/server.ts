@@ -489,7 +489,10 @@ Disallow: /
             "GET, HEAD, OPTIONS"); // POST, DELETE, PUT, PATCH
 
         res.setHeader("Access-Control-Allow-Headers",
-            "Content-Type, Content-Length, Accept-Ranges, Link, Transfer-Encoding");
+            "Content-Type, Content-Length, Accept-Ranges, Content-Range, Range, Link, Transfer-Encoding");
+
+        res.setHeader("Access-Control-Expose-Headers",
+            "Content-Type, Content-Length, Accept-Ranges, Content-Range, Range, Link, Transfer-Encoding");
     }
 
     public addPublications(pubs: string[]): string[] {
