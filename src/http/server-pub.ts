@@ -25,30 +25,29 @@ export function serverPub(server: Server, topRouter: express.Application): expre
     const urlBookShowAll = "./manifest.json/show/all";
 
     const urlReaderNYPL = "/readerNYPL/?url=PREFIX" + querystring.escape(urlBook);
-    const urlReaderHADRIEN = "/readerHADRIEN/?manifest=true&href=PREFIX"
-        + querystring.escape(urlBook);
 
     const urlReaderEPUBJS =
-        "https://s3.amazonaws.com/epubjs-manifest/examples/manifest.html?href=PREFIZ"
-        + urlBook;
+        "https://s3.amazonaws.com/epubjs-manifest/examples/manifest.html?href=PREFIZ" + urlBook;
 
-    const urlReaderHADRIENbasic =
+    const urlReaderHADRIEN = "/readerHADRIEN/?manifest=true&href=PREFIX" + querystring.escape(urlBook);
+
+    const urlReaderHADRIEN_ =
         "https://hadriengardeur.github.io/webpub-manifest/examples/viewer/?manifest=true&href=PREFIX"
         + querystring.escape(urlBook);
 
-    const urlReaderREADIUM1 =
-        "http://readium-2.surge.sh/?epub=PREFIX"
-        + querystring.escape(urlBook);
+    // const urlReaderREADIUM1 =
+    //     "http://readium-2.surge.sh/?epub=PREFIX"
+    //     + querystring.escape(urlBook);
 
     const htmlLanding = "<html><body><h1>PATH_STR</h1><h2><a href='" +
         urlBookShowAll + "'>" + urlBookShowAll + "</a></h2>" +
         (server.disableReaders ? "" : (
-            "<p>Reader NYPL:<br><a href='" +
-            urlReaderNYPL + "'>" + urlReaderNYPL + "</a></p><p>Reader HADRIEN:<br><a href='" +
-            urlReaderHADRIEN + "'>" + urlReaderHADRIEN + "</a></p><p>Reader EPUB.js:<br><a href='" +
-            urlReaderEPUBJS + "'>" + urlReaderEPUBJS + "</a></p><p>Reader HADRIEN BASIC:<br><a href='" +
-            urlReaderHADRIENbasic + "'>" + urlReaderHADRIENbasic + "</a></p><p>Reader READIUM-1:<br><a href='" +
-            urlReaderREADIUM1 + "'>" + urlReaderREADIUM1 + "</a></p>")) +
+            "<p>Reader NYPL:<br><a href='" + urlReaderNYPL + "'>" + urlReaderNYPL + "</a></p>" +
+            "<p>Reader EPUB.js:<br><a href='" + urlReaderEPUBJS + "'>" + urlReaderEPUBJS + "</a></p>" +
+            "<p>Reader HADRIEN:<br><a href='" + urlReaderHADRIEN + "'>" + urlReaderHADRIEN + "</a></p>" +
+            "<p>Reader HADRIEN BASIC:<br><a href='" + urlReaderHADRIEN_ + "'>" + urlReaderHADRIEN_ + "</a></p>"
+            // "<p>Reader READIUM-1:<br><a href='" + urlReaderREADIUM1 + "'>" + urlReaderREADIUM1 + "</a></p>"
+        )) +
         "</body></html>";
 
     const routerPathBase64 = express.Router({ strict: false });
