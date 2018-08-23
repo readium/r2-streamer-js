@@ -21,9 +21,9 @@ import * as filehound from "filehound";
 
 import { Server } from "./server";
 
-initGlobalConverters_GENERIC();
-initGlobalConverters_SHARED();
 initGlobalConverters_OPDS();
+initGlobalConverters_SHARED();
+initGlobalConverters_GENERIC();
 
 setLcpNativePluginPath(path.join(process.cwd(), "LCP", "lcp.node"));
 
