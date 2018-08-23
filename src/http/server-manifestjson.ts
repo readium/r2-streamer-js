@@ -286,7 +286,8 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
                 const jsonObj = TAJSON.serialize(objToSerialize);
 
                 let validationStr: string | undefined;
-                if (!reqparams.jsonPath || reqparams.jsonPath === "all") {
+                const doValidate = !reqparams.jsonPath || reqparams.jsonPath === "all";
+                if (doValidate) {
 
                     // // tslint:disable-next-line:no-string-literal
                     // if (jsonObj["@context"] && typeof jsonObj["@context"] === "string") {
@@ -323,7 +324,8 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
                     // tslint:disable-next-line:max-line-length
                     (coverImage ? "<a href=\"" + coverImage + "\"><div style=\"width: 400px;\"><img src=\"" + coverImage + "\" alt=\"\" style=\"display: block; width: 100%; height: auto;\"/></div></a>" : "") +
                     "<hr><p><pre>" + jsonPretty + "</pre></p>" +
-                    (validationStr ? ("<hr><p><pre>" + validationStr + "</pre></p>") : ("<hr><p>JSON SCHEMA OK.</p>")) +
+                    // tslint:disable-next-line:max-line-length
+                    (doValidate ? (validationStr ? ("<hr><p><pre>" + validationStr + "</pre></p>") : ("<hr><p>JSON SCHEMA OK.</p>")) : "") +
                     // "<hr><p><pre>" + jsonStr + "</pre></p>" +
                     // "<p><pre>" + dumpStr + "</pre></p>" +
                     "</body></html>");
