@@ -9,13 +9,22 @@ import * as fs from "fs";
 import * as path from "path";
 
 import { setLcpNativePluginPath } from "@r2-lcp-js/parser/epub/lcp";
-import { initGlobals } from "@r2-shared-js/init-globals";
+import {
+    initGlobalConverters_OPDS,
+} from "@r2-opds-js/opds/init-globals";
+import {
+    initGlobalConverters_GENERIC,
+    initGlobalConverters_SHARED,
+} from "@r2-shared-js/init-globals";
 import * as debug_ from "debug";
 import * as filehound from "filehound";
 
 import { Server } from "./server";
 
-initGlobals();
+initGlobalConverters_GENERIC();
+initGlobalConverters_SHARED();
+initGlobalConverters_OPDS();
+
 setLcpNativePluginPath(path.join(process.cwd(), "LCP", "lcp.node"));
 
 const debug = debug_("r2:streamer#http/server-cli");
