@@ -9,6 +9,7 @@ import * as crypto from "crypto";
 import * as path from "path";
 
 import { Publication } from "@models/publication";
+import { Link } from "@models/publication-link";
 import {
     getAllMediaOverlays,
     mediaOverlayURLParam,
@@ -362,7 +363,7 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
                 res.setHeader("ETag", hash);
                 // res.setHeader("Cache-Control", "public,max-age=86400");
 
-                const links = publication.GetPreFetchResources();
+                const links = getPreFetchResources(publication);
                 if (links && links.length) {
                     let prefetch = "";
                     links.forEach((l) => {
@@ -384,4 +385,22 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
         });
 
     routerPathBase64.use("/:" + _pathBase64 + "/manifest.json", routerManifestJson);
+}
+
+function getPreFetchResources(publication: Publication): Link[] {
+    const links: Link[] = [];
+
+    if (publication.Resources) {
+        const mediaTypes = ["text/css", "application/vnd.ms-opentype", "text/javascript"];
+
+        publication.Resources.forEach((link) => {
+            mediaTypes.forEach((mediaType) => {
+                if (link.TypeLink === mediaType) {
+                    links.push(link);
+                }
+            });
+        });
+    }
+
+    return links;
 }
