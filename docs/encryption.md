@@ -8,7 +8,7 @@ Both IDPF and Adobe font de-obfuscation schemes are supported.
 
 ### Demonstration
 
-Let's consider the base64 encoding of the hexadecimal representation of the SHA256 digest of the user passphrase. For example, user passphrase `dan` becomes `ec4f2dbb3b140095550c9afbbb69b5d6fd9e814b9da82fad0b34e9fcbe56f1cb` (SHA256), which becomes `ZWM0ZjJkYmIzYjE0MDA5NTU1MGM5YWZiYmI2OWI1ZDZmZDllODE0YjlkYTgyZmFkMGIzNGU5ZmNiZTU2ZjFjYg==` (base64).
+Let's consider the SHA256 hash of the user passphrase (or more precisely, the SHA256 digest / hexadecimal representation of the binary buffer / byte array), and its subsequent base64 encoding. For example, user passphrase `dan` becomes `ec4f2dbb3b140095550c9afbbb69b5d6fd9e814b9da82fad0b34e9fcbe56f1cb` (SHA256), which becomes `ZWM0ZjJkYmIzYjE0MDA5NTU1MGM5YWZiYmI2OWI1ZDZmZDllODE0YjlkYTgyZmFkMGIzNGU5ZmNiZTU2ZjFjYg==` (base64).
 
 Now, let's consider the special URL syntax `http://domain.com/pub/*-{LCP_PASS}-*{PUB_ID}/manifest.json`, which references the "webpub manifest" of a particular publication identified by `{PUB_ID}`, and which passes the LCP base64-encoded passphrase into the request, denoted by the delimiters `*-` and `-*` around `{LCP_PASS}`.
 
