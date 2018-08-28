@@ -38,13 +38,15 @@ https://readium2.herokuapp.com/pub/L2FwcC9taXNjL2VwdWJzL3dhc3RlbGFuZC1vdGYtb2JmX
 
 Note that in this example fonts are obfuscated (IDPF algorithm), therefore they are not encrypted via LCP. Also note that "streaming" of encrypted audio / video content is supported too, but test files are too large to demonstrate here (strictly-speaking, this is not "streaming", but rather: support for HTTP partial byte ranges, random access into the AES-256-CBC resource).
 
-### Implementation status
+### Implementation status (TypeScript / JavaScript)
 
-* Certificate chain validation is on the todo list (top-priority)
-* Signature verification is on the todo list (top-priority)
-* Date / time checks are on the todo list (top priority)
-* Certificate Revocation List is a stretch goal (nice to have, but not urgent at this stage)
-* LSD License Status Document is a top priority too.
+Note that the following list of features is implemented natively (C++) in a separate production-grade project. The TypeScript / JavaScript implementation is just for demonstration purposes:
+
+* Certificate chain validation (TODO)
+* Signature verification (TODO)
+* Date / time checks (TODO)
+* Certificate Revocation List (TODO)
+* LSD License Status Document (TODO)
 
 ### Developer remarks
 
