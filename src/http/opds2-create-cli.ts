@@ -41,7 +41,12 @@ if (fs.existsSync(opdsJsonFilePath)) {
 // tslint:disable-next-line:no-floating-promises
 (async () => {
     const feed = new OPDSFeed();
+
+    // TODO: what is the JSON-LD context URL?
+    // https://drafts.opds.io/opds-2.0
+    // https://github.com/opds-community/test-catalog/tree/master/2.0
     feed.Context = ["http://opds-spec.org/opds.jsonld"];
+
     feed.Metadata = new OPDSMetadata();
     feed.Metadata.RDFType = "http://schema.org/DataFeed";
     feed.Metadata.Title = "Readium 2 OPDS 2.0 Feed";
