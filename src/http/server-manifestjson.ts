@@ -298,7 +298,7 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
                     // // tslint:disable-next-line:no-string-literal
                     // jsonObj["@context"] = jsonObj["@context"][0];
 
-                    const jsonSchemasRootpath = path.join(process.cwd(), "misc/json-schema");
+                    const jsonSchemasRootpath = path.join(process.cwd(), "misc/json-schema/webpub-manifest");
                     validationStr = webPubManifestJsonValidate(jsonSchemasRootpath, jsonObj);
                 }
 
