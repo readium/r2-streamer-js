@@ -8,7 +8,7 @@ Both IDPF and Adobe font de-obfuscation schemes are supported.
 
 ### Demonstration
 
-Let's consider the base64 encoding of the hexadecimal representation of the SHA256 digest of the user passphrase. For example, user passphrase `dan` becomes `ec4f2dbb3b140095550c9afbbb69b5d6fd9e814b9da82fad0b34e9fcbe56f1cb` (SHA256), which becomes `ZWM0ZjJkYmIzYjE0MDA5NTU1MGM5YWZiYmI2OWI1ZDZmZDllODE0YjlkYTgyZmFkMGIzNGU5ZmNiZTU2ZjFjYg==` (base64).
+Let's consider the SHA256 hash of the user passphrase (or more precisely, the SHA256 digest / hexadecimal representation of the binary buffer / byte array), and its subsequent base64 encoding. For example, user passphrase `dan` becomes `ec4f2dbb3b140095550c9afbbb69b5d6fd9e814b9da82fad0b34e9fcbe56f1cb` (SHA256), which becomes `ZWM0ZjJkYmIzYjE0MDA5NTU1MGM5YWZiYmI2OWI1ZDZmZDllODE0YjlkYTgyZmFkMGIzNGU5ZmNiZTU2ZjFjYg==` (base64).
 
 Now, let's consider the special URL syntax `http://domain.com/pub/*-{LCP_PASS}-*{PUB_ID}/manifest.json`, which references the "webpub manifest" of a particular publication identified by `{PUB_ID}`, and which passes the LCP base64-encoded passphrase into the request, denoted by the delimiters `*-` and `-*` around `{LCP_PASS}`.
 
@@ -38,13 +38,15 @@ https://readium2.herokuapp.com/pub/L2FwcC9taXNjL2VwdWJzL3dhc3RlbGFuZC1vdGYtb2JmX
 
 Note that in this example fonts are obfuscated (IDPF algorithm), therefore they are not encrypted via LCP. Also note that "streaming" of encrypted audio / video content is supported too, but test files are too large to demonstrate here (strictly-speaking, this is not "streaming", but rather: support for HTTP partial byte ranges, random access into the AES-256-CBC resource).
 
-### Implementation status
+### Implementation status (TypeScript / JavaScript)
 
-* Certificate chain validation is on the todo list (top-priority)
-* Signature verification is on the todo list (top-priority)
-* Date / time checks are on the todo list (top priority)
-* Certificate Revocation List is a stretch goal (nice to have, but not urgent at this stage)
-* LSD License Status Document is a top priority too.
+Note that the following list of features is implemented natively (C++) in a separate production-grade project. The TypeScript / JavaScript implementation is just for demonstration purposes:
+
+* Certificate chain validation (TODO)
+* Signature verification (TODO)
+* Date / time checks (TODO)
+* Certificate Revocation List (TODO)
+* LSD License Status Document (TODO)
 
 ### Developer remarks
 
