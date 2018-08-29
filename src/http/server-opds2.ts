@@ -6,6 +6,7 @@
 // ==LICENSE-END==
 
 import * as crypto from "crypto";
+import * as path from "path";
 
 import { OPDSLink } from "@opds/opds2/opds2-link";
 import { isHTTP } from "@utils/http/UrlUtils";
@@ -16,6 +17,7 @@ import * as express from "express";
 import * as jsonMarkup from "json-markup";
 import { JSON as TAJSON } from "ta-json";
 
+import { jsonSchemaValidate } from "../utils/json-schema-validate";
 import { IRequestPayloadExtension, IRequestQueryParams, _jsonPath, _show } from "./request-ext";
 import { Server } from "./server";
 import { trailingSlashRedirect } from "./server-trailing-slash-redirect";
@@ -145,6 +147,36 @@ export function serverOPDS2(server: Server, topRouter: express.Application) {
 
                 const jsonObj = TAJSON.serialize(objToSerialize);
 
+                let validationStr: string | undefined;
+                const doValidate = !reqparams.jsonPath || reqparams.jsonPath === "all";
+                if (doValidate) {
+
+                    // // tslint:disable-next-line:no-string-literal
+                    // if (jsonObj["@context"] && typeof jsonObj["@context"] === "string") {
+                    //     jsonObj["@context"] = [ jsonObj["@context"] ];
+                    // }
+
+                    // // tslint:disable-next-line:no-string-literal
+                    // jsonObj["@context"] = jsonObj["@context"][0];
+
+                    const jsonSchemasRootpath = path.join(process.cwd(), "misc/json-schema/opds");
+                    const jsonSchemasNames = [
+                        "feed", // must be first!
+                        "acquisition-object",
+                        "feed-metadata",
+                        "link",
+                        "properties",
+                        "publication",
+                        "../webpub-manifest/subcollection",
+                        "../webpub-manifest/metadata",
+                        "../webpub-manifest/link",
+                        "../webpub-manifest/contributor",
+                        "../webpub-manifest/contributor-object",
+                    ];
+
+                    validationStr = jsonSchemaValidate(jsonSchemasRootpath, "opds", jsonSchemasNames, jsonObj);
+                }
+
                 absolutizeURLs(jsonObj);
 
                 // const jsonStr = global.JSON.stringify(jsonObj, null, "    ");
@@ -158,6 +190,8 @@ export function serverOPDS2(server: Server, topRouter: express.Application) {
                 res.status(200).send("<html><body>" +
                     "<h1>OPDS2 JSON feed</h1>" +
                     "<hr><p><pre>" + jsonPretty + "</pre></p>" +
+                    // tslint:disable-next-line:max-line-length
+                    (doValidate ? (validationStr ? ("<hr><p><pre>" + validationStr + "</pre></p>") : ("<hr><p>JSON SCHEMA OK.</p>")) : "") +
                     // "<hr><p><pre>" + jsonStr + "</pre></p>" +
                     // "<p><pre>" + dumpStr + "</pre></p>" +
                     "</body></html>");

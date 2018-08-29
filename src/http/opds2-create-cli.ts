@@ -83,7 +83,7 @@ if (fs.existsSync(opdsJsonFilePath)) {
         const linkSelf = new OPDSLink();
         linkSelf.Href = filePathBase64Encoded + "/manifest.json";
         linkSelf.TypeLink = "application/webpub+json";
-        linkSelf.AddRel("self");
+        linkSelf.AddRel("http://opds-spec.org/acquisition");
         publi.Links.push(linkSelf);
 
         feed.Publications.push(publi);

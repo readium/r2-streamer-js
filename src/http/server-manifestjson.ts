@@ -23,7 +23,7 @@ import * as express from "express";
 import * as jsonMarkup from "json-markup";
 import { JSON as TAJSON } from "ta-json";
 
-import { webPubManifestJsonValidate } from "../utils/json-schema-validate";
+import { jsonSchemaValidate } from "../utils/json-schema-validate";
 import {
     IRequestPayloadExtension,
     IRequestQueryParams,
@@ -299,7 +299,17 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
                     // jsonObj["@context"] = jsonObj["@context"][0];
 
                     const jsonSchemasRootpath = path.join(process.cwd(), "misc/json-schema/webpub-manifest");
-                    validationStr = webPubManifestJsonValidate(jsonSchemasRootpath, jsonObj);
+                    const jsonSchemasNames = [
+                        "publication", // must be first!
+                        "contributor-object",
+                        "contributor",
+                        "link",
+                        "metadata",
+                        "subcollection",
+                    ];
+
+                    validationStr = jsonSchemaValidate(jsonSchemasRootpath,
+                            "webpubmanifest", jsonSchemasNames, jsonObj);
                 }
 
                 absolutizeURLs(jsonObj);

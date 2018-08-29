@@ -13,9 +13,14 @@ import * as debug_ from "debug";
 
 const debug = debug_("r2:streamer#utils/json-schema-validate");
 
-let _jsonSchemas: any[] | undefined;
+const _jsonSchemasCache: any = {}; //  any[] | undefined;
 
-export function webPubManifestJsonValidate(jsonSchemasRootpath: string, jsonToValidate: any): string | undefined {
+export function jsonSchemaValidate(
+    jsonSchemasRootpath: string,
+    key: string,
+    jsonSchemasNames: string[],
+    jsonToValidate: any): string | undefined {
+
     try {
         // tslint:disable-next-line:max-line-length
         // "^((?<grandfathered>(en-GB-oed|i-ami|i-bnn|i-default|i-enochian|i-hak|i-klingon|i-lux|i-mingo|i-navajo|i-pwn|i-tao|i-tay|i-tsu|sgn-BE-FR|sgn-BE-NL|sgn-CH-DE)|(art-lojban|cel-gaulish|no-bok|no-nyn|zh-guoyu|zh-hakka|zh-min|zh-min-nan|zh-xiang))|((?<language>([A-Za-z]{2,3}(-(?<extlang>[A-Za-z]{3}(-[A-Za-z]{3}){0,2}))?)|[A-Za-z]{4}|[A-Za-z]{5,8})(-(?<script>[A-Za-z]{4}))?(-(?<region>[A-Za-z]{2}|[0-9]{3}))?(-(?<variant>[A-Za-z0-9]{5,8}|[0-9][A-Za-z0-9]{3}))*(-(?<extension>[0-9A-WY-Za-wy-z](-[A-Za-z0-9]{2,8})+))*(-(?<privateUse>x(-[A-Za-z0-9]{1,8})+))?)|(?<privateUse2>x(-[A-Za-z0-9]{1,8})+))$"
@@ -49,18 +54,9 @@ export function webPubManifestJsonValidate(jsonSchemasRootpath: string, jsonToVa
         // const bcp47RegEx = "^" + languageTag + "$";
         // debug(bcp47RegEx);
 
-        debug("WebPub Manifest JSON Schema validation ...");
+        debug("JSON Schema validation ...");
 
-        if (!_jsonSchemas) { // lazy loading
-
-            const jsonSchemasNames = [
-                "publication", // must be first!
-                "contributor-object",
-                "contributor",
-                "link",
-                "metadata",
-                "subcollection",
-            ];
+        if (!_jsonSchemasCache[key]) { // lazy loading
 
             for (const jsonSchemaName of jsonSchemasNames) {
                 const jsonSchemaPath = path.join(jsonSchemasRootpath, jsonSchemaName + ".schema.json");
@@ -92,14 +88,14 @@ export function webPubManifestJsonValidate(jsonSchemasRootpath: string, jsonToVa
                     return undefined;
                 }
                 const jsonSchema = global.JSON.parse(jsonSchemaStr);
-                if (!_jsonSchemas) {
-                    _jsonSchemas = [];
+                if (!_jsonSchemasCache[key]) {
+                    _jsonSchemasCache[key] = [];
                 }
-                _jsonSchemas.push(jsonSchema);
+                _jsonSchemasCache[key].push(jsonSchema);
                 // debug(jsonSchema);
             }
         }
-        if (!_jsonSchemas) {
+        if (!_jsonSchemasCache[key]) {
             return undefined;
         }
 
@@ -111,7 +107,7 @@ export function webPubManifestJsonValidate(jsonSchemasRootpath: string, jsonToVa
         //     debug(ajvValidate.errors);
         // }
 
-        _jsonSchemas.forEach((jsonSchema) => {
+        _jsonSchemasCache[key].forEach((jsonSchema: any) => {
             // tslint:disable-next-line:no-string-literal
             debug("JSON Schema ADD: " + jsonSchema["$id"]);
             // tslint:disable-next-line:no-string-literal
@@ -122,14 +118,14 @@ export function webPubManifestJsonValidate(jsonSchemasRootpath: string, jsonToVa
         debug("JSON Schema VALIDATE ...");
 
         // tslint:disable-next-line:no-string-literal
-        const ajvValid = ajv.validate(_jsonSchemas[0]["$id"], jsonToValidate);
+        const ajvValid = ajv.validate(_jsonSchemasCache[key][0]["$id"], jsonToValidate);
         if (!ajvValid) {
-            debug("WebPub Manifest JSON Schema validation FAIL.");
+            debug("JSON Schema validation FAIL.");
             const errorsText = ajv.errorsText();
             debug(errorsText);
             return errorsText;
         } else {
-            debug("WebPub Manifest JSON Schema validation OK.");
+            debug("JSON Schema validation OK.");
         }
     } catch (err) {
         debug("JSON Schema VALIDATION PROBLEM.");
