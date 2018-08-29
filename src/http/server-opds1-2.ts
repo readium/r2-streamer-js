@@ -5,6 +5,8 @@
 // that can be found in the LICENSE file exposed on Github (readium) in the project repository.
 // ==LICENSE-END==
 
+import * as path from "path";
+
 import { convertOpds1ToOpds2 } from "@opds/converter";
 import { OPDS } from "@opds/opds1/opds";
 import { OPDSFeed } from "@opds/opds2/opds2";
@@ -22,6 +24,7 @@ import * as requestPromise from "request-promise-native";
 import { JSON as TAJSON } from "ta-json";
 import * as xmldom from "xmldom";
 
+import { jsonSchemaValidate } from "../utils/json-schema-validate";
 import { IRequestPayloadExtension, _urlEncoded } from "./request-ext";
 import { Server } from "./server";
 import { trailingSlashRedirect } from "./server-trailing-slash-redirect";
@@ -197,6 +200,37 @@ export function serverOPDS12(_server: Server, topRouter: express.Application) {
             traverseJsonObjects(jsonObjOPDS1, funk);
 
             const jsonObjOPDS2 = TAJSON.serialize(opds2);
+
+            let validationStr: string | undefined;
+            const doValidate = !reqparams.jsonPath || reqparams.jsonPath === "all";
+            if (doValidate) {
+
+                // // tslint:disable-next-line:no-string-literal
+                // if (jsonObj["@context"] && typeof jsonObj["@context"] === "string") {
+                //     jsonObj["@context"] = [ jsonObj["@context"] ];
+                // }
+
+                // // tslint:disable-next-line:no-string-literal
+                // jsonObj["@context"] = jsonObj["@context"][0];
+
+                const jsonSchemasRootpath = path.join(process.cwd(), "misc/json-schema/opds");
+                const jsonSchemasNames = [
+                    "feed", // must be first!
+                    "acquisition-object",
+                    "feed-metadata",
+                    "link",
+                    "properties",
+                    "publication",
+                    "../webpub-manifest/subcollection",
+                    "../webpub-manifest/metadata",
+                    "../webpub-manifest/link",
+                    "../webpub-manifest/contributor",
+                    "../webpub-manifest/contributor-object",
+                ];
+
+                validationStr = jsonSchemaValidate(jsonSchemasRootpath, "opds", jsonSchemasNames, jsonObjOPDS2);
+            }
+
             traverseJsonObjects(jsonObjOPDS2, funk);
 
             const css = css2json(jsonStyle);
@@ -219,6 +253,8 @@ export function serverOPDS12(_server: Server, topRouter: express.Application) {
                 jsonPrettyOPDS2 + "</div></td>" +
                 "</tbody></tr>" +
                 "</table>" +
+                // tslint:disable-next-line:max-line-length
+                (doValidate ? (validationStr ? ("<hr><p><pre>" + validationStr + "</pre></p>") : ("<hr><p>JSON SCHEMA OK.</p>")) : "") +
                 // "<p><pre>" + jsonPretty + "</pre></p>" +
                 // "<hr><p><pre>" + jsonStr + "</pre></p>" +
                 // "<p><pre>" + dumpStr + "</pre></p>" +
