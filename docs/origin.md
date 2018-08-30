@@ -8,7 +8,7 @@ Furthermore, every publications' "webpub manifest" JSON (and their linked resour
 
 So, the full "origin" of *all* publications looks like (for example): `https://127.0.0.1:8080`, which can be decomposed to the URL format: `SCHEME://IP:PORT`. The URL syntax used to identify specific publications is: `SCHEME://IP:PORT/pub/ID`, and the syntax used to reference specific assets within a given publication is `SCHEME://IP:PORT/pub/ID/PATH/TO/RESOURCE`.
 
-(more information at https://github.com/edrlab/r2-streamer-js/blob/develop/docs/http.md )
+(more information at https://github.com/readium/r2-streamer-js/blob/develop/docs/http.md )
 
 ## Problem description
 
@@ -26,7 +26,7 @@ For example, a URL such as `SCHEME://IP:PORT/pub/ID/PATH/TO/RESOURCE` (let's say
 
 ## Electron
 
-See: https://github.com/edrlab/r2-navigator-js/issues/2
+See: https://github.com/readium/r2-navigator-js/issues/2
 
 Key APIs:
 

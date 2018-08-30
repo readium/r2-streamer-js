@@ -31,7 +31,7 @@ try {
     if (branch.indexOf(detached) === 0) {
         branch = branch.substr(detached.length);
     }
-    const gitUrlBase = "https://github.com/edrlab/r2-streamer-js/";
+    const gitUrlBase = "https://github.com/readium/r2-streamer-js/";
     json = {
         "short": git.short(),
         "long": git.long(),

@@ -6,7 +6,7 @@ NodeJS implementation (written in TypeScript) and HTTP micro-services (Express m
 
 ## Build status
 
-[![NPM](https://img.shields.io/npm/v/r2-streamer-js.svg)](https://www.npmjs.com/package/r2-streamer-js) [![David](https://david-dm.org/edrlab/r2-streamer-js/status.svg)](https://david-dm.org/edrlab/r2-streamer-js) [![Travis](https://travis-ci.org/edrlab/r2-streamer-js.svg?branch=develop)](https://travis-ci.org/edrlab/r2-streamer-js) [![Heroku](https://img.shields.io/badge/app-Heroku-blue.svg)](https://readium2.herokuapp.com) [![Now.sh](https://img.shields.io/badge/app-Now.sh-lightgrey.svg)](https://readium2.now.sh)
+[![NPM](https://img.shields.io/npm/v/r2-streamer-js.svg)](https://www.npmjs.com/package/r2-streamer-js) [![David](https://david-dm.org/readium/r2-streamer-js/status.svg)](https://david-dm.org/readium/r2-streamer-js) [![Travis](https://travis-ci.org/readium/r2-streamer-js.svg?branch=develop)](https://travis-ci.org/readium/r2-streamer-js) [![Heroku](https://img.shields.io/badge/app-Heroku-blue.svg)](https://readium2.herokuapp.com) [![Now.sh](https://img.shields.io/badge/app-Now.sh-lightgrey.svg)](https://readium2.now.sh)
 
 THIS SOFTWARE IS **ALPHA**!
 
@@ -19,11 +19,11 @@ Public APIs are not stable. The internal logical architecture and physical code 
 
 ## GitHub repository
 
-https://github.com/edrlab/r2-streamer-js
+https://github.com/readium/r2-streamer-js
 
-There is no [github.io](https://edrlab.github.io/r2-streamer-js) site for this project (no [gh-pages](https://github.com/edrlab/r2-streamer-js/tree/gh-pages) branch).
+There is no [github.io](https://readium.github.io/r2-streamer-js) site for this project (no [gh-pages](https://github.com/readium/r2-streamer-js/tree/gh-pages) branch).
 
-Wiki documentation is not used, instead there are Markdown files inside the repository ([docs](https://github.com/edrlab/r2-streamer-js/tree/develop/docs) folder).
+Wiki documentation is not used, instead there are Markdown files inside the repository ([docs](https://github.com/readium/r2-streamer-js/tree/develop/docs) folder).
 
 Note that there are currently no API docs for the source code.
 
@@ -67,15 +67,15 @@ import { Publication } from "r2-streamer-js/dist/es5/src/models/publication";
 
 ## Dependencies
 
-https://david-dm.org/edrlab/r2-streamer-js
+https://david-dm.org/readium/r2-streamer-js
 
-A [package-lock.json](https://github.com/edrlab/r2-streamer-js/blob/develop/package-lock.json) is provided (modern NPM alternative to `npm-shrinkwrap.json`).
+A [package-lock.json](https://github.com/readium/r2-streamer-js/blob/develop/package-lock.json) is provided (modern NPM alternative to `npm-shrinkwrap.json`).
 
-A [yarn.lock](https://github.com/edrlab/r2-streamer-js/blob/develop/yarn.lock) file is also provided at the root of the source tree (Yarn is not recommended anymore to manage this project's NPM dependencies, due to several experienced build-breaking bugs).
+A [yarn.lock](https://github.com/readium/r2-streamer-js/blob/develop/yarn.lock) file is also provided at the root of the source tree (Yarn is not recommended anymore to manage this project's NPM dependencies, due to several experienced build-breaking bugs).
 
 ## Continuous Integration
 
-https://travis-ci.org/edrlab/r2-streamer-js
+https://travis-ci.org/readium/r2-streamer-js
 
 TravisCI builds are triggered automatically at every Git "push" in the `develop` branch.
 
@@ -139,16 +139,16 @@ Command line steps (optional Yarn):
 
 ### HTTP API
 
-https://github.com/edrlab/r2-streamer-js/blob/develop/docs/http.md
+https://github.com/readium/r2-streamer-js/blob/develop/docs/http.md
 
 ### Support for remote publications
 
-https://github.com/edrlab/r2-streamer-js/blob/develop/docs/remote-epub.md
+https://github.com/readium/r2-streamer-js/blob/develop/docs/remote-epub.md
 
 ### Support for OPDS feeds
 
-https://github.com/edrlab/r2-streamer-js/blob/develop/docs/opds.md
+https://github.com/readium/r2-streamer-js/blob/develop/docs/opds.md
 
 ### Support for encrypted content
 
-https://github.com/edrlab/r2-streamer-js/blob/develop/docs/encryption.md
+https://github.com/readium/r2-streamer-js/blob/develop/docs/encryption.md

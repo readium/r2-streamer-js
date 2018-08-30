@@ -4,7 +4,7 @@
 
 https://readium2.herokuapp.com/opds/
 
-The EPUB files referenced from the OPDS feeds are remotely accessed using HTTP partial byte range requests in order to support loading large publications (e.g. audio / video EPUB3 files). More information here: https://github.com/edrlab/r2-streamer-js/blob/develop/docs/remote-epub.md
+The EPUB files referenced from the OPDS feeds are remotely accessed using HTTP partial byte range requests in order to support loading large publications (e.g. audio / video EPUB3 files). More information here: https://github.com/readium/r2-streamer-js/blob/develop/docs/remote-epub.md
 
 ## A selection of public OPDS feeds:
 
