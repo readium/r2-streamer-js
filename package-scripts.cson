@@ -89,7 +89,7 @@
     json -I -f ./package.json -e "this.bin=undefined" &&
     json -I -f ./package.json -e "this.main=undefined" &&
     json -I -f ./package.json -e "this.files=undefined" &&
-    json -I -f ./package.json -e "this.scripts={\\"now-start\\":\\"node ./es8-es2017/src/http/server-cli.js ./misc/epubs\\"}" &&
+    json -I -f ./package.json -e "this.scripts={\\"now-start\\":\\"node --version && npm --version && node ./es8-es2017/src/http/server-cli.js ./misc/epubs\\"}" &&
     cd ..
   '
 
