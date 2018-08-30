@@ -55,10 +55,10 @@
     "mime-types": "^2.1.20",
     "moment": "^2.22.2",
     "morgan": "^1.9.0",
-    "r2-lcp-js": "github:edrlab/r2-lcp-js-dist#develop",
-    "r2-opds-js": "github:edrlab/r2-opds-js-dist#develop",
-    "r2-shared-js": "github:edrlab/r2-shared-js-dist#develop",
-    "r2-utils-js": "github:edrlab/r2-utils-js-dist#develop",
+    "r2-lcp-js": "^1.0.0-alpha.1",
+    "r2-opds-js": "^1.0.0-alpha.1",
+    "r2-shared-js": "^1.0.0-alpha.1",
+    "r2-utils-js": "^1.0.0-alpha.1",
     "request": "^2.88.0",
     "request-promise-native": "^1.0.5",
     "selfsigned": "^1.10.3",
@@ -103,6 +103,7 @@
   "files": [
     "LICENSE",
     "README.md",
+    "CHANGELOG.md",
     "docs/**/*",
     "dist/**/*"
   ],
