@@ -76,7 +76,7 @@
     cpy "./misc/readers/reader-NYPL/**/*" ./now/ --cwd=./ --parents --no-dir &&
     cpy "./misc/readers/reader-HADRIEN/**/*" ./now/ --cwd=./ --parents --no-dir &&
     cpy "./misc/epubs/*.epub" now/misc/epubs/ &&
-    cpy "./misc/json-schema/*.json" now/misc/json-schema/ &&
+    cpy "./misc/json-schema/**/*" ./now/ --cwd=./ --parents --no-dir &&
     cpy ./package.json now/ &&
     cd now/ &&
     json -I -f ./package.json -e "this.build=undefined" &&
