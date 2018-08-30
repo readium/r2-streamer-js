@@ -52,7 +52,7 @@
     "express": "^4.16.3",
     "filehound": "^1.16.4",
     "json-markup": "^1.1.0",
-    "mime-types": "^2.1.19",
+    "mime-types": "^2.1.20",
     "moment": "^2.22.2",
     "morgan": "^1.9.0",
     "r2-lcp-js": "github:edrlab/r2-lcp-js-dist#develop",
@@ -92,7 +92,7 @@
     "sorcery": "^0.10.0",
     "tslint": "^5.11.0",
     "tslint-language-service": "^0.9.9",
-    "typescript": "^3.0.1",
+    "typescript": "^3.0.3",
     "uglify-es": "^3.3.10"
   },
   "main": "dist/es6-es2015/src/index.js",
