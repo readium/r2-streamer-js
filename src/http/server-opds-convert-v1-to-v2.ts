@@ -29,9 +29,11 @@ import { IRequestPayloadExtension, _urlEncoded } from "./request-ext";
 import { Server } from "./server";
 import { trailingSlashRedirect } from "./server-trailing-slash-redirect";
 
-const debug = debug_("r2:streamer#http/server-opds1-2");
+const debug = debug_("r2:streamer#http/server-opds-convert-v1-to-v2");
 
-export function serverOPDS12(_server: Server, topRouter: express.Application) {
+// tslint:disable-next-line:variable-name
+export const serverOPDS_convert_v1_to_v2_PATH = "/opds-v1-to-v2-convert";
+export function serverOPDS_convert_v1_to_v2(_server: Server, topRouter: express.Application) {
 
     // https://github.com/mafintosh/json-markup/blob/master/style.css
     const jsonStyle = `
@@ -58,12 +60,13 @@ export function serverOPDS12(_server: Server, topRouter: express.Application) {
 }
 `;
 
-    const routerOPDS12 = express.Router({ strict: false });
-    routerOPDS12.use(morgan("combined", { stream: { write: (msg: any) => debug(msg) } }));
+    // tslint:disable-next-line:variable-name
+    const routerOPDS_convert_v1_to_v2 = express.Router({ strict: false });
+    routerOPDS_convert_v1_to_v2.use(morgan("combined", { stream: { write: (msg: any) => debug(msg) } }));
 
-    routerOPDS12.use(trailingSlashRedirect);
+    routerOPDS_convert_v1_to_v2.use(trailingSlashRedirect);
 
-    routerOPDS12.get("/", (_req: express.Request, res: express.Response) => {
+    routerOPDS_convert_v1_to_v2.get("/", (_req: express.Request, res: express.Response) => {
 
         let html = "<html><head>";
         html += `<script type="text/javascript">function encodeURIComponent_RFC3986(str) { ` +
@@ -74,7 +77,7 @@ export function serverOPDS12(_server: Server, topRouter: express.Application) {
             `location.origin +` +
             // `location.protocol + '//' + location.hostname + ` +
             // `(location.port ? (':' + location.port) : '') + ` +
-            ` '/opds12/' +` +
+            ` '${serverOPDS_convert_v1_to_v2_PATH}/' +` +
             ` encodeURIComponent_RFC3986(document.getElementById("url").value);` +
             `location.href = url;}</script>`;
         html += "</head>";
@@ -90,12 +93,13 @@ export function serverOPDS12(_server: Server, topRouter: express.Application) {
         res.status(200).send(html);
     });
 
-    routerOPDS12.param("urlEncoded", (req, _res, next, value, _name) => {
+    routerOPDS_convert_v1_to_v2.param("urlEncoded", (req, _res, next, value, _name) => {
         (req as IRequestPayloadExtension).urlEncoded = value;
         next();
     });
 
-    routerOPDS12.get("/:" + _urlEncoded + "(*)", async (req: express.Request, res: express.Response) => {
+    routerOPDS_convert_v1_to_v2.get("/:" + _urlEncoded + "(*)",
+        async (req: express.Request, res: express.Response) => {
 
         const reqparams = req.params as IRequestPayloadExtension;
 
@@ -181,18 +185,24 @@ export function serverOPDS12(_server: Server, topRouter: express.Application) {
             }
 
             const funk = (obj: any) => {
-                if ((obj.href && typeof obj.href === "string"
-                    && obj.type && obj.type.indexOf("application/atom+xml") >= 0) ||
-                    (obj.Href && typeof obj.Href === "string"
-                        && obj.Type && obj.Type.indexOf("application/atom+xml") >= 0)
-                ) {
+                if ((obj.href && typeof obj.href === "string") ||
+                    (obj.Href && typeof obj.Href === "string")) {
+
                     let fullHref = obj.href ? obj.href as string : obj.Href as string;
-                    if (!isHTTP(fullHref)) {
+
+                    const notFull = !isHTTP(fullHref);
+                    if (notFull) {
                         fullHref = ensureAbsolute(urlDecoded, fullHref);
                     }
-                    obj.__href__ = rootUrl +
-                        req.originalUrl.substr(0, req.originalUrl.indexOf("/opds12/")) +
-                        "/opds12/" + encodeURIComponent_RFC3986(fullHref);
+
+                    if ((obj.type && obj.type.indexOf("application/atom+xml") >= 0) ||
+                        (obj.Type && obj.Type.indexOf("application/atom+xml") >= 0)) {
+                        obj.__href__ = rootUrl + req.originalUrl.substr(0,
+                            req.originalUrl.indexOf(serverOPDS_convert_v1_to_v2_PATH + "/")) +
+                            serverOPDS_convert_v1_to_v2_PATH + "/" + encodeURIComponent_RFC3986(fullHref);
+                    } else if (notFull) {
+                        obj.__href__ = fullHref;
+                    }
                 }
             };
 
@@ -291,5 +301,5 @@ export function serverOPDS12(_server: Server, topRouter: express.Application) {
         }
     });
 
-    topRouter.use("/opds12", routerOPDS12);
+    topRouter.use(serverOPDS_convert_v1_to_v2_PATH, routerOPDS_convert_v1_to_v2);
 }

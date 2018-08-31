@@ -22,9 +22,13 @@ import { IRequestPayloadExtension, IRequestQueryParams, _jsonPath, _show } from 
 import { Server } from "./server";
 import { trailingSlashRedirect } from "./server-trailing-slash-redirect";
 
-const debug = debug_("r2:streamer#http/server-opds2");
+const debug = debug_("r2:streamer#http/server-opds-local-feed");
 
-export function serverOPDS2(server: Server, topRouter: express.Application) {
+// tslint:disable-next-line:variable-name
+export const serverOPDS_local_feed_PATH = "/opds2-local-feed";
+// tslint:disable-next-line:variable-name
+export const serverOPDS_local_feed_PATH_ = "/publications.json";
+export function serverOPDS_local_feed(server: Server, topRouter: express.Application) {
 
     // https://github.com/mafintosh/json-markup/blob/master/style.css
     const jsonStyle = `
@@ -51,10 +55,11 @@ export function serverOPDS2(server: Server, topRouter: express.Application) {
 }
 `;
 
-    const routerOPDS2 = express.Router({ strict: false });
+    // tslint:disable-next-line:variable-name
+    const routerOPDS_local_feed = express.Router({ strict: false });
     // routerOPDS2.use(morgan("combined", { stream: { write: (msg: any) => debug(msg) } }));
 
-    routerOPDS2.get(["/", "/" + _show + "/:" + _jsonPath + "?"],
+    routerOPDS_local_feed.get(["/", "/" + _show + "/:" + _jsonPath + "?"],
         (req: express.Request, res: express.Response) => {
 
             const reqparams = req.params as IRequestPayloadExtension;
@@ -76,7 +81,7 @@ export function serverOPDS2(server: Server, topRouter: express.Application) {
 
             const rootUrl = (isSecureHttp ? "https://" : "http://")
                 + req.headers.host;
-            const selfURL = rootUrl + "/opds2/publications.json";
+            const selfURL = rootUrl + serverOPDS_local_feed_PATH + serverOPDS_local_feed_PATH_;
 
             const feed = server.publicationsOPDS();
             if (!feed) {
@@ -103,10 +108,19 @@ export function serverOPDS2(server: Server, topRouter: express.Application) {
             function absolutizeURLs(jsonObj: any) {
                 traverseJsonObjects(jsonObj,
                     (obj) => {
-                        if (obj.href && typeof obj.href === "string"
-                            && !isHTTP(obj.href)) {
-                            // obj.href_ = obj.href;
-                            obj.href = absoluteURL(obj.href);
+                        if (obj.href && typeof obj.href === "string") {
+
+                            if (!isHTTP(obj.href)) {
+                                // obj.href_ = obj.href;
+                                obj.href = absoluteURL(obj.href);
+                            }
+
+                            if (isShow &&
+                                obj.type === "application/webpub+json" &&
+                                obj.rel === "http://opds-spec.org/acquisition" &&
+                                (obj.href as string).endsWith("/manifest.json")) {
+                                    obj.href += "/show";
+                            }
                         }
                     });
             }
@@ -187,6 +201,10 @@ export function serverOPDS2(server: Server, topRouter: express.Application) {
 
                 const jsonPretty = jsonMarkup(jsonObj, css2json(jsonStyle));
 
+                // const regex = new RegExp(">" + rootUrl + "/([^<]+</a>)", "g");
+                // jsonPretty = jsonPretty.replace(regex, ">$1");
+                // jsonPretty = jsonPretty.replace(/>publications.json<\/a>/, ">" + rootUrl + "/publications.json</a>");
+
                 res.status(200).send("<html><body>" +
                     "<h1>OPDS2 JSON feed</h1>" +
                     "<hr><p><pre>" + jsonPretty + "</pre></p>" +
@@ -213,7 +231,7 @@ export function serverOPDS2(server: Server, topRouter: express.Application) {
 
                 const match = req.header("If-None-Match");
                 if (match === hash) {
-                    debug("publications.json cache");
+                    debug("opds2 publications.json cache");
                     res.status(304); // StatusNotModified
                     res.end();
                     return;
@@ -226,12 +244,13 @@ export function serverOPDS2(server: Server, topRouter: express.Application) {
             }
         });
 
-    const routerOPDS2_ = express.Router({ strict: false });
+    // tslint:disable-next-line:variable-name
+    const routerOPDS_local_feed_ = express.Router({ strict: false });
     // routerOPDS2_.use(morgan("combined", { stream: { write: (msg: any) => debug(msg) } }));
 
-    routerOPDS2_.use(trailingSlashRedirect);
+    routerOPDS_local_feed_.use(trailingSlashRedirect);
 
-    routerOPDS2_.get("/", (req: express.Request, res: express.Response) => {
+    routerOPDS_local_feed_.get("/", (req: express.Request, res: express.Response) => {
 
         const i = req.originalUrl.indexOf("?");
 
@@ -241,8 +260,9 @@ export function serverOPDS2(server: Server, topRouter: express.Application) {
         }
 
         let redirect = pathWithoutQuery +
-            (pathWithoutQuery.substr(-1) === "/" ? "" : "/") +
-            "publications.json/show";
+            // (pathWithoutQuery.substr(-1) === "/" ? "" : "/") +
+            serverOPDS_local_feed_PATH_ + "/show";
+        redirect = redirect.replace("//", "/");
         if (i >= 0) {
             redirect += req.originalUrl.substr(i);
         }
@@ -254,7 +274,7 @@ export function serverOPDS2(server: Server, topRouter: express.Application) {
         res.redirect(301, redirect);
     });
 
-    routerOPDS2_.use("/publications.json", routerOPDS2);
+    routerOPDS_local_feed_.use(serverOPDS_local_feed_PATH_, routerOPDS_local_feed);
 
-    topRouter.use("/opds2", routerOPDS2_);
+    topRouter.use(serverOPDS_local_feed_PATH, routerOPDS_local_feed_);
 }

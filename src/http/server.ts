@@ -28,9 +28,10 @@ import { IRequestPayloadExtension, IRequestQueryParams, _jsonPath, _show, _versi
 import { serverAssets } from "./server-assets";
 import { serverManifestJson } from "./server-manifestjson";
 import { serverMediaOverlays } from "./server-mediaoverlays";
-import { serverOPDS } from "./server-opds-browse-v1";
-import { serverOPDS12 } from "./server-opds-convert-v1-to-v2";
-import { serverOPDS2 } from "./server-opds-local-feed";
+import { serverOPDS_browse_v1, serverOPDS_browse_v1_PATH } from "./server-opds-browse-v1";
+import { serverOPDS_browse_v2, serverOPDS_browse_v2_PATH } from "./server-opds-browse-v2";
+import { serverOPDS_convert_v1_to_v2, serverOPDS_convert_v1_to_v2_PATH } from "./server-opds-convert-v1-to-v2";
+import { serverOPDS_local_feed, serverOPDS_local_feed_PATH } from "./server-opds-local-feed";
 import { serverPub } from "./server-pub";
 import { serverUrl } from "./server-url";
 
@@ -260,14 +261,19 @@ export class Server {
                     + "'>" + "./pub/" + filePathBase64 + "</a></p>";
             });
             if (!this.disableOPDS) {
-                html += "<h1>OPDS2 feed</h1><p><a href='./opds2'>CLICK HERE</a></p>";
+                html += "<h1>OPDS2 feed</h1><p><a href='." + serverOPDS_local_feed_PATH +
+                    "'>CLICK HERE</a></p>";
             }
             if (!this.disableRemotePubUrl) {
                 html += "<h1>Load HTTP publication URL</h1><p><a href='./url'>CLICK HERE</a></p>";
             }
             if (!this.disableOPDS) {
-                html += "<h1>Browse HTTP OPDS1 feed</h1><p><a href='./opds'>CLICK HERE</a></p>";
-                html += "<h1>Convert OPDS feed v1 to v2</h1><p><a href='./opds12'>CLICK HERE</a></p>";
+                html += "<h1>Browse HTTP OPDS1 feed</h1><p><a href='." + serverOPDS_browse_v1_PATH +
+                    "'>CLICK HERE</a></p>";
+                html += "<h1>Browse HTTP OPDS2 feed</h1><p><a href='." + serverOPDS_browse_v2_PATH +
+                    "'>CLICK HERE</a></p>";
+                html += "<h1>Convert OPDS feed v1 to v2</h1><p><a href='." + serverOPDS_convert_v1_to_v2_PATH +
+                    "'>CLICK HERE</a></p>";
             }
             html += "<h1>Server version</h1><p><a href='./version/show'>CLICK HERE</a></p>";
             html += "</body></html>";
@@ -336,9 +342,10 @@ export class Server {
             serverUrl(this, this.expressApp);
         }
         if (!this.disableOPDS) {
-            serverOPDS(this, this.expressApp);
-            serverOPDS2(this, this.expressApp);
-            serverOPDS12(this, this.expressApp);
+            serverOPDS_browse_v1(this, this.expressApp);
+            serverOPDS_browse_v2(this, this.expressApp);
+            serverOPDS_local_feed(this, this.expressApp);
+            serverOPDS_convert_v1_to_v2(this, this.expressApp);
         }
 
         const routerPathBase64: express.Router = serverPub(this, this.expressApp);

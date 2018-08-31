@@ -1,5 +1,8 @@
 # Next
 
+Changes:
+* OPDS micro-services updates (URL routes / paths, added support for OPDS2 browse, absolute URLs)
+
 Git diff:
 * https://github.com/readium/r2-streamer-js/compare/v1.0.0-alpha.3...develop
 

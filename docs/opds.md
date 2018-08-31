@@ -47,6 +47,7 @@ FEEDBOOKS:
 https://www.feedbooks.com/catalog.atom
 =>
 https://readium2.herokuapp.com/opds/https%3A%2F%2Fwww.feedbooks.com%2Fcatalog.atom
+( http://35.234.121.197/publicdomain/browse/ )
 
 UNGLUE.IT
 https://unglue.it/api/opds/

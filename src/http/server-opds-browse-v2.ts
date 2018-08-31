@@ -21,19 +21,19 @@ import { IRequestPayloadExtension, _urlEncoded } from "./request-ext";
 import { Server } from "./server";
 import { trailingSlashRedirect } from "./server-trailing-slash-redirect";
 
-const debug = debug_("r2:streamer#http/server-opds-browse-v1");
+const debug = debug_("r2:streamer#http/server-opds-browse-v2");
 
 // tslint:disable-next-line:variable-name
-export const serverOPDS_browse_v1_PATH = "/opds-v1-browser";
-export function serverOPDS_browse_v1(_server: Server, topRouter: express.Application) {
+export const serverOPDS_browse_v2_PATH = "/opds-v2-browser";
+export function serverOPDS_browse_v2(_server: Server, topRouter: express.Application) {
 
     // tslint:disable-next-line:variable-name
-    const routerOPDS_browse_v1 = express.Router({ strict: false });
-    routerOPDS_browse_v1.use(morgan("combined", { stream: { write: (msg: any) => debug(msg) } }));
+    const routerOPDS_browse_v2 = express.Router({ strict: false });
+    routerOPDS_browse_v2.use(morgan("combined", { stream: { write: (msg: any) => debug(msg) } }));
 
-    routerOPDS_browse_v1.use(trailingSlashRedirect);
+    routerOPDS_browse_v2.use(trailingSlashRedirect);
 
-    routerOPDS_browse_v1.get("/", (_req: express.Request, res: express.Response) => {
+    routerOPDS_browse_v2.get("/", (_req: express.Request, res: express.Response) => {
 
         let html = "<html><head>";
         html += `<script type="text/javascript">function encodeURIComponent_RFC3986(str) { ` +
@@ -44,7 +44,7 @@ export function serverOPDS_browse_v1(_server: Server, topRouter: express.Applica
             `location.origin +` +
             // `location.protocol + '//' + location.hostname + ` +
             // `(location.port ? (':' + location.port) : '') + ` +
-            ` '${serverOPDS_browse_v1_PATH}/' +` +
+            ` '${serverOPDS_browse_v2_PATH}/' +` +
             ` encodeURIComponent_RFC3986(document.getElementById("url").value);` +
             `location.href = url;}</script>`;
         html += "</head>";
@@ -60,12 +60,12 @@ export function serverOPDS_browse_v1(_server: Server, topRouter: express.Applica
         res.status(200).send(html);
     });
 
-    routerOPDS_browse_v1.param("urlEncoded", (req, _res, next, value, _name) => {
+    routerOPDS_browse_v2.param("urlEncoded", (req, _res, next, value, _name) => {
         (req as IRequestPayloadExtension).urlEncoded = value;
         next();
     });
 
-    routerOPDS_browse_v1.get("/:" + _urlEncoded + "(*)", async (req: express.Request, res: express.Response) => {
+    routerOPDS_browse_v2.get("/:" + _urlEncoded + "(*)", async (req: express.Request, res: express.Response) => {
 
         const reqparams = req.params as IRequestPayloadExtension;
 
@@ -148,8 +148,8 @@ export function serverOPDS_browse_v1(_server: Server, topRouter: express.Applica
                         (link.Type.indexOf("opds-catalog") >= 0 || link.Type === "application/atom+xml")) {
                         const linkUrl = ensureAbsolute(urlDecoded, link.Href);
                         const opdsUrl = req.originalUrl.substr(0,
-                            req.originalUrl.indexOf(serverOPDS_browse_v1_PATH + "/"))
-                            + serverOPDS_browse_v1_PATH + "/" + encodeURIComponent_RFC3986(linkUrl);
+                            req.originalUrl.indexOf(serverOPDS_browse_v2_PATH + "/"))
+                            + serverOPDS_browse_v2_PATH + "/" + encodeURIComponent_RFC3986(linkUrl);
 
                         html += "<a href='" + opdsUrl
                             + "'>" + link.Href + "</a> (TITLE: " + link.Title
@@ -204,8 +204,8 @@ export function serverOPDS_browse_v1(_server: Server, topRouter: express.Applica
                             (link.Type.indexOf("opds-catalog") >= 0 || link.Type === "application/atom+xml")) {
                             const linkUrl = ensureAbsolute(urlDecoded, link.Href);
                             const opdsUrl = req.originalUrl.substr(0,
-                                req.originalUrl.indexOf(serverOPDS_browse_v1_PATH + "/"))
-                                + serverOPDS_browse_v1_PATH + "/" + encodeURIComponent_RFC3986(linkUrl);
+                                req.originalUrl.indexOf(serverOPDS_browse_v2_PATH + "/"))
+                                + serverOPDS_browse_v2_PATH + "/" + encodeURIComponent_RFC3986(linkUrl);
 
                             html += "<a href='" + opdsUrl
                                 + "'>" + link.Href + "</a> (TITLE: " + link.Title
@@ -228,7 +228,7 @@ export function serverOPDS_browse_v1(_server: Server, topRouter: express.Applica
                     if (epub) {
                         const epub_ = ensureAbsolute(urlDecoded, epub);
                         const epubUrl = req.originalUrl.substr(0,
-                            req.originalUrl.indexOf(serverOPDS_browse_v1_PATH + "/"))
+                            req.originalUrl.indexOf(serverOPDS_browse_v2_PATH + "/"))
                             + "/url/" + encodeURIComponent_RFC3986(epub_);
 
                         html += "<strong><a href='" + epubUrl + "'>" + epub + "</a></strong>";
@@ -281,5 +281,5 @@ export function serverOPDS_browse_v1(_server: Server, topRouter: express.Applica
         }
     });
 
-    topRouter.use(serverOPDS_browse_v1_PATH, routerOPDS_browse_v1);
+    topRouter.use(serverOPDS_browse_v2_PATH, routerOPDS_browse_v2);
 }
