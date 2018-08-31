@@ -32,7 +32,7 @@ import { trailingSlashRedirect } from "./server-trailing-slash-redirect";
 const debug = debug_("r2:streamer#http/server-opds-convert-v1-to-v2");
 
 // tslint:disable-next-line:variable-name
-export const serverOPDS_convert_v1_to_v2_PATH = "/opds-v1-to-v2-convert";
+export const serverOPDS_convert_v1_to_v2_PATH = "/opds-v1-v2-convert";
 export function serverOPDS_convert_v1_to_v2(_server: Server, topRouter: express.Application) {
 
     // https://github.com/mafintosh/json-markup/blob/master/style.css

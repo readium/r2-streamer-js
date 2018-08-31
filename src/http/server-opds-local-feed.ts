@@ -25,7 +25,7 @@ import { trailingSlashRedirect } from "./server-trailing-slash-redirect";
 const debug = debug_("r2:streamer#http/server-opds-local-feed");
 
 // tslint:disable-next-line:variable-name
-export const serverOPDS_local_feed_PATH = "/opds2-local-feed";
+export const serverOPDS_local_feed_PATH = "/opds2";
 // tslint:disable-next-line:variable-name
 export const serverOPDS_local_feed_PATH_ = "/publications.json";
 export function serverOPDS_local_feed(server: Server, topRouter: express.Application) {

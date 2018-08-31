@@ -6,7 +6,6 @@
 // ==LICENSE-END==
 
 import * as child_process from "child_process";
-import * as crypto from "crypto";
 import * as fs from "fs";
 import * as http from "http";
 import * as https from "https";
@@ -15,57 +14,29 @@ import * as path from "path";
 import { Publication } from "@models/publication";
 import { OPDSFeed } from "@opds/opds2/opds2";
 import { PublicationParsePromise } from "@parser/publication-parser";
-import { encodeURIComponent_RFC3986, isHTTP } from "@utils/http/UrlUtils";
-import * as css2json from "css2json";
 import * as debug_ from "debug";
 import * as express from "express";
-import * as jsonMarkup from "json-markup";
 import { JSON as TAJSON } from "ta-json";
 import { tmpNameSync } from "tmp";
 
 import { CertificateData, generateSelfSignedData } from "../utils/self-signed";
-import { IRequestPayloadExtension, IRequestQueryParams, _jsonPath, _show, _version } from "./request-ext";
+import { _jsonPath, _show } from "./request-ext";
 import { serverAssets } from "./server-assets";
 import { serverManifestJson } from "./server-manifestjson";
 import { serverMediaOverlays } from "./server-mediaoverlays";
-import { serverOPDS_browse_v1, serverOPDS_browse_v1_PATH } from "./server-opds-browse-v1";
-import { serverOPDS_browse_v2, serverOPDS_browse_v2_PATH } from "./server-opds-browse-v2";
-import { serverOPDS_convert_v1_to_v2, serverOPDS_convert_v1_to_v2_PATH } from "./server-opds-convert-v1-to-v2";
-import { serverOPDS_local_feed, serverOPDS_local_feed_PATH } from "./server-opds-local-feed";
+import { serverOPDS_browse_v1 } from "./server-opds-browse-v1";
+import { serverOPDS_browse_v2 } from "./server-opds-browse-v2";
+import { serverOPDS_convert_v1_to_v2 } from "./server-opds-convert-v1-to-v2";
+import { serverOPDS_local_feed } from "./server-opds-local-feed";
 import { serverPub } from "./server-pub";
-import { serverUrl, serverUrl_PATH } from "./server-url";
+import { serverRoot } from "./server-root";
+import { serverSecure } from "./server-secure";
+import { serverRemotePub } from "./server-url";
+import { serverVersion } from "./server-version";
 
 const debug = debug_("r2:streamer#http/server");
-const debugHttps = debug_("r2:https");
-
-const IS_DEV = (process.env.NODE_ENV === "development" || process.env.NODE_ENV === "dev");
 
 interface IPathPublicationMap { [key: string]: any; }
-
-// https://github.com/mafintosh/json-markup/blob/master/style.css
-const jsonStyle = `
-.json-markup {
-    line-height: 17px;
-    font-size: 13px;
-    font-family: monospace;
-    white-space: pre;
-}
-.json-markup-key {
-    font-weight: bold;
-}
-.json-markup-bool {
-    color: firebrick;
-}
-.json-markup-string {
-    color: green;
-}
-.json-markup-null {
-    color: gray;
-}
-.json-markup-number {
-    color: blue;
-}
-`;
 
 export interface ServerData extends CertificateData {
     urlScheme: string;
@@ -121,225 +92,22 @@ export class Server {
         this.expressApp = express();
         // this.expressApp.enable('strict routing');
 
-        this.expressApp.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
-
-            if (!this.isSecured()) {
-                next();
-                return;
-            }
-
-            // let ua = req.get("user-agent");
-            // if (ua) {
-            //     ua = ua.toLowerCase();
-            // }
-
-            // console.log(util.inspect(req,
-            // { showHidden: false,
-            // depth: 1,
-            // colors: true,
-            // customInspect: true,
-            // breakLength: 100,
-            // maxArrayLength: undefined }));
-
-            let doFail = true;
-
-            if (this.serverData && this.serverData.trustKey &&
-                this.serverData.trustCheck && this.serverData.trustCheckIV) {
-
-                // @ts-ignorexx: TS2454 (variable is used before being assigned)
-                // instead: exclamation mark "definite assignment"
-                let t1!: [number, number];
-                if (IS_DEV) {
-                    t1 = process.hrtime();
-                }
-                let delta = 0;
-
-                const urlCheck = this.serverUrl() + req.url;
-
-                const base64Val = req.get("X-" + this.serverData.trustCheck);
-                if (base64Val) {
-                    const decodedVal = new Buffer(base64Val, "base64"); // .toString("utf8");
-
-                    // const AES_BLOCK_SIZE = 16;
-                    // const iv = decodedVal.slice(0, AES_BLOCK_SIZE);
-                    const encrypted = decodedVal; // .slice(AES_BLOCK_SIZE);
-
-                    const decrypteds: Buffer[] = [];
-                    const decryptStream = crypto.createDecipheriv("aes-256-cbc",
-                        this.serverData.trustKey,
-                        this.serverData.trustCheckIV);
-                    decryptStream.setAutoPadding(false);
-                    const buff1 = decryptStream.update(encrypted);
-                    if (buff1) {
-                        decrypteds.push(buff1);
-                    }
-                    const buff2 = decryptStream.final();
-                    if (buff2) {
-                        decrypteds.push(buff2);
-                    }
-                    const decrypted = Buffer.concat(decrypteds);
-                    const nPaddingBytes = decrypted[decrypted.length - 1];
-                    const size = encrypted.length - nPaddingBytes;
-                    const decryptedStr = decrypted.slice(0, size).toString("utf8");
-                    // debug(decryptedStr);
-                    try {
-                        const decryptedJson = JSON.parse(decryptedStr);
-                        let url = decryptedJson.url;
-                        const time = decryptedJson.time;
-
-                        // milliseconds since epoch (midnight, 1 Jan 1970)
-                        const now = Date.now(); // +new Date()
-                        delta = now - time;
-
-                        // 3-second time window between HTTP header creation and consumption
-                        // this should account for plenty of hypothetical server latency
-                        // (typical figures way under 100ms, but there are occasional high-load spikes)
-                        if (delta <= 3000) {
-                            const i = url.lastIndexOf("#");
-                            if (i > 0) {
-                                url = url.substr(0, i);
-                            }
-                            if (url === urlCheck) {
-                                doFail = false;
-                            }
-                        }
-                    } catch (err) {
-                        debug(err);
-                        debug(decryptedStr);
-                    }
-                }
-
-                if (IS_DEV) {
-                    const t2 = process.hrtime(t1);
-                    const seconds = t2[0];
-                    const nanoseconds = t2[1];
-                    const milliseconds = nanoseconds / 1e6;
-                    // const totalNanoseconds = (seconds * 1e9) + nanoseconds;
-                    // const totalMilliseconds = totalNanoseconds / 1e6;
-                    // const totalSeconds = totalNanoseconds / 1e9;
-
-                    debugHttps(`< B > (${delta}ms) ${seconds}s ${milliseconds}ms [ ${urlCheck} ]`);
-                }
-            }
-
-            if (doFail) {
-                debug("############## X-Debug- FAIL ========================== ");
-                debug(req.url);
-                // debug(url);
-                // Object.keys(req.headers).forEach((header: string) => {
-                //     debug(header + " => " + req.headers[header]);
-                // });
-                res.status(200);
-                // res.send("<html><body> </body></html>");
-                res.end();
-                return;
-            }
-
-            next();
-        });
+        serverSecure(this, this.expressApp);
 
         // https://expressjs.com/en/4x/api.html#express.static
         const staticOptions = {
             etag: false,
         };
-
         if (!this.disableReaders) {
             this.expressApp.use("/readerNYPL", express.static("misc/readers/reader-NYPL", staticOptions));
             this.expressApp.use("/readerHADRIEN", express.static("misc/readers/reader-HADRIEN", staticOptions));
         }
 
-        this.expressApp.get("/", (_req: express.Request, res: express.Response) => {
-
-            let html = "<html><body><h1>Publications</h1>";
-
-            this.publications.forEach((pub) => {
-                const filePathBase64 = new Buffer(pub).toString("base64");
-
-                html += "<p><strong>"
-                    + (isHTTP(pub) ? pub : path.basename(pub))
-                    + "</strong><br> => <a href='./pub/" + encodeURIComponent_RFC3986(filePathBase64)
-                    + "'>" + "./pub/" + filePathBase64 + "</a></p>";
-            });
-            if (!this.disableOPDS) {
-                html += "<h1>OPDS2 feed</h1><p><a href='." + serverOPDS_local_feed_PATH +
-                    "'>CLICK HERE</a></p>";
-            }
-            if (!this.disableRemotePubUrl) {
-                html += "<h1>Load HTTP publication URL</h1><p><a href='." + serverUrl_PATH + "'>CLICK HERE</a></p>";
-            }
-            if (!this.disableOPDS) {
-                html += "<h1>Browse HTTP OPDS1 feed</h1><p><a href='." + serverOPDS_browse_v1_PATH +
-                    "'>CLICK HERE</a></p>";
-                html += "<h1>Browse HTTP OPDS2 feed</h1><p><a href='." + serverOPDS_browse_v2_PATH +
-                    "'>CLICK HERE</a></p>";
-                html += "<h1>Convert OPDS feed v1 to v2</h1><p><a href='." + serverOPDS_convert_v1_to_v2_PATH +
-                    "'>CLICK HERE</a></p>";
-            }
-            html += "<h1>Server version</h1><p><a href='./version/show'>CLICK HERE</a></p>";
-            html += "</body></html>";
-
-            res.status(200).send(html);
-        });
-
-        this.expressApp.get(["/" + _version, "/" + _version + "/" + _show + "/:" + _jsonPath + "?"],
-            (req: express.Request, res: express.Response) => {
-
-                const reqparams = req.params as IRequestPayloadExtension;
-
-                const isShow = req.url.indexOf("/show") >= 0 || (req.query as IRequestQueryParams).show;
-                if (!reqparams.jsonPath && (req.query as IRequestQueryParams).show) {
-                    reqparams.jsonPath = (req.query as IRequestQueryParams).show;
-                }
-
-                const gitRevJson = "../../../gitrev.json";
-                if (!fs.existsSync(path.resolve(path.join(__dirname, gitRevJson)))) {
-
-                    const err = "Missing Git rev JSON! ";
-                    debug(err + gitRevJson);
-                    res.status(500).send("<html><body><p>Internal Server Error</p><p>"
-                        + err + "</p></body></html>");
-                    return;
-                }
-
-                const jsonObj = require(gitRevJson);
-                // debug(jsonObj);
-
-                if (isShow) {
-                    const jsonPretty = jsonMarkup(jsonObj, css2json(jsonStyle));
-
-                    res.status(200).send("<html><body>" +
-                        "<h1>R2-STREAMER-JS VERSION INFO</h1>" +
-                        "<hr><p><pre>" + jsonPretty + "</pre></p>" +
-                        // "<hr><p><pre>" + jsonStr + "</pre></p>" +
-                        // "<p><pre>" + dumpStr + "</pre></p>" +
-                        "</body></html>");
-                } else {
-                    this.setResponseCORS(res);
-                    res.set("Content-Type", "application/json; charset=utf-8");
-
-                    const jsonStr = JSON.stringify(jsonObj, null, "  ");
-
-                    const checkSum = crypto.createHash("sha256");
-                    checkSum.update(jsonStr);
-                    const hash = checkSum.digest("hex");
-
-                    const match = req.header("If-None-Match");
-                    if (match === hash) {
-                        debug("publications.json cache");
-                        res.status(304); // StatusNotModified
-                        res.end();
-                        return;
-                    }
-
-                    res.setHeader("ETag", hash);
-                    // res.setHeader("Cache-Control", "public,max-age=86400");
-
-                    res.status(200).send(jsonStr);
-                }
-            });
+        serverRoot(this, this.expressApp);
+        serverVersion(this, this.expressApp);
 
         if (!this.disableRemotePubUrl) {
-            serverUrl(this, this.expressApp);
+            serverRemotePub(this, this.expressApp);
         }
         if (!this.disableOPDS) {
             serverOPDS_browse_v1(this, this.expressApp);

@@ -18,7 +18,6 @@ export const _jsonPath = "jsonPath";
 export const _urlEncoded = "urlEncoded";
 
 export const _show = "show";
-export const _version = "version";
 
 export interface IRequestPayloadExtension extends express.Request {
     lcpPass64: string;

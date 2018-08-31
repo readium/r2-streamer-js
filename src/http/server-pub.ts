@@ -19,9 +19,11 @@ import { trailingSlashRedirect } from "./server-trailing-slash-redirect";
 
 const debug = debug_("r2:streamer#http/server-pub");
 
+// tslint:disable-next-line:variable-name
+export const serverPub_PATH = "/pub";
 export function serverPub(server: Server, topRouter: express.Application): express.Router {
 
-    const urlBook = "/pub/PATH_BASE64/manifest.json";
+    const urlBook = serverPub_PATH + "/PATH_BASE64/manifest.json";
     const urlBookShowAll = "./manifest.json/show/all";
 
     const urlReaderNYPL = "/readerNYPL/?url=PREFIX" + querystring.escape(urlBook);
@@ -132,7 +134,7 @@ export function serverPub(server: Server, topRouter: express.Application): expre
             + req.headers.host));
     });
 
-    topRouter.use("/pub", routerPathBase64);
+    topRouter.use(serverPub_PATH, routerPathBase64);
 
     return routerPathBase64;
 }

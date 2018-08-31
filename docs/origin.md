@@ -8,7 +8,7 @@ Furthermore, every publications' "webpub manifest" JSON (and their linked resour
 
 So, the full "origin" of *all* publications looks like (for example): `https://127.0.0.1:8080`, which can be decomposed to the URL format: `SCHEME://IP:PORT`. The URL syntax used to identify specific publications is: `SCHEME://IP:PORT/pub/ID`, and the syntax used to reference specific assets within a given publication is `SCHEME://IP:PORT/pub/ID/PATH/TO/RESOURCE`.
 
-(more information at https://github.com/readium/r2-streamer-js/blob/develop/docs/http.md )
+(more information at [http.md](http.md) )
 
 ## Problem description
 

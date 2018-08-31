@@ -20,12 +20,12 @@ import * as xmldom from "xmldom";
 import { IRequestPayloadExtension, _urlEncoded } from "./request-ext";
 import { Server } from "./server";
 import { trailingSlashRedirect } from "./server-trailing-slash-redirect";
-import { serverUrl_PATH } from "./server-url";
+import { serverRemotePub_PATH } from "./server-url";
 
 const debug = debug_("r2:streamer#http/server-opds-browse-v2");
 
 // tslint:disable-next-line:variable-name
-export const serverOPDS_browse_v2_PATH = "/opds-v2-browser";
+export const serverOPDS_browse_v2_PATH = "/opds-v2-browse";
 export function serverOPDS_browse_v2(_server: Server, topRouter: express.Application) {
 
     // tslint:disable-next-line:variable-name
@@ -230,7 +230,7 @@ export function serverOPDS_browse_v2(_server: Server, topRouter: express.Applica
                         const epub_ = ensureAbsolute(urlDecoded, epub);
                         const epubUrl = req.originalUrl.substr(0,
                             req.originalUrl.indexOf(serverOPDS_browse_v2_PATH + "/"))
-                            + serverUrl_PATH + "/" + encodeURIComponent_RFC3986(epub_);
+                            + serverRemotePub_PATH + "/" + encodeURIComponent_RFC3986(epub_);
 
                         html += "<strong><a href='" + epubUrl + "'>" + epub + "</a></strong>";
                     }

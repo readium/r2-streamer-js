@@ -2,9 +2,11 @@
 
 `readium2-streamer-js` implements a basic OPDS feed parser / navigator. Visit this link and enter a public OPDS feed's HTTP URL (see examples below):
 
-https://readium2.herokuapp.com/opds/
+https://readium2.herokuapp.com/opds-v1-browse/
 
-The EPUB files referenced from the OPDS feeds are remotely accessed using HTTP partial byte range requests in order to support loading large publications (e.g. audio / video EPUB3 files). More information here: https://github.com/readium/r2-streamer-js/blob/develop/docs/remote-epub.md
+https://readium2.now.sh/opds-v1-browse/
+
+The EPUB files referenced from the OPDS feeds are remotely accessed using HTTP partial byte range requests in order to support loading large publications (e.g. audio / video EPUB3 files). More information here: [remote-epub.md](remote-epub.md).
 
 ## A selection of public OPDS feeds:
 

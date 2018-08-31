@@ -6,7 +6,7 @@
 
 This route serves the list of available publications as an "OPDS 2" JSON file using the `application/opds+json` content type.
 
-More information about the OPDS format here: https://github.com/opds-community/opds-revision
+More information about the OPDS format here: https://github.com/opds-community/
 
 The `?canonical=true` URL query string parameter can be used to generate a sorted JSON with no pretty-printing (no indentation).
 
@@ -30,7 +30,7 @@ For testing purposes, the served HTML page contains a list of links to available
 
 This route serves the "webpub manifest" JSON file using the `application/webpub+json` content type.
 
-The `?canonical=true` URL query string parameter can be used to generate a sorted JSON with no pretty-printing (no indentation), and links removed.
+The `?canonical=true` URL query string parameter can be used to generate a sorted JSON with no pretty-printing (no indentation).
 
 ### GET /pub/{PUB_ID}/manifest.json/show
 
@@ -66,6 +66,14 @@ Warning: large SMIL files are likely to crush performance when pretty-printing t
 
 This conveninent micro-service automatically redirects to the base64 route described in the above section (`/pub/{PUB_ID}`). See [remote-epub.md](remote-epub.md).
 
-## GET /opds/ and /opds/{ENCODED_URL}
+## GET /opds-v1-browse/ and /opds-v1-browse/{ENCODED_URL}
 
-This micro-service provides a basic OPDS reader. See [opds.md](opds.md).
+This micro-service provides a basic OPDS1 (XML/Atom) browser. See [opds.md](opds.md).
+
+## GET /opds-v2-browse/ and /opds-v2-browse/{ENCODED_URL}
+
+Same as above, for OPDS2 (JSON)
+
+## GET /opds-v1-v2-convert/ and /opds-v1-v2-convert/{ENCODED_URL}
+
+This micro-service loads an OPDS1 feed (XML/Atom), converts it to OPDS2 (JSON), and displays both in a browsable "compare" view.
