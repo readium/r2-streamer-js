@@ -1,8 +1,24 @@
-# 1.0.0-alpha.1
+# 1.0.0-alpha.3
 
-Initial NPM publish
+Git revision info:
+https://unpkg.com/r2-streamer-js@1.0.0-alpha.3/dist/gitrev.json
+https://github.com/edrlab/r2-streamer-js-dist/blob/v1.0.0-alpha.3/dist/gitrev.json
+Git commit history:
+https://github.com/readium/r2-streamer-js/commits/v1.0.0-alpha.3
+Git diff:
+https://github.com/readium/r2-streamer-js/compare/v1.0.0-alpha.2...v1.0.0-alpha.3
+
+* `package-lock.json` had incorrect version
 
 # 1.0.0-alpha.2
+
+Git revision info:
+https://unpkg.com/r2-streamer-js@1.0.0-alpha.2/dist/gitrev.json
+https://github.com/edrlab/r2-streamer-js-dist/blob/v1.0.0-alpha.2/dist/gitrev.json
+Git commit history:
+https://github.com/readium/r2-streamer-js/commits/v1.0.0-alpha.2
+Git diff:
+https://github.com/readium/r2-streamer-js/compare/v1.0.0-alpha.1...v1.0.0-alpha.2
 
 NPM updates:
 
@@ -13,6 +29,12 @@ NPM updates:
 * `r2-opds-js`
 * `r2-lcp-js`
 
-# 1.0.0-alpha.3
+# 1.0.0-alpha.1
 
-* `package-lock.json` had incorrect version
+Git revision info:
+https://unpkg.com/r2-streamer-js@1.0.0-alpha.1/dist/gitrev.json
+https://github.com/edrlab/r2-streamer-js-dist/blob/v1.0.0-alpha.1/dist/gitrev.json
+Git commit history:
+https://github.com/readium/r2-streamer-js/commits/v1.0.0-alpha.1
+Git diff:
+(initial NPM publish)
