@@ -28,9 +28,9 @@ import { IRequestPayloadExtension, IRequestQueryParams, _jsonPath, _show, _versi
 import { serverAssets } from "./server-assets";
 import { serverManifestJson } from "./server-manifestjson";
 import { serverMediaOverlays } from "./server-mediaoverlays";
-import { serverOPDS } from "./server-opds";
-import { serverOPDS12 } from "./server-opds1-2";
-import { serverOPDS2 } from "./server-opds2";
+import { serverOPDS } from "./server-opds-browse-v1";
+import { serverOPDS12 } from "./server-opds-convert-v1-to-v2";
+import { serverOPDS2 } from "./server-opds-local-feed";
 import { serverPub } from "./server-pub";
 import { serverUrl } from "./server-url";
 
