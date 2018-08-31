@@ -33,7 +33,7 @@ import { serverOPDS_browse_v2, serverOPDS_browse_v2_PATH } from "./server-opds-b
 import { serverOPDS_convert_v1_to_v2, serverOPDS_convert_v1_to_v2_PATH } from "./server-opds-convert-v1-to-v2";
 import { serverOPDS_local_feed, serverOPDS_local_feed_PATH } from "./server-opds-local-feed";
 import { serverPub } from "./server-pub";
-import { serverUrl } from "./server-url";
+import { serverUrl, serverUrl_PATH } from "./server-url";
 
 const debug = debug_("r2:streamer#http/server");
 const debugHttps = debug_("r2:https");
@@ -265,7 +265,7 @@ export class Server {
                     "'>CLICK HERE</a></p>";
             }
             if (!this.disableRemotePubUrl) {
-                html += "<h1>Load HTTP publication URL</h1><p><a href='./url'>CLICK HERE</a></p>";
+                html += "<h1>Load HTTP publication URL</h1><p><a href='." + serverUrl_PATH + "'>CLICK HERE</a></p>";
             }
             if (!this.disableOPDS) {
                 html += "<h1>Browse HTTP OPDS1 feed</h1><p><a href='." + serverOPDS_browse_v1_PATH +

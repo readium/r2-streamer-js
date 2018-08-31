@@ -15,6 +15,8 @@ import { trailingSlashRedirect } from "./server-trailing-slash-redirect";
 
 const debug = debug_("r2:streamer#http/server-url");
 
+// tslint:disable-next-line:variable-name
+export const serverUrl_PATH = "/url";
 export function serverUrl(_server: Server, topRouter: express.Application) {
 
     const routerUrl = express.Router({ strict: false });
@@ -33,7 +35,7 @@ export function serverUrl(_server: Server, topRouter: express.Application) {
             `location.origin +` +
             // `location.protocol + '//' + location.hostname + ` +
             // `(location.port ? (':' + location.port) : '') + ` +
-            ` '/url/' +` +
+            ` '${serverUrl_PATH}/' +` +
             ` encodeURIComponent_RFC3986(document.getElementById("url").value);` +
             `location.href = url;}</script>`;
         html += "</head>";
@@ -69,7 +71,8 @@ export function serverUrl(_server: Server, topRouter: express.Application) {
         debug(urlDecoded);
 
         const urlDecodedBase64 = new Buffer(urlDecoded).toString("base64");
-        const redirect = req.originalUrl.substr(0, req.originalUrl.indexOf("/url/"))
+        const redirect = req.originalUrl.substr(0,
+            req.originalUrl.indexOf(serverUrl_PATH + "/"))
             + "/pub/" + urlDecodedBase64 + "/";
 
         // No need for CORS with this URL redirect (HTML page lists available services)
@@ -79,5 +82,5 @@ export function serverUrl(_server: Server, topRouter: express.Application) {
         res.redirect(301, redirect);
     });
 
-    topRouter.use("/url", routerUrl);
+    topRouter.use(serverUrl_PATH, routerUrl);
 }
