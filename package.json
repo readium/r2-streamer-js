@@ -51,7 +51,7 @@
     "debug": "^3.1.0",
     "express": "^4.16.3",
     "filehound": "^1.16.4",
-    "js-beautify": "^1.8.1",
+    "js-beautify": "^1.8.4",
     "json-markup": "^1.1.0",
     "mime-types": "^2.1.20",
     "moment": "^2.22.2",
