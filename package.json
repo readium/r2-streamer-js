@@ -48,7 +48,7 @@
   "dependencies": {
     "ajv": "^6.5.3",
     "css2json": "^0.0.4",
-    "debug": "^3.1.0",
+    "debug": "^4.0.1",
     "express": "^4.16.3",
     "filehound": "^1.16.4",
     "js-beautify": "^1.8.4",
