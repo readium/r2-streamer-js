@@ -1,6 +1,6 @@
 # NodeJS / TypeScript Readium-2 "streamer"
 
-NodeJS implementation (written in TypeScript) and HTTP micro-services (Express middleware) for https://github.com/readium/readium-2/tree/master/streamer
+NodeJS implementation (written in TypeScript) and HTTP micro-services (Express middleware) for https://github.com/readium/architecture/tree/master/streamer
 
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](/LICENSE)
 
@@ -103,7 +103,7 @@ https://unpkg.com/r2-streamer-js/dist/gitrev.json
 
 GitHub "dist" repository (latest pushed):
 
-https://rawgit.com/edrlab/r2-streamer-js-dist/master/dist/gitrev.json
+https://rawgit.com/edrlab/r2-streamer-js-dist/develop/dist/gitrev.json
 
 Heroku app (latest deployed):
 
