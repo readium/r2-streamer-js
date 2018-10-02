@@ -151,6 +151,11 @@ export function serverOPDS_convert_v1_to_v2(_server: Server, topRouter: express.
             const responseStr = responseData.toString("utf8");
             const responseXml = new xmldom.DOMParser().parseFromString(responseStr);
             // debug(responseXml);
+            if (!responseXml || !responseXml.documentElement) {
+                res.status(500).send("<html><body><p>Internal Server Error</p><p>"
+                    + "XML parse fail" + "</p></body></html>");
+                return;
+            }
             const isEntry = responseXml.documentElement.localName === "entry";
             let opds1: OPDS | undefined;
             // let opdsEntry: Entry | undefined;

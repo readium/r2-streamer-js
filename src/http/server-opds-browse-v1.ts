@@ -109,6 +109,11 @@ export function serverOPDS_browse_v1(_server: Server, topRouter: express.Applica
             const responseStr = responseData.toString("utf8");
             const responseXml = new xmldom.DOMParser().parseFromString(responseStr);
             // debug(responseXml);
+            if (!responseXml || !responseXml.documentElement) {
+                res.status(500).send("<html><body><p>Internal Server Error</p><p>"
+                    + "XML parse fail" + "</p></body></html>");
+                return;
+            }
             const isEntry = responseXml.documentElement.localName === "entry";
             let opds: OPDS | undefined;
             let opdsEntry: Entry | undefined;
