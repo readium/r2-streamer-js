@@ -94,7 +94,7 @@
     "sorcery": "^0.10.0",
     "tslint": "^5.11.0",
     "tslint-language-service": "^0.9.9",
-    "typescript": "^3.0.3",
+    "typescript": "^3.1.1",
     "uglify-es": "^3.3.10"
   },
   "main": "dist/es6-es2015/src/index.js",
