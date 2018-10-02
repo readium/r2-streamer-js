@@ -17,7 +17,7 @@ import { PublicationParsePromise } from "@parser/publication-parser";
 import { encodeURIComponent_RFC3986, isHTTP } from "@utils/http/UrlUtils";
 import * as debug_ from "debug";
 import * as moment from "moment";
-import { JSON as TAJSON } from "ta-json";
+import { JSON as TAJSON } from "ta-json-x";
 
 const debug = debug_("r2:streamer#http/opds2-create-cli");
 

@@ -21,7 +21,7 @@ import * as jsonMarkup from "json-markup";
 import * as morgan from "morgan";
 import * as request from "request";
 import * as requestPromise from "request-promise-native";
-import { JSON as TAJSON } from "ta-json";
+import { JSON as TAJSON } from "ta-json-x";
 import * as xmldom from "xmldom";
 
 import { jsonSchemaValidate } from "../utils/json-schema-validate";

@@ -16,7 +16,7 @@ import { OPDSFeed } from "@opds/opds2/opds2";
 import { PublicationParsePromise } from "@parser/publication-parser";
 import * as debug_ from "debug";
 import * as express from "express";
-import { JSON as TAJSON } from "ta-json";
+import { JSON as TAJSON } from "ta-json-x";
 import { tmpNameSync } from "tmp";
 
 import { CertificateData, generateSelfSignedData } from "../utils/self-signed";
