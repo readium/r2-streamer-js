@@ -9,6 +9,7 @@ Changes:
 * Dependency "ta-json" GitHub semver dependency becomes "ta-json-x" NPM package (fixes https://github.com/readium/r2-testapp-js/issues/10 )
 * Removed TypeScript linter warning message (checks for no unused variables)
 * NPM updates related to the Node TypeScript typings
+* Fixed TypeScript regression bug (3.0.3 -> 3.1.1) related to XML / HTML DOM typings
 
 Git revision info:
 * https://unpkg.com/r2-streamer-js@1.0.0-alpha.5/dist/gitrev.json
