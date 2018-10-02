@@ -8,7 +8,7 @@
         "alwaysShowRuleFailuresAsWarnings": false,
         "ignoreDefinitionFiles": true,
         "configFile": "./tslint.json",
-        "disableNoUnusedVariableRule": true
+        "disableNoUnusedVariableRule": false
       }
     ],
     "rootDir": "../",

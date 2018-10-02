@@ -1,6 +1,6 @@
 {
   "name": "r2-streamer-js",
-  "version": "1.0.0-alpha.4",
+  "version": "1.0.0-alpha.5",
   "description": "Readium 2 'streamer' for NodeJS (TypeScript)",
   "keywords": [
     "readium",
@@ -63,7 +63,7 @@
     "request": "^2.88.0",
     "request-promise-native": "^1.0.5",
     "selfsigned": "^1.10.3",
-    "ta-json": "github:danielweck/ta-json#dist",
+    "ta-json-x": "^2.5.0",
     "tmp": "^0.0.33",
     "tslib": "^1.9.3",
     "uuid": "^3.3.2",
@@ -75,7 +75,7 @@
     "@types/js-beautify": "^1.8.0",
     "@types/mime-types": "^2.1.0",
     "@types/morgan": "^1.7.35",
-    "@types/node": "8.*.*",
+    "@types/node": "^8.10.32",
     "@types/request": "^2.47.1",
     "@types/request-promise-native": "^1.0.15",
     "@types/tmp": "^0.0.33",
