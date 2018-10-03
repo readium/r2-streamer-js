@@ -68,7 +68,7 @@ define("LocalStorageStore", ["require", "exports", "MemoryStore"], function (req
         function LocalStorageStore(config) {
             this.prefix = config.prefix;
             try {
-                // In some browsers (eg iOS Safari in private mode), 
+                // In some browsers (eg iOS Safari in private mode),
                 // localStorage exists but throws an exception when
                 // you try to write to it.
                 var testKey = config.prefix + "-" + String(Math.random());
@@ -152,7 +152,7 @@ define("Manifest", ["require", "exports"], function (require, exports) {
         function Manifest(manifestJSON, manifestUrl) {
             this.metadata = manifestJSON.metadata || {};
             this.links = manifestJSON.links || [];
-            this.spine = manifestJSON.spine || [];
+            this.spine = (manifestJSON.readingOrder || manifestJSON.spine) || [];
             this.resources = manifestJSON.resources || [];
             this.toc = manifestJSON.toc || [];
             this.manifestUrl = manifestUrl;
@@ -289,14 +289,14 @@ define("ApplicationCacheCacher", ["require", "exports", "Cacher"], function (req
     "use strict";
     /** Class that caches files using the (deprecated) application cache API.
         This is necessary until Service Worker support improves.
-        
+
         This class expects the application to have a cache manifest file
         containing the application files (currently index.html, sw.js, fetch.js,
         and webpub-viewer.js), and all the book content. There must _also_ be an
         html file that includes the manifest. That second html file can be empty
         except for the html tag linking to the manifest, and its location should
         be used as the ApplicationCacheCacher's bookCacheUrl.
-    
+
         The ApplicationCacheCacher will create an iframe with the bookCacheUrl to start
         the download of book content. Since the book's html files are in the manifest,
         once the cache is ready any of those files will be loaded from the cache.
@@ -378,14 +378,14 @@ define("ApplicationCacheCacher", ["require", "exports", "Cacher"], function (req
     Object.defineProperty(exports, "__esModule", { value: true });
     /** Class that caches files using the (deprecated) application cache API.
         This is necessary until Service Worker support improves.
-        
+
         This class expects the application to have a cache manifest file
         containing the application files (currently index.html, sw.js, fetch.js,
         and webpub-viewer.js), and all the book content. There must _also_ be an
         html file that includes the manifest. That second html file can be empty
         except for the html tag linking to the manifest, and its location should
         be used as the ApplicationCacheCacher's bookCacheUrl.
-    
+
         The ApplicationCacheCacher will create an iframe with the bookCacheUrl to start
         the download of book content. Since the book's html files are in the manifest,
         once the cache is ready any of those files will be loaded from the cache.
@@ -531,7 +531,8 @@ define("ServiceWorkerCacher", ["require", "exports", "Cacher", "Manifest", "Appl
                     switch (_b.label) {
                         case 0:
                             urls = [];
-                            for (_i = 0, _a = manifest.spine; _i < _a.length; _i++) {
+                            var spn = manifest.readingOrder || manifest.spine;
+                            for (_i = 0, _a = spn; _i < _a.length; _i++) {
                                 resource = _a[_i];
                                 if (resource.href) {
                                     urls.push(resource.href);
@@ -1038,7 +1039,7 @@ define("EventHandler", ["require", "exports", "BrowserUtilities"], function (req
                     _this.pendingTouchEventStart = null;
                     return;
                 }
-                // This is a swipe. 
+                // This is a swipe.
                 var slope = (startTouch.clientY - endTouch.clientY) / (startTouch.clientX - endTouch.clientX);
                 if (Math.abs(slope) > 0.5) {
                     // This is a mostly vertical swipe. Ignore.
@@ -1949,7 +1950,7 @@ define("IFrameNavigator", ["require", "exports", "Cacher", "Manifest", "EventHan
                 var newResource = readingPosition.resource.slice(0, readingPosition.resource.indexOf("#"));
                 if (newResource === this.iframe.src) {
                     // The resource isn't changing, but handle it like a new
-                    // iframe load to hide the menus and popups and go to the 
+                    // iframe load to hide the menus and popups and go to the
                     // new element.
                     this.handleIFrameLoad();
                 }
@@ -2161,7 +2162,7 @@ define("ColumnsPaginatedBookView", ["require", "exports", "HTMLUtilities", "Brow
             var width = this.getColumnWidth();
             var rightWidth = scrollWidth + this.sideMargin - width;
             if (this.hasFixedScrollWidth) {
-                // In some browsers (IE and Firefox with certain books), 
+                // In some browsers (IE and Firefox with certain books),
                 // scrollWidth doesn't change when some columns
                 // are off to the left, so we need to subtract them.
                 var leftWidth = this.getLeftColumnsWidth();
