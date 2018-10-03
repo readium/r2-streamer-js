@@ -1,5 +1,8 @@
 # Next
 
+Changes:
+* NYPL and Hadrien demo readers updated for spine+readingOrder support
+
 Git diff:
 * https://github.com/readium/r2-streamer-js/compare/v1.0.0-alpha.5...develop
 
