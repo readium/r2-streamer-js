@@ -5,11 +5,11 @@
 // that can be found in the LICENSE file exposed on Github (readium) in the project repository.
 // ==LICENSE-END==
 
-import * as path from "path";
-
-import { convertOpds1ToOpds2 } from "@opds/converter";
+import { convertOpds1ToOpds2, convertOpds1ToOpds2_EntryToPublication } from "@opds/converter";
 import { OPDS } from "@opds/opds1/opds";
+import { Entry } from "@opds/opds1/opds-entry";
 import { OPDSFeed } from "@opds/opds2/opds2";
+import { OPDSPublication } from "@opds/opds2/opds2-publication";
 import { encodeURIComponent_RFC3986, ensureAbsolute, isHTTP } from "@utils/http/UrlUtils";
 import { traverseJsonObjects } from "@utils/JsonUtils";
 import { streamToBufferPromise } from "@utils/stream/BufferUtils";
@@ -19,11 +19,11 @@ import * as debug_ from "debug";
 import * as express from "express";
 import * as jsonMarkup from "json-markup";
 import * as morgan from "morgan";
+import * as path from "path";
 import * as request from "request";
 import * as requestPromise from "request-promise-native";
 import { JSON as TAJSON } from "ta-json-x";
 import * as xmldom from "xmldom";
-
 import { jsonSchemaValidate } from "../utils/json-schema-validate";
 import { IRequestPayloadExtension, _urlEncoded } from "./request-ext";
 import { Server } from "./server";
@@ -157,27 +157,37 @@ export function serverOPDS_convert_v1_to_v2(_server: Server, topRouter: express.
                 return;
             }
             const isEntry = responseXml.documentElement.localName === "entry";
-            let opds1: OPDS | undefined;
-            // let opdsEntry: Entry | undefined;
-            let opds2: OPDSFeed | undefined;
+            let opds1Feed: OPDS | undefined;
+            let opds1Entry: Entry | undefined;
+            let opds2Feed: OPDSFeed | undefined;
+            let opds2Publication: OPDSPublication | undefined;
             if (isEntry) {
-                // opdsEntry = XML.deserialize<Entry>(responseXml, Entry);
-
-                const err = "OPDS Entry as top-level feed, not supported.";
-                debug(err);
-
-                res.status(500).send("<html><body><p>Internal Server Error</p><p>"
-                    + err + "</p></body></html>");
-                return;
-            } else {
-                opds1 = XML.deserialize<OPDS>(responseXml, OPDS);
+                opds1Entry = XML.deserialize<Entry>(responseXml, Entry);
 
                 try {
-                    opds2 = convertOpds1ToOpds2(opds1);
-                    // debug(opds2);
+                    opds2Publication = convertOpds1ToOpds2_EntryToPublication(opds1Entry);
+                    // debug(opds2Publication);
 
                     // // breakLength: 100  maxArrayLength: undefined
-                    // console.log(util.inspect(opds2,
+                    // console.log(util.inspect(opds2Publication,
+                    //     { showHidden: false, depth: 1000, colors: true, customInspect: true }));
+                } catch (err) {
+                    debug("OPDS 1 -> 2 conversion FAILED (Entry)");
+                    debug(err);
+
+                    res.status(500).send("<html><body><p>Internal Server Error</p><p>"
+                        + err + "</p></body></html>");
+                    return;
+                }
+            } else {
+                opds1Feed = XML.deserialize<OPDS>(responseXml, OPDS);
+
+                try {
+                    opds2Feed = convertOpds1ToOpds2(opds1Feed);
+                    // debug(opds2Feed);
+
+                    // // breakLength: 100  maxArrayLength: undefined
+                    // console.log(util.inspect(opds2Feed,
                     //     { showHidden: false, depth: 1000, colors: true, customInspect: true }));
                 } catch (err) {
                     debug("OPDS 1 -> 2 conversion FAILED");
@@ -211,10 +221,10 @@ export function serverOPDS_convert_v1_to_v2(_server: Server, topRouter: express.
                 }
             };
 
-            const jsonObjOPDS1 = TAJSON.serialize(opds1);
+            const jsonObjOPDS1 = TAJSON.serialize(opds1Entry ? opds1Entry : opds1Feed);
             traverseJsonObjects(jsonObjOPDS1, funk);
 
-            const jsonObjOPDS2 = TAJSON.serialize(opds2);
+            const jsonObjOPDS2 = TAJSON.serialize(opds2Publication ? opds2Publication : opds2Feed);
 
             let validationStr: string | undefined;
             const doValidate = !reqparams.jsonPath || reqparams.jsonPath === "all";
@@ -230,7 +240,6 @@ export function serverOPDS_convert_v1_to_v2(_server: Server, topRouter: express.
 
                 const jsonSchemasRootpath = path.join(process.cwd(), "misc/json-schema/opds");
                 const jsonSchemasNames = [
-                    "feed", // must be first!
                     "acquisition-object",
                     "feed-metadata",
                     "link",
@@ -242,6 +251,14 @@ export function serverOPDS_convert_v1_to_v2(_server: Server, topRouter: express.
                     "../webpub-manifest/contributor",
                     "../webpub-manifest/contributor-object",
                 ];
+                if (opds2Publication) {
+                    jsonSchemasNames.unshift("feed");
+                } else {
+                    jsonSchemasNames.splice(jsonSchemasNames.indexOf("publication"), 1);
+                    jsonSchemasNames.unshift("feed");
+                    jsonSchemasNames.unshift("publication");
+                }
+                debug(jsonSchemasNames);
 
                 validationStr = jsonSchemaValidate(jsonSchemasRootpath, "opds", jsonSchemasNames, jsonObjOPDS2);
             }
@@ -253,7 +270,9 @@ export function serverOPDS_convert_v1_to_v2(_server: Server, topRouter: express.
             const jsonPrettyOPDS2 = jsonMarkup(jsonObjOPDS2, css);
 
             res.status(200).send("<html><body>" +
-                "<h1>OPDS2 JSON feed (converted from OPDS1 XML/ATOM)</h1>" +
+                "<h1>OPDS2 JSON " +
+                (opds2Publication ? "entry" : "feed") +
+                " (converted from OPDS1 XML/ATOM)</h1>" +
                 "<h2><a href=\"" + urlDecoded + "\">" + urlDecoded + "</a></h2>" +
                 "<hr>" +
                 "<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"90%\" " +
