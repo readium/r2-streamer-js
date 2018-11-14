@@ -57,7 +57,7 @@
     "moment": "^2.22.2",
     "morgan": "^1.9.1",
     "r2-lcp-js": "^1.0.0-alpha.4",
-    "r2-opds-js": "^1.0.0-alpha.4",
+    "r2-opds-js": "^1.0.0-alpha.6",
     "r2-shared-js": "^1.0.0-alpha.4",
     "r2-utils-js": "^1.0.0-alpha.4",
     "request": "^2.88.0",
