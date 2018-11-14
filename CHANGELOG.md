@@ -1,8 +1,5 @@
 # Next
 
-Changes:
-* NYPL and Hadrien demo readers updated for spine+readingOrder support
-
 Git diff:
 * https://github.com/readium/r2-streamer-js/compare/v1.0.0-alpha.6...develop
 
@@ -14,6 +11,7 @@ Changes:
 * NPM updates (minor)
 * Git revision JSON info now includes NodeJS and NPM version (build environment)
 * OPDS v1 to v2 converter micros-service now supports publication/entry display (+JSON validation)
+* NYPL and Hadrien demo readers updated for spine+readingOrder support
 
 Git revision info:
 * https://unpkg.com/r2-streamer-js@1.0.0-alpha.6/dist/gitrev.json
