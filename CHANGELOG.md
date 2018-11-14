@@ -3,6 +3,9 @@
 Git diff:
 * https://github.com/readium/r2-streamer-js/compare/v1.0.0-alpha.6...develop
 
+Changes:
+* TODO
+
 # 1.0.0-alpha.6
 
 > Build environment: NodeJS `8.12.0`, NPM `6.4.1`
