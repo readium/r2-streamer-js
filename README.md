@@ -61,14 +61,14 @@ Note that web-browser Javascript is currently not supported (only NodeJS runtime
  Example usage:
 
 ```javascript
-// currently no index file
-// import { * } from "r2-streamer-js";
+// from the index file
+import { Server } from "r2-streamer-js";
 
 // ES5 import (assuming node_modules/r2-streamer-js/):
-import { sortObject } from "r2-streamer-js/dist/es5/src/_utils/JsonUtils";
+import { Server } from "r2-streamer-js/dist/es5/src/http/server";
 
 // ... or alternatively using a convenient path alias in the TypeScript config (+ WebPack etc.):
-import { sortObject } from "@r2-streamer-js/JsonUtils";
+import { Server } from "@r2-streamer-js/http/server";
 ```
 
 ## Dependencies
