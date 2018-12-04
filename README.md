@@ -56,9 +56,9 @@ http://node.green
 
 Note that web-browser Javascript is currently not supported (only NodeJS runtimes).
 
- The type definitions (aka "typings") are included as `*.d.ts` files in `./node_modules/r2-streamer-js/dist/**`, so this package can be used directly in a TypeScript project.
- 
- Example usage:
+The type definitions (aka "typings") are included as `*.d.ts` files in `./node_modules/r2-streamer-js/dist/**`, so this package can be used directly in a TypeScript project.
+
+Example usage:
 
 ```javascript
 // from the index file
