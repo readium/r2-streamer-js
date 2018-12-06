@@ -30,6 +30,24 @@
       }
     },
     {
+      "label": "quickdist",
+      "group": "build",
+      "type": "shell",
+      "command": "npm",
+      "args": [
+        "run",
+        "copydist"
+      ],
+      "problemMatcher": [
+        "$tsc",
+        "$eslint-stylish"
+      ],
+      "presentation": {
+          "reveal": "always",
+          "panel": "shared"
+      }
+    },
+    {
       "label": "lintbuild",
       "group": "build",
       "type": "shell",
