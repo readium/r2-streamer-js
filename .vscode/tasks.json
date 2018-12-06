@@ -1,12 +1,10 @@
 {
-  "version": "0.1.0",
-  "command": "npm",
-  "args": [],
-  "isShellCommand": true,
-  "showOutput": "always",
-  "suppressTaskName": true,
-  "echoCommand": true,
+  "version": "2.0.0",
   "isBackground": false,
+  "presentation": {
+      "reveal": "always",
+      "panel": "new"
+  },
   "env": {
     "DEBUG": "*",
     "NODE_DEBUG": "1",
@@ -14,32 +12,60 @@
   },
   "tasks": [
     {
-      "taskName": "build",
+      "label": "build",
+      "group": "build",
+      "type": "shell",
+      "command": "npm",
       "args": [
         "run",
         "transpile:typescript:es8-es2017+afterdist"
       ],
-      "isBuildCommand": true,
       "problemMatcher": [
         "$tsc",
-        "$jshint"
-      ]
+        "$eslint-stylish"
+      ],
+      "presentation": {
+          "reveal": "always",
+          "panel": "shared"
+      }
     },
     {
-      "taskName": "lintbuild",
+      "label": "lintbuild",
+      "group": "build",
+      "type": "shell",
+      "command": "npm",
       "args": [
         "run",
         "build:es8-es2017"
-      ]
+      ],
+      "problemMatcher": [
+        "$tsc",
+        "$eslint-stylish"
+      ],
+      "presentation": {
+          "reveal": "always",
+          "panel": "shared"
+      }
     },
     {
-      "taskName": "typescript",
+      "label": "typescript",
+      "group": "build",
+      "type": "shell",
+      "command": "npm",
       "args": [
         "run",
         "transpile:typescript:single",
         "es8-es2017",
         "${file}"
-      ]
+      ],
+      "problemMatcher": [
+        "$tsc",
+        "$eslint-stylish"
+      ],
+      "presentation": {
+          "reveal": "always",
+          "panel": "shared"
+      }
     }
   ]
 }
