@@ -137,7 +137,7 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                 mediaType = link.TypeLink;
             }
 
-            const isText = mediaType && (
+            const isText = (typeof mediaType === "string") && (
                 mediaType.indexOf("text/") === 0 ||
                 mediaType.indexOf("application/xhtml") === 0 ||
                 mediaType.indexOf("application/xml") === 0 ||
@@ -210,11 +210,11 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                 return;
             }
 
-            // TODO: isHead for encrypted Content-Length
-            if ((isEncrypted && (isObfuscatedFont || !server.disableDecryption)) &&
-                link) {
+            const doTransform = !isEncrypted || (isObfuscatedFont || !server.disableDecryption);
 
-                let decryptFail = false;
+            if (doTransform && link) {
+
+                let transformFail = false;
                 let transformedStream: IStreamAndLength;
                 try {
                     transformedStream = await Transformers.tryStream(
@@ -228,13 +228,16 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                     return;
                 }
                 if (transformedStream) {
-                    zipStream_ = transformedStream;
+                    if (transformedStream !== zipStream_) {
+                        debug("Asset transformed ok: " + link.Href);
+                    }
+                    zipStream_ = transformedStream; // can be unchanged
                 } else {
-                    decryptFail = true;
+                    transformFail = true;
                 }
 
-                if (decryptFail) {
-                    const err = "Encryption scheme not supported.";
+                if (transformFail) {
+                    const err = "Transform fail (encryption scheme not supported?)";
                     debug(err);
                     res.status(500).send("<html><body><p>Internal Server Error</p><p>"
                         + err + "</p></body></html>");
