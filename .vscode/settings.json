@@ -1,12 +1,6 @@
 {
   "typescript.tsdk": "./node_modules/typescript/lib",
   "typescript.tsserver.trace": "off",
-  "macros": {
-    "sortImports": [
-      "editor.action.selectAll",
-      "sortImports.sort"
-    ]
-  },
   "files.exclude": {
     "**/.git": true,
     "**/.DS_Store": true,
@@ -21,25 +15,21 @@
   },
   "search.exclude": {},
   "git.enabled": false,
-  "tslint.enable": true,
-  "tslint.jsEnable": false,
-  "tslint.autoFixOnSave": false,
-  "tslint.run": "onSave",
   "telemetry.enableCrashReporter": false,
   "telemetry.enableTelemetry": false,
+  "typescript.surveys.enabled": false,
   "editor.roundedSelection": false,
   "editor.wordWrap": "off",
   "editor.quickSuggestions": false,
-  "editor.autoClosingBrackets": false,
+  "editor.autoClosingBrackets": "never",
   "editor.scrollBeyondLastLine": false,
   "editor.formatOnType": false,
   "editor.suggestOnTriggerCharacters": false,
-  "window.reopenFolders": "none",
   "editor.folding": false,
   "editor.renderWhitespace": "all",
   "editor.tabSize": 4,
   "editor.insertSpaces": true,
   "editor.minimap.enabled": false,
-  "sortImports.onSave": false,
-  "sort-imports.on-save": false
+  "sort-imports.on-save": false,
+  "tslint.jsEnable": false
 }
