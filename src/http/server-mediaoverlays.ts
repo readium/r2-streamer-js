@@ -8,15 +8,15 @@
 import * as crypto from "crypto";
 import * as path from "path";
 
-import { Publication } from "@models/publication";
+import { Publication } from "@r2-shared-js/models/publication";
 import {
     getAllMediaOverlays,
     getMediaOverlay,
     mediaOverlayURLParam,
     mediaOverlayURLPath,
-} from "@parser/epub";
-import { encodeURIComponent_RFC3986, isHTTP } from "@utils/http/UrlUtils";
-import { sortObject, traverseJsonObjects } from "@utils/JsonUtils";
+} from "@r2-shared-js/parser/epub";
+import { encodeURIComponent_RFC3986, isHTTP } from "@r2-utils-js/_utils/http/UrlUtils";
+import { sortObject, traverseJsonObjects } from "@r2-utils-js/_utils/JsonUtils";
 import * as css2json from "css2json";
 import * as debug_ from "debug";
 import * as express from "express";

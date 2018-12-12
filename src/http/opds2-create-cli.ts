@@ -7,14 +7,14 @@
 
 import * as fs from "fs";
 
-import { Publication } from "@models/publication";
-import { OPDSFeed } from "@opds/opds2/opds2";
-import { OPDSLink } from "@opds/opds2/opds2-link";
-import { OPDSMetadata } from "@opds/opds2/opds2-metadata";
-import { OPDSPublication } from "@opds/opds2/opds2-publication";
-import { OPDSPublicationMetadata } from "@opds/opds2/opds2-publicationMetadata";
-import { PublicationParsePromise } from "@parser/publication-parser";
-import { encodeURIComponent_RFC3986, isHTTP } from "@utils/http/UrlUtils";
+import { OPDSFeed } from "@r2-opds-js/opds/opds2/opds2";
+import { OPDSLink } from "@r2-opds-js/opds/opds2/opds2-link";
+import { OPDSMetadata } from "@r2-opds-js/opds/opds2/opds2-metadata";
+import { OPDSPublication } from "@r2-opds-js/opds/opds2/opds2-publication";
+import { OPDSPublicationMetadata } from "@r2-opds-js/opds/opds2/opds2-publicationMetadata";
+import { Publication } from "@r2-shared-js/models/publication";
+import { PublicationParsePromise } from "@r2-shared-js/parser/publication-parser";
+import { encodeURIComponent_RFC3986, isHTTP } from "@r2-utils-js/_utils/http/UrlUtils";
 import * as debug_ from "debug";
 import * as moment from "moment";
 import { JSON as TAJSON } from "ta-json-x";

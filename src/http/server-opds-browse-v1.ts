@@ -5,11 +5,11 @@
 // that can be found in the LICENSE file exposed on Github (readium) in the project repository.
 // ==LICENSE-END==
 
-import { OPDS } from "@opds/opds1/opds";
-import { Entry } from "@opds/opds1/opds-entry";
-import { encodeURIComponent_RFC3986, ensureAbsolute } from "@utils/http/UrlUtils";
-import { streamToBufferPromise } from "@utils/stream/BufferUtils";
-import { XML } from "@utils/xml-js-mapper";
+import { OPDS } from "@r2-opds-js/opds/opds1/opds";
+import { Entry } from "@r2-opds-js/opds/opds1/opds-entry";
+import { encodeURIComponent_RFC3986, ensureAbsolute } from "@r2-utils-js/_utils/http/UrlUtils";
+import { streamToBufferPromise } from "@r2-utils-js/_utils/stream/BufferUtils";
+import { XML } from "@r2-utils-js/_utils/xml-js-mapper";
 import * as debug_ from "debug";
 import * as express from "express";
 import * as morgan from "morgan";

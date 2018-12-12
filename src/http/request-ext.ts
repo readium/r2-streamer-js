@@ -9,7 +9,7 @@ import * as express from "express";
 
 import {
     mediaOverlayURLParam,
-} from "@parser/epub";
+} from "@r2-shared-js/parser/epub";
 
 // export const _lcpPass64 = "lcpPass64";
 export const _pathBase64 = "pathBase64";

@@ -5,15 +5,15 @@
 // that can be found in the LICENSE file exposed on Github (readium) in the project repository.
 // ==LICENSE-END==
 
-import { convertOpds1ToOpds2, convertOpds1ToOpds2_EntryToPublication } from "@opds/converter";
-import { OPDS } from "@opds/opds1/opds";
-import { Entry } from "@opds/opds1/opds-entry";
-import { OPDSFeed } from "@opds/opds2/opds2";
-import { OPDSPublication } from "@opds/opds2/opds2-publication";
-import { encodeURIComponent_RFC3986, ensureAbsolute, isHTTP } from "@utils/http/UrlUtils";
-import { traverseJsonObjects } from "@utils/JsonUtils";
-import { streamToBufferPromise } from "@utils/stream/BufferUtils";
-import { XML } from "@utils/xml-js-mapper";
+import { convertOpds1ToOpds2, convertOpds1ToOpds2_EntryToPublication } from "@r2-opds-js/opds/converter";
+import { OPDS } from "@r2-opds-js/opds/opds1/opds";
+import { Entry } from "@r2-opds-js/opds/opds1/opds-entry";
+import { OPDSFeed } from "@r2-opds-js/opds/opds2/opds2";
+import { OPDSPublication } from "@r2-opds-js/opds/opds2/opds2-publication";
+import { encodeURIComponent_RFC3986, ensureAbsolute, isHTTP } from "@r2-utils-js/_utils/http/UrlUtils";
+import { traverseJsonObjects } from "@r2-utils-js/_utils/JsonUtils";
+import { streamToBufferPromise } from "@r2-utils-js/_utils/stream/BufferUtils";
+import { XML } from "@r2-utils-js/_utils/xml-js-mapper";
 import * as css2json from "css2json";
 import * as debug_ from "debug";
 import * as express from "express";

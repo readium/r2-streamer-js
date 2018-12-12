@@ -11,9 +11,9 @@ import * as http from "http";
 import * as https from "https";
 import * as path from "path";
 
-import { Publication } from "@models/publication";
-import { OPDSFeed } from "@opds/opds2/opds2";
-import { PublicationParsePromise } from "@parser/publication-parser";
+import { OPDSFeed } from "@r2-opds-js/opds/opds2/opds2";
+import { Publication } from "@r2-shared-js/models/publication";
+import { PublicationParsePromise } from "@r2-shared-js/parser/publication-parser";
 import * as debug_ from "debug";
 import * as express from "express";
 import { JSON as TAJSON } from "ta-json-x";

@@ -7,19 +7,20 @@
 
 import * as path from "path";
 
-import { Publication } from "@models/publication";
-import { Link } from "@models/publication-link";
-import { Transformers } from "@transform/transformer";
-import { parseRangeHeader } from "@utils/http/RangeUtils";
-import { streamToBufferPromise } from "@utils/stream/BufferUtils";
-// import { CounterPassThroughStream } from "@utils/stream/CounterPassThroughStream";
-import { IStreamAndLength, IZip } from "@utils/zip/zip";
+import { Publication } from "@r2-shared-js/models/publication";
+import { Link } from "@r2-shared-js/models/publication-link";
+import { Transformers } from "@r2-shared-js/transform/transformer";
+import { parseRangeHeader } from "@r2-utils-js/_utils/http/RangeUtils";
+import { streamToBufferPromise } from "@r2-utils-js/_utils/stream/BufferUtils";
+import { IStreamAndLength, IZip } from "@r2-utils-js/_utils/zip/zip";
 import * as debug_ from "debug";
 import * as express from "express";
 import * as mime from "mime-types";
 
 import { IRequestPayloadExtension, IRequestQueryParams, _asset, _pathBase64 } from "./request-ext";
 import { Server } from "./server";
+
+// import { CounterPassThroughStream } from "@r2-utils-js/_utils/stream/CounterPassThroughStream";
 
 const debug = debug_("r2:streamer#http/server-assets");
 

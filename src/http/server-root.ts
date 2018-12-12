@@ -7,7 +7,7 @@
 
 import * as path from "path";
 
-import { encodeURIComponent_RFC3986, isHTTP } from "@utils/http/UrlUtils";
+import { encodeURIComponent_RFC3986, isHTTP } from "@r2-utils-js/_utils/http/UrlUtils";
 import * as express from "express";
 import { html as beautifyHtml } from "js-beautify";
 
