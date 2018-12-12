@@ -162,9 +162,7 @@ export function serverOPDS_convert_v1_to_v2(_server: Server, topRouter: express.
             let opds2Feed: OPDSFeed | undefined;
             let opds2Publication: OPDSPublication | undefined;
             if (isEntry) {
-                debug("opds1Entry");
                 opds1Entry = XML.deserialize<Entry>(responseXml, Entry);
-                debug(opds1Entry);
 
                 try {
                     opds2Publication = convertOpds1ToOpds2_EntryToPublication(opds1Entry);
