@@ -206,3 +206,9 @@ BNF.FR (GALLICA):
 http://gallica.bnf.fr/opds
 =>
 https://readium2.herokuapp.com/opds/http%3A%2F%2Fgallica.bnf.fr%2Fopds
+
+## OPDS 2.0
+
+Specification: https://drafts.opds.io/opds-2.0
+
+Sample feed: https://test.opds.io/2.0/home.json
