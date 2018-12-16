@@ -21,7 +21,7 @@ https://github.com/readium/r2-streamer-js
 
 There is no [github.io](https://readium.github.io/r2-streamer-js) site for this project (no [gh-pages](https://github.com/readium/r2-streamer-js/tree/gh-pages) branch).
 
-Wiki documentation is not used, instead there are Markdown files inside the repository ([docs](https://github.com/readium/r2-streamer-js/tree/develop/docs) folder).
+Wiki documentation is not used, instead there are Markdown files inside the repository ([docs folder](/docs)).
 
 ## NPM package
 
@@ -131,18 +131,149 @@ Command line steps (NPM, but similar with YARN):
 
 ## Documentation
 
+### Basic usage
+
+```javascript
+// ES5 import (assuming node_modules/r2-streamer-js/):
+import { Server } from "r2-streamer-js/dist/es5/src/http/server";
+
+// ... or alternatively using a convenient path alias in the TypeScript config (+ WebPack etc.):
+import { Server } from "@r2-streamer-js/http/server";
+
+// Constructor parameter is optional:
+// disableDecryption: true 
+// disableOPDS
+// disableReaders: true 
+// disableRemotePubUrl: true to deactivate
+const server = new Server({
+  disableDecryption: false, // deactivates the decryption of encrypted resources (Readium LCP).
+  disableOPDS: true, // deactivates the HTTP routes for the OPDS "micro services" (browser, converter)
+  disableReaders: true, // deactivates the built-in "readers" for ReadiumWebPubManifest (HTTP static host / route).
+  disableRemotePubUrl: true, // deactivates the HTTP route for loading a remote publication.
+});
+
+// First parameter: port number, zero means default (3000),
+// unless specified via the environment variable `PORT` (process.env.PORT).
+// Tip: the NPM package `portfinder` can be used to automatically find an available port number.
+// Second parameter: if true, HTTPS instead of HTTP, using a randomly-generated self-signed certificate.
+const url = await server.start(3000, false);
+
+console.log(server.isSecured()); // false
+
+// http://127.0.0.1:3000
+// Note that ports 80 and 443 (HTTPS) are always implicit (ommitted).
+console.log(url);
+
+// `serverInfo.urlScheme` ("http")
+// `serverInfo.urlHost` ("127.0.0.1")
+// `serverInfo.urlPort` (3000)
+console.log(server.serverInfo());
+
+// Calls `uncachePublications()` (see below)
+server.stop();
+
+console.log(server.isStarted()); // false
+```
+
+To serve a `/robots.txt` file that completely disables search robots:
+
+```javascript
+// Call this before `server.start()`
+server.preventRobots();
+```
+
+To add custom HTTP routes:
+
+```javascript
+// Call these before `server.start()`.
+// They are equivalent to `app.use()` and `app.get()`, where `app` is the underlying Express instance:
+
+server.expressUse("/static-files", express.static("/path/to/files", {
+  dotfiles: "ignore",
+  etag: true,
+  fallthrough: false,
+  immutable: true,
+  index: false,
+  maxAge: "1d",
+  redirect: false,
+}));
+
+server.expressGet(["/hello.html"], (req: express.Request, res: express.Response) => {
+  
+  // Optionally, to add permissive CORS headers to the HTTP response
+  server.setResponseCORS(res);
+
+  res.status(200).send("<html><body>Hello</body></html>");
+});
+```
+
+To register publications references (local filesystem paths) inside the internal server state
+(which is used to create the OPDS2 feed, see below):
+
+```javascript
+// This can be called before or after `server.start()`:
+
+// the returned array contains URL routes to the ReadiumWebPubManifests,
+// e.g. `/pub/ID/manifest.json`, where `ID` is the Base64 encoding of the registered path.
+const publicationURLs = server.addPublications(["/path/to/book.epub"]);
+
+// ...then:
+const publicationPaths = getPublications(); // ["/path/to/book.epub"]
+
+// ...and (calls `uncachePublication()`, see below):
+const publicationURLs = server.removePublications(["/path/to/book.epub"]);
+```
+
+To get the OPDS2 feed for the currently registered publications:
+
+```javascript
+// This launches a potentially time-consuming Node process that scans (loads) each registered Publication,
+// and stores the generated OPDS2 feed inside a temporary filesystem location.
+// So this returns `undefined` at the first call, and the client must invoke the function again later.
+// Note that both `addPublications()` and `removePublications()` clear the OPDS2 feed entirely,
+// requiring its subsequent re-generation (full scan of registered publication paths).
+// (poor design, but at this stage really just an OPDS2 demo without real use-case)
+const opds2 = server.publicationsOPDS();
+```
+
+To actually load+parse a publication reference (local filesystem path) into a ReadiumWebPubManifest
+Publication instance, stored in the server's state:
+(note that publications do not need to be registered via `addPublications()` first,
+and a remote URL can be used instead of a local filesytem path)
+
+```javascript
+// The Publication object model is defined in `r2-shared-js`
+const publication = await server.loadOrGetCachedPublication("/path/to/book.epub");
+
+// The above is basically a lazy-loader that checks the cache before loading+parsing a publication,
+// equivalent to:
+const publication = server.cachedPublication("/path/to/book.epub");
+if (!publication) {
+  publication = ...; // load and parse "/path/to/book.epub"
+  server.cachePublication("/path/to/book.epub", publication);
+}
+
+console.log(server.isPublicationCached("/path/to/book.epub")); // true
+
+// see also:
+// (calls `publication.freeDestroy()` to cleanup allocated objects in the Publication,
+// particularly the file handle to the underlying zip/EPUB/CBZ file)
+server.uncachePublication("/path/to/book.epub");
+server.uncachePublications();
+```
+
 ### HTTP API
 
-https://github.com/readium/r2-streamer-js/blob/develop/docs/http.md
+[docs/http.md](/docs/http.md)
 
 ### Support for remote publications
 
-https://github.com/readium/r2-streamer-js/blob/develop/docs/remote-epub.md
+[docs/remote-epub.md](/docs/remote-epub.md)
 
 ### Support for OPDS feeds
 
-https://github.com/readium/r2-streamer-js/blob/develop/docs/opds.md
+[docs/opds.md](/docs/opds.md)
 
 ### Support for encrypted content
 
-https://github.com/readium/r2-streamer-js/blob/develop/docs/encryption.md
+[docs/encryption.md](/docs/encryption.md)

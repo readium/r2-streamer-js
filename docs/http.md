@@ -1,6 +1,6 @@
 # HTTP API
 
-`readium2-streamer-js` contains an Express server with support for the following routes:
+`r2-streamer-js` contains an Express server with support for the following routes:
 
 ## GET /opds2/publications.json
 
