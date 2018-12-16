@@ -16,6 +16,7 @@ import {
     initGlobalConverters_GENERIC,
     initGlobalConverters_SHARED,
 } from "@r2-shared-js/init-globals";
+import { EPUBis, isEPUBlication } from "@r2-shared-js/parser/epub";
 import * as debug_ from "debug";
 import * as filehound from "filehound";
 
@@ -69,10 +70,9 @@ if (!stats.isFile() && !stats.isDirectory()) {
     process.exit(1);
 }
 
-// /\.epub[3]?$/.test(ext)
-const isEPUB = fs.existsSync(path.join(filePath, "META-INF", "container.xml"));
+const isAnEPUB = isEPUBlication(filePath);
 
-if (stats.isDirectory() && !isEPUB) {
+if (stats.isDirectory() && (isAnEPUB !== EPUBis.LocalExploded)) {
     debug("Analysing directory...");
 
     // tslint:disable-next-line:no-floating-promises

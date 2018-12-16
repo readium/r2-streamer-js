@@ -141,9 +141,9 @@ import { Server } from "r2-streamer-js/dist/es5/src/http/server";
 import { Server } from "@r2-streamer-js/http/server";
 
 // Constructor parameter is optional:
-// disableDecryption: true 
+// disableDecryption: true
 // disableOPDS
-// disableReaders: true 
+// disableReaders: true
 // disableRemotePubUrl: true to deactivate
 const server = new Server({
   disableDecryption: false, // deactivates the decryption of encrypted resources (Readium LCP).
@@ -199,7 +199,7 @@ server.expressUse("/static-files", express.static("/path/to/files", {
 }));
 
 server.expressGet(["/hello.html"], (req: express.Request, res: express.Response) => {
-  
+
   // Optionally, to add permissive CORS headers to the HTTP response
   server.setResponseCORS(res);
 
