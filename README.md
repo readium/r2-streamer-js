@@ -162,6 +162,13 @@ const url = await server.start(3000, false);
 // contexts where the client side has access to the private encryption key (i.e. Electron app, see r2-navigator-js)
 console.log(server.isSecured()); // false
 
+// A client app that is capable of setting HTTP headers for every request originating from content webviews
+// can obtain the special encrypted header using this function:
+// (as used internally by the Electron-based `r2-navigator-js` component to secure the transport layer)
+const nameValuePair = server.getSecureHTTPHeader(url + "/PATH_TO_RESOURCE");
+console.log(nameValuePair.name);
+console.log(nameValuePair.value);
+
 // http://127.0.0.1:3000
 // Note that ports 80 and 443 (HTTPS) are always implicit (ommitted).
 console.log(url);

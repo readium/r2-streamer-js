@@ -30,7 +30,7 @@ import { serverOPDS_convert_v1_to_v2 } from "./server-opds-convert-v1-to-v2";
 import { serverOPDS_local_feed } from "./server-opds-local-feed";
 import { serverPub } from "./server-pub";
 import { serverRoot } from "./server-root";
-import { serverSecure } from "./server-secure";
+import { IHTTPHeaderNameValue, serverSecure, serverSecureHTTPHeader } from "./server-secure";
 import { serverRemotePub } from "./server-url";
 import { serverVersion } from "./server-version";
 
@@ -151,6 +151,10 @@ Disallow: /
     public isSecured(): boolean {
         return (typeof this.serverInfo() !== "undefined") &&
             (typeof this.httpsServer !== "undefined");
+    }
+
+    public getSecureHTTPHeader(url: string): IHTTPHeaderNameValue | undefined {
+        return serverSecureHTTPHeader(this, url);
     }
 
     public async start(port: number, secure: boolean): Promise<ServerData> {

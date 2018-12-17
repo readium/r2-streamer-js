@@ -18,6 +18,63 @@ const debugHttps = debug_("r2:https");
 
 const IS_DEV = (process.env.NODE_ENV === "development" || process.env.NODE_ENV === "dev");
 
+export interface IHTTPHeaderNameValue {
+    name: string;
+    value: string;
+}
+export function serverSecureHTTPHeader(server: Server, url: string): IHTTPHeaderNameValue | undefined {
+
+    const info = server.serverInfo();
+    if (server.isSecured() &&
+        info && info.trustKey && info.trustCheck && info.trustCheckIV) {
+
+        // @ts-ignorexx: TS2454 (variable is used before being assigned)
+        // instead: exclamation mark "definite assignment"
+        let t1!: [number, number];
+        if (IS_DEV) {
+            t1 = process.hrtime();
+        }
+
+        const encrypteds: Buffer[] = [];
+        // encrypteds.push(info.trustCheckIV);
+        const encryptStream = crypto.createCipheriv("aes-256-cbc",
+            info.trustKey,
+            info.trustCheckIV);
+        encryptStream.setAutoPadding(true);
+        // milliseconds since epoch (midnight, 1 Jan 1970)
+        const now = Date.now(); // +new Date()
+        const jsonStr = `{"url":"${url}","time":${now}}`;
+        // const jsonBuff = new Buffer(jsonStr, "utf8");
+        const buff1 = encryptStream.update(jsonStr, "utf8"); // jsonBuff
+        if (buff1) {
+            encrypteds.push(buff1);
+        }
+        const buff2 = encryptStream.final();
+        if (buff2) {
+            encrypteds.push(buff2);
+        }
+        const encrypted = Buffer.concat(encrypteds);
+
+        const base64 = new Buffer(encrypted).toString("base64");
+
+        if (IS_DEV) {
+            const t2 = process.hrtime(t1);
+            const seconds = t2[0];
+            const nanoseconds = t2[1];
+            const milliseconds = nanoseconds / 1e6;
+            // const totalNanoseconds = (seconds * 1e9) + nanoseconds;
+            // const totalMilliseconds = totalNanoseconds / 1e6;
+            // const totalSeconds = totalNanoseconds / 1e9;
+
+            debugHttps(`< A > ${seconds}s ${milliseconds}ms [ ${url} ]`);
+        }
+
+        return { name : "X-" + info.trustCheck, value: base64 };
+    }
+
+    return undefined;
+}
+
 export function serverSecure(server: Server, topRouter: express.Application) {
 
     topRouter.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
