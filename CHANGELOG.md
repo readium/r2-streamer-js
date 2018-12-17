@@ -1,10 +1,33 @@
 # Next
 
 Git diff:
-* https://github.com/readium/r2-streamer-js/compare/v1.0.1...develop
+* https://github.com/readium/r2-streamer-js/compare/v1.0.2...develop
 
 Changes:
 * TODO
+
+# 1.0.2
+
+> Build environment: NodeJS `8.14.0`, NPM `6.5.0`
+
+Changes:
+* NPM updates (minor)
+* Replaced deprecated RawGit URLs
+* Removed unnecessary TypeScript import aliases
+* Fixed OPDS2 links in the doc
+* Updated OPDS2 and ReadiumWebPubManifest schemas
+* Improved documentation
+* Improved EPUB type detection in the CLI (local, remote, packed, exploded)
+
+Git revision info:
+* https://unpkg.com/r2-streamer-js@1.0.2/dist/gitrev.json
+* https://github.com/edrlab/r2-streamer-js-dist/blob/v1.0.2/dist/gitrev.json
+
+Git commit history:
+* https://github.com/readium/r2-streamer-js/commits/v1.0.2
+
+Git diff:
+* https://github.com/readium/r2-streamer-js/compare/v1.0.1...v1.0.2
 
 # 1.0.1
 
