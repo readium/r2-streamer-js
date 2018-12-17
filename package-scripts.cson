@@ -299,4 +299,4 @@
     ls ./dist &&
     cat ./dist/gitrev.json
   '
-# https://rawgit.com/edrlab/r2-streamer-js-dist/develop/dist/gitrev.json
+# https://raw.githack.com/edrlab/r2-streamer-js-dist/develop/dist/gitrev.json

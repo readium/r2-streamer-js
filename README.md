@@ -107,7 +107,7 @@ https://unpkg.com/r2-streamer-js/dist/gitrev.json
 
 Alternatively, GitHub mirror with semantic-versioning release tags:
 
-https://rawgit.com/edrlab/r2-streamer-js-dist/develop/dist/gitrev.json
+https://raw.githack.com/edrlab/r2-streamer-js-dist/develop/dist/gitrev.json
 
 Heroku app (latest deployed):
 
