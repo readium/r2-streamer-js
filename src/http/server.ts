@@ -261,6 +261,8 @@ Disallow: /
         res.setHeader("Access-Control-Allow-Origin",
             "*");
 
+        // TODO: should this only be set for preflight requests,
+        // i.e. req.method === "OPTIONS"?
         res.setHeader("Access-Control-Allow-Methods",
             "GET, HEAD, OPTIONS"); // POST, DELETE, PUT, PATCH
 
