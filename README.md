@@ -155,9 +155,11 @@ const server = new Server({
 // First parameter: port number, zero means default (3000),
 // unless specified via the environment variable `PORT` (process.env.PORT).
 // Tip: the NPM package `portfinder` can be used to automatically find an available port number.
-// Second parameter: if true, HTTPS instead of HTTP, using a randomly-generated self-signed certificate.
 const url = await server.start(3000, false);
 
+// Second constructor parameter: if true, HTTPS instead of HTTP, using a randomly-generated self-signed certificate.
+// Also validates encrypted HTTP header during request-request cycles, so should only be used in runtime
+// contexts where the client side has access to the private encryption key (i.e. Electron app, see r2-navigator-js)
 console.log(server.isSecured()); // false
 
 // http://127.0.0.1:3000
@@ -238,8 +240,6 @@ const opds2 = server.publicationsOPDS();
 
 To actually load+parse a publication reference (local filesystem path) into a ReadiumWebPubManifest
 Publication instance, stored in the server's state:
-(note that publications do not need to be registered via `addPublications()` first,
-and a remote URL can be used instead of a local filesytem path)
 
 ```javascript
 // The Publication object model is defined in `r2-shared-js`
@@ -262,7 +262,12 @@ server.uncachePublication("/path/to/book.epub");
 server.uncachePublications();
 ```
 
-### HTTP API
+Note that HTTP/remote publications URLs can be loaded into the server's cache
+and subsequently served by the streamer without prior registration via `addPublications()`.
+However, publications from the local filesytem will only be served when registered,
+even if they are cached (in other words, the HTTP route is disabled when the publication is non-registered).
+
+### HTTP API (built-in routes / micro-services)
 
 [docs/http.md](/docs/http.md)
 
