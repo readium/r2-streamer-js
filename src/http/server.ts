@@ -122,6 +122,7 @@ export class Server {
         serverAssets(this, routerPathBase64);
     }
 
+    // TODO: HTTP header `X-Robots-Tag` === `none`?
     public preventRobots() {
         this.expressApp.get("/robots.txt", (_req: express.Request, res: express.Response) => {
 
