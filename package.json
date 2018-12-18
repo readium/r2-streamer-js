@@ -1,6 +1,6 @@
 {
   "name": "r2-streamer-js",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Readium 2 'streamer' for NodeJS (TypeScript)",
   "keywords": [
     "readium",
@@ -56,10 +56,10 @@
     "mime-types": "^2.1.21",
     "moment": "^2.23.0",
     "morgan": "^1.9.1",
-    "r2-lcp-js": "^1.0.0",
-    "r2-opds-js": "^1.0.0",
-    "r2-shared-js": "^1.0.1",
-    "r2-utils-js": "^1.0.0",
+    "r2-lcp-js": "^1.0.2",
+    "r2-opds-js": "^1.0.2",
+    "r2-shared-js": "^1.0.3",
+    "r2-utils-js": "^1.0.2",
     "request": "^2.88.0",
     "request-promise-native": "^1.0.5",
     "selfsigned": "^1.10.4",
