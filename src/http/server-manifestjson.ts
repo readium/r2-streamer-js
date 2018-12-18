@@ -98,7 +98,9 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
                 // (req.hostname && req.hostname.indexOf("now.sh") >= 0)
                 ;
 
-            const pathBase64Str = new Buffer(decodeURIComponent(reqparams.pathBase64), "base64").toString("utf8");
+            // reqparams.pathBase64 is already decoded!
+            // const decoded = decodeURIComponent(reqparams.pathBase64);
+            const pathBase64Str = new Buffer(reqparams.pathBase64, "base64").toString("utf8");
 
             // const fileName = path.basename(pathBase64Str);
             // const ext = path.extname(fileName).toLowerCase();
@@ -116,7 +118,9 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
             // dumpPublication(publication);
 
             if (reqparams.lcpPass64 && !server.disableDecryption) {
-                const lcpPass = new Buffer(decodeURIComponent(reqparams.lcpPass64), "base64").toString("utf8");
+                // reqparams.lcpPass64 is already decoded!
+                // const decoded = decodeURIComponent(reqparams.lcpPass64);
+                const lcpPass = new Buffer(reqparams.lcpPass64, "base64").toString("utf8");
                 if (publication.LCP) {
                     try {
                         await publication.LCP.tryUserKeys([lcpPass]); // hex

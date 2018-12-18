@@ -64,7 +64,7 @@ export function serverPub(server: Server, topRouter: express.Application): expre
         if (value.indexOf(server.lcpBeginToken) === 0 && value.indexOf(server.lcpEndToken) > 0) {
             const i = value.indexOf(server.lcpEndToken);
             const pass64 = value.substr(server.lcpBeginToken.length, i - server.lcpBeginToken.length);
-            // const pass = new Buffer(decodeURIComponent(pass64), "base64").toString("utf8");
+            // const pass = new Buffer(pass64, "base64").toString("utf8");
             (req as IRequestPayloadExtension).lcpPass64 = pass64;
 
             value = value.substr(i + server.lcpEndToken.length);
@@ -72,7 +72,9 @@ export function serverPub(server: Server, topRouter: express.Application): expre
             debug(value);
         }
 
-        const valueStr = new Buffer(decodeURIComponent(value), "base64").toString("utf8");
+        // value is already decoded!
+        // const decoded = decodeURIComponent(value);
+        const valueStr = new Buffer(value, "base64").toString("utf8");
         if (isHTTP(valueStr)) {
             // debug(`Publication URL: ${valueStr}`);
 
@@ -82,7 +84,9 @@ export function serverPub(server: Server, topRouter: express.Application): expre
         }
 
         const found = server.getPublications().find((filePath) => {
-            const filePathBase64 = encodeURIComponent_RFC3986(new Buffer(filePath).toString("base64"));
+            const filePathBase64 = new Buffer(filePath).toString("base64");
+            // const filePathBase64Encoded = encodeURIComponent_RFC3986(filePathBase64);
+            // value is already decoded!
             return value === filePathBase64;
         });
 
@@ -104,7 +108,9 @@ export function serverPub(server: Server, topRouter: express.Application): expre
             reqparams.pathBase64 = (req as IRequestPayloadExtension).pathBase64;
         }
 
-        const pathBase64Str = new Buffer(decodeURIComponent(reqparams.pathBase64), "base64").toString("utf8");
+        // pathBase64 is already decoded!
+        // const decoded = decodeURIComponent(reqparams.pathBase64);
+        const pathBase64Str = new Buffer(reqparams.pathBase64, "base64").toString("utf8");
         debug(`Publication: ${pathBase64Str}`);
 
         const isSecureHttp = req.secure ||

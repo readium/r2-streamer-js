@@ -88,7 +88,9 @@ export function serverMediaOverlays(server: Server, routerPathBase64: express.Ro
                 // (req.hostname && req.hostname.indexOf("now.sh") >= 0)
                 ;
 
-            const pathBase64Str = new Buffer(decodeURIComponent(reqparams.pathBase64), "base64").toString("utf8");
+            // reqparams.pathBase64 is already decoded!
+            // const decoded = decodeURIComponent(reqparams.pathBase64);
+            const pathBase64Str = new Buffer(reqparams.pathBase64, "base64").toString("utf8");
 
             // const fileName = path.basename(pathBase64Str);
             // const ext = path.extname(fileName).toLowerCase();

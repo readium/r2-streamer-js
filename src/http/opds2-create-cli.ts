@@ -14,7 +14,7 @@ import { OPDSPublication } from "@r2-opds-js/opds/opds2/opds2-publication";
 import { OPDSPublicationMetadata } from "@r2-opds-js/opds/opds2/opds2-publicationMetadata";
 import { Publication } from "@r2-shared-js/models/publication";
 import { PublicationParsePromise } from "@r2-shared-js/parser/publication-parser";
-import { encodeURIComponent_RFC3986, isHTTP } from "@r2-utils-js/_utils/http/UrlUtils";
+import { isHTTP } from "@r2-utils-js/_utils/http/UrlUtils";
 import * as debug_ from "debug";
 import * as moment from "moment";
 import { JSON as TAJSON } from "ta-json-x";
@@ -75,13 +75,12 @@ if (fs.existsSync(opdsJsonFilePath)) {
         }
 
         nPubs++;
-        const filePathBase64Encoded = encodeURIComponent_RFC3986(pathBase64);
 
         const publi = new OPDSPublication();
 
         publi.Links = [];
         const linkSelf = new OPDSLink();
-        linkSelf.Href = filePathBase64Encoded + "/manifest.json";
+        linkSelf.Href = pathBase64 + "/manifest.json";
         linkSelf.TypeLink = "application/webpub+json";
         linkSelf.AddRel("http://opds-spec.org/acquisition");
         publi.Links.push(linkSelf);
@@ -92,7 +91,7 @@ if (fs.existsSync(opdsJsonFilePath)) {
         const coverLink = publication.GetCover();
         if (coverLink) {
             const linkCover = new OPDSLink();
-            linkCover.Href = filePathBase64Encoded + "/" + coverLink.Href;
+            linkCover.Href = pathBase64 + "/" + coverLink.Href;
             linkCover.TypeLink = coverLink.TypeLink;
             // linkCover.Rel = [];
             // linkCover.Rel.push("cover");
