@@ -1,10 +1,27 @@
 # Next
 
 Git diff:
-* https://github.com/readium/r2-streamer-js/compare/v1.0.3...develop
+* https://github.com/readium/r2-streamer-js/compare/v1.0.4...develop
 
 Changes:
 * TODO
+
+# 1.0.4
+
+> Build environment: NodeJS `8.14.0`, NPM `6.5.0`
+
+Changes:
+* Fixed regression bug due to the previous base64 pub ID encoding bugfix (slashes). Depending on what lib is used, URLs and URLs components do not necessarilly get automatically decoded/encoded (percent escape for base64 chars, e.g. `=` and `/`). We must be very careful because we pass around both full URLs, and URLs components that require encoding (thus the double-encoding issues).
+
+Git revision info:
+* https://unpkg.com/r2-streamer-js@1.0.4/dist/gitrev.json
+* https://github.com/edrlab/r2-streamer-js-dist/blob/v1.0.4/dist/gitrev.json
+
+Git commit history:
+* https://github.com/readium/r2-streamer-js/commits/v1.0.4
+
+Git diff:
+* https://github.com/readium/r2-streamer-js/compare/v1.0.3...v1.0.4
 
 # 1.0.3
 
