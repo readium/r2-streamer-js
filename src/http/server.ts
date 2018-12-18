@@ -14,6 +14,7 @@ import * as path from "path";
 import { OPDSFeed } from "@r2-opds-js/opds/opds2/opds2";
 import { Publication } from "@r2-shared-js/models/publication";
 import { PublicationParsePromise } from "@r2-shared-js/parser/publication-parser";
+import { encodeURIComponent_RFC3986 } from "@r2-utils-js/_utils/http/UrlUtils";
 import * as debug_ from "debug";
 import * as express from "express";
 import { JSON as TAJSON } from "ta-json-x";
@@ -286,7 +287,7 @@ Disallow: /
         });
 
         return pubs.map((pub) => {
-            const pubid = new Buffer(pub).toString("base64");
+            const pubid = encodeURIComponent_RFC3986(new Buffer(pub).toString("base64"));
             return `/pub/${pubid}/manifest.json`;
         });
     }
@@ -302,7 +303,7 @@ Disallow: /
         });
 
         return pubs.map((pub) => {
-            const pubid = new Buffer(pub).toString("base64");
+            const pubid = encodeURIComponent_RFC3986(new Buffer(pub).toString("base64"));
             return `/pub/${pubid}/manifest.json`;
         });
     }
@@ -387,7 +388,7 @@ Disallow: /
                 const jsFile = path.join(__dirname, "opds2-create-cli.js");
                 const args = [jsFile, this.opdsJsonFilePath];
                 this.publications.forEach((pub) => {
-                    const filePathBase64 = new Buffer(pub).toString("base64");
+                    const filePathBase64 = encodeURIComponent_RFC3986(new Buffer(pub).toString("base64"));
                     args.push(filePathBase64);
                 });
                 // debug("SPAWN OPDS2 create: %o", args);

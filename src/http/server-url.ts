@@ -5,6 +5,7 @@
 // that can be found in the LICENSE file exposed on Github (readium) in the project repository.
 // ==LICENSE-END==
 
+import { encodeURIComponent_RFC3986 } from "@r2-utils-js/_utils/http/UrlUtils";
 import * as debug_ from "debug";
 import * as express from "express";
 import * as morgan from "morgan";
@@ -70,7 +71,7 @@ export function serverRemotePub(_server: Server, topRouter: express.Application)
         // }
         debug(urlDecoded);
 
-        const urlDecodedBase64 = new Buffer(urlDecoded).toString("base64");
+        const urlDecodedBase64 = encodeURIComponent_RFC3986(new Buffer(urlDecoded).toString("base64"));
         const redirect = req.originalUrl.substr(0,
             req.originalUrl.indexOf(serverRemotePub_PATH + "/"))
             + "/pub/" + urlDecodedBase64 + "/";

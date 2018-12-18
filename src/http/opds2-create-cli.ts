@@ -56,7 +56,7 @@ if (fs.existsSync(opdsJsonFilePath)) {
 
     let nPubs = 0;
     for (const pathBase64 of args) {
-        const pathBase64Str = new Buffer(pathBase64, "base64").toString("utf8");
+        const pathBase64Str = new Buffer(decodeURIComponent(pathBase64), "base64").toString("utf8");
 
         if (isHTTP(pathBase64Str)) {
             continue;
