@@ -223,11 +223,13 @@ To register publications references (local filesystem paths) inside the internal
 // This can be called before or after `server.start()`:
 
 // the returned array contains URL routes to the ReadiumWebPubManifests,
-// e.g. `/pub/ID/manifest.json`, where `ID` is the Base64 encoding of the registered path.
+// e.g. `/pub/ID/manifest.json`, where `ID` is the base64 encoding of the registered path.
+// Note that the returned base64 URL path components are already URI-encoded (escaped).
+// (`=` and `/` are typically problematic edge-cases)
 const publicationURLs = server.addPublications(["/path/to/book.epub"]);
 
 // ...then:
-const publicationPaths = getPublications(); // ["/path/to/book.epub"]
+const publicationPaths = server.getPublications(); // ["/path/to/book.epub"]
 
 // ...and (calls `uncachePublication()`, see below):
 const publicationURLs = server.removePublications(["/path/to/book.epub"]);
