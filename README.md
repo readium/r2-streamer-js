@@ -21,8 +21,6 @@ https://github.com/readium/r2-streamer-js
 
 There is no [github.io](https://readium.github.io/r2-streamer-js) site for this project (no [gh-pages](https://github.com/readium/r2-streamer-js/tree/gh-pages) branch).
 
-Wiki documentation is not used, instead there are Markdown files inside the repository ([docs folder](/docs)).
-
 ## NPM package
 
 https://www.npmjs.com/package/r2-streamer-js
