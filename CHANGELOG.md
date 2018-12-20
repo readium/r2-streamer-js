@@ -1,10 +1,29 @@
 # Next
 
 Git diff:
-* https://github.com/readium/r2-streamer-js/compare/v1.0.5...develop
+* https://github.com/readium/r2-streamer-js/compare/v1.0.6...develop
 
 Changes:
 * TODO
+
+# 1.0.6
+
+> Build environment: NodeJS `8.14.1`, NPM `6.4.1`
+
+Changes:
+* Updated documentation
+* NPM 6.5.* has regression bugs for global package installs, so revert back to NPM 6.4.1 (which is officially shipped with the NodeJS installer).
+* Now correctly reset LCP basic/test profile userkey when incorrect value passed in URL (used for testing, not real-world usage pattern, not LCP 1.0/production profile)
+
+Git revision info:
+* https://unpkg.com/r2-streamer-js@1.0.6/dist/gitrev.json
+* https://github.com/edrlab/r2-streamer-js-dist/blob/v1.0.6/dist/gitrev.json
+
+Git commit history:
+* https://github.com/readium/r2-streamer-js/commits/v1.0.6
+
+Git diff:
+* https://github.com/readium/r2-streamer-js/compare/v1.0.5...v1.0.6
 
 # 1.0.5
 
