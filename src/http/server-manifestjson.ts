@@ -125,6 +125,8 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
                     try {
                         await publication.LCP.tryUserKeys([lcpPass]); // hex
                     } catch (err) {
+                        // a bit brutal, but that's just for testing anyway (not real-world usage pattern)
+                        publication.LCP.ContentKey = undefined;
                         debug(err);
                         const errMsg = "FAIL publication.LCP.tryUserKeys(): " + err;
                         debug(errMsg);

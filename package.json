@@ -150,7 +150,7 @@
     "server-bundlemin": "node \"./dist/bundle-es8-es2017/server-cli.min.js\"",
     "server-bundlemin-debug": "cross-env DEBUG=r2:* npm run server-bundlemin",
     "server-bundlemin-debug-x": "cross-env DEBUG=* npm run server-bundlemin",
-    "server": "node \"./dist/es8-es2017/src/http/server-cli.js\"",
+    "server": "node --version && node \"./dist/es8-es2017/src/http/server-cli.js\"",
     "server-debug": "cross-env DEBUG=r2:* npm run server",
     "server-debug-x": "cross-env DEBUG=* npm run server",
     "server-https-debug": "cross-env DEBUG=r2:* PORT=443 npm run server",

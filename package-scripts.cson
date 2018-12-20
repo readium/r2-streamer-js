@@ -260,7 +260,7 @@
   '
 
   'server': '
-    node "./dist/es8-es2017/src/http/server-cli.js"
+    node --version && node "./dist/es8-es2017/src/http/server-cli.js"
   '
 
   'server-debug': '
