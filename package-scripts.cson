@@ -13,7 +13,8 @@
 
   'copydist': '
     cpy "./dist/**/*" ../r2-navigator-js/node_modules/r2-streamer-js/ --cwd=./ --parents --no-dir &&
-    cpy "./dist/**/*" ../r2-testapp-js/node_modules/r2-streamer-js/ --cwd=./ --parents --no-dir
+    cpy "./dist/**/*" ../r2-testapp-js/node_modules/r2-streamer-js/ --cwd=./ --parents --no-dir &&
+    cpy "./dist/**/*" ../readium-desktop/node_modules/r2-streamer-js/ --cwd=./ --parents --no-dir
   '
 
   'quick-build-dist': '
