@@ -211,3 +211,5 @@ https://readium2.herokuapp.com/opds-v1-browse/http%3A%2F%2Fgallica.bnf.fr%2Fopds
 Specification: https://drafts.opds.io/opds-2.0
 
 Sample feed: https://test.opds.io/2.0/home.json
+
+Feedbooks: https://catalog.feedbooks.com/catalog/index.json
