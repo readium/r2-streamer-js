@@ -5,6 +5,8 @@
 // that can be found in the LICENSE file exposed on Github (readium) in the project repository.
 // ==LICENSE-END==
 
+import * as path from "path";
+
 import { convertOpds1ToOpds2, convertOpds1ToOpds2_EntryToPublication } from "@r2-opds-js/opds/converter";
 import { OPDS } from "@r2-opds-js/opds/opds1/opds";
 import { Entry } from "@r2-opds-js/opds/opds1/opds-entry";
@@ -16,14 +18,15 @@ import { streamToBufferPromise } from "@r2-utils-js/_utils/stream/BufferUtils";
 import { XML } from "@r2-utils-js/_utils/xml-js-mapper";
 import * as css2json from "css2json";
 import * as debug_ from "debug";
+import * as DotProp from "dot-prop";
 import * as express from "express";
 import * as jsonMarkup from "json-markup";
 import * as morgan from "morgan";
-import * as path from "path";
 import * as request from "request";
 import * as requestPromise from "request-promise-native";
 import { JSON as TAJSON } from "ta-json-x";
 import * as xmldom from "xmldom";
+
 import { jsonSchemaValidate } from "../utils/json-schema-validate";
 import { IRequestPayloadExtension, _urlEncoded } from "./request-ext";
 import { Server } from "./server";
@@ -251,16 +254,68 @@ export function serverOPDS_convert_v1_to_v2(_server: Server, topRouter: express.
                     "../webpub-manifest/contributor",
                     "../webpub-manifest/contributor-object",
                 ];
-                if (opds2Publication) {
-                    jsonSchemasNames.unshift("feed");
-                } else {
+                if (opds2Publication) { // isEntry
                     jsonSchemasNames.splice(jsonSchemasNames.indexOf("publication"), 1);
                     jsonSchemasNames.unshift("feed");
-                    jsonSchemasNames.unshift("publication");
+                    jsonSchemasNames.unshift("publication"); // must be first!
+                } else {
+                    jsonSchemasNames.unshift("feed"); // must be first!
                 }
-                debug(jsonSchemasNames);
+                // debug(jsonSchemasNames);
 
-                validationStr = jsonSchemaValidate(jsonSchemasRootpath, "opds", jsonSchemasNames, jsonObjOPDS2);
+                const validationErrors =
+                    jsonSchemaValidate(jsonSchemasRootpath, jsonSchemasNames, jsonObjOPDS2);
+                if (validationErrors) {
+                    validationStr = "";
+
+                    for (const err of validationErrors) {
+
+                        debug("JSON Schema validation FAIL.");
+                        debug(err);
+
+                        if (opds2Publication) {
+                            const val = DotProp.get(jsonObjOPDS2, err.jsonPath);
+                            const valueStr = (typeof val === "string") ?
+                                `${val}` :
+                                ((val instanceof Array || typeof val === "object") ?
+                                `${JSON.stringify(val)}` :
+                                    "");
+                            debug(valueStr);
+
+                            const title = DotProp.get(jsonObjOPDS2, "metadata.title");
+                            debug(title);
+
+                            validationStr +=
+                            // tslint:disable-next-line:max-line-length
+                            `\n"${title}"\n\n${err.ajvMessage}: ${valueStr}\n\n'${err.ajvDataPath.replace(/^\./, "")}' (${err.ajvSchemaPath})\n\n`;
+                        } else {
+                            const val = DotProp.get(jsonObjOPDS2, err.jsonPath);
+                            const valueStr = (typeof val === "string") ?
+                                `${val}` :
+                                ((val instanceof Array || typeof val === "object") ?
+                                `${JSON.stringify(val)}` :
+                                    "");
+                            debug(valueStr);
+
+                            let title = "";
+                            let pubIndex = "";
+                            if (/^publications\.[0-9]+/.test(err.jsonPath)) {
+                                const jsonPubTitlePath =
+                                    err.jsonPath.replace(/^(publications\.[0-9]+).*/, "$1.metadata.title");
+                                debug(jsonPubTitlePath);
+                                title = DotProp.get(jsonObjOPDS2, jsonPubTitlePath);
+                                debug(title);
+
+                                pubIndex = err.jsonPath.replace(/^publications\.([0-9]+).*/, "$1");
+                                debug(pubIndex);
+                            }
+
+                            validationStr +=
+                            // tslint:disable-next-line:max-line-length
+                            `\n___________INDEX___________ #${pubIndex} "${title}"\n\n${err.ajvMessage}: ${valueStr}\n\n'${err.ajvDataPath.replace(/^\./, "")}' (${err.ajvSchemaPath})\n\n`;
+                        }
+                    }
+                }
             }
 
             traverseJsonObjects(jsonObjOPDS2, funk);

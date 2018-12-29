@@ -19,6 +19,7 @@ import { encodeURIComponent_RFC3986, isHTTP } from "@r2-utils-js/_utils/http/Url
 import { sortObject, traverseJsonObjects } from "@r2-utils-js/_utils/JsonUtils";
 import * as css2json from "css2json";
 import * as debug_ from "debug";
+import * as DotProp from "dot-prop";
 import * as express from "express";
 import * as jsonMarkup from "json-markup";
 import { JSON as TAJSON } from "ta-json-x";
@@ -314,8 +315,32 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
                         "subcollection",
                     ];
 
-                    validationStr = jsonSchemaValidate(jsonSchemasRootpath,
-                            "webpubmanifest", jsonSchemasNames, jsonObj);
+                    const validationErrors =
+                        jsonSchemaValidate(jsonSchemasRootpath, jsonSchemasNames, jsonObj);
+                    if (validationErrors) {
+                        validationStr = "";
+
+                        for (const err of validationErrors) {
+
+                            debug("JSON Schema validation FAIL.");
+                            debug(err);
+
+                            const val = DotProp.get(jsonObj, err.jsonPath);
+                            const valueStr = (typeof val === "string") ?
+                                `${val}` :
+                                ((val instanceof Array || typeof val === "object") ?
+                                `${JSON.stringify(val)}` :
+                                    "");
+                            debug(valueStr);
+
+                            const title = DotProp.get(jsonObj, "metadata.title");
+                            debug(title);
+
+                            validationStr +=
+                            // tslint:disable-next-line:max-line-length
+                            `\n"${title}"\n\n${err.ajvMessage}: ${valueStr}\n\n'${err.ajvDataPath.replace(/^\./, "")}' (${err.ajvSchemaPath})\n\n`;
+                        }
+                    }
                 }
 
                 absolutizeURLs(jsonObj);

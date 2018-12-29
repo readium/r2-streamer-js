@@ -49,6 +49,7 @@
     "ajv": "^6.6.2",
     "css2json": "^0.0.4",
     "debug": "^4.1.1",
+    "dot-prop": "^4.2.0",
     "express": "^4.16.4",
     "filehound": "^1.16.5",
     "js-beautify": "^1.8.9",

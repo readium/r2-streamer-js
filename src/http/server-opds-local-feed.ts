@@ -13,6 +13,7 @@ import { isHTTP } from "@r2-utils-js/_utils/http/UrlUtils";
 import { sortObject, traverseJsonObjects } from "@r2-utils-js/_utils/JsonUtils";
 import * as css2json from "css2json";
 import * as debug_ from "debug";
+import * as DotProp from "dot-prop";
 import * as express from "express";
 import * as jsonMarkup from "json-markup";
 import { JSON as TAJSON } from "ta-json-x";
@@ -188,10 +189,52 @@ export function serverOPDS_local_feed(server: Server, topRouter: express.Applica
                         "../webpub-manifest/contributor-object",
                     ];
 
-                    validationStr = jsonSchemaValidate(jsonSchemasRootpath, "opds", jsonSchemasNames, jsonObj);
+                    const validationErrors =
+                        jsonSchemaValidate(jsonSchemasRootpath, jsonSchemasNames, jsonObj);
+                    if (validationErrors) {
+                        validationStr = "";
+
+                        for (const err of validationErrors) {
+
+                            debug("JSON Schema validation FAIL.");
+                            debug(err);
+
+                            const val = DotProp.get(jsonObj, err.jsonPath);
+                            const valueStr = (typeof val === "string") ?
+                                `${val}` :
+                                ((val instanceof Array || typeof val === "object") ?
+                                `${JSON.stringify(val)}` :
+                                    "");
+                            debug(valueStr);
+
+                            let title = "";
+                            let pubIndex = "";
+                            if (/^publications\.[0-9]+/.test(err.jsonPath)) {
+                                const jsonPubTitlePath =
+                                    err.jsonPath.replace(/^(publications\.[0-9]+).*/, "$1.metadata.title");
+                                debug(jsonPubTitlePath);
+                                title = DotProp.get(jsonObj, jsonPubTitlePath);
+                                debug(title);
+
+                                pubIndex = err.jsonPath.replace(/^publications\.([0-9]+).*/, "$1");
+                                debug(pubIndex);
+                            }
+
+                            validationStr +=
+                            // tslint:disable-next-line:max-line-length
+                            `\n___________INDEX___________ #${pubIndex} "${title}"\n\n${err.ajvMessage}: ${valueStr}\n\n'${err.ajvDataPath.replace(/^\./, "")}' (${err.ajvSchemaPath})\n\n`;
+                        }
+                    }
                 }
 
                 absolutizeURLs(jsonObj);
+
+                if (jsonObj.publications && jsonObj.publications.length) {
+                    let i = 0;
+                    jsonObj.publications.forEach((pub: any) => {
+                        pub.___________INDEX___________ = i++;
+                    });
+                }
 
                 // const jsonStr = global.JSON.stringify(jsonObj, null, "    ");
 
