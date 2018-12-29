@@ -22,7 +22,6 @@ import { Metadata } from "@r2-shared-js/models/metadata";
 import { Publication } from "@r2-shared-js/models/publication";
 import { PublicationParsePromise } from "@r2-shared-js/parser/publication-parser";
 import { isHTTP } from "@r2-utils-js/_utils/http/UrlUtils";
-import * as debug_ from "debug";
 import * as moment from "moment";
 import { JSON as TAJSON } from "ta-json-x";
 
@@ -30,22 +29,23 @@ initGlobalConverters_OPDS();
 initGlobalConverters_SHARED();
 initGlobalConverters_GENERIC();
 
-const debug = debug_("r2:streamer#http/opds2-create-cli");
+// import * as debug_ from "debug";
+// const debug = debug_("r2:streamer#http/opds2-create-cli");
 
-debug(`process.cwd(): ${process.cwd()}`);
-debug(`__dirname: ${__dirname}`);
+console.log(`process.cwd(): ${process.cwd()}`);
+console.log(`__dirname: ${__dirname}`);
 
 let args = process.argv.slice(2);
-// debug("process.argv.slice(2): %o", args);
+// console.log("process.argv.slice(2): %o", args);
 
 if (!args.length) {
-    debug("FILEPATH ARGUMENTS ARE MISSING.");
+    console.log("FILEPATH ARGUMENTS ARE MISSING.");
     process.exit(1);
 }
 const opdsJsonFilePath = args[0];
 args = args.slice(1);
 if (fs.existsSync(opdsJsonFilePath)) {
-    debug("OPDS2 JSON file already exists.");
+    console.log("OPDS2 JSON file already exists.");
     process.exit(1);
 }
 
@@ -76,12 +76,12 @@ if (fs.existsSync(opdsJsonFilePath)) {
         // const fileName = path.basename(pathBase64Str);
         // const ext = path.extname(fileName).toLowerCase();
 
-        debug(`OPDS parsing: ${pathBase64Str}`);
+        console.log(`OPDS parsing: ${pathBase64Str}`);
         let publication: Publication;
         try {
             publication = await PublicationParsePromise(pathBase64Str);
         } catch (err) {
-            debug(err);
+            console.log(err);
             continue;
         }
 
@@ -113,16 +113,16 @@ if (fs.existsSync(opdsJsonFilePath)) {
 
             }
             publi.Images.push(linkCover);
+        } else {
+            console.log("NO COVER IMAGE?");
         }
 
         if (publication.Metadata) {
             try {
                 const publicationMetadataJson = TAJSON.serialize(publication.Metadata);
-                debug(publicationMetadataJson);
-                publi.Metadata = TAJSON.deserialize<Metadata>(
-                    publicationMetadataJson, Metadata);
+                publi.Metadata = TAJSON.deserialize<Metadata>(publicationMetadataJson, Metadata);
             } catch (err) {
-                debug(err);
+                console.log(err);
                 continue;
             }
         }
@@ -134,6 +134,6 @@ if (fs.existsSync(opdsJsonFilePath)) {
     const jsonStr = global.JSON.stringify(jsonObj, null, "");
     fs.writeFileSync(opdsJsonFilePath, jsonStr, { encoding: "utf8" });
 
-    debug("DONE! :)");
-    debug(opdsJsonFilePath);
+    console.log("DONE! :)");
+    console.log(opdsJsonFilePath);
 })();
