@@ -123,8 +123,7 @@ if (fs.existsSync(opdsJsonFilePath)) {
                     publicationMetadataJson, Metadata);
             } catch (err) {
                 debug(err);
-                // continue;
-                return;
+                continue;
             }
         }
     }
