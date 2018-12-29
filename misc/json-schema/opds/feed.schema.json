@@ -4,6 +4,13 @@
   "title": "OPDS Feed",
   "type": "object",
   "properties": {
+    "@context": {
+      "type": ["string", "array"],
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
     "metadata": {
       "description": "Contains feed-level metadata such as title or number of items",
       "$ref": "feed-metadata.schema.json"
