@@ -7,17 +7,28 @@
 
 import * as fs from "fs";
 
+import {
+    initGlobalConverters_OPDS,
+} from "@r2-opds-js/opds/init-globals";
 import { OPDSFeed } from "@r2-opds-js/opds/opds2/opds2";
 import { OPDSLink } from "@r2-opds-js/opds/opds2/opds2-link";
 import { OPDSMetadata } from "@r2-opds-js/opds/opds2/opds2-metadata";
 import { OPDSPublication } from "@r2-opds-js/opds/opds2/opds2-publication";
-import { OPDSPublicationMetadata } from "@r2-opds-js/opds/opds2/opds2-publicationMetadata";
+import {
+    initGlobalConverters_GENERIC,
+    initGlobalConverters_SHARED,
+} from "@r2-shared-js/init-globals";
+import { Metadata } from "@r2-shared-js/models/metadata";
 import { Publication } from "@r2-shared-js/models/publication";
 import { PublicationParsePromise } from "@r2-shared-js/parser/publication-parser";
 import { isHTTP } from "@r2-utils-js/_utils/http/UrlUtils";
 import * as debug_ from "debug";
 import * as moment from "moment";
 import { JSON as TAJSON } from "ta-json-x";
+
+initGlobalConverters_OPDS();
+initGlobalConverters_SHARED();
+initGlobalConverters_GENERIC();
 
 const debug = debug_("r2:streamer#http/opds2-create-cli");
 
@@ -107,11 +118,13 @@ if (fs.existsSync(opdsJsonFilePath)) {
         if (publication.Metadata) {
             try {
                 const publicationMetadataJson = TAJSON.serialize(publication.Metadata);
-                publi.Metadata = TAJSON.deserialize<OPDSPublicationMetadata>(
-                    publicationMetadataJson, OPDSPublicationMetadata);
+                debug(publicationMetadataJson);
+                publi.Metadata = TAJSON.deserialize<Metadata>(
+                    publicationMetadataJson, Metadata);
             } catch (err) {
                 debug(err);
-                continue;
+                // continue;
+                return;
             }
         }
     }
