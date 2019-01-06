@@ -91,7 +91,7 @@
     "git-rev-sync": "^1.12.0",
     "json": "^9.0.6",
     "mkdirp": "^0.5.1",
-    "rimraf": "^2.6.2",
+    "rimraf": "^2.6.3",
     "sorcery": "^0.10.0",
     "tslint": "^5.12.0",
     "tslint-language-service": "^0.9.9",
