@@ -166,27 +166,24 @@ export function serverOPDS_local_feed(server: Server, topRouter: express.Applica
                 const doValidate = !reqparams.jsonPath || reqparams.jsonPath === "all";
                 if (doValidate) {
 
-                    // // tslint:disable-next-line:no-string-literal
-                    // if (jsonObj["@context"] && typeof jsonObj["@context"] === "string") {
-                    //     jsonObj["@context"] = [ jsonObj["@context"] ];
-                    // }
-
-                    // // tslint:disable-next-line:no-string-literal
-                    // jsonObj["@context"] = jsonObj["@context"][0];
-
-                    const jsonSchemasRootpath = path.join(process.cwd(), "misc/json-schema/opds");
+                    const jsonSchemasRootpath = path.join(process.cwd(), "misc", "json-schema");
                     const jsonSchemasNames = [
-                        "feed", // must be first!
-                        "acquisition-object",
-                        "feed-metadata",
-                        "link",
-                        "properties",
-                        "publication",
-                        "../webpub-manifest/subcollection",
-                        "../webpub-manifest/metadata",
-                        "../webpub-manifest/link",
-                        "../webpub-manifest/contributor",
-                        "../webpub-manifest/contributor-object",
+                        "opds/feed", // must be first!
+                        "opds/publication",
+                        "opds/acquisition-object",
+                        "opds/feed-metadata",
+                        "opds/properties",
+                        // "opds/authentication",
+                        "webpub-manifest/publication",
+                        "webpub-manifest/contributor-object",
+                        "webpub-manifest/contributor",
+                        "webpub-manifest/link",
+                        "webpub-manifest/metadata",
+                        "webpub-manifest/subcollection",
+                        "webpub-manifest/properties",
+                        "webpub-manifest/extensions/epub/metadata",
+                        "webpub-manifest/extensions/epub/subcollections",
+                        "webpub-manifest/extensions/epub/properties",
                     ];
 
                     const validationErrors =

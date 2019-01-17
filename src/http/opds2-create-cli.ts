@@ -56,7 +56,15 @@ if (fs.existsSync(opdsJsonFilePath)) {
     // TODO: what is the JSON-LD context URL?
     // https://drafts.opds.io/opds-2.0
     // https://github.com/opds-community/test-catalog/tree/master/2.0
-    feed.Context = ["http://opds-spec.org/opds.jsonld"];
+    // JSON SCHEMA:
+    // "@context": {
+    //     "type": ["string", "array"],
+    //     "items": {
+    //       "type": "string"
+    //     },
+    //     "uniqueItems": true
+    //   },
+    // feed.Context = ["http://opds-spec.org/opds.jsonld"];
 
     feed.Metadata = new OPDSMetadata();
     feed.Metadata.RDFType = "http://schema.org/DataFeed";

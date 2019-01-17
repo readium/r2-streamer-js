@@ -297,22 +297,24 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
                 const doValidate = !reqparams.jsonPath || reqparams.jsonPath === "all";
                 if (doValidate) {
 
-                    // // tslint:disable-next-line:no-string-literal
-                    // if (jsonObj["@context"] && typeof jsonObj["@context"] === "string") {
-                    //     jsonObj["@context"] = [ jsonObj["@context"] ];
-                    // }
-
-                    // // tslint:disable-next-line:no-string-literal
-                    // jsonObj["@context"] = jsonObj["@context"][0];
-
-                    const jsonSchemasRootpath = path.join(process.cwd(), "misc/json-schema/webpub-manifest");
+                    const jsonSchemasRootpath = path.join(process.cwd(), "misc", "json-schema");
                     const jsonSchemasNames = [
-                        "publication", // must be first!
-                        "contributor-object",
-                        "contributor",
-                        "link",
-                        "metadata",
-                        "subcollection",
+                        "webpub-manifest/publication", // must be first!
+                        "webpub-manifest/contributor-object",
+                        "webpub-manifest/contributor",
+                        "webpub-manifest/link",
+                        "webpub-manifest/metadata",
+                        "webpub-manifest/subcollection",
+                        "webpub-manifest/properties",
+                        "webpub-manifest/extensions/epub/metadata",
+                        "webpub-manifest/extensions/epub/subcollections",
+                        "webpub-manifest/extensions/epub/properties",
+                        // "opds/feed",
+                        // "opds/publication",
+                        "opds/acquisition-object",
+                        // "opds/feed-metadata",
+                        "opds/properties",
+                        // "opds/authentication",
                     ];
 
                     const validationErrors =

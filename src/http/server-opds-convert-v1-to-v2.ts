@@ -233,34 +233,25 @@ export function serverOPDS_convert_v1_to_v2(_server: Server, topRouter: express.
             const doValidate = !reqparams.jsonPath || reqparams.jsonPath === "all";
             if (doValidate) {
 
-                // // tslint:disable-next-line:no-string-literal
-                // if (jsonObj["@context"] && typeof jsonObj["@context"] === "string") {
-                //     jsonObj["@context"] = [ jsonObj["@context"] ];
-                // }
-
-                // // tslint:disable-next-line:no-string-literal
-                // jsonObj["@context"] = jsonObj["@context"][0];
-
-                const jsonSchemasRootpath = path.join(process.cwd(), "misc/json-schema/opds");
+                const jsonSchemasRootpath = path.join(process.cwd(), "misc", "json-schema");
                 const jsonSchemasNames = [
-                    "acquisition-object",
-                    "feed-metadata",
-                    "link",
-                    "properties",
-                    "publication",
-                    "../webpub-manifest/subcollection",
-                    "../webpub-manifest/metadata",
-                    "../webpub-manifest/link",
-                    "../webpub-manifest/contributor",
-                    "../webpub-manifest/contributor-object",
+                    opds2Publication ? "opds/publication" : "opds/feed", // must be first!
+                    !opds2Publication ? "opds/feed" : "opds/publication", // must be first!
+                    "opds/acquisition-object",
+                    "opds/feed-metadata",
+                    "opds/properties",
+                    // "opds/authentication",
+                    "webpub-manifest/publication",
+                    "webpub-manifest/contributor-object",
+                    "webpub-manifest/contributor",
+                    "webpub-manifest/link",
+                    "webpub-manifest/metadata",
+                    "webpub-manifest/subcollection",
+                    "webpub-manifest/properties",
+                    "webpub-manifest/extensions/epub/metadata",
+                    "webpub-manifest/extensions/epub/subcollections",
+                    "webpub-manifest/extensions/epub/properties",
                 ];
-                if (opds2Publication) { // isEntry
-                    jsonSchemasNames.splice(jsonSchemasNames.indexOf("publication"), 1);
-                    jsonSchemasNames.unshift("feed");
-                    jsonSchemasNames.unshift("publication"); // must be first!
-                } else {
-                    jsonSchemasNames.unshift("feed"); // must be first!
-                }
                 // debug(jsonSchemasNames);
 
                 const validationErrors =

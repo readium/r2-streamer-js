@@ -61,7 +61,8 @@ export function jsonSchemaValidate(
         // debug(bcp47RegEx);
 
         for (const jsonSchemaName of jsonSchemasNames) {
-            const jsonSchemaPath = path.join(jsonSchemasRootpath, jsonSchemaName + ".schema.json");
+            const jsonSchemaName_ = jsonSchemaName.replace(/\//g, path.sep);
+            const jsonSchemaPath = path.join(jsonSchemasRootpath, jsonSchemaName_ + ".schema.json");
 
             if (_cachedJsonSchemas[jsonSchemaPath]) {
                 continue;
@@ -123,7 +124,7 @@ export function jsonSchemaValidate(
                 // tslint:disable-next-line:no-string-literal
                 idRoot = jsonSchema["$id"];
             }
-
+            // debug(jsonSchema);
             // tslint:disable-next-line:no-string-literal
             ajv.addSchema(jsonSchema, jsonSchema["$id"]); // returns 'ajv' for chaining
         }
@@ -160,7 +161,7 @@ export function jsonSchemaValidate(
     } catch (err) {
         debug("JSON Schema VALIDATION PROBLEM.");
         debug(err);
-        return err;
+        return undefined;
     }
 
     return undefined;
