@@ -61,9 +61,6 @@
       }
     }
   },
-  "required": [
-    "href"
-  ],
   "if": {
     "properties": {
       "templated": {
