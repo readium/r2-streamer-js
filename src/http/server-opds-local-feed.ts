@@ -181,6 +181,8 @@ export function serverOPDS_local_feed(server: Server, topRouter: express.Applica
                         "webpub-manifest/metadata",
                         "webpub-manifest/subcollection",
                         "webpub-manifest/properties",
+                        "webpub-manifest/subject",
+                        "webpub-manifest/subject-object",
                         "webpub-manifest/extensions/epub/metadata",
                         "webpub-manifest/extensions/epub/subcollections",
                         "webpub-manifest/extensions/epub/properties",

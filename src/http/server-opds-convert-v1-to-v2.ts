@@ -248,6 +248,8 @@ export function serverOPDS_convert_v1_to_v2(_server: Server, topRouter: express.
                     "webpub-manifest/metadata",
                     "webpub-manifest/subcollection",
                     "webpub-manifest/properties",
+                    "webpub-manifest/subject",
+                    "webpub-manifest/subject-object",
                     "webpub-manifest/extensions/epub/metadata",
                     "webpub-manifest/extensions/epub/subcollections",
                     "webpub-manifest/extensions/epub/properties",
