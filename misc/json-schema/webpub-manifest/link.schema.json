@@ -27,7 +27,7 @@
         "array"
       ],
       "items": {
-        "title": "string"
+        "type": "string"
       }
     },
     "properties": {
@@ -55,12 +55,16 @@
       "exclusiveMinimum": 0
     },
     "children": {
+      "description": "Resources that are children of the linked resource, in the context of a given collection role",
       "type": "array",
       "items": {
         "$ref": "link.schema.json"
       }
     }
   },
+  "required": [
+    "href"
+  ],
   "if": {
     "properties": {
       "templated": {
