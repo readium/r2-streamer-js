@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://readium.org/lcp-specs/schema/lcpdf.schema.json",
+  "title": "LCP for PDF",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "https://readium.org/webpub-manifest/schema/publication.schema.json",
+    }
+    {
+      "description": "The readingOrder specified in manifest.json must strictly reference one or more PDF documents",
+      "properties": {
+        "readingOrder": {
+          "items": {
+            "properties": {
+              "type": {
+                "const": "application/pdf"
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

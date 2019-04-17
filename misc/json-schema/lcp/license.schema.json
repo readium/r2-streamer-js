@@ -1,0 +1,239 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://readium.org/lcp-specs/schema/license.schema.json",
+  "title": "Readium LCP v1.0",
+  "description": "Copyright (c) 2019 The Readium Foundation.",
+	"description": "Edited by DRMInside, 2016.",
+	"description": "Edited by L.Le Meur / EDRLab, 2017.",
+	"description": "Edited by H.Gardeur / Feedbooks, 2019.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "description": "Unique identifier for the License",
+      "type": "string"
+    },
+    "issued": {
+      "description": "Date when the license was first issued",
+      "type": "string",
+      "format": "date-time"
+    },
+    "provider": {
+      "description": "Unique identifier for the Provider",
+      "type": "string",
+      "format": "uri"
+    },
+    "updated": {
+      "description": "Date when the license was last updated",
+      "type": "string",
+      "format": "date-time"
+    },
+    "encryption": {
+      "description": "Information related to the encryption of the content",
+      "type": "object",
+      "properties": {
+        "profile": {
+          "description": "Identifies the Encryption Profile used by this LCP-protected Publication",
+          "type": "string",
+          "format": "uri"
+        },
+        "content_key": {
+          "type": "object",
+          "properties": {
+            "encrypted_value": {
+              "description": "Encrypted Content Key",
+              "type": "string",
+              "contentEncoding": "base64"
+            },
+            "algorithm": {
+              "description": "Algorithm used to encrypt the Content Key",
+              "type": "string",
+              "format": "uri"
+            }
+          },
+          "required": [
+            "encrypted_value",
+            "algorithm"
+          ]
+        },
+        "user_key": {
+          "type": "object",
+          "properties": {
+            "algorithm": {
+              "description": "Algorithm used to generate the User Key from the User Passphrase",
+              "type": "string",
+              "format": "uri"
+            },
+            "key_check": {
+              "description": "Used to verify that the Reading System has the correct User Key",
+              "type": "string",
+              "contentEncoding": "base64"
+            },
+            "text_hint": {
+              "description": "A hint to be displayed to the User to help them remember the User Passphrase",
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "algorithm",
+            "key_check",
+            "text_hint"
+          ]
+        },
+      },
+      "required": [
+        "profile",
+        "content_key",
+        "user_key"
+      ]
+    },
+    "links": {
+      "type": "array",
+      "items": {
+        "$ref": "link.schema.json"
+      },
+      "uniqueItems": true
+    },
+    "rights": {
+      "type": "object",
+      "properties": {
+        "print": {
+          "description": "Maximum number of pages that can be printed over the lifetime of the license",
+          "type": "integer",
+          "minimum": 0
+        },
+        "copy": {
+          "description": "Maximum number of characters that can be copied to the clipboard over the lifetime of the license",
+          "type": "integer",
+          "minimum": 0
+        },
+        "start": {
+          "description": "Date and time when the license begins",
+          "type": "string",
+          "format": "date-time"
+        },
+        "end": {
+          "description": "Date and time when the license ends",
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "user": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "Unique identifier for the User at a specific Provider",
+          "type": "string"
+        },
+        "email": {
+          "description": "The User’s e-mail address",
+          "type": "string"
+        },
+        "name": {
+          "description": "The User’s name",
+          "type": "string"
+        },
+        "encrypted": {
+          "description": "A list of which user object values are encrypted in this License Document",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "signature": {
+      "type": "object",
+      "properties": {
+        "algorithm": {
+          "description": "Algorithm used to calculate the signature",
+          "type": "string",
+          "format": "uri"
+        },
+        "certificate": {
+          "description": "The Provider Certificate: an X509 certificate used by the Content Provider",
+          "type": "string",
+          "contentEncoding": "base64"
+        },
+        "value": {
+          "description": "Value of the signature",
+          "type": "string",
+          "contentEncoding": "base64"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "algorithm",
+        "certificate",
+        "value"
+      ]
+    }
+  },
+  "required": [
+    "id",
+    "issued",
+    "provider",
+    "encryption",
+    "links",
+    "signature"
+  ],
+  "allOf": [
+    {
+      "description": "An LCP License MUST contain a link to a hint",
+      "properties": {
+        "links": {
+          "contains": {
+            "properties": {
+              "href": {
+                "format": "uri"
+              },
+              "rel": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "const": "hint"
+                  },
+                  {
+                    "type": "array",
+                    "contains": {
+                      "const": "hint"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "An LCP License MUST contain a link to a publication",
+      "properties": {
+        "links": {
+          "contains": {
+            "properties": {
+              "href": {
+                "format": "uri"
+              },
+              "rel": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "const": "publication"
+                  },
+                  {
+                    "type": "array",
+                    "contains": {
+                      "const": "publication"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}
