@@ -78,7 +78,7 @@
     "@types/morgan": "^1.7.35",
     "@types/node": "^8.10.46",
     "@types/request": "^2.48.1",
-    "@types/request-promise-native": "^1.0.15",
+    "@types/request-promise-native": "^1.0.16",
     "@types/tmp": "^0.1.0",
     "@types/uuid": "^3.4.3",
     "@types/xmldom": "^0.1.29",
@@ -95,7 +95,7 @@
     "sorcery": "^0.10.0",
     "tslint": "^5.16.0",
     "tslint-language-service": "^0.9.9",
-    "typescript": "^3.4.4",
+    "typescript": "^3.4.5",
     "uglify-es": "^3.3.10"
   },
   "main": "dist/es6-es2015/src/index.js",
