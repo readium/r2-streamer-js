@@ -50,13 +50,19 @@ export interface IServerOptions {
     disableDecryption?: boolean; /* excludes obfuscated fonts */
     disableRemotePubUrl?: boolean;
     disableOPDS?: boolean;
+    maxPrefetchLinks?: number;
 }
+
+// this ceiling value seems very arbitrary ... what would be a reasonable default value?
+// ... based on what metric, any particular HTTP server or client implementation?
+export const MAX_PREFETCH_LINKS = 10;
 
 export class Server {
     public readonly disableReaders: boolean;
     public readonly disableDecryption: boolean;
     public readonly disableRemotePubUrl: boolean;
     public readonly disableOPDS: boolean;
+    public readonly maxPrefetchLinks: number;
 
     public readonly lcpBeginToken = "*-";
     public readonly lcpEndToken = "-*";
@@ -81,6 +87,9 @@ export class Server {
         this.disableDecryption = options && options.disableDecryption ? options.disableDecryption : false;
         this.disableRemotePubUrl = options && options.disableRemotePubUrl ? options.disableRemotePubUrl : false;
         this.disableOPDS = options && options.disableOPDS ? options.disableOPDS : false;
+
+        // note: zero not allowed (fallback to default MAX_PREFETCH_LINKS). use -1 to disable ceiling value.
+        this.maxPrefetchLinks = options && options.maxPrefetchLinks ? options.maxPrefetchLinks : MAX_PREFETCH_LINKS;
 
         this.publications = [];
         this.pathPublicationMap = {};

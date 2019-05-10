@@ -83,7 +83,9 @@ if (stats.isDirectory() && (isAnEPUB !== EPUBis.LocalExploded)) {
             .paths(filePath)
             .ext([".epub", ".epub3", ".cbz"])
             .find();
-        const server = new Server();
+        const server = new Server({
+            maxPrefetchLinks: 10, // that's the default, see server.ts MAX_PREFETCH_LINKS
+        });
         server.preventRobots();
         server.addPublications(files);
         const url = await server.start(0, false);
@@ -110,7 +112,9 @@ if (stats.isDirectory() && (isAnEPUB !== EPUBis.LocalExploded)) {
 } else {
     // tslint:disable-next-line:no-floating-promises
     (async () => {
-        const server = new Server();
+        const server = new Server({
+            maxPrefetchLinks: 10, // that's the default, see server.ts MAX_PREFETCH_LINKS
+        });
         server.preventRobots();
         server.addPublications([filePath]);
         const url = await server.start(0, false);
