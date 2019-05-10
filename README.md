@@ -148,6 +148,7 @@ const server = new Server({
   disableOPDS: true, // deactivates the HTTP routes for the OPDS "micro services" (browser, converter)
   disableReaders: true, // deactivates the built-in "readers" for ReadiumWebPubManifest (HTTP static host / route).
   disableRemotePubUrl: true, // deactivates the HTTP route for loading a remote publication.
+  maxPrefetchLinks: 5, // Link HTTP header, with rel = prefetch, see server.ts MAX_PREFETCH_LINKS (default = 10)
 });
 
 // First parameter: port number, zero means default (3000),
