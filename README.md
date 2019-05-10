@@ -125,7 +125,8 @@ Command line steps (NPM, but similar with YARN):
 4) `npm install`, or alternatively `npm ci` (both commands initialize the `node_modules` tree of package dependencies, based on the strict `package-lock.json` definition)
 5) `npm run build:all` (invoke the main build script: clean, lint, compile)
 6) `ls dist` (that's the build output which gets published as NPM package)
-7) `npm run server-debug PATH_TO_EPUB_OR_DIR` (path is relative or absolute)
+7) `npm run server-debug -- PATH_TO_EPUB_OR_DIR " -1"` (ES8-2017 dist, path is relative or absolute, -1 means no limits for HTTP header prefetch Links)
+8) or: `npm run start -- 99` (ES6-2015 dist, default `./misc/epubs` folder, the 99 value overrides the default maximum number of HTTP header prefetch Links)
 
 ## Documentation
 

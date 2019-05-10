@@ -20,7 +20,7 @@ import { EPUBis, isEPUBlication } from "@r2-shared-js/parser/epub";
 import * as debug_ from "debug";
 import * as filehound from "filehound";
 
-import { Server } from "./server";
+import { MAX_PREFETCH_LINKS, Server } from "./server";
 
 initGlobalConverters_OPDS();
 initGlobalConverters_SHARED();
@@ -70,6 +70,24 @@ if (!stats.isFile() && !stats.isDirectory()) {
     process.exit(1);
 }
 
+let maxPrefetchLinks = MAX_PREFETCH_LINKS;
+if (args[1]) {
+    args[1] = args[1].trim();
+    if (args[1].length && args[1][0] === "-") {
+        maxPrefetchLinks = -1;
+    } else {
+        try {
+            maxPrefetchLinks = parseInt(args[1], 10);
+        } catch (err) {
+            debug(err);
+        }
+        if (isNaN(maxPrefetchLinks)) {
+            maxPrefetchLinks = MAX_PREFETCH_LINKS;
+        }
+    }
+}
+debug(`maxPrefetchLinks: ${maxPrefetchLinks}`);
+
 const isAnEPUB = isEPUBlication(filePath);
 
 if (stats.isDirectory() && (isAnEPUB !== EPUBis.LocalExploded)) {
@@ -84,7 +102,7 @@ if (stats.isDirectory() && (isAnEPUB !== EPUBis.LocalExploded)) {
             .ext([".epub", ".epub3", ".cbz"])
             .find();
         const server = new Server({
-            maxPrefetchLinks: 10, // that's the default, see server.ts MAX_PREFETCH_LINKS
+            maxPrefetchLinks,
         });
         server.preventRobots();
         server.addPublications(files);
@@ -113,7 +131,7 @@ if (stats.isDirectory() && (isAnEPUB !== EPUBis.LocalExploded)) {
     // tslint:disable-next-line:no-floating-promises
     (async () => {
         const server = new Server({
-            maxPrefetchLinks: 10, // that's the default, see server.ts MAX_PREFETCH_LINKS
+            maxPrefetchLinks,
         });
         server.preventRobots();
         server.addPublications([filePath]);
