@@ -45,7 +45,7 @@
     cpy ./dist/bundle-#ECMASCRIPT#/server-cli.js.map ./dist/bundle-#ECMASCRIPT#/ --rename=server-cli-.js.map &&
     json -I -f ./dist/bundle-#ECMASCRIPT#/server-cli-.js.map -e "this.sourcesContent=false" &&
 
-    uglifyjs
+    terser
       ./dist/bundle-#ECMASCRIPT#/server-cli.js
       --output
       ./dist/bundle-#ECMASCRIPT#/server-cli.min.js
@@ -54,7 +54,7 @@
       --keep-classnames
       --keep-fnames
       --beautify
-      "beautify=false,preserve_line=false,indent_level=0"
+      "beautify=false,ecma=6,indent_level=0"
       --source-map
       "root=\'\',url=\'server-cli.min.js.map\',content=\'./dist/bundle-#ECMASCRIPT#/server-cli-.js.map\'" &&
 
