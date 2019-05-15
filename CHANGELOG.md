@@ -1,10 +1,28 @@
 # Next
 
 Git diff:
-* https://github.com/readium/r2-streamer-js/compare/v1.0.12...develop
+* https://github.com/readium/r2-streamer-js/compare/v1.0.13...develop
 
 Changes:
 * TODO
+
+# 1.0.13
+
+> Build environment: NodeJS `10.15.3`, NPM `6.9.0`
+
+Changes:
+* rel=prefetch HTTP header Links now generated based on ordered sequence of supported media types, rather than order of authored JSON resource array / EPUB manifest items (fixed limitation still applies: maximum number of headers).
+* Build env update: switched from `uglify-es` to `terser` (ECMAScript-2015 / ES6 minifier for optional bundled app scripts)
+
+Git revision info:
+* https://unpkg.com/r2-streamer-js@1.0.13/dist/gitrev.json
+* https://github.com/edrlab/r2-streamer-js-dist/blob/v1.0.13/dist/gitrev.json
+
+Git commit history:
+* https://github.com/readium/r2-streamer-js/commits/v1.0.13
+
+Git diff:
+* https://github.com/readium/r2-streamer-js/compare/v1.0.12...v1.0.13
 
 # 1.0.12
 
