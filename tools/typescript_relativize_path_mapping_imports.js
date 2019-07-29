@@ -120,7 +120,7 @@ for (dirPath of dirPaths) {
 
                 const regex2 = new RegExp(pathMappingsKey, "g");
                 let regex2Match = regex2.exec(regex1Match[2]);
-                if (!regex2Match) {
+                if (!regex2Match || !regex2Match[1]) {
                     continue; // return;
                 }
 

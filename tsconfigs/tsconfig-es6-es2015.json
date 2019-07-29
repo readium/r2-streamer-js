@@ -11,6 +11,9 @@
       "dom.iterable"
     ],
     "paths": {
+      "filehound": [
+        "src/noop.d.ts"
+      ],
       "@r2-opds-js/*": [
         "node_modules/r2-opds-js/dist/es6-es2015/src/*"
       ],
