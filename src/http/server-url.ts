@@ -71,7 +71,7 @@ export function serverRemotePub(_server: Server, topRouter: express.Application)
         // }
         debug(urlDecoded);
 
-        const urlDecodedBase64 = encodeURIComponent_RFC3986(new Buffer(urlDecoded).toString("base64"));
+        const urlDecodedBase64 = encodeURIComponent_RFC3986(Buffer.from(urlDecoded).toString("base64"));
         const redirect = req.originalUrl.substr(0,
             req.originalUrl.indexOf(serverRemotePub_PATH + "/"))
             + "/pub/" + urlDecodedBase64 + "/";

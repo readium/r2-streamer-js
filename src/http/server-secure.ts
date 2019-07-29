@@ -44,7 +44,7 @@ export function serverSecureHTTPHeader(server: Server, url: string): IHTTPHeader
         // milliseconds since epoch (midnight, 1 Jan 1970)
         const now = Date.now(); // +new Date()
         const jsonStr = `{"url":"${url}","time":${now}}`;
-        // const jsonBuff = new Buffer(jsonStr, "utf8");
+        // const jsonBuff = Buffer.from(jsonStr, "utf8");
         const buff1 = encryptStream.update(jsonStr, "utf8"); // jsonBuff
         if (buff1) {
             encrypteds.push(buff1);
@@ -55,7 +55,7 @@ export function serverSecureHTTPHeader(server: Server, url: string): IHTTPHeader
         }
         const encrypted = Buffer.concat(encrypteds);
 
-        const base64 = new Buffer(encrypted).toString("base64");
+        const base64 = Buffer.from(encrypted).toString("base64");
 
         if (IS_DEV) {
             const t2 = process.hrtime(t1);
@@ -116,7 +116,7 @@ export function serverSecure(server: Server, topRouter: express.Application) {
 
             const base64Val = req.get("X-" + serverData.trustCheck);
             if (base64Val) {
-                const decodedVal = new Buffer(base64Val, "base64"); // .toString("utf8");
+                const decodedVal = Buffer.from(base64Val, "base64"); // .toString("utf8");
 
                 // const AES_BLOCK_SIZE = 16;
                 // const iv = decodedVal.slice(0, AES_BLOCK_SIZE);

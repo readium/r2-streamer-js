@@ -35,7 +35,7 @@ export function serverRoot(server: Server, topRouter: express.Application) {
 <body>
 <h1>Local Publications</h1>
 ${server.getPublications().map((pub) => {
-                const filePathBase64 = new Buffer(pub).toString("base64");
+                const filePathBase64 = Buffer.from(pub).toString("base64");
                 return `\
 <h2><a href=".${serverPub_PATH}/${encodeURIComponent_RFC3986(filePathBase64)}">\
 ${isHTTP(pub) ? pub : path.basename(pub)}\

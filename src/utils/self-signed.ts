@@ -53,12 +53,12 @@ export async function generateSelfSignedData(): Promise<CertificateData> {
             // const hash = checkSum.digest("hex").toUpperCase();
             const salt = crypto.randomBytes(16).toString("hex");
             const hash = crypto.pbkdf2Sync(password, salt, 1000, 32, "sha256").toString("hex");
-            (keys as CertificateData).trustKey = new Buffer(hash, "hex");
+            (keys as CertificateData).trustKey = Buffer.from(hash, "hex");
 
             (keys as CertificateData).trustCheck = uuid.v4();
 
             const AES_BLOCK_SIZE = 16;
-            const ivBuff = new Buffer(uuid.v4());
+            const ivBuff = Buffer.from(uuid.v4());
             const iv = ivBuff.slice(0, AES_BLOCK_SIZE);
             (keys as CertificateData).trustCheckIV = iv;
 

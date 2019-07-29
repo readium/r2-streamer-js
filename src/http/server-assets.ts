@@ -56,7 +56,7 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
 
             // reqparams.pathBase64 is already decoded!
             // const decoded = decodeURIComponent(reqparams.pathBase64);
-            const pathBase64Str = new Buffer(reqparams.pathBase64, "base64").toString("utf8");
+            const pathBase64Str = Buffer.from(reqparams.pathBase64, "base64").toString("utf8");
 
             // const fileName = path.basename(pathBase64Str);
             // const ext = path.extname(fileName).toLowerCase();
