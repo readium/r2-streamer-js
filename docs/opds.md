@@ -167,7 +167,7 @@ http://chitanka.info/catalog.opds
 https://readium2.herokuapp.com/opds-v1-browse/http%3A%2F%2Fchitanka.info%2Fcatalog.opds
 
 GITBOOK:
-https://www.gitbook.com/api/opds/catalog.atom
+https://api.gitbook.com/opds/catalog.atom
 =>
 https://readium2.herokuapp.com/opds-v1-browse/https%3A%2F%2Fwww.gitbook.com%2Fapi%2Fopds%2Fcatalog.atom%20
 
