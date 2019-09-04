@@ -47,7 +47,7 @@
   "homepage": "https://github.com/readium/r2-streamer-js",
   "dependencies": {
     "ajv": "^6.10.2",
-    "css2json": "^0.0.4",
+    "css2json": "^1.0.0",
     "debug": "^4.1.1",
     "dot-prop": "^5.1.0",
     "express": "^4.17.1",
