@@ -61,7 +61,7 @@ export function serverMediaOverlays(server: Server, routerPathBase64: express.Ro
     routerMediaOverlays.get(["/", "/" + _show + "/:" + mediaOverlayURLParam + "?"],
         async (req: express.Request, res: express.Response) => {
 
-            const reqparams = req.params as IRequestPayloadExtension;
+            const reqparams = (req as IRequestPayloadExtension).params;
 
             if (!reqparams.pathBase64) {
                 reqparams.pathBase64 = (req as IRequestPayloadExtension).pathBase64;

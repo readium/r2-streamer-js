@@ -63,7 +63,7 @@ export function serverOPDS_local_feed(server: Server, topRouter: express.Applica
     routerOPDS_local_feed.get(["/", "/" + _show + "/:" + _jsonPath + "?"],
         (req: express.Request, res: express.Response) => {
 
-            const reqparams = req.params as IRequestPayloadExtension;
+            const reqparams = (req as IRequestPayloadExtension).params;
 
             const isShow = req.url.indexOf("/show") >= 0 || (req.query as IRequestQueryParams).show;
             if (!reqparams.jsonPath && (req.query as IRequestQueryParams).show) {

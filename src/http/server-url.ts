@@ -59,7 +59,7 @@ export function serverRemotePub(_server: Server, topRouter: express.Application)
 
     routerUrl.get("/:" + _urlEncoded + "(*)", (req: express.Request, res: express.Response) => {
 
-        const reqparams = req.params as IRequestPayloadExtension;
+        const reqparams = (req as IRequestPayloadExtension).params;
 
         if (!reqparams.urlEncoded) {
             reqparams.urlEncoded = (req as IRequestPayloadExtension).urlEncoded;

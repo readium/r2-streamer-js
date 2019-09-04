@@ -59,7 +59,7 @@ export function serverPub(server: Server, topRouter: express.Application): expre
 
     routerPathBase64.param("pathBase64", (req, res, next, value, _name) => {
 
-        const reqparams = req.params as IRequestPayloadExtension;
+        const reqparams = (req as IRequestPayloadExtension).params;
 
         if (value.indexOf(server.lcpBeginToken) === 0 && value.indexOf(server.lcpEndToken) > 0) {
             const i = value.indexOf(server.lcpEndToken);
@@ -102,7 +102,7 @@ export function serverPub(server: Server, topRouter: express.Application): expre
 
     routerPathBase64.get("/:" + _pathBase64, (req: express.Request, res: express.Response) => {
 
-        const reqparams = req.params as IRequestPayloadExtension;
+        const reqparams = (req as IRequestPayloadExtension).params;
 
         if (!reqparams.pathBase64) {
             reqparams.pathBase64 = (req as IRequestPayloadExtension).pathBase64;

@@ -68,7 +68,7 @@ export function serverOPDS_browse_v2(_server: Server, topRouter: express.Applica
 
     routerOPDS_browse_v2.get("/:" + _urlEncoded + "(*)", async (req: express.Request, res: express.Response) => {
 
-        const reqparams = req.params as IRequestPayloadExtension;
+        const reqparams = (req as IRequestPayloadExtension).params;
 
         if (!reqparams.urlEncoded) {
             reqparams.urlEncoded = (req as IRequestPayloadExtension).urlEncoded;

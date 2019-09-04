@@ -51,7 +51,7 @@ export function serverVersion(server: Server, topRouter: express.Application) {
     topRouter.get([serverVersion_PATH, serverVersion_PATH + "/" + _show + "/:" + _jsonPath + "?"],
     (req: express.Request, res: express.Response) => {
 
-        const reqparams = req.params as IRequestPayloadExtension;
+        const reqparams = (req as IRequestPayloadExtension).params;
 
         const isShow = req.url.indexOf("/show") >= 0 || (req.query as IRequestQueryParams).show;
         if (!reqparams.jsonPath && (req.query as IRequestQueryParams).show) {
