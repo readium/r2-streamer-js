@@ -5,11 +5,10 @@
 // that can be found in the LICENSE file exposed on Github (readium) in the project repository.
 // ==LICENSE-END==
 
-import * as fs from "fs";
-import * as path from "path";
-
 import * as Ajv from "ajv";
 import * as debug_ from "debug";
+import * as fs from "fs";
+import * as path from "path";
 
 const debug = debug_("r2:streamer#utils/json-schema-validate");
 

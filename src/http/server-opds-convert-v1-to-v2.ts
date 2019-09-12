@@ -5,27 +5,31 @@
 // that can be found in the LICENSE file exposed on Github (readium) in the project repository.
 // ==LICENSE-END==
 
-import * as path from "path";
-
-import { convertOpds1ToOpds2, convertOpds1ToOpds2_EntryToPublication } from "@r2-opds-js/opds/converter";
-import { OPDS } from "@r2-opds-js/opds/opds1/opds";
-import { Entry } from "@r2-opds-js/opds/opds1/opds-entry";
-import { OPDSFeed } from "@r2-opds-js/opds/opds2/opds2";
-import { OPDSPublication } from "@r2-opds-js/opds/opds2/opds2-publication";
-import { encodeURIComponent_RFC3986, ensureAbsolute, isHTTP } from "@r2-utils-js/_utils/http/UrlUtils";
-import { traverseJsonObjects } from "@r2-utils-js/_utils/JsonUtils";
-import { streamToBufferPromise } from "@r2-utils-js/_utils/stream/BufferUtils";
-import { XML } from "@r2-utils-js/_utils/xml-js-mapper";
 import * as css2json from "css2json";
 import * as debug_ from "debug";
 import * as DotProp from "dot-prop";
 import * as express from "express";
 import * as jsonMarkup from "json-markup";
 import * as morgan from "morgan";
+import * as path from "path";
 import * as request from "request";
 import * as requestPromise from "request-promise-native";
 import { JSON as TAJSON } from "ta-json-x";
 import * as xmldom from "xmldom";
+
+import {
+    convertOpds1ToOpds2, convertOpds1ToOpds2_EntryToPublication,
+} from "@r2-opds-js/opds/converter";
+import { OPDS } from "@r2-opds-js/opds/opds1/opds";
+import { Entry } from "@r2-opds-js/opds/opds1/opds-entry";
+import { OPDSFeed } from "@r2-opds-js/opds/opds2/opds2";
+import { OPDSPublication } from "@r2-opds-js/opds/opds2/opds2-publication";
+import {
+    encodeURIComponent_RFC3986, ensureAbsolute, isHTTP,
+} from "@r2-utils-js/_utils/http/UrlUtils";
+import { traverseJsonObjects } from "@r2-utils-js/_utils/JsonUtils";
+import { streamToBufferPromise } from "@r2-utils-js/_utils/stream/BufferUtils";
+import { XML } from "@r2-utils-js/_utils/xml-js-mapper";
 
 import { jsonSchemaValidate } from "../utils/json-schema-validate";
 import { IRequestPayloadExtension, _urlEncoded } from "./request-ext";

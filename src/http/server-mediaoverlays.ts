@@ -6,22 +6,19 @@
 // ==LICENSE-END==
 
 import * as crypto from "crypto";
-import * as path from "path";
-
-import { Publication } from "@r2-shared-js/models/publication";
-import {
-    getAllMediaOverlays,
-    getMediaOverlay,
-    mediaOverlayURLParam,
-    mediaOverlayURLPath,
-} from "@r2-shared-js/parser/epub";
-import { encodeURIComponent_RFC3986, isHTTP } from "@r2-utils-js/_utils/http/UrlUtils";
-import { sortObject, traverseJsonObjects } from "@r2-utils-js/_utils/JsonUtils";
 import * as css2json from "css2json";
 import * as debug_ from "debug";
 import * as express from "express";
 import * as jsonMarkup from "json-markup";
+import * as path from "path";
 import { JSON as TAJSON } from "ta-json-x";
+
+import { Publication } from "@r2-shared-js/models/publication";
+import {
+    getAllMediaOverlays, getMediaOverlay, mediaOverlayURLParam, mediaOverlayURLPath,
+} from "@r2-shared-js/parser/epub";
+import { encodeURIComponent_RFC3986, isHTTP } from "@r2-utils-js/_utils/http/UrlUtils";
+import { sortObject, traverseJsonObjects } from "@r2-utils-js/_utils/JsonUtils";
 
 import { IRequestPayloadExtension, IRequestQueryParams, _pathBase64, _show } from "./request-ext";
 import { Server } from "./server";

@@ -6,15 +6,16 @@
 // ==LICENSE-END==
 
 import * as crypto from "crypto";
-import * as fs from "fs";
-import * as path from "path";
-
 import * as css2json from "css2json";
 import * as debug_ from "debug";
 import * as express from "express";
+import * as fs from "fs";
 import * as jsonMarkup from "json-markup";
+import * as path from "path";
 
-import { IRequestPayloadExtension, IRequestQueryParams, _jsonPath, _show, _urlEncoded } from "./request-ext";
+import {
+    IRequestPayloadExtension, IRequestQueryParams, _jsonPath, _show, _urlEncoded,
+} from "./request-ext";
 import { Server } from "./server";
 
 const debug = debug_("r2:streamer#http/server-version");

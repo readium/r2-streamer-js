@@ -5,6 +5,9 @@
 // that can be found in the LICENSE file exposed on Github (readium) in the project repository.
 // ==LICENSE-END==
 
+import * as debug_ from "debug";
+import * as express from "express";
+import * as mime from "mime-types";
 import * as path from "path";
 
 import { Publication } from "@r2-shared-js/models/publication";
@@ -13,9 +16,6 @@ import { Transformers } from "@r2-shared-js/transform/transformer";
 import { parseRangeHeader } from "@r2-utils-js/_utils/http/RangeUtils";
 import { streamToBufferPromise } from "@r2-utils-js/_utils/stream/BufferUtils";
 import { IStreamAndLength, IZip } from "@r2-utils-js/_utils/zip/zip";
-import * as debug_ from "debug";
-import * as express from "express";
-import * as mime from "mime-types";
 
 import { IRequestPayloadExtension, IRequestQueryParams, _asset, _pathBase64 } from "./request-ext";
 import { Server } from "./server";

@@ -5,11 +5,11 @@
 // that can be found in the LICENSE file exposed on Github (readium) in the project repository.
 // ==LICENSE-END==
 
+import * as express from "express";
+import { html as beautifyHtml } from "js-beautify";
 import * as path from "path";
 
 import { encodeURIComponent_RFC3986, isHTTP } from "@r2-utils-js/_utils/http/UrlUtils";
-import * as express from "express";
-import { html as beautifyHtml } from "js-beautify";
 
 import { _jsonPath, _show, _urlEncoded } from "./request-ext";
 import { Server } from "./server";

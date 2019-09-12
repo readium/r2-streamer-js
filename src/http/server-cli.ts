@@ -5,20 +5,17 @@
 // that can be found in the LICENSE file exposed on Github (readium) in the project repository.
 // ==LICENSE-END==
 
+import * as debug_ from "debug";
+import * as filehound from "filehound";
 import * as fs from "fs";
 import * as path from "path";
 
 import { setLcpNativePluginPath } from "@r2-lcp-js/parser/epub/lcp";
+import { initGlobalConverters_OPDS } from "@r2-opds-js/opds/init-globals";
 import {
-    initGlobalConverters_OPDS,
-} from "@r2-opds-js/opds/init-globals";
-import {
-    initGlobalConverters_GENERIC,
-    initGlobalConverters_SHARED,
+    initGlobalConverters_GENERIC, initGlobalConverters_SHARED,
 } from "@r2-shared-js/init-globals";
 import { EPUBis, isEPUBlication } from "@r2-shared-js/parser/epub";
-import * as debug_ from "debug";
-import * as filehound from "filehound";
 
 import { MAX_PREFETCH_LINKS, Server } from "./server";
 
