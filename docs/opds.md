@@ -219,7 +219,7 @@ http://readium2.herokuapp.com/opds-v1-v2-convert/http%3A%2F%2Fopoto-ed.org%2Fcat
 WMFLABS WIKISOURCE:
 https://tools.wmflabs.org/wsexport/wikisource-fr-good.atom
 =>
-http://readium2.herokuapp.com/opds-v1-v2-convert/https://tools.wmflabs.org/wsexport/wikisource-fr-good.atom
+http://readium2.herokuapp.com/opds-v1-v2-convert/https%3A%2F%2Ftools.wmflabs.org%2Fwsexport%2Fwikisource-fr-good.atom
 
 ## OPDS 2.0
 
