@@ -349,12 +349,18 @@ export function serverOPDS_convert_v1_to_v2(_server: Server, topRouter: express.
                 "</body></html>");
         };
 
+        const headers = {
+            "Accept": "application/json,application/xml",
+            "Accept-Language": "en-UK,en-US;q=0.7,en;q=0.5",
+            "User-Agent": "READIUM2",
+        };
+
         // No response streaming! :(
         // https://github.com/request/request-promise/issues/90
         const needsStreamingResponse = true;
         if (needsStreamingResponse) {
             request.get({
-                headers: {},
+                headers,
                 method: "GET",
                 uri: urlDecoded,
             })
@@ -365,7 +371,7 @@ export function serverOPDS_convert_v1_to_v2(_server: Server, topRouter: express.
             try {
                 // tslint:disable-next-line:await-promise no-floating-promises
                 response = await requestPromise({
-                    headers: {},
+                    headers,
                     method: "GET",
                     resolveWithFullResponse: true,
                     uri: urlDecoded,
