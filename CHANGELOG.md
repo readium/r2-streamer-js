@@ -1,10 +1,29 @@
 # Next
 
 Git diff:
-* https://github.com/readium/r2-streamer-js/compare/v1.0.18...develop
+* https://github.com/readium/r2-streamer-js/compare/v1.0.19...develop
 
 Changes:
 * TODO
+
+# 1.0.19
+
+> Build environment: NodeJS `10.16.3`, NPM `6.12.0`
+
+Changes:
+* HTTP request headers for OPDS fetch, as some servers reject missing UserAgent, etc.
+* Added 3 new test OPDS feeds in documentation
+* NPM updates (including NodeJS v12 for Electron v6)
+
+Git revision info:
+* https://unpkg.com/r2-streamer-js@1.0.19/dist/gitrev.json
+* https://github.com/edrlab/r2-streamer-js-dist/blob/v1.0.19/dist/gitrev.json
+
+Git commit history:
+* https://github.com/readium/r2-streamer-js/commits/v1.0.19
+
+Git diff:
+* https://github.com/readium/r2-streamer-js/compare/v1.0.18...v1.0.19
 
 # 1.0.18
 
