@@ -1,10 +1,27 @@
 # Next
 
 Git diff:
-* https://github.com/readium/r2-streamer-js/compare/v1.0.19...develop
+* https://github.com/readium/r2-streamer-js/compare/v1.0.20...develop
 
 Changes:
 * TODO
+
+# 1.0.20
+
+> Build environment: NodeJS `12.13.0`, NPM `6.12.0`
+
+Changes:
+* NPM updates
+
+Git revision info:
+* https://unpkg.com/r2-streamer-js@1.0.20/dist/gitrev.json
+* https://github.com/edrlab/r2-streamer-js-dist/blob/v1.0.20/dist/gitrev.json
+
+Git commit history:
+* https://github.com/readium/r2-streamer-js/commits/v1.0.20
+
+Git diff:
+* https://github.com/readium/r2-streamer-js/compare/v1.0.19...v1.0.20
 
 # 1.0.19
 
