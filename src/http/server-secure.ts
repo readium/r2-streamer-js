@@ -83,6 +83,11 @@ export function serverSecure(server: Server, topRouter: express.Application) {
             return;
         }
 
+        if (req.method.toLowerCase() === "options") {
+            next();
+            return;
+        }
+
         // let ua = req.get("user-agent");
         // if (ua) {
         //     ua = ua.toLowerCase();

@@ -24,7 +24,35 @@ import { serverVersion_PATH } from "./server-version";
 // import * as debug_ from "debug";
 // const debug = debug_("r2:streamer#http/server-root");
 
+// const IS_DEV = (process.env.NODE_ENV === "development" || process.env.NODE_ENV === "dev");
+
 export function serverRoot(server: Server, topRouter: express.Application) {
+
+    topRouter.options("*", (_req: express.Request, res: express.Response) => {
+
+        // console.log(req.url);
+
+        // Object.keys(req.headers).forEach((header: string) => {
+        //     console.log(header + " => " + req.headers[header]);
+        // });
+
+        server.setResponseCORS(res);
+
+        const serverData = server.serverInfo();
+        if (serverData && serverData.trustKey &&
+            serverData.trustCheck && serverData.trustCheckIV) {
+
+            res.setHeader("Access-Control-Allow-Headers",
+                (res.getHeader("Access-Control-Allow-Headers") as string).toString() +
+                ", X-" + serverData.trustCheck); // access-control-request-headers
+        }
+
+        // Object.keys(res.getHeaders()).forEach((header: string) => {
+        //     console.log(header + " => " + res.getHeaders()[header]);
+        // });
+
+        res.status(200).end();
+    });
 
     topRouter.get("/", (_req: express.Request, res: express.Response) => {
 

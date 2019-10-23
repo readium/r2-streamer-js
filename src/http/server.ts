@@ -275,16 +275,16 @@ Disallow: /
         res.setHeader("Access-Control-Allow-Origin",
             "*");
 
-        // TODO: should this only be set for preflight requests,
-        // i.e. req.method === "OPTIONS"?
         res.setHeader("Access-Control-Allow-Methods",
             "GET, HEAD, OPTIONS"); // POST, DELETE, PUT, PATCH
 
         res.setHeader("Access-Control-Allow-Headers",
-            "Content-Type, Content-Length, Accept-Ranges, Content-Range, Range, Link, Transfer-Encoding");
+            // tslint:disable-next-line:max-line-length
+            "Content-Type, Content-Length, Accept-Ranges, Content-Range, Range, Link, Transfer-Encoding, X-Requested-With, Authorization, Accept, Origin, User-Agent, DNT, Cache-Control, Keep-Alive, If-Modified-Since");
 
         res.setHeader("Access-Control-Expose-Headers",
-            "Content-Type, Content-Length, Accept-Ranges, Content-Range, Range, Link, Transfer-Encoding");
+            // tslint:disable-next-line:max-line-length
+            "Content-Type, Content-Length, Accept-Ranges, Content-Range, Range, Link, Transfer-Encoding, X-Requested-With, Authorization, Accept, Origin, User-Agent, DNT, Cache-Control, Keep-Alive, If-Modified-Since");
     }
 
     public addPublications(pubs: string[]): string[] {
