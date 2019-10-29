@@ -10,6 +10,7 @@ import * as express from "express";
 import * as mime from "mime-types";
 import * as path from "path";
 
+import { zipHasEntry } from "@r2-shared-js/_utils/zipHasEntry";
 import { Publication } from "@r2-shared-js/models/publication";
 import { Link } from "@r2-shared-js/models/publication-link";
 import { Transformers } from "@r2-shared-js/transform/transformer";
@@ -85,7 +86,7 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
 
             const pathInZip = reqparams.asset;
 
-            if (!zip.hasEntry(pathInZip)) {
+            if (!zipHasEntry(zip, pathInZip, undefined)) {
                 const err = "Asset not in zip! " + pathInZip;
                 debug(err);
                 res.status(500).send("<html><body><p>Internal Server Error</p><p>"
