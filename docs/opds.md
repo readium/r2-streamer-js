@@ -16,6 +16,9 @@ The EPUB files referenced from the OPDS feeds are remotely accessed using HTTP p
 
 ## A selection of public OPDS feeds:
 
+NYPL registry (OPDS2):
+https://libraryregistry.librarysimplified.org/libraries
+
 NYPL INSTANT CLASSICS:
 https://instantclassics.librarysimplified.org/index.xml
 =>
