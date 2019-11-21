@@ -5,29 +5,66 @@
 // that can be found in the LICENSE file exposed on Github (readium) in the project repository.
 // ==LICENSE-END==
 
+import * as css2json from "css2json";
 import * as debug_ from "debug";
+import * as DotProp from "dot-prop";
 import * as express from "express";
+import * as jsonMarkup from "json-markup";
 import * as morgan from "morgan";
+import * as path from "path";
 import * as request from "request";
 import * as requestPromise from "request-promise-native";
-import * as xmldom from "xmldom";
 
-import { OPDS } from "@r2-opds-js/opds/opds1/opds";
-import { Entry } from "@r2-opds-js/opds/opds1/opds-entry";
-import { encodeURIComponent_RFC3986, ensureAbsolute } from "@r2-utils-js/_utils/http/UrlUtils";
+import { TaJsonDeserialize, TaJsonSerialize } from "@r2-lcp-js/serializable";
+import { OPDSFeed } from "@r2-opds-js/opds/opds2/opds2";
+import { OPDSAuthenticationDoc } from "@r2-opds-js/opds/opds2/opds2-authentication-doc";
+import { OPDSPublication } from "@r2-opds-js/opds/opds2/opds2-publication";
+import {
+    encodeURIComponent_RFC3986, ensureAbsolute, isHTTP,
+} from "@r2-utils-js/_utils/http/UrlUtils";
+import { traverseJsonObjects } from "@r2-utils-js/_utils/JsonUtils";
 import { streamToBufferPromise } from "@r2-utils-js/_utils/stream/BufferUtils";
-import { XML } from "@r2-utils-js/_utils/xml-js-mapper";
 
+import { jsonSchemaValidate } from "../utils/json-schema-validate";
 import { IRequestPayloadExtension, _urlEncoded } from "./request-ext";
 import { Server } from "./server";
+import { serverOPDS_convert_v1_to_v2_PATH } from "./server-opds-convert-v1-to-v2";
 import { trailingSlashRedirect } from "./server-trailing-slash-redirect";
-import { serverRemotePub_PATH } from "./server-url";
 
 const debug = debug_("r2:streamer#http/server-opds-browse-v2");
 
 // tslint:disable-next-line:variable-name
 export const serverOPDS_browse_v2_PATH = "/opds-v2-browse";
+
+// tslint:disable-next-line:variable-name
+export const serverOPDS_dataUrl_PATH = "/data-url";
+
 export function serverOPDS_browse_v2(_server: Server, topRouter: express.Application) {
+
+    // https://github.com/mafintosh/json-markup/blob/master/style.css
+    const jsonStyle = `
+.json-markup {
+    line-height: 17px;
+    font-size: 13px;
+    font-family: monospace;
+    white-space: pre;
+}
+.json-markup-key {
+    font-weight: bold;
+}
+.json-markup-bool {
+    color: firebrick;
+}
+.json-markup-string {
+    color: green;
+}
+.json-markup-null {
+    color: gray;
+}
+.json-markup-number {
+    color: blue;
+}
+`;
 
     // tslint:disable-next-line:variable-name
     const routerOPDS_browse_v2 = express.Router({ strict: false });
@@ -81,6 +118,15 @@ export function serverOPDS_browse_v2(_server: Server, topRouter: express.Applica
         // }
         debug(urlDecoded);
 
+        const isSecureHttp = req.secure ||
+            req.protocol === "https" ||
+            req.get("X-Forwarded-Proto") === "https"
+            // (req.headers.host && req.headers.host.indexOf("now.sh") >= 0) ||
+            // (req.hostname && req.hostname.indexOf("now.sh") >= 0)
+            ;
+        const rootUrl = (isSecureHttp ? "https://" : "http://")
+            + req.headers.host;
+
         const failure = (err: any) => {
             debug(err);
             res.status(500).send("<html><body><p>Internal Server Error</p><p>"
@@ -108,154 +154,168 @@ export function serverOPDS_browse_v2(_server: Server, topRouter: express.Applica
                 return;
             }
             const responseStr = responseData.toString("utf8");
-            const responseXml = new xmldom.DOMParser().parseFromString(responseStr);
-            // debug(responseXml);
-            if (!responseXml || !responseXml.documentElement) {
-                res.status(500).send("<html><body><p>Internal Server Error</p><p>"
-                    + "XML parse fail" + "</p></body></html>");
-                return;
-            }
-            const isEntry = responseXml.documentElement.localName === "entry";
-            let opds: OPDS | undefined;
-            let opdsEntry: Entry | undefined;
-            if (isEntry) {
-                opdsEntry = XML.deserialize<Entry>(responseXml, Entry);
-            } else {
-                opds = XML.deserialize<OPDS>(responseXml, OPDS);
-            }
+            const responseJson = JSON.parse(responseStr);
 
-            // // breakLength: 100  maxArrayLength: undefined
-            // console.log(util.inspect(opds,
-            //     { showHidden: false, depth: 1000, colors: true, customInspect: true }));
+            const isPublication = !responseJson.publications &&
+                !responseJson.navigation &&
+                !responseJson.groups &&
+                !responseJson.catalogs &&
+                responseJson.metadata;
+            const isAuth = !isPublication && responseJson.authentication;
 
-            let html = "<html><head>";
-            html += "</head>";
-            html += "<body><h1>" + urlDecoded + "</h1>";
-            if (opds && opds.Title) {
-                html += "<h2>" + opds.Title + "</h2>";
-            }
-            if (opdsEntry && opdsEntry.Title) {
-                html += "<h2>" + opdsEntry.Title + "</h2>";
-            }
-            if (opds && opds.Icon) {
-                const iconUrl = ensureAbsolute(urlDecoded, opds.Icon);
-                html += "<img src='" + iconUrl + "' alt='' />";
-            }
-            // if (opds.Updated) {
-            //     html += "<h3>" + opds.Updated.toUTCString() + "</h3>";
-            //     html += "<h3>" + opds.Updated.toDateString() + "</h3>";
-            //     html += "<h3>" + opds.Updated.toISOString() + "</h3>";
-            //     html += "<h3>" + opds.Updated.toTimeString() + "</h3>";
-            // }
-            const links = opds ? opds.Links : (opdsEntry ? opdsEntry.Links : undefined);
-            if (links && links.length) {
-                html += "<p>";
-                links.forEach((link) => {
-                    if (link.Type &&
-                        (link.Type.indexOf("opds-catalog") >= 0 || link.Type === "application/atom+xml")) {
-                        const linkUrl = ensureAbsolute(urlDecoded, link.Href);
-                        const opdsUrl = req.originalUrl.substr(0,
-                            req.originalUrl.indexOf(serverOPDS_browse_v2_PATH + "/"))
-                            + serverOPDS_browse_v2_PATH + "/" + encodeURIComponent_RFC3986(linkUrl);
+            const opds2Feed: OPDSPublication | OPDSFeed | OPDSAuthenticationDoc =
+                // tslint:disable-next-line: max-line-length
+                isPublication ? TaJsonDeserialize<OPDSPublication>(responseJson, OPDSPublication) : // "application/opds-publication+json"
+                // tslint:disable-next-line: max-line-length
+                (isAuth ? TaJsonDeserialize<OPDSAuthenticationDoc>(responseJson, OPDSAuthenticationDoc) : // "application/vnd.opds.authentication.v1.0+json"
+                TaJsonDeserialize<OPDSFeed>(responseJson, OPDSFeed)); // "application/opds+json"
 
-                        html += "<a href='" + opdsUrl
-                            + "'>" + link.Href + "</a> (TITLE: " + link.Title
-                            + ") [REL: " + link.Rel + "]<br/>";
-                    }
-                });
-                html += "</p>";
-            }
+            const opds2FeedJson = TaJsonSerialize(opds2Feed);
 
-            function processEntry(entry: Entry) {
+            let validationStr: string | undefined;
+            const doValidate = !reqparams.jsonPath || reqparams.jsonPath === "all";
+            if (doValidate) {
 
-                html += "<hr/>";
-                html += "<div>";
-                if (opds) {
-                    html += "<h3>" + entry.Title + "</h3>";
+                const jsonSchemasRootpath = path.join(process.cwd(), "misc", "json-schema");
+                const jsonSchemasNames = [
+                    "opds/publication",
+                    "opds/acquisition-object",
+                    "opds/feed-metadata",
+                    "opds/properties",
+                    "webpub-manifest/publication",
+                    "webpub-manifest/contributor-object",
+                    "webpub-manifest/contributor",
+                    "webpub-manifest/link",
+                    "webpub-manifest/metadata",
+                    "webpub-manifest/subcollection",
+                    "webpub-manifest/properties",
+                    "webpub-manifest/subject",
+                    "webpub-manifest/subject-object",
+                    "webpub-manifest/extensions/epub/metadata",
+                    "webpub-manifest/extensions/epub/subcollections",
+                    "webpub-manifest/extensions/epub/properties",
+                ];
+                if (isAuth) {
+                    jsonSchemasNames.unshift("opds/authentication"); // must be first!
+                } else if (!isPublication) {
+                    jsonSchemasNames.unshift("opds/feed"); // must be first!
                 }
-                if (entry.Summary) {
-                    if (!entry.SummaryType || entry.SummaryType === "text") {
-                        html += "<strong>" + entry.Summary + "</strong>";
-                    } else if (entry.SummaryType === "html") {
-                        html += "<div>" + entry.Summary + "</div>";
-                    }
-                    html += "<br/>";
-                }
-                if (entry.Content) {
-                    if (!entry.ContentType || entry.ContentType === "text") {
-                        html += "<strong>" + entry.Content + "</strong>";
-                    } else if (entry.ContentType === "html") {
-                        html += "<div>" + entry.Content + "</div>";
-                    }
-                    html += "<br/>";
-                }
-                if (entry.Links && entry.Links.length) {
-                    let image: string | undefined;
-                    let imageThumbnail: string | undefined;
-                    let epub: string | undefined;
-                    entry.Links.forEach((link) => {
-                        if (link.Type === "application/epub+zip") {
-                            epub = link.Href;
-                        }
-                        if (link.HasRel("http://opds-spec.org/image")
-                            || link.HasRel("x-stanza-cover-image")) {
-                            image = link.Href;
-                        }
-                        if (link.HasRel("http://opds-spec.org/image/thumbnail")
-                            || link.HasRel("http://opds-spec.org/thumbnail")
-                            || link.HasRel("x-stanza-cover-image-thumbnail")) {
-                            imageThumbnail = link.Href;
-                        }
+                // debug(jsonSchemasNames);
 
-                        if (opds && link.Type &&
-                            (link.Type.indexOf("opds-catalog") >= 0 || link.Type === "application/atom+xml")) {
-                            const linkUrl = ensureAbsolute(urlDecoded, link.Href);
-                            const opdsUrl = req.originalUrl.substr(0,
-                                req.originalUrl.indexOf(serverOPDS_browse_v2_PATH + "/"))
-                                + serverOPDS_browse_v2_PATH + "/" + encodeURIComponent_RFC3986(linkUrl);
+                const validationErrors =
+                    jsonSchemaValidate(jsonSchemasRootpath, jsonSchemasNames, opds2FeedJson);
+                if (validationErrors) {
+                    validationStr = "";
 
-                            html += "<a href='" + opdsUrl
-                                + "'>" + link.Href + "</a> (TITLE: " + link.Title
-                                + ") [REL: " + link.Rel + "]<br/>";
-                        }
-                    });
-                    if (imageThumbnail) {
-                        const imageThumbnailUrl = ensureAbsolute(urlDecoded, imageThumbnail);
-                        if (image) {
-                            const imageUrl = ensureAbsolute(urlDecoded, image);
-                            html += "<a href='" + imageUrl + "'><img src='"
-                                + imageThumbnailUrl + "' alt='' /></a><br/>";
+                    for (const err of validationErrors) {
+
+                        debug("JSON Schema validation FAIL.");
+                        debug(err);
+
+                        if (isPublication) {
+                            const val = DotProp.get(opds2FeedJson, err.jsonPath);
+                            const valueStr = (typeof val === "string") ?
+                                `${val}` :
+                                ((val instanceof Array || typeof val === "object") ?
+                                `${JSON.stringify(val)}` :
+                                    "");
+                            debug(valueStr);
+
+                            const title = DotProp.get(opds2FeedJson, "metadata.title");
+                            debug(title);
+
+                            validationStr +=
+                            // tslint:disable-next-line:max-line-length
+                            `\n"${title}"\n\n${err.ajvMessage}: ${valueStr}\n\n'${err.ajvDataPath.replace(/^\./, "")}' (${err.ajvSchemaPath})\n\n`;
                         } else {
-                            html += "<img src='" + imageThumbnailUrl + "' alt='' /><br/>";
-                        }
-                    } else if (image) {
-                        const imageUrl = ensureAbsolute(urlDecoded, image);
-                        html += "<img src='" + imageUrl + "' alt='' /><br/>";
-                    }
-                    if (epub) {
-                        const epub_ = ensureAbsolute(urlDecoded, epub);
-                        const epubUrl = req.originalUrl.substr(0,
-                            req.originalUrl.indexOf(serverOPDS_browse_v2_PATH + "/"))
-                            + serverRemotePub_PATH + "/" + encodeURIComponent_RFC3986(epub_);
+                            const val = DotProp.get(opds2FeedJson, err.jsonPath);
+                            const valueStr = (typeof val === "string") ?
+                                `${val}` :
+                                ((val instanceof Array || typeof val === "object") ?
+                                `${JSON.stringify(val)}` :
+                                    "");
+                            debug(valueStr);
 
-                        html += "<strong><a href='" + epubUrl + "'>" + epub + "</a></strong>";
+                            let title = "";
+                            let pubIndex = "";
+                            if (/^publications\.[0-9]+/.test(err.jsonPath)) {
+                                const jsonPubTitlePath =
+                                    err.jsonPath.replace(/^(publications\.[0-9]+).*/, "$1.metadata.title");
+                                debug(jsonPubTitlePath);
+                                title = DotProp.get(opds2FeedJson, jsonPubTitlePath);
+                                debug(title);
+
+                                pubIndex = err.jsonPath.replace(/^publications\.([0-9]+).*/, "$1");
+                                debug(pubIndex);
+                            }
+
+                            validationStr +=
+                            // tslint:disable-next-line:max-line-length
+                            `\n___________INDEX___________ #${pubIndex} "${title}"\n\n${err.ajvMessage}: ${valueStr}\n\n'${err.ajvDataPath.replace(/^\./, "")}' (${err.ajvSchemaPath})\n\n`;
+                        }
                     }
                 }
-                html += "</div>";
             }
 
-            if (opds && opds.Entries && opds.Entries.length) {
-                opds.Entries.forEach((entry) => {
-                    processEntry(entry);
-                });
-            }
-            if (opdsEntry) {
-                processEntry(opdsEntry);
-            }
+            const funk = (obj: any) => {
+                if ((obj.href && typeof obj.href === "string") ||
+                    (obj.Href && typeof obj.Href === "string")) {
 
-            html += "</body></html>";
+                    let fullHref = obj.href ? obj.href as string : obj.Href as string;
 
-            res.status(200).send(html);
+                    const isDataUrl = /^data:/.test(fullHref);
+                    const isMailUrl = /^mailto:/.test(fullHref);
+                    const notFull = !isDataUrl && !isMailUrl && !isHTTP(fullHref);
+                    if (notFull) {
+                        fullHref = ensureAbsolute(urlDecoded, fullHref);
+                    }
+
+                    if ((obj.type && obj.type.indexOf("opds") >= 0 && obj.type.indexOf("json") >= 0) ||
+                        (obj.Type && obj.Type.indexOf("opds") >= 0 && obj.Type.indexOf("json") >= 0)) {
+
+                        obj.__href__ = rootUrl + req.originalUrl.substr(0,
+                            req.originalUrl.indexOf(serverOPDS_browse_v2_PATH + "/")) +
+                            serverOPDS_browse_v2_PATH + "/" + encodeURIComponent_RFC3986(fullHref);
+
+                    } else if ((obj.type && obj.type.indexOf("application/atom+xml") >= 0) ||
+                        (obj.Type && obj.Type.indexOf("application/atom+xml") >= 0)) {
+
+                        obj.__href__ = rootUrl + req.originalUrl.substr(0,
+                            req.originalUrl.indexOf(serverOPDS_browse_v2_PATH + "/")) +
+                            serverOPDS_convert_v1_to_v2_PATH + "/" + encodeURIComponent_RFC3986(fullHref);
+
+                    } else if (isDataUrl) {
+                        // obj.href = obj.href.substr(0, 100) + "(...)";
+                        // obj.__href__ = rootUrl + req.originalUrl.substr(0,
+                        //     req.originalUrl.indexOf(serverOPDS_browse_v2_PATH + "/")) +
+                        //     serverOPDS_dataUrl_PATH + "/" + encodeURIComponent_RFC3986(fullHref);
+
+                    } else if (notFull && !isMailUrl) {
+                        obj.__href__ = fullHref;
+                    }
+                }
+            };
+            traverseJsonObjects(opds2FeedJson, funk);
+
+            const css = css2json(jsonStyle);
+            let jsonPrettyOPDS2 = jsonMarkup(opds2FeedJson, css);
+            // tslint:disable-next-line: max-line-length
+            jsonPrettyOPDS2 = jsonPrettyOPDS2.replace(/>"data:image\/(.*)"</g, "><a href=\"data:image/$1\" target=\"_BLANK\"><img style=\"max-width: 100px;\" src=\"data:image/$1\"></a><");
+
+            res.status(200).send("<html><body>" +
+                "<h1>OPDS2 JSON " +
+                (isPublication ? "entry" : (isAuth ? "authentication" : "feed")) +
+                " (OPDS2)</h1>" +
+                "<h2><a href=\"" + urlDecoded + "\">" + urlDecoded + "</a></h2>" +
+                "<hr>" +
+                "<div style=\"overflow-x: auto;margin:0;padding:0;width:100%;height:auto;\">" +
+                jsonPrettyOPDS2 + "</div>" +
+                // tslint:disable-next-line:max-line-length
+                (doValidate ? (validationStr ? ("<hr><p><pre>" + validationStr + "</pre></p>") : ("<hr><p>JSON SCHEMA OK.</p>")) : "") +
+                // "<p><pre>" + jsonPretty + "</pre></p>" +
+                // "<hr><p><pre>" + jsonStr + "</pre></p>" +
+                // "<p><pre>" + dumpStr + "</pre></p>" +
+                "</body></html>");
         };
 
         const headers = {
@@ -295,4 +355,66 @@ export function serverOPDS_browse_v2(_server: Server, topRouter: express.Applica
     });
 
     topRouter.use(serverOPDS_browse_v2_PATH, routerOPDS_browse_v2);
+
+    // tslint:disable-next-line:variable-name
+    const routerOPDS_dataUrl = express.Router({ strict: false });
+    routerOPDS_dataUrl.use(morgan("combined", { stream: { write: (msg: any) => debug(msg) } }));
+
+    routerOPDS_dataUrl.use(trailingSlashRedirect);
+
+    routerOPDS_dataUrl.get("/", (_req: express.Request, res: express.Response) => {
+
+        let html = "<html><head>";
+        html += `<script type="text/javascript">function encodeURIComponent_RFC3986(str) { ` +
+            `return encodeURIComponent(str).replace(/[!'()*]/g, (c) => { ` +
+            `return "%" + c.charCodeAt(0).toString(16); }); }` +
+            `function go(evt) {` +
+            `if (evt) { evt.preventDefault(); } var url = ` +
+            `location.origin +` +
+            // `location.protocol + '//' + location.hostname + ` +
+            // `(location.port ? (':' + location.port) : '') + ` +
+            ` '${serverOPDS_dataUrl_PATH}/' +` +
+            ` encodeURIComponent_RFC3986(document.getElementById("url").value);` +
+            `location.href = url;}</script>`;
+        html += "</head>";
+
+        html += "<body><h1>data URL viewer</h1>";
+
+        html += `<form onsubmit="go();return false;">` +
+            `<input type="text" name="url" id="url" size="80">` +
+            `<input type="submit" value="Go!"></form>`;
+
+        html += "</body></html>";
+
+        res.status(200).send(html);
+    });
+
+    routerOPDS_dataUrl.param("urlEncoded", (req, _res, next, value, _name) => {
+        (req as IRequestPayloadExtension).urlEncoded = value;
+        next();
+    });
+
+    routerOPDS_dataUrl.get("/:" + _urlEncoded + "(*)", async (req: express.Request, res: express.Response) => {
+
+        const reqparams = (req as IRequestPayloadExtension).params;
+
+        if (!reqparams.urlEncoded) {
+            reqparams.urlEncoded = (req as IRequestPayloadExtension).urlEncoded;
+        }
+
+        const urlDecoded = reqparams.urlEncoded;
+        // if (urlDecoded.substr(-1) === "/") {
+        //     urlDecoded = urlDecoded.substr(0, urlDecoded.length - 1);
+        // }
+        debug(urlDecoded);
+
+        res.status(200).send("<html><body>" +
+            "<h1>DATA URL</h1>" +
+            "<h2><a href=\"" + urlDecoded + "\">" + urlDecoded + "</a></h2>" +
+            "<hr>" +
+            "<img src=\"" + urlDecoded + "\" />" +
+            "</body></html>");
+    });
+
+    topRouter.use(serverOPDS_dataUrl_PATH, routerOPDS_dataUrl);
 }

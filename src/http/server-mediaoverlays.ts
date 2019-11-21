@@ -11,8 +11,8 @@ import * as debug_ from "debug";
 import * as express from "express";
 import * as jsonMarkup from "json-markup";
 import * as path from "path";
-import { JSON as TAJSON } from "ta-json-x";
 
+import { TaJsonSerialize } from "@r2-lcp-js/serializable";
 import { Publication } from "@r2-shared-js/models/publication";
 import {
     getAllMediaOverlays, getMediaOverlay, mediaOverlayURLParam, mediaOverlayURLPath,
@@ -163,7 +163,7 @@ export function serverMediaOverlays(server: Server, routerPathBase64: express.Ro
                 objToSerialize = [];
             }
 
-            let jsonObj = TAJSON.serialize(objToSerialize);
+            let jsonObj = TaJsonSerialize(objToSerialize);
             jsonObj = { "media-overlay": jsonObj };
 
             if (isShow) {

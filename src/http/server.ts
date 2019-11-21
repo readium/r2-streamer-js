@@ -12,9 +12,9 @@ import * as fs from "fs";
 import * as http from "http";
 import * as https from "https";
 import * as path from "path";
-import { JSON as TAJSON } from "ta-json-x";
 import { tmpNameSync } from "tmp";
 
+import { TaJsonDeserialize } from "@r2-lcp-js/serializable";
 import { OPDSFeed } from "@r2-opds-js/opds/opds2/opds2";
 import { Publication } from "@r2-shared-js/models/publication";
 import { PublicationParsePromise } from "@r2-shared-js/parser/publication-parser";
@@ -427,7 +427,7 @@ Disallow: /
         }
         const json = global.JSON.parse(jsonStr);
 
-        this.publicationsOPDSfeed = TAJSON.deserialize<OPDSFeed>(json, OPDSFeed);
+        this.publicationsOPDSfeed = TaJsonDeserialize<OPDSFeed>(json, OPDSFeed);
         return this.publicationsOPDSfeed;
     }
 }

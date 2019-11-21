@@ -7,8 +7,8 @@
 
 import * as fs from "fs";
 import * as moment from "moment";
-import { JSON as TAJSON } from "ta-json-x";
 
+import { TaJsonDeserialize, TaJsonSerialize } from "@r2-lcp-js/serializable";
 import { initGlobalConverters_OPDS } from "@r2-opds-js/opds/init-globals";
 import { OPDSFeed } from "@r2-opds-js/opds/opds2/opds2";
 import { OPDSLink } from "@r2-opds-js/opds/opds2/opds2-link";
@@ -124,8 +124,8 @@ if (fs.existsSync(opdsJsonFilePath)) {
 
         if (publication.Metadata) {
             try {
-                const publicationMetadataJson = TAJSON.serialize(publication.Metadata);
-                publi.Metadata = TAJSON.deserialize<Metadata>(publicationMetadataJson, Metadata);
+                const publicationMetadataJson = TaJsonSerialize(publication.Metadata);
+                publi.Metadata = TaJsonDeserialize<Metadata>(publicationMetadataJson, Metadata);
             } catch (err) {
                 console.log(err);
                 continue;
@@ -135,7 +135,7 @@ if (fs.existsSync(opdsJsonFilePath)) {
 
     feed.Metadata.NumberOfItems = nPubs;
 
-    const jsonObj = TAJSON.serialize(feed);
+    const jsonObj = TaJsonSerialize(feed);
     const jsonStr = global.JSON.stringify(jsonObj, null, "");
     fs.writeFileSync(opdsJsonFilePath, jsonStr, { encoding: "utf8" });
 

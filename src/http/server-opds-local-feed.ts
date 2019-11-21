@@ -12,8 +12,8 @@ import * as DotProp from "dot-prop";
 import * as express from "express";
 import * as jsonMarkup from "json-markup";
 import * as path from "path";
-import { JSON as TAJSON } from "ta-json-x";
 
+import { JsonArray, TaJsonSerialize } from "@r2-lcp-js/serializable";
 import { OPDSLink } from "@r2-opds-js/opds/opds2/opds2-link";
 import { isHTTP } from "@r2-utils-js/_utils/http/UrlUtils";
 import { sortObject, traverseJsonObjects } from "@r2-utils-js/_utils/JsonUtils";
@@ -160,7 +160,7 @@ export function serverOPDS_local_feed(server: Server, topRouter: express.Applica
                     objToSerialize = {};
                 }
 
-                const jsonObj = TAJSON.serialize(objToSerialize);
+                const jsonObj = TaJsonSerialize(objToSerialize);
 
                 let validationStr: string | undefined;
                 const doValidate = !reqparams.jsonPath || reqparams.jsonPath === "all";
@@ -228,9 +228,9 @@ export function serverOPDS_local_feed(server: Server, topRouter: express.Applica
 
                 absolutizeURLs(jsonObj);
 
-                if (jsonObj.publications && jsonObj.publications.length) {
+                if (jsonObj.publications && (jsonObj.publications as JsonArray).length) {
                     let i = 0;
-                    jsonObj.publications.forEach((pub: any) => {
+                    (jsonObj.publications as JsonArray).forEach((pub: any) => {
                         pub.___________INDEX___________ = i++;
                     });
                 }
@@ -259,7 +259,7 @@ export function serverOPDS_local_feed(server: Server, topRouter: express.Applica
                 server.setResponseCORS(res);
                 res.set("Content-Type", "application/opds+json; charset=utf-8");
 
-                const publicationsJsonObj = TAJSON.serialize(feed);
+                const publicationsJsonObj = TaJsonSerialize(feed);
 
                 absolutizeURLs(publicationsJsonObj);
 

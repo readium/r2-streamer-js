@@ -12,8 +12,8 @@ import * as DotProp from "dot-prop";
 import * as express from "express";
 import * as jsonMarkup from "json-markup";
 import * as path from "path";
-import { JSON as TAJSON } from "ta-json-x";
 
+import { TaJsonSerialize } from "@r2-lcp-js/serializable";
 import { Publication } from "@r2-shared-js/models/publication";
 import { Link } from "@r2-shared-js/models/publication-link";
 import {
@@ -285,7 +285,7 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
                     objToSerialize = {};
                 }
 
-                const jsonObj = TAJSON.serialize(objToSerialize);
+                const jsonObj = TaJsonSerialize(objToSerialize);
 
                 let validationStr: string | undefined;
                 const doValidate = !reqparams.jsonPath || reqparams.jsonPath === "all";
@@ -373,7 +373,7 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
                 server.setResponseCORS(res);
                 res.set("Content-Type", "application/webpub+json; charset=utf-8");
 
-                const publicationJsonObj = TAJSON.serialize(publication);
+                const publicationJsonObj = TaJsonSerialize(publication);
 
                 // absolutizeURLs(publicationJsonObj);
 

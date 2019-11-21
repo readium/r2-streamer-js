@@ -14,9 +14,9 @@ import * as morgan from "morgan";
 import * as path from "path";
 import * as request from "request";
 import * as requestPromise from "request-promise-native";
-import { JSON as TAJSON } from "ta-json-x";
 import * as xmldom from "xmldom";
 
+import { TaJsonSerialize } from "@r2-lcp-js/serializable";
 import {
     convertOpds1ToOpds2, convertOpds1ToOpds2_EntryToPublication,
 } from "@r2-opds-js/opds/converter";
@@ -228,10 +228,10 @@ export function serverOPDS_convert_v1_to_v2(_server: Server, topRouter: express.
                 }
             };
 
-            const jsonObjOPDS1 = TAJSON.serialize(opds1Entry ? opds1Entry : opds1Feed);
+            const jsonObjOPDS1 = TaJsonSerialize(opds1Entry ? opds1Entry : opds1Feed);
             traverseJsonObjects(jsonObjOPDS1, funk);
 
-            const jsonObjOPDS2 = TAJSON.serialize(opds2Publication ? opds2Publication : opds2Feed);
+            const jsonObjOPDS2 = TaJsonSerialize(opds2Publication ? opds2Publication : opds2Feed);
 
             let validationStr: string | undefined;
             const doValidate = !reqparams.jsonPath || reqparams.jsonPath === "all";
