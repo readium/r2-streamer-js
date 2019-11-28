@@ -139,7 +139,9 @@ export function serverOPDS_browse_v2(_server: Server, topRouter: express.Applica
             //     debug(header + " => " + response.headers[header]);
             // });
 
-            if (response.statusCode && (response.statusCode < 200 || response.statusCode >= 300)) {
+            const isAuthStatusCode = response.statusCode === 401;
+            const isBadStatusCode = response.statusCode && (response.statusCode < 200 || response.statusCode >= 300);
+            if (!isAuthStatusCode && isBadStatusCode) {
                 failure("HTTP CODE " + response.statusCode);
                 return;
             }
@@ -150,7 +152,7 @@ export function serverOPDS_browse_v2(_server: Server, topRouter: express.Applica
             } catch (err) {
                 debug(err);
                 res.status(500).send("<html><body><p>Internal Server Error</p><p>"
-                    + err + "</p></body></html>");
+                    + err + (isAuthStatusCode ? " (Auth 401)" : "") + "</p></body></html>");
                 return;
             }
             const responseStr = responseData.toString("utf8");
@@ -305,7 +307,7 @@ export function serverOPDS_browse_v2(_server: Server, topRouter: express.Applica
             res.status(200).send("<html><body>" +
                 "<h1>OPDS2 JSON " +
                 (isPublication ? "entry" : (isAuth ? "authentication" : "feed")) +
-                " (OPDS2)</h1>" +
+                " (OPDS2) " + (isAuthStatusCode ? " [HTTP 401]" : "") + "</h1>" +
                 "<h2><a href=\"" + urlDecoded + "\">" + urlDecoded + "</a></h2>" +
                 "<hr>" +
                 "<div style=\"overflow-x: auto;margin:0;padding:0;width:100%;height:auto;\">" +
