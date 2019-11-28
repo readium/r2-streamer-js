@@ -321,6 +321,15 @@ export function serverOPDS_browse_v2(_server: Server, topRouter: express.Applica
                             req.originalUrl.indexOf(serverOPDS_browse_v2_PATH + "/")) +
                             serverOPDS_browse_v2_PATH + "/" + encodeURIComponent_RFC3986(fullHref);
 
+                        if (authRequestBase64 && authResponseBase64) {
+                            obj.__href__AUTH = obj.__href__ +
+                            "?" +
+                            _authResponse + "=" + encodeURIComponent_RFC3986(authResponseBase64) +
+                            "&" +
+                            _authRequest + "=" + encodeURIComponent_RFC3986(authRequestBase64)
+                            ;
+                        }
+
                     } else if ((obj.type && obj.type.indexOf("application/atom+xml") >= 0) ||
                         (obj.Type && obj.Type.indexOf("application/atom+xml") >= 0)) {
 
