@@ -5,6 +5,7 @@
 // that can be found in the LICENSE file exposed on Github (readium) in the project repository.
 // ==LICENSE-END==
 
+import * as crypto from "crypto";
 import * as css2json from "css2json";
 import * as debug_ from "debug";
 import * as DotProp from "dot-prop";
@@ -14,6 +15,7 @@ import * as morgan from "morgan";
 import * as path from "path";
 import * as request from "request";
 import * as requestPromise from "request-promise-native";
+import * as uuid from "uuid";
 
 import { TaJsonDeserialize, TaJsonSerialize } from "@r2-lcp-js/serializable";
 import { OPDSFeed } from "@r2-opds-js/opds/opds2/opds2";
@@ -38,6 +40,17 @@ export const serverOPDS_browse_v2_PATH = "/opds-v2-browse";
 
 // tslint:disable-next-line:variable-name
 export const serverOPDS_dataUrl_PATH = "/data-url";
+
+// tslint:disable-next-line:variable-name
+export const serverOPDS_auth_PATH = "/opds-auth";
+
+const salt = crypto.randomBytes(16).toString("hex");
+const OPDS_AUTH_ENCRYPTION_KEY_BUFFER = crypto.pbkdf2Sync(uuid.v4(), salt, 1000, 32, "sha256");
+const OPDS_AUTH_ENCRYPTION_KEY_HEX = OPDS_AUTH_ENCRYPTION_KEY_BUFFER.toString("hex");
+
+const AES_BLOCK_SIZE = 16;
+const OPDS_AUTH_ENCRYPTION_IV_BUFFER = Buffer.from(uuid.v4()).slice(0, AES_BLOCK_SIZE);
+const OPDS_AUTH_ENCRYPTION_IV_HEX = OPDS_AUTH_ENCRYPTION_IV_BUFFER.toString("hex");
 
 export function serverOPDS_browse_v2(_server: Server, topRouter: express.Application) {
 
@@ -304,6 +317,123 @@ export function serverOPDS_browse_v2(_server: Server, topRouter: express.Applica
             // tslint:disable-next-line: max-line-length
             jsonPrettyOPDS2 = jsonPrettyOPDS2.replace(/>"data:image\/(.*)"</g, "><a href=\"data:image/$1\" target=\"_BLANK\"><img style=\"max-width: 100px;\" src=\"data:image/$1\"></a><");
 
+            const authDoc = isAuth ? opds2Feed as OPDSAuthenticationDoc : undefined;
+            const authObj = (authDoc && authDoc.Authentication) ? authDoc.Authentication.find((auth) => {
+                return auth.Type === "http://opds-spec.org/auth/oauth/password";
+            }) : undefined;
+            const authLink = authObj ? (authObj.Links && authObj.Links.find((link) => {
+                return link.Rel.includes("authenticate") && link.TypeLink === "application/json";
+            })) : undefined;
+            // const authLinkRefresh = authObj ? (authObj.Links && authObj.Links.find((link) => {
+            //     return link.Rel.includes("refresh") && link.TypeLink === "application/json";
+            // })) : undefined;
+
+            const authHtmlForm = !authObj ? "" : `
+<hr>
+<form id="authForm">
+    <input type="text" name="login" id="login" size="40">
+    <span>${authObj.Labels.Login}</span>
+<br><br>
+    <input type="password" name="password" id="password" size="40">
+    <span>${authObj.Labels.Password}</span>
+<br><br>
+    <input type="submit" value="Authenticate">
+</form>
+<script type="text/javascript">
+// document.addEventListener("DOMContentLoaded", (event) => {
+// });
+const formElement = document.getElementById("authForm");
+formElement.addEventListener("submit", (event) => {
+    event.preventDefault();
+    doAuth();
+});
+function encodeURIComponent_RFC3986(str) {
+    return encodeURIComponent(str).replace(/[!'()*]/g, (c) => {
+        return "%" + c.charCodeAt(0).toString(16);
+    });
+}
+function encodeFormData(json) {
+    if (!json) {
+        return "";
+    }
+    return Object.keys(json).map((key) => {
+        return encodeURIComponent_RFC3986(key) + "=" + (json[key] ? encodeURIComponent_RFC3986(json[key]) : "_");
+    }).join("&");
+}
+function hexStrToArrayBuffer(hexStr) {
+    return new Uint8Array(
+        hexStr
+        .match(/.{1,2}/g)
+        .map((byte) => {
+            return parseInt(byte, 16);
+        })
+    );
+}
+function doAuth() {
+    ${authLink ? `
+    const bodyJson = { url: "${authLink.Href}", grant_type: "password", username: document.getElementById("login").value, password: document.getElementById("password").value };
+    const bodyStr = JSON.stringify(bodyJson);
+
+    const textEncoder = new TextEncoder("utf-8");
+    const bodyStrEncoded = textEncoder.encode(bodyStr); // Uint8Array
+
+    const keyPromise = window.crypto.subtle.importKey(
+        "raw",
+        hexStrToArrayBuffer("${OPDS_AUTH_ENCRYPTION_KEY_HEX}"),
+        { "name": "AES-CBC" },
+        false,
+        ["encrypt", "decrypt"]
+    );
+    keyPromise.then((key) => { // CryptoKey
+
+        const iv = hexStrToArrayBuffer("${OPDS_AUTH_ENCRYPTION_IV_HEX}");
+        const encryptedBodyPromise = window.crypto.subtle.encrypt(
+            {
+                name: "AES-CBC",
+                iv
+            },
+            key,
+            bodyStrEncoded
+        );
+        encryptedBodyPromise.then((encryptedBody) => { // ArrayBuffer
+            // const arg = String.fromCharCode.apply(null, new Uint8Array(encryptedBody));
+            const arg = new Uint8Array(encryptedBody).reduce((data, byte) => {
+                return data + String.fromCharCode(byte);
+            }, '');
+            const encryptedBodyB64 = window.btoa(arg);
+
+            const url = location.origin + "${serverOPDS_auth_PATH}/" + encodeURIComponent_RFC3986(encryptedBodyB64);
+            location.href = url;
+        }).catch((err) => {
+            console.log(err);
+        });
+    }).catch((err) => {
+        console.log(err);
+    });
+
+/* does not work because of HTTP CORS, so we forward to NodeJS fetch/request via the serverOPDS_auth_PATH HTTP route
+    window.fetch("${authLink.Href}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-url-encoded",
+            "Accept": "application/json"
+        },
+        body: encodeFormData(bodyJson)
+    })
+    .then((response) => {
+        const res = JSON.stringify(response, null, 4);
+        console.log(res);
+    })
+    .catch((error) => {
+        console.log(error);
+    });
+*/
+    ` :
+    `window.alert("no auth link!");`
+    }
+}
+</script>`;
+
             res.status(200).send("<html><body>" +
                 "<h1>OPDS2 JSON " +
                 (isPublication ? "entry" : (isAuth ? "authentication" : "feed")) +
@@ -314,6 +444,7 @@ export function serverOPDS_browse_v2(_server: Server, topRouter: express.Applica
                 jsonPrettyOPDS2 + "</div>" +
                 // tslint:disable-next-line:max-line-length
                 (doValidate ? (validationStr ? ("<hr><p><pre>" + validationStr + "</pre></p>") : ("<hr><p>JSON SCHEMA OK.</p>")) : "") +
+                authHtmlForm +
                 // "<p><pre>" + jsonPretty + "</pre></p>" +
                 // "<hr><p><pre>" + jsonStr + "</pre></p>" +
                 // "<p><pre>" + dumpStr + "</pre></p>" +
@@ -357,6 +488,8 @@ export function serverOPDS_browse_v2(_server: Server, topRouter: express.Applica
     });
 
     topRouter.use(serverOPDS_browse_v2_PATH, routerOPDS_browse_v2);
+
+    // -------------------------------------------------------
 
     // tslint:disable-next-line:variable-name
     const routerOPDS_dataUrl = express.Router({ strict: false });
@@ -419,4 +552,169 @@ export function serverOPDS_browse_v2(_server: Server, topRouter: express.Applica
     });
 
     topRouter.use(serverOPDS_dataUrl_PATH, routerOPDS_dataUrl);
+
+    // -------------------------------------------------------
+
+    // tslint:disable-next-line:variable-name
+    const routerOPDS_auth = express.Router({ strict: false });
+    routerOPDS_auth.use(morgan("combined", { stream: { write: (msg: any) => debug(msg) } }));
+
+    routerOPDS_auth.use(trailingSlashRedirect);
+
+    routerOPDS_auth.get("/", (_req: express.Request, res: express.Response) => {
+
+        const html = "<html><body><h1>NOPE</h1></body></html>";
+        res.status(200).send(html);
+    });
+
+    routerOPDS_auth.param("urlEncoded", (req, _res, next, value, _name) => {
+        (req as IRequestPayloadExtension).urlEncoded = value;
+        next();
+    });
+
+    routerOPDS_auth.get("/:" + _urlEncoded + "(*)", async (req: express.Request, res: express.Response) => {
+
+        const reqparams = (req as IRequestPayloadExtension).params;
+
+        if (!reqparams.urlEncoded) {
+            reqparams.urlEncoded = (req as IRequestPayloadExtension).urlEncoded;
+        }
+
+        const urlDecoded = reqparams.urlEncoded;
+        // if (urlDecoded.substr(-1) === "/") {
+        //     urlDecoded = urlDecoded.substr(0, urlDecoded.length - 1);
+        // }
+        debug(urlDecoded);
+
+        try {
+            const encrypted = Buffer.from(urlDecoded, "base64"); // .toString("utf8");
+
+            const decrypteds: Buffer[] = [];
+            const decryptStream = crypto.createDecipheriv("aes-256-cbc",
+                OPDS_AUTH_ENCRYPTION_KEY_BUFFER,
+                OPDS_AUTH_ENCRYPTION_IV_BUFFER);
+            decryptStream.setAutoPadding(false);
+            const buff1 = decryptStream.update(encrypted);
+            if (buff1) {
+                decrypteds.push(buff1);
+            }
+            const buff2 = decryptStream.final();
+            if (buff2) {
+                decrypteds.push(buff2);
+            }
+            const decrypted = Buffer.concat(decrypteds);
+            const nPaddingBytes = decrypted[decrypted.length - 1];
+            const size = encrypted.length - nPaddingBytes;
+            const decryptedStr = decrypted.slice(0, size).toString("utf8");
+            const decryptedJson = JSON.parse(decryptedStr);
+
+            const url = decryptedJson.url;
+            delete decryptedJson.url;
+
+            // const grantType = decryptedJson.grant_type;
+            // const username = decryptedJson.username;
+            // const password = decryptedJson.password;
+
+            // function encodeFormData(json: any) {
+            //     return Object.keys(json).map((key) => {
+            //         return encodeURIComponent_RFC3986(key) +
+            //             "=" + (json[key] ? encodeURIComponent_RFC3986(json[key]) : "_");
+            //     }).join("&");
+            // }
+            // const encodedFormData = encodeFormData(decryptedJson);
+
+            const failure = (err: any) => {
+                debug(err);
+                res.status(500).send("<html><body><p>Internal Server Error</p><p>"
+                    + err + "</p></body></html>");
+            };
+
+            const success = async (response: request.RequestResponse) => {
+
+                // Object.keys(response.headers).forEach((header: string) => {
+                //     debug(header + " => " + response.headers[header]);
+                // });
+
+                if (response.statusCode && (response.statusCode < 200 || response.statusCode >= 300)) {
+                    failure("HTTP CODE " + response.statusCode);
+                    return;
+                }
+
+                let responseData: Buffer;
+                try {
+                    responseData = await streamToBufferPromise(response);
+                } catch (err) {
+                    debug(err);
+                    res.status(500).send("<html><body><p>Internal Server Error</p><p>"
+                        + err + "</p></body></html>");
+                    return;
+                }
+                try {
+                    const responseStr = responseData.toString("utf8");
+                    const responseJson = JSON.parse(responseStr);
+
+                    decryptedJson.password = "***";
+                    res.status(200).send(`
+                        <html><body>
+                        <hr>
+                        <pre>${JSON.stringify(decryptedJson, null, 4)}</pre>
+                        <hr>
+                        <pre>${JSON.stringify(responseJson, null, 4)}</pre>
+                        <hr>
+                        </body></html>
+                    `);
+                } catch (err) {
+                    debug(err);
+                    res.status(500).send("<html><body><p>Internal Server Error</p><p>"
+                        + err + "</p></body></html>");
+                    return;
+                }
+            };
+
+            const headers = {
+                "Accept": "application/json,application/xml",
+                "Accept-Language": "en-UK,en-US;q=0.7,en;q=0.5",
+                "Content-Type": "application/x-www-form-url-encoded",
+                "User-Agent": "READIUM2",
+            };
+
+            // No response streaming! :(
+            // https://github.com/request/request-promise/issues/90
+            const needsStreamingResponse = true;
+            if (needsStreamingResponse) {
+                request.post({
+                    form: decryptedJson,
+                    headers,
+                    method: "GET",
+                    uri: url,
+                })
+                    .on("response", success)
+                    .on("error", failure);
+            } else {
+                let response: requestPromise.FullResponse;
+                try {
+                    // tslint:disable-next-line:await-promise no-floating-promises
+                    response = await requestPromise({
+                        form: decryptedJson,
+                        headers,
+                        method: "POST",
+                        resolveWithFullResponse: true,
+                        uri: url,
+                    });
+                } catch (err) {
+                    failure(err);
+                    return;
+                }
+
+                await success(response);
+            }
+        } catch (err) {
+            debug(err);
+
+            res.status(500).send("<html><body><p>Internal Server Error</p><p>"
+            + "--" + "</p></body></html>");
+        }
+    });
+
+    topRouter.use(serverOPDS_auth_PATH, routerOPDS_auth);
 }
