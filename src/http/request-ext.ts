@@ -16,7 +16,9 @@ export const _jsonPath = "jsonPath";
 export const _urlEncoded = "urlEncoded";
 
 export const _show = "show";
-export const _auth = "auth";
+export const _authResponse = "authResponse";
+export const _authRequest = "authRequest";
+export const _authRefresh = "authRefresh";
 
 export interface IRequestPayloadExtension extends express.Request {
     lcpPass64: string;
@@ -30,6 +32,8 @@ export interface IRequestPayloadExtension extends express.Request {
 export interface IRequestQueryParams {
     show: string;
     canonical: string;
-    auth: string;
+    authResponse: string;
+    authRequest: string;
+    authRefresh: string;
     [mediaOverlayURLParam]: string;
 }

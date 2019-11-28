@@ -28,7 +28,10 @@ import { traverseJsonObjects } from "@r2-utils-js/_utils/JsonUtils";
 import { streamToBufferPromise } from "@r2-utils-js/_utils/stream/BufferUtils";
 
 import { jsonSchemaValidate } from "../utils/json-schema-validate";
-import { IRequestPayloadExtension, IRequestQueryParams, _auth, _urlEncoded } from "./request-ext";
+import {
+    IRequestPayloadExtension, IRequestQueryParams, _authRefresh, _authRequest, _authResponse,
+    _urlEncoded,
+} from "./request-ext";
 import { Server } from "./server";
 import { serverOPDS_convert_v1_to_v2_PATH } from "./server-opds-convert-v1-to-v2";
 import { trailingSlashRedirect } from "./server-trailing-slash-redirect";
@@ -125,16 +128,17 @@ export function serverOPDS_browse_v2(_server: Server, topRouter: express.Applica
             reqparams.urlEncoded = (req as IRequestPayloadExtension).urlEncoded;
         }
 
-        let authParamJson: any | undefined;
-        const authParamBase64 = (req.query as IRequestQueryParams).auth;
-        if (authParamBase64) {
+        let authResponseJson: any | undefined;
+        const authResponseBase64 = (req.query as IRequestQueryParams).authResponse;
+        if (authResponseBase64) {
             try {
-                const authParamStr = Buffer.from(authParamBase64, "base64").toString("utf8");
-                authParamJson = JSON.parse(authParamStr);
+                const authResponseStr = Buffer.from(authResponseBase64, "base64").toString("utf8");
+                authResponseJson = JSON.parse(authResponseStr);
             } catch (err) {
                 debug(err);
             }
         }
+        const authRequestBase64 = (req.query as IRequestQueryParams).authRequest;
 
         const urlDecoded = reqparams.urlEncoded;
         // if (urlDecoded.substr(-1) === "/") {
@@ -164,6 +168,20 @@ export function serverOPDS_browse_v2(_server: Server, topRouter: express.Applica
             // });
 
             const isAuthStatusCode = response.statusCode === 401;
+
+            if (isAuthStatusCode && // comment this to test refresh_token
+                authRequestBase64 && authResponseJson && authResponseJson.refresh_token) {
+
+                const redirectUrl = rootUrl + req.originalUrl.substr(0,
+                    req.originalUrl.indexOf(serverOPDS_browse_v2_PATH + "/")) +
+                    serverOPDS_auth_PATH + "/" + encodeURIComponent_RFC3986(authRequestBase64) +
+                    "?" + _authRefresh + "=" + authResponseJson.refresh_token;
+
+                debug(`REDIRECT: ${req.originalUrl} ==> ${redirectUrl}`);
+                res.redirect(301, redirectUrl);
+                return;
+            }
+
             const isBadStatusCode = response.statusCode && (response.statusCode < 200 || response.statusCode >= 300);
             if (!isAuthStatusCode && isBadStatusCode) {
                 failure("HTTP CODE " + response.statusCode);
@@ -474,8 +492,8 @@ function doAuth() {
             "User-Agent": "READIUM2",
         };
 
-        if (authParamJson && authParamJson.access_token) {
-            (headers as any).Authorization = `Bearer ${authParamJson.access_token}`;
+        if (authResponseJson && authResponseJson.access_token) {
+            (headers as any).Authorization = `Bearer ${authResponseJson.access_token}`;
         }
 
         // No response streaming! :(
@@ -601,11 +619,9 @@ function doAuth() {
             reqparams.urlEncoded = (req as IRequestPayloadExtension).urlEncoded;
         }
 
-        const urlDecoded = reqparams.urlEncoded;
-        // if (urlDecoded.substr(-1) === "/") {
-        //     urlDecoded = urlDecoded.substr(0, urlDecoded.length - 1);
-        // }
-        debug(urlDecoded);
+        const base64Payload = reqparams.urlEncoded;
+
+        const refreshToken = (req.query as IRequestQueryParams).authRefresh;
 
         const isSecureHttp = req.secure ||
             req.protocol === "https" ||
@@ -617,7 +633,7 @@ function doAuth() {
             + req.headers.host;
 
         try {
-            const encrypted = Buffer.from(urlDecoded, "base64"); // .toString("utf8");
+            const encrypted = Buffer.from(base64Payload, "base64"); // .toString("utf8");
 
             const decrypteds: Buffer[] = [];
             const decryptStream = crypto.createDecipheriv("aes-256-cbc",
@@ -644,6 +660,12 @@ function doAuth() {
             const targetUrl = decryptedJson.targetUrl;
             delete decryptedJson.targetUrl;
 
+            // https://www.oauth.com/oauth2-servers/making-authenticated-requests/refreshing-an-access-token/
+            if (refreshToken) {
+                decryptedJson.grant_type = "refresh_token";
+                decryptedJson.refresh_token = refreshToken;
+            }
+
             // const grantType = decryptedJson.grant_type;
             // const username = decryptedJson.username;
             // const password = decryptedJson.password;
@@ -657,15 +679,12 @@ function doAuth() {
             // const encodedFormData = encodeFormData(decryptedJson);
 
             const failure = (err: any) => {
-                decryptedJson.password = "***";
-
                 debug(err);
                 res.status(500).send("<html><body><p>Internal Server Error</p><p>"
                     + err + "</p></body></html>");
             };
 
             const success = async (response: request.RequestResponse) => {
-                decryptedJson.password = "***";
 
                 // Object.keys(response.headers).forEach((header: string) => {
                 //     debug(header + " => " + response.headers[header]);
@@ -698,9 +717,11 @@ function doAuth() {
                     const targetUrl_ = rootUrl + req.originalUrl.substr(0,
                         req.originalUrl.indexOf(serverOPDS_auth_PATH + "/")) +
                         serverOPDS_browse_v2_PATH + "/" + encodeURIComponent_RFC3986(targetUrl) +
-                        "?" + _auth + "=" +
-                        encodeURIComponent_RFC3986(Buffer.from(JSON.stringify(responseJson)).toString("base64"));
+                        "?" + _authResponse + "=" +
+                        encodeURIComponent_RFC3986(Buffer.from(JSON.stringify(responseJson)).toString("base64")) +
+                        "&" + _authRequest + "=" + encodeURIComponent_RFC3986(base64Payload);
 
+                    decryptedJson.password = "***";
                     res.status(200).send(`
                         <html><body>
                         <hr>
