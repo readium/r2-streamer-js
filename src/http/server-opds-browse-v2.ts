@@ -28,7 +28,7 @@ import { traverseJsonObjects } from "@r2-utils-js/_utils/JsonUtils";
 import { streamToBufferPromise } from "@r2-utils-js/_utils/stream/BufferUtils";
 
 import { jsonSchemaValidate } from "../utils/json-schema-validate";
-import { IRequestPayloadExtension, _urlEncoded } from "./request-ext";
+import { IRequestPayloadExtension, IRequestQueryParams, _auth, _urlEncoded } from "./request-ext";
 import { Server } from "./server";
 import { serverOPDS_convert_v1_to_v2_PATH } from "./server-opds-convert-v1-to-v2";
 import { trailingSlashRedirect } from "./server-trailing-slash-redirect";
@@ -123,6 +123,17 @@ export function serverOPDS_browse_v2(_server: Server, topRouter: express.Applica
 
         if (!reqparams.urlEncoded) {
             reqparams.urlEncoded = (req as IRequestPayloadExtension).urlEncoded;
+        }
+
+        let authParamJson: any | undefined;
+        const authParamBase64 = (req.query as IRequestQueryParams).auth;
+        if (authParamBase64) {
+            try {
+                const authParamStr = Buffer.from(authParamBase64, "base64").toString("utf8");
+                authParamJson = JSON.parse(authParamStr);
+            } catch (err) {
+                debug(err);
+            }
         }
 
         const urlDecoded = reqparams.urlEncoded;
@@ -371,7 +382,13 @@ function hexStrToArrayBuffer(hexStr) {
 }
 function doAuth() {
     ${authLink ? `
-    const bodyJson = { url: "${authLink.Href}", grant_type: "password", username: document.getElementById("login").value, password: document.getElementById("password").value };
+    const bodyJson = {
+        targetUrl: "${urlDecoded}",
+        authUrl: "${authLink.Href}",
+        grant_type: "password",
+        username: document.getElementById("login").value,
+        password: document.getElementById("password").value
+    };
     const bodyStr = JSON.stringify(bodyJson);
 
     const textEncoder = new TextEncoder("utf-8");
@@ -457,6 +474,10 @@ function doAuth() {
             "User-Agent": "READIUM2",
         };
 
+        if (authParamJson && authParamJson.access_token) {
+            (headers as any).Authorization = `Bearer ${authParamJson.access_token}`;
+        }
+
         // No response streaming! :(
         // https://github.com/request/request-promise/issues/90
         const needsStreamingResponse = true;
@@ -491,67 +512,67 @@ function doAuth() {
 
     // -------------------------------------------------------
 
-    // tslint:disable-next-line:variable-name
-    const routerOPDS_dataUrl = express.Router({ strict: false });
-    routerOPDS_dataUrl.use(morgan("combined", { stream: { write: (msg: any) => debug(msg) } }));
+    // // tslint:disable-next-line:variable-name
+    // const routerOPDS_dataUrl = express.Router({ strict: false });
+    // routerOPDS_dataUrl.use(morgan("combined", { stream: { write: (msg: any) => debug(msg) } }));
 
-    routerOPDS_dataUrl.use(trailingSlashRedirect);
+    // routerOPDS_dataUrl.use(trailingSlashRedirect);
 
-    routerOPDS_dataUrl.get("/", (_req: express.Request, res: express.Response) => {
+    // routerOPDS_dataUrl.get("/", (_req: express.Request, res: express.Response) => {
 
-        let html = "<html><head>";
-        html += `<script type="text/javascript">function encodeURIComponent_RFC3986(str) { ` +
-            `return encodeURIComponent(str).replace(/[!'()*]/g, (c) => { ` +
-            `return "%" + c.charCodeAt(0).toString(16); }); }` +
-            `function go(evt) {` +
-            `if (evt) { evt.preventDefault(); } var url = ` +
-            `location.origin +` +
-            // `location.protocol + '//' + location.hostname + ` +
-            // `(location.port ? (':' + location.port) : '') + ` +
-            ` '${serverOPDS_dataUrl_PATH}/' +` +
-            ` encodeURIComponent_RFC3986(document.getElementById("url").value);` +
-            `location.href = url;}</script>`;
-        html += "</head>";
+    //     let html = "<html><head>";
+    //     html += `<script type="text/javascript">function encodeURIComponent_RFC3986(str) { ` +
+    //         `return encodeURIComponent(str).replace(/[!'()*]/g, (c) => { ` +
+    //         `return "%" + c.charCodeAt(0).toString(16); }); }` +
+    //         `function go(evt) {` +
+    //         `if (evt) { evt.preventDefault(); } var url = ` +
+    //         `location.origin +` +
+    //         // `location.protocol + '//' + location.hostname + ` +
+    //         // `(location.port ? (':' + location.port) : '') + ` +
+    //         ` '${serverOPDS_dataUrl_PATH}/' +` +
+    //         ` encodeURIComponent_RFC3986(document.getElementById("url").value);` +
+    //         `location.href = url;}</script>`;
+    //     html += "</head>";
 
-        html += "<body><h1>data URL viewer</h1>";
+    //     html += "<body><h1>data URL viewer</h1>";
 
-        html += `<form onsubmit="go();return false;">` +
-            `<input type="text" name="url" id="url" size="80">` +
-            `<input type="submit" value="Go!"></form>`;
+    //     html += `<form onsubmit="go();return false;">` +
+    //         `<input type="text" name="url" id="url" size="80">` +
+    //         `<input type="submit" value="Go!"></form>`;
 
-        html += "</body></html>";
+    //     html += "</body></html>";
 
-        res.status(200).send(html);
-    });
+    //     res.status(200).send(html);
+    // });
 
-    routerOPDS_dataUrl.param("urlEncoded", (req, _res, next, value, _name) => {
-        (req as IRequestPayloadExtension).urlEncoded = value;
-        next();
-    });
+    // routerOPDS_dataUrl.param("urlEncoded", (req, _res, next, value, _name) => {
+    //     (req as IRequestPayloadExtension).urlEncoded = value;
+    //     next();
+    // });
 
-    routerOPDS_dataUrl.get("/:" + _urlEncoded + "(*)", async (req: express.Request, res: express.Response) => {
+    // routerOPDS_dataUrl.get("/:" + _urlEncoded + "(*)", async (req: express.Request, res: express.Response) => {
 
-        const reqparams = (req as IRequestPayloadExtension).params;
+    //     const reqparams = (req as IRequestPayloadExtension).params;
 
-        if (!reqparams.urlEncoded) {
-            reqparams.urlEncoded = (req as IRequestPayloadExtension).urlEncoded;
-        }
+    //     if (!reqparams.urlEncoded) {
+    //         reqparams.urlEncoded = (req as IRequestPayloadExtension).urlEncoded;
+    //     }
 
-        const urlDecoded = reqparams.urlEncoded;
-        // if (urlDecoded.substr(-1) === "/") {
-        //     urlDecoded = urlDecoded.substr(0, urlDecoded.length - 1);
-        // }
-        debug(urlDecoded);
+    //     const urlDecoded = reqparams.urlEncoded;
+    //     // if (urlDecoded.substr(-1) === "/") {
+    //     //     urlDecoded = urlDecoded.substr(0, urlDecoded.length - 1);
+    //     // }
+    //     debug(urlDecoded);
 
-        res.status(200).send("<html><body>" +
-            "<h1>DATA URL</h1>" +
-            "<h2><a href=\"" + urlDecoded + "\">" + urlDecoded + "</a></h2>" +
-            "<hr>" +
-            "<img src=\"" + urlDecoded + "\" />" +
-            "</body></html>");
-    });
+    //     res.status(200).send("<html><body>" +
+    //         "<h1>DATA URL</h1>" +
+    //         "<h2><a href=\"" + urlDecoded + "\">" + urlDecoded + "</a></h2>" +
+    //         "<hr>" +
+    //         "<img src=\"" + urlDecoded + "\" />" +
+    //         "</body></html>");
+    // });
 
-    topRouter.use(serverOPDS_dataUrl_PATH, routerOPDS_dataUrl);
+    // topRouter.use(serverOPDS_dataUrl_PATH, routerOPDS_dataUrl);
 
     // -------------------------------------------------------
 
@@ -586,6 +607,15 @@ function doAuth() {
         // }
         debug(urlDecoded);
 
+        const isSecureHttp = req.secure ||
+            req.protocol === "https" ||
+            req.get("X-Forwarded-Proto") === "https"
+            // (req.headers.host && req.headers.host.indexOf("now.sh") >= 0) ||
+            // (req.hostname && req.hostname.indexOf("now.sh") >= 0)
+            ;
+        const rootUrl = (isSecureHttp ? "https://" : "http://")
+            + req.headers.host;
+
         try {
             const encrypted = Buffer.from(urlDecoded, "base64"); // .toString("utf8");
 
@@ -608,8 +638,11 @@ function doAuth() {
             const decryptedStr = decrypted.slice(0, size).toString("utf8");
             const decryptedJson = JSON.parse(decryptedStr);
 
-            const url = decryptedJson.url;
-            delete decryptedJson.url;
+            const authUrl = decryptedJson.authUrl;
+            delete decryptedJson.authUrl;
+
+            const targetUrl = decryptedJson.targetUrl;
+            delete decryptedJson.targetUrl;
 
             // const grantType = decryptedJson.grant_type;
             // const username = decryptedJson.username;
@@ -624,12 +657,15 @@ function doAuth() {
             // const encodedFormData = encodeFormData(decryptedJson);
 
             const failure = (err: any) => {
+                decryptedJson.password = "***";
+
                 debug(err);
                 res.status(500).send("<html><body><p>Internal Server Error</p><p>"
                     + err + "</p></body></html>");
             };
 
             const success = async (response: request.RequestResponse) => {
+                decryptedJson.password = "***";
 
                 // Object.keys(response.headers).forEach((header: string) => {
                 //     debug(header + " => " + response.headers[header]);
@@ -652,10 +688,23 @@ function doAuth() {
                 try {
                     const responseStr = responseData.toString("utf8");
                     const responseJson = JSON.parse(responseStr);
+                    // {
+                    //     "access_token": "XXX",
+                    //     "token_type": "Bearer",
+                    //     "expires_in": 3600,
+                    //     "refresh_token": "YYYY",
+                    //     "created_at": 1574940691
+                    // }
+                    const targetUrl_ = rootUrl + req.originalUrl.substr(0,
+                        req.originalUrl.indexOf(serverOPDS_auth_PATH + "/")) +
+                        serverOPDS_browse_v2_PATH + "/" + encodeURIComponent_RFC3986(targetUrl) +
+                        "?" + _auth + "=" +
+                        encodeURIComponent_RFC3986(Buffer.from(JSON.stringify(responseJson)).toString("base64"));
 
-                    decryptedJson.password = "***";
                     res.status(200).send(`
                         <html><body>
+                        <hr>
+                        <a href="${targetUrl_}">${targetUrl}</a>
                         <hr>
                         <pre>${JSON.stringify(decryptedJson, null, 4)}</pre>
                         <hr>
@@ -686,7 +735,7 @@ function doAuth() {
                     form: decryptedJson,
                     headers,
                     method: "GET",
-                    uri: url,
+                    uri: authUrl,
                 })
                     .on("response", success)
                     .on("error", failure);
@@ -699,7 +748,7 @@ function doAuth() {
                         headers,
                         method: "POST",
                         resolveWithFullResponse: true,
-                        uri: url,
+                        uri: authUrl,
                     });
                 } catch (err) {
                     failure(err);
