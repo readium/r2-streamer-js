@@ -730,6 +730,11 @@ function doAuth() {
                         encodeURIComponent_RFC3986(Buffer.from(JSON.stringify(responseJson)).toString("base64")) +
                         "&" + _authRequest + "=" + encodeURIComponent_RFC3986(base64Payload);
 
+                    const refreshTokenUrl = responseJson.refresh_token ? rootUrl + req.originalUrl.substr(0,
+                        req.originalUrl.indexOf(serverOPDS_auth_PATH + "/")) +
+                        serverOPDS_auth_PATH + "/" + encodeURIComponent_RFC3986(base64Payload) +
+                        "?" + _authRefresh + "=" + encodeURIComponent_RFC3986(responseJson.refresh_token) : undefined;
+
                     decryptedJson.password = "***";
                     res.status(200).send(`
                         <html><body>
@@ -739,6 +744,8 @@ function doAuth() {
                         <pre>${JSON.stringify(decryptedJson, null, 4)}</pre>
                         <hr>
                         <pre>${JSON.stringify(responseJson, null, 4)}</pre>
+                        <hr>
+                        ${refreshTokenUrl ? `<a href="${refreshTokenUrl}">FORCE REFRESH TOKEN</a>` : ""}
                         <hr>
                         </body></html>
                     `);
