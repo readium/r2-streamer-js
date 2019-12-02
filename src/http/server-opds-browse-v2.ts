@@ -360,11 +360,16 @@ export function serverOPDS_browse_v2(_server: Server, topRouter: express.Applica
                 return auth.Type === "http://opds-spec.org/auth/oauth/password";
             }) : undefined;
             const authLink = authObj ? (authObj.Links && authObj.Links.find((link) => {
-                return link.Rel.includes("authenticate") && link.TypeLink === "application/json";
+                return link.Rel && link.Rel.includes("authenticate") && link.TypeLink === "application/json";
             })) : undefined;
             // const authLinkRefresh = authObj ? (authObj.Links && authObj.Links.find((link) => {
             //     return link.Rel.includes("refresh") && link.TypeLink === "application/json";
             // })) : undefined;
+
+            const imageLink = authDoc ? (authDoc.Links && authDoc.Links.find((link) => {
+                return link.Rel && link.Rel.includes("logo") && link.TypeLink && link.TypeLink.startsWith("image/");
+            })) : undefined;
+            const imageUrl = imageLink ? ensureAbsolute(urlDecoded, imageLink.Href) : undefined;
 
             const authHtmlForm = !authObj ? "" : `
 <hr>
@@ -377,6 +382,7 @@ export function serverOPDS_browse_v2(_server: Server, topRouter: express.Applica
 <br><br>
     <input type="submit" value="Authenticate">
 </form>
+${imageUrl ? `<img src="${imageUrl}" />` : ``}
 <script type="text/javascript">
 // document.addEventListener("DOMContentLoaded", (event) => {
 // });
@@ -771,7 +777,7 @@ function doAuth() {
                 request.post({
                     form: decryptedJson,
                     headers,
-                    method: "GET",
+                    method: "POST",
                     uri: authUrl,
                 })
                     .on("response", success)
