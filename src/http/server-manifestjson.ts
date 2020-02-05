@@ -147,7 +147,8 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
             const manifestURL = rootUrl + "/" + "manifest.json";
 
             const contentType =
-                (publication.Metadata && publication.Metadata.RDFType) === "https://schema.org/Audiobook" ?
+                (publication.Metadata && publication.Metadata.RDFType &&
+                /http[s]?:\/\/schema\.org\/Audiobook$/.test(publication.Metadata.RDFType)) ?
                 "application/audiobook+json" : "application/webpub+json";
 
             const selfLink = publication.searchLinkByRel("self");

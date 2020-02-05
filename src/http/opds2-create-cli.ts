@@ -98,7 +98,8 @@ if (fs.existsSync(opdsJsonFilePath)) {
         const linkSelf = new OPDSLink();
         linkSelf.Href = pathBase64 + "/manifest.json";
         linkSelf.TypeLink =
-            (publication.Metadata && publication.Metadata.RDFType) === "https://schema.org/Audiobook" ?
+            (publication.Metadata && publication.Metadata.RDFType &&
+            /http[s]?:\/\/schema\.org\/Audiobook$/.test(publication.Metadata.RDFType)) ?
             "application/audiobook+json" : "application/webpub+json";
         linkSelf.AddRel("http://opds-spec.org/acquisition");
         publi.Links.push(linkSelf);
