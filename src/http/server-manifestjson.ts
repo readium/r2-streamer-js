@@ -146,9 +146,13 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
                 + encodeURIComponent_RFC3986(reqparams.pathBase64);
             const manifestURL = rootUrl + "/" + "manifest.json";
 
+            const contentType =
+                (publication.Metadata && publication.Metadata.RDFType) === "https://schema.org/Audiobook" ?
+                "application/audiobook+json" : "application/webpub+json";
+
             const selfLink = publication.searchLinkByRel("self");
             if (!selfLink) {
-                publication.AddLink("application/webpub+json", ["self"], manifestURL, undefined);
+                publication.AddLink(contentType, ["self"], manifestURL, undefined);
             }
 
             // // test JSON Schema string format "uri-template" vs. "uri-reference"
@@ -371,7 +375,7 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
                     "</body></html>");
             } else {
                 server.setResponseCORS(res);
-                res.set("Content-Type", "application/webpub+json; charset=utf-8");
+                res.set("Content-Type", `${contentType}; charset=utf-8`);
 
                 const publicationJsonObj = TaJsonSerialize(publication);
 
