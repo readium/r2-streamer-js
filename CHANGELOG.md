@@ -1,10 +1,30 @@
 # Next
 
 Git diff:
-* https://github.com/readium/r2-streamer-js/compare/v1.0.23...develop
+* https://github.com/readium/r2-streamer-js/compare/v1.0.24...develop
 
 Changes:
 * TODO
+
+# 1.0.24
+
+> Build environment: NodeJS `12.15.0`, NPM `6.13.7`
+
+Changes:
+* NPM package updates
+* Content transformers now pass "session info" semantic-agnostic data (serialized string) so that anonymous HTTP requests can be correlated with specific publications and with their reading session (multiple readers scenario). Also see changes in r2-shared, and of course r2-navigator.
+* Support for AudioBook serving/streaming, local-packed (zipped), local-exploded (unzipped), and remote-exploded.
+* OPDS browse micro-service: OAuth token-based authentication and refresh support.
+
+Git revision info:
+* https://unpkg.com/r2-streamer-js@1.0.24/dist/gitrev.json
+* https://github.com/edrlab/r2-streamer-js-dist/blob/v1.0.24/dist/gitrev.json
+
+Git commit history:
+* https://github.com/readium/r2-streamer-js/commits/v1.0.24
+
+Git diff:
+* https://github.com/readium/r2-streamer-js/compare/v1.0.23...v1.0.24
 
 # 1.0.23
 
