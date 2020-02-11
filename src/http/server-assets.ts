@@ -18,7 +18,9 @@ import { parseRangeHeader } from "@r2-utils-js/_utils/http/RangeUtils";
 import { streamToBufferPromise } from "@r2-utils-js/_utils/stream/BufferUtils";
 import { IStreamAndLength, IZip } from "@r2-utils-js/_utils/zip/zip";
 
-import { IRequestPayloadExtension, IRequestQueryParams, _asset, _pathBase64 } from "./request-ext";
+import {
+    IRequestPayloadExtension, IRequestQueryParams, URL_PARAM_SESSION_INFO, _asset, _pathBase64,
+} from "./request-ext";
 import { Server } from "./server";
 
 // import { CounterPassThroughStream } from "@r2-utils-js/_utils/stream/CounterPassThroughStream";
@@ -226,15 +228,22 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
 
             const doTransform = !isEncrypted || (isObfuscatedFont || !server.disableDecryption);
 
+            const sessionInfo = (req.query as IRequestQueryParams)[URL_PARAM_SESSION_INFO];
+
             if (doTransform && link) {
 
                 let transformFail = false;
                 let transformedStream: IStreamAndLength;
                 try {
                     transformedStream = await Transformers.tryStream(
-                        publication, link,
+                        publication,
+                        link,
                         zipStream_,
-                        isPartialByteRangeRequest, partialByteBegin, partialByteEnd);
+                        isPartialByteRangeRequest,
+                        partialByteBegin,
+                        partialByteEnd,
+                        sessionInfo,
+                    );
                 } catch (err) {
                     debug(err);
                     res.status(500).send("<html><body><p>Internal Server Error</p><p>"

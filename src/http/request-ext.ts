@@ -9,6 +9,8 @@ import * as express from "express";
 
 import { mediaOverlayURLParam } from "@r2-shared-js/parser/epub";
 
+export const URL_PARAM_SESSION_INFO = "r2_SESSION_INFO";
+
 // export const _lcpPass64 = "lcpPass64";
 export const _pathBase64 = "pathBase64";
 export const _asset = "asset";
@@ -36,4 +38,5 @@ export interface IRequestQueryParams {
     authRequest: string;
     authRefresh: string;
     [mediaOverlayURLParam]: string;
+    [URL_PARAM_SESSION_INFO]: string;
 }
