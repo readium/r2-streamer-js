@@ -15,7 +15,7 @@ import * as morgan from "morgan";
 import * as path from "path";
 import * as request from "request";
 import * as requestPromise from "request-promise-native";
-import * as uuid from "uuid";
+import { v4 as uuidv4 } from "uuid";
 
 import { TaJsonDeserialize, TaJsonSerialize } from "@r2-lcp-js/serializable";
 import { OPDSFeed } from "@r2-opds-js/opds/opds2/opds2";
@@ -48,11 +48,11 @@ export const serverOPDS_dataUrl_PATH = "/data-url";
 export const serverOPDS_auth_PATH = "/opds-auth";
 
 const salt = crypto.randomBytes(16).toString("hex");
-const OPDS_AUTH_ENCRYPTION_KEY_BUFFER = crypto.pbkdf2Sync(uuid.v4(), salt, 1000, 32, "sha256");
+const OPDS_AUTH_ENCRYPTION_KEY_BUFFER = crypto.pbkdf2Sync(uuidv4(), salt, 1000, 32, "sha256");
 const OPDS_AUTH_ENCRYPTION_KEY_HEX = OPDS_AUTH_ENCRYPTION_KEY_BUFFER.toString("hex");
 
 const AES_BLOCK_SIZE = 16;
-const OPDS_AUTH_ENCRYPTION_IV_BUFFER = Buffer.from(uuid.v4()).slice(0, AES_BLOCK_SIZE);
+const OPDS_AUTH_ENCRYPTION_IV_BUFFER = Buffer.from(uuidv4()).slice(0, AES_BLOCK_SIZE);
 const OPDS_AUTH_ENCRYPTION_IV_HEX = OPDS_AUTH_ENCRYPTION_IV_BUFFER.toString("hex");
 
 export function serverOPDS_browse_v2(_server: Server, topRouter: express.Application) {

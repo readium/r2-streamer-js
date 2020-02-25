@@ -7,7 +7,7 @@
 
 import * as crypto from "crypto";
 import * as selfsigned from "selfsigned";
-import * as uuid from "uuid";
+import { v4 as uuidv4 } from "uuid";
 
 export interface CertificateData {
     trustKey: Buffer;
@@ -38,7 +38,7 @@ export async function generateSelfSignedData(): Promise<CertificateData> {
                 name: "subjectAltName",
             }],
         };
-        const rand = uuid.v4();
+        const rand = uuidv4();
         const attributes = [{ name: "commonName", value: "R2 insecure server " + rand }];
 
         selfsigned.generate(attributes, opts, (err: any, keys: any) => {
@@ -47,7 +47,7 @@ export async function generateSelfSignedData(): Promise<CertificateData> {
                 return;
             }
 
-            const password = uuid.v4();
+            const password = uuidv4();
             // const checkSum = crypto.createHash("sha256");
             // checkSum.update(password);
             // const hash = checkSum.digest("hex").toUpperCase();
@@ -55,10 +55,10 @@ export async function generateSelfSignedData(): Promise<CertificateData> {
             const hash = crypto.pbkdf2Sync(password, salt, 1000, 32, "sha256").toString("hex");
             (keys as CertificateData).trustKey = Buffer.from(hash, "hex");
 
-            (keys as CertificateData).trustCheck = uuid.v4();
+            (keys as CertificateData).trustCheck = uuidv4();
 
             const AES_BLOCK_SIZE = 16;
-            const ivBuff = Buffer.from(uuid.v4());
+            const ivBuff = Buffer.from(uuidv4());
             const iv = ivBuff.slice(0, AES_BLOCK_SIZE);
             (keys as CertificateData).trustCheckIV = iv;
 
