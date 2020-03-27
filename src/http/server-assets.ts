@@ -332,8 +332,8 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
 
             if (isHead) {
                 res.end();
-                // } else if (zipStream_.length === 2) {
-                //     debug("===> BUFFER SEND (short stream)");
+                // } else if (!isPartialByteRangeRequest && zipStream_.length) { // always true
+                //     debug("===> BUFFER SEND (bypass streaming)");
                 //     let zipData: Buffer;
                 //     try {
                 //         zipData = await streamToBufferPromise(zipStream_.stream);
@@ -346,9 +346,10 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                 //     if (zipData) {
                 //         debug("CHECK: " + zipStream_.length + " ==> " + zipData.length);
                 //     }
-                //     res.send(zipStream_.stream);
+                //     // res.send(zipStream_.stream);
+                //     res.send(zipData);
             } else {
-                // debug("===> STREAM PIPE");
+                // debug(`===> STREAM PIPE: ${link ? link.Href : "link?"} /// ${pathInZip}`);
 
                 // const counterStream = new CounterPassThroughStream(++streamCounter);
 
@@ -375,40 +376,40 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                     //     debug("ZIP DRAIN " + counterStream.id);
                     // })
                     // .pipe(counterStream)
-                    // .on("progress", function f() {
+                    // .on("progress", function f(this: any) {
                     //     debug("CounterPassThroughStream PROGRESS: " +
                     //         (this as CounterPassThroughStream).id +
                     //         " -- " + (this as CounterPassThroughStream).bytesReceived);
                     // })
-                    // .on("end", function f() {
+                    // .on("end", function f(this: any) {
                     //     debug("CounterPassThroughStream END: " +
                     //         (this as CounterPassThroughStream).id);
                     // })
-                    // .on("close", function f() {
+                    // .on("close", function f(this: any) {
                     //     debug("CounterPassThroughStream CLOSE: " +
                     //         (this as CounterPassThroughStream).id);
                     // })
-                    // .once("finish", function f() {
+                    // .once("finish", function f(this: any) {
                     //     debug("CounterPassThroughStream FINISH: " +
                     //         (this as CounterPassThroughStream).id +
                     //         " -- " + (this as CounterPassThroughStream).bytesReceived);
                     // })
-                    // .on("error", function f() {
+                    // .on("error", function f(this: any) {
                     //     debug("CounterPassThroughStream ERROR: " +
                     //         (this as CounterPassThroughStream).id);
                     // })
-                    // .on("pipe", function f() {
+                    // .on("pipe", function f(this: any) {
                     //     debug("CounterPassThroughStream PIPE: " +
                     //         (this as CounterPassThroughStream).id);
                     // })
-                    // .on("unpipe", function f() {
+                    // .on("unpipe", function f(this: any) {
                     //     debug("CounterPassThroughStream UNPIPE: " +
                     //         (this as CounterPassThroughStream).id);
                     // })
-                    // // .on("drain", function f() {
-                    // //     debug("CounterPassThroughStream DRAIN: " +
-                    // //         (this as CounterPassThroughStream).id);
-                    // // })
+                    // .on("drain", function f(this: any) {
+                    //     debug("CounterPassThroughStream DRAIN: " +
+                    //         (this as CounterPassThroughStream).id);
+                    // })
                     .pipe(res)
                     // .on("finish", () => {
                     //     debug("RES FINISH " + counterStream.id);
