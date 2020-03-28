@@ -1,10 +1,30 @@
 # Next
 
 Git diff:
-* https://github.com/readium/r2-streamer-js/compare/v1.0.25...develop
+* https://github.com/readium/r2-streamer-js/compare/v1.0.26...develop
 
 Changes:
 * TODO
+
+# 1.0.26
+
+> Build environment: NodeJS `12.16.1`, NPM `6.14.4`
+
+Changes:
+* NPM package updates
+* added no-cache to HTTP headers for byte range requests, and added HTTP status 416 for non-supported range
+* added error logging for response streaming
+* added new URL parameter to transformer
+
+Git revision info:
+* https://unpkg.com/r2-streamer-js@1.0.26/dist/gitrev.json
+* https://github.com/edrlab/r2-streamer-js-dist/blob/v1.0.26/dist/gitrev.json
+
+Git commit history:
+* https://github.com/readium/r2-streamer-js/commits/v1.0.26
+
+Git diff:
+* https://github.com/readium/r2-streamer-js/compare/v1.0.25...v1.0.26
 
 # 1.0.25
 
