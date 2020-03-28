@@ -24,6 +24,7 @@ import {
 import { Server } from "./server";
 
 // import { CounterPassThroughStream } from "@r2-utils-js/_utils/stream/CounterPassThroughStream";
+// import { PassThrough } from "stream";
 
 const debug = debug_("r2:streamer#http/server-assets");
 
@@ -190,7 +191,6 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
 
             let partialByteBegin = 0; // inclusive boundaries
             let partialByteEnd = -1;
-            let partialByteLength = 0;
             if (isPartialByteRangeRequest) {
                 debug(req.headers.range);
                 const ranges = parseRangeHeader(req.headers.range);
@@ -200,7 +200,8 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                     if (ranges.length > 1) {
                         const err = "Too many HTTP ranges: " + req.headers.range;
                         debug(err);
-                        res.status(500).send("<html><body><p>Internal Server Error</p><p>"
+                        // res.set("Content-Range", `*/${contentLength}`);
+                        res.status(416).send("<html><body><p>Internal Server Error</p><p>"
                             + err + "</p></body></html>");
                         return;
                     }
@@ -211,9 +212,9 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                         partialByteBegin = 0;
                     }
                 }
-            }
 
-            // debug(`${pathInZip} >> ${partialByteBegin}-${partialByteEnd}`);
+                debug(`${pathInZip} >> ${partialByteBegin}-${partialByteEnd}`);
+            }
             let zipStream_: IStreamAndLength;
             try {
                 zipStream_ = isPartialByteRangeRequest && !isEncrypted ?
@@ -232,12 +233,14 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
 
             if (doTransform && link) {
 
-                let transformFail = false;
+                const fullUrl = `${server.serverUrl()}${req.originalUrl}`;
+
                 let transformedStream: IStreamAndLength;
                 try {
                     transformedStream = await Transformers.tryStream(
                         publication,
                         link,
+                        fullUrl,
                         zipStream_,
                         isPartialByteRangeRequest,
                         partialByteBegin,
@@ -256,10 +259,6 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                     }
                     zipStream_ = transformedStream; // can be unchanged
                 } else {
-                    transformFail = true;
-                }
-
-                if (transformFail) {
                     const err = "Transform fail (encryption scheme not supported?)";
                     debug(err);
                     res.status(500).send("<html><body><p>Internal Server Error</p><p>"
@@ -267,14 +266,6 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                     return;
                 }
             }
-
-            if (partialByteEnd < 0) {
-                partialByteEnd = zipStream_.length - 1;
-            }
-
-            partialByteLength = isPartialByteRangeRequest ?
-                partialByteEnd - partialByteBegin + 1 :
-                zipStream_.length;
 
             if (isShow) {
                 let zipData: Buffer;
@@ -307,7 +298,14 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
             }
 
             server.setResponseCORS(res);
-            res.setHeader("Cache-Control", "public,max-age=86400");
+
+            if (isPartialByteRangeRequest) {
+                res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+                res.setHeader("Pragma", "no-cache");
+                res.setHeader("Expires", "0");
+            } else {
+                res.setHeader("Cache-Control", "public,max-age=86400");
+            }
 
             if (mediaType) {
                 res.set("Content-Type", mediaType);
@@ -317,6 +315,12 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
             res.setHeader("Accept-Ranges", "bytes");
 
             if (isPartialByteRangeRequest) {
+                if (partialByteEnd < 0) {
+                    partialByteEnd = zipStream_.length - 1;
+                }
+                const partialByteLength = isPartialByteRangeRequest ?
+                    partialByteEnd - partialByteBegin + 1 :
+                    zipStream_.length;
                 // res.setHeader("Connection", "close");
                 // res.setHeader("Transfer-Encoding", "chunked");
                 res.setHeader("Content-Length", `${partialByteLength}`);
@@ -332,7 +336,9 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
 
             if (isHead) {
                 res.end();
-                // } else if (!isPartialByteRangeRequest && zipStream_.length) { // always true
+                // } else if (!isPartialByteRangeRequest && zipStream_.length &&
+                //     mediaType && mediaType.indexOf("html") >= 0) {
+
                 //     debug("===> BUFFER SEND (bypass streaming)");
                 //     let zipData: Buffer;
                 //     try {
@@ -346,101 +352,165 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                 //     if (zipData) {
                 //         debug("CHECK: " + zipStream_.length + " ==> " + zipData.length);
                 //     }
+                //     debug("HTMLHTMLHTMLHTMLHTMLHTMLHTML");
+                //     debug(zipData.toString("utf8"));
+                //     debug("HTMLHTMLHTMLHTMLHTMLHTMLHTML");
                 //     // res.send(zipStream_.stream);
                 //     res.send(zipData);
             } else {
-                // debug(`===> STREAM PIPE: ${link ? link.Href : "link?"} /// ${pathInZip}`);
 
                 // const counterStream = new CounterPassThroughStream(++streamCounter);
+                // debug(`===> STREAM PIPE [${counterStream.id}] ${link ? link.Href : "link?"} /// ${pathInZip}`);
 
-                zipStream_.stream
-                    // .on("finish", () => {
-                    //     debug("ZIP FINISH " + counterStream.id);
-                    // })
-                    // .on("end", () => {
-                    //     debug("ZIP END " + counterStream.id);
-                    // })
-                    // .on("close", () => {
-                    //     debug("ZIP CLOSE " + counterStream.id);
-                    // })
-                    // .on("error", () => {
-                    //     debug("ZIP ERROR " + counterStream.id);
-                    // })
-                    // .on("pipe", () => {
-                    //     debug("ZIP PIPE " + counterStream.id);
-                    // })
-                    // .on("unpipe", () => {
-                    //     debug("ZIP UNPIPE " + counterStream.id);
-                    // })
-                    // .on("drain", () => {
-                    //     debug("ZIP DRAIN " + counterStream.id);
-                    // })
-                    // .pipe(counterStream)
-                    // .on("progress", function f(this: any) {
-                    //     debug("CounterPassThroughStream PROGRESS: " +
-                    //         (this as CounterPassThroughStream).id +
-                    //         " -- " + (this as CounterPassThroughStream).bytesReceived);
-                    // })
-                    // .on("end", function f(this: any) {
-                    //     debug("CounterPassThroughStream END: " +
-                    //         (this as CounterPassThroughStream).id);
-                    // })
-                    // .on("close", function f(this: any) {
-                    //     debug("CounterPassThroughStream CLOSE: " +
-                    //         (this as CounterPassThroughStream).id);
-                    // })
-                    // .once("finish", function f(this: any) {
-                    //     debug("CounterPassThroughStream FINISH: " +
-                    //         (this as CounterPassThroughStream).id +
-                    //         " -- " + (this as CounterPassThroughStream).bytesReceived);
-                    // })
-                    // .on("error", function f(this: any) {
-                    //     debug("CounterPassThroughStream ERROR: " +
-                    //         (this as CounterPassThroughStream).id);
-                    // })
-                    // .on("pipe", function f(this: any) {
-                    //     debug("CounterPassThroughStream PIPE: " +
-                    //         (this as CounterPassThroughStream).id);
-                    // })
-                    // .on("unpipe", function f(this: any) {
-                    //     debug("CounterPassThroughStream UNPIPE: " +
-                    //         (this as CounterPassThroughStream).id);
-                    // })
-                    // .on("drain", function f(this: any) {
-                    //     debug("CounterPassThroughStream DRAIN: " +
-                    //         (this as CounterPassThroughStream).id);
-                    // })
-                    .pipe(res)
-                    // .on("finish", () => {
-                    //     debug("RES FINISH " + counterStream.id);
-                    // })
-                    // .on("end", () => {
-                    //     debug("RES END " + counterStream.id);
-                    // })
-                    .on("close", () => {
-                        // debug("RES CLOSE " + counterStream.id);
-
-                        res.end();
-
-                        // counterStream.unpipe(res);
-                        // counterStream.end();
-                        // if (zipStream_) {
-                        //     zipStream_.stream.unpipe(counterStream);
-                        // }
-
-                        // zipStream.close();
+                zipStream_.stream // readable
+                    .on("error", function f(this: ReadableStream) {
+                        debug("ZIP ERROR " + pathInZip);
                     })
-                    // .on("error", () => {
-                    //     debug("RES ERROR " + counterStream.id);
+                    // .on("finish", function f(this: ReadableStream) {
+                    //     debug("ZIP FINISH " + counterStream.id + " = " + pathInZip);
                     // })
-                    // .on("pipe", () => {
-                    //     debug("RES PIPE " + counterStream.id);
+                    // .on("end", function f(this: ReadableStream) {
+                    //     debug("ZIP END " + counterStream.id + " = " + pathInZip);
                     // })
-                    // .on("unpipe", () => {
-                    //     debug("RES UNPIPE " + counterStream.id);
+                    // .on("close", function f(this: ReadableStream) {
+                    //     debug("ZIP CLOSE " + counterStream.id + " = " + pathInZip);
                     // })
-                    // .on("drain", () => {
-                    //     debug("RES DRAIN " + counterStream.id);
+                    // .on("error", function f(this: ReadableStream) {
+                    //     debug("ZIP ERROR " + counterStream.id + " = " + pathInZip);
+                    // })
+                    // .on("pipe", function f(this: ReadableStream) {
+                    //     debug("ZIP PIPE " + counterStream.id + " = " + pathInZip);
+                    // })
+                    // .on("unpipe", function f(this: ReadableStream) {
+                    //     debug("ZIP UNPIPE " + counterStream.id + " = " + pathInZip);
+                    // })
+                    // .on("drain", function f(this: ReadableStream) {
+                    //     debug("ZIP DRAIN " + counterStream.id + " = " + pathInZip);
+                    // })
+                    // .on("pause", function f(this: ReadableStream) {
+                    //     debug("ZIP PAUSE " + counterStream.id + " = " + pathInZip);
+                    // })
+                    // .on("resume", function f(this: ReadableStream) {
+                    //     debug("ZIP RESUME " + counterStream.id + " = " + pathInZip);
+                    // })
+                    // .pipe(counterStream) // readable (zipStream_.stream) --> writable (counterStream is duplex)
+                    // .on("progress", function f(this: CounterPassThroughStream) {
+                    //     debug("CounterPassThroughStream PROGRESS: " +
+                    //         this.id + " -- " + this.bytesReceived + " = " + pathInZip);
+                    // })
+                    // .on("finish", function f(this: CounterPassThroughStream) {
+                    //     debug("CounterPassThroughStream FINISH: " +
+                    //         this.id +
+                    //         " -- " + this.bytesReceived + " = " + pathInZip);
+                    // })
+                    // .on("end", function f(this: CounterPassThroughStream) {
+                    //     debug("CounterPassThroughStream END: " +
+                    //         this.id + " = " + pathInZip);
+                    // })
+                    // .on("close", function f(this: CounterPassThroughStream) {
+                    //     debug("CounterPassThroughStream CLOSE: " +
+                    //         this.id + " = " + pathInZip);
+                    // })
+                    // .on("error", function f(this: CounterPassThroughStream) {
+                    //     debug("CounterPassThroughStream ERROR: " +
+                    //         this.id + " = " + pathInZip);
+                    // })
+                    // .on("pipe", function f(this: CounterPassThroughStream) {
+                    //     debug("CounterPassThroughStream PIPE: " +
+                    //         this.id + " = " + pathInZip);
+                    // })
+                    // .on("unpipe", function f(this: CounterPassThroughStream) {
+                    //     debug("CounterPassThroughStream UNPIPE: " +
+                    //         this.id + " = " + pathInZip);
+                    // })
+                    // .on("drain", function f(this: CounterPassThroughStream) {
+                    //     debug("CounterPassThroughStream DRAIN: " +
+                    //         this.id + " = " + pathInZip);
+                    // })
+                    // .on("pause", function f(this: CounterPassThroughStream) {
+                    //     debug("CounterPassThroughStream PAUSE: " +
+                    //         this.id + " = " + pathInZip);
+                    // })
+                    // .on("resume", function f(this: CounterPassThroughStream) {
+                    //     debug("CounterPassThroughStream RESUME: " +
+                    //         this.id + " = " + pathInZip);
+                    // })
+                    // readable (counterStream is duplex) --> writable (PassThrough is duplex)
+                    // .pipe(new PassThrough())
+                    // .on("finish", function f(this: PassThrough) {
+                    //     debug("PASS FINISH " + counterStream.id + " = " + pathInZip);
+                    // })
+                    // .on("end", function f(this: PassThrough) {
+                    //     debug("PASS END " + counterStream.id + " = " + pathInZip);
+                    // })
+                    // .on("close", function f(this: PassThrough) {
+                    //     debug("PASS CLOSE " + counterStream.id + " = " + pathInZip);
+                    // })
+                    // .on("error", function f(this: PassThrough) {
+                    //     debug("PASS ERROR " + counterStream.id + " = " + pathInZip);
+                    // })
+                    // .on("pipe", function f(this: PassThrough) {
+                    //     debug("PASS PIPE " + counterStream.id + " = " + pathInZip);
+                    // })
+                    // .on("unpipe", function f(this: PassThrough) {
+                    //     debug("PASS UNPIPE " + counterStream.id + " = " + pathInZip);
+                    // })
+                    // .on("drain", function f(this: PassThrough) {
+                    //     debug("PASS DRAIN " + counterStream.id + " = " + pathInZip);
+                    // })
+                    // .on("pause", function f(this: PassThrough) {
+                    //     debug("PASS PAUSE " + counterStream.id + " = " + pathInZip);
+                    // })
+                    // .on("resume", function f(this: PassThrough) {
+                    //     debug("PASS RESUME " + counterStream.id + " = " + pathInZip);
+                    // })
+                    .pipe(res) // readable (counterStream is duplex) --> writable (res)
+                    .on("error", function f(this: express.Response) {
+                        debug("RES ERROR " + pathInZip);
+                    })
+                    .on("close", function f(this: express.Response) {
+
+                        res.end(); // writable
+                    })
+                    // .on("finish", function f(this: express.Response) {
+                    //     debug("RES FINISH " + counterStream.id + " = " + pathInZip);
+                    // })
+                    // .on("end", function f(this: express.Response) {
+                    //     debug("RES END " + counterStream.id + " = " + pathInZip);
+                    // })
+                    // .on("close", function f(this: express.Response) {
+                    //     debug("RES CLOSE " + counterStream.id + " = " + pathInZip);
+
+                    //     res.end(); // writable
+
+                    //     // // readable (counterStream is duplex) --> writable (res)
+                    //     // counterStream.unpipe(res);
+
+                    //     // // duplex writable + readable
+                    //     // counterStream.end();
+
+                    //     // // readable (zipStream_.stream) --> writable (counterStream is duplex)
+                    //     // zipStream_.stream.unpipe(counterStream);
+
+                    //     // // zipStream_.stream.close();
+                    // })
+                    // .on("error", function f(this: express.Response) {
+                    //     debug("RES ERROR " + counterStream.id + " = " + pathInZip);
+                    // })
+                    // .on("pipe", function f(this: express.Response) {
+                    //     debug("RES PIPE " + counterStream.id + " = " + pathInZip);
+                    // })
+                    // .on("unpipe", function f(this: express.Response) {
+                    //     debug("RES UNPIPE " + counterStream.id + " = " + pathInZip);
+                    // })
+                    // .on("drain", function f(this: express.Response) {
+                    //     debug("RES DRAIN " + counterStream.id + " = " + pathInZip);
+                    // })
+                    // .on("pause", function f(this: express.Response) {
+                    //     debug("RES PAUSE " + counterStream.id + " = " + pathInZip);
+                    // })
+                    // .on("resume", function f(this: express.Response) {
+                    //     debug("RES RESUME " + counterStream.id + " = " + pathInZip);
                     // })
                     ;
             }
