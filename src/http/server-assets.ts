@@ -175,9 +175,9 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
             // }
 
             const isEncrypted = link && link.Properties && link.Properties.Encrypted;
-            const isObfuscatedFont = isEncrypted && link &&
-                (link.Properties.Encrypted.Algorithm === "http://ns.adobe.com/pdf/enc#RC"
-                    || link.Properties.Encrypted.Algorithm === "http://www.idpf.org/2008/embedding");
+            // const isObfuscatedFont = isEncrypted && link &&
+            //     (link.Properties.Encrypted.Algorithm === "http://ns.adobe.com/pdf/enc#RC"
+            //         || link.Properties.Encrypted.Algorithm === "http://www.idpf.org/2008/embedding");
 
             const isPartialByteRangeRequest = ((req.headers && req.headers.range) ? true : false);
 
@@ -227,7 +227,8 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                 return;
             }
 
-            const doTransform = !isEncrypted || (isObfuscatedFont || !server.disableDecryption);
+            // The HTML transforms are chained here too, so cannot check server.disableDecryption at this level!
+            const doTransform = true; // !isEncrypted || (isObfuscatedFont || !server.disableDecryption);
 
             const sessionInfo = (req.query as IRequestQueryParams)[URL_PARAM_SESSION_INFO];
 
