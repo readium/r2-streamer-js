@@ -6,7 +6,7 @@ NodeJS implementation (written in TypeScript) and HTTP micro-services (Express m
 
 ## Build status
 
-[![NPM](https://img.shields.io/npm/v/r2-streamer-js.svg)](https://www.npmjs.com/package/r2-streamer-js) [![David](https://david-dm.org/readium/r2-streamer-js/status.svg)](https://david-dm.org/readium/r2-streamer-js) [![Travis](https://travis-ci.org/readium/r2-streamer-js.svg?branch=develop)](https://travis-ci.org/readium/r2-streamer-js) [![Heroku](https://img.shields.io/badge/app-Heroku-blue.svg)](https://readium2.herokuapp.com) [![Now.sh](https://img.shields.io/badge/app-Now.sh-lightgrey.svg)](https://readium2.now.sh)
+[![NPM](https://img.shields.io/npm/v/r2-streamer-js.svg)](https://www.npmjs.com/package/r2-streamer-js) [![David](https://david-dm.org/readium/r2-streamer-js/status.svg)](https://david-dm.org/readium/r2-streamer-js) [![Travis](https://travis-ci.org/readium/r2-streamer-js.svg?branch=develop)](https://travis-ci.org/readium/r2-streamer-js) [![Heroku](https://img.shields.io/badge/app-Heroku-blue.svg)](https://readium2.herokuapp.com)
 
 [Changelog](/CHANGELOG.md)
 
@@ -89,11 +89,9 @@ A test server app (not production-ready) is automatically deployed at **Heroku**
 
 https://readium2.herokuapp.com
 
-A mirror app is also deployed at **Now.sh**:
+A mirror app used to be deployed at **Now.sh** (https://readium2.now.sh), but this is not available anymore due to technical reasons (i.e. the new Now deployment model does not support our custom Express server)
 
-https://readium2.now.sh
-
-Both servers run NodeJS 8, and the apps are based on the ES8-2017 code transpiled from TypeScript.
+Deployed servers run NodeJS 10+, and the apps are based on the ES8-2017 code transpiled from TypeScript.
 
 HTTP CORS headers are served to allow cross-origin / remote API requests.
 
@@ -110,10 +108,6 @@ https://raw.githack.com/edrlab/r2-streamer-js-dist/develop/dist/gitrev.json
 Heroku app (latest deployed):
 
 https://readium2.herokuapp.com/version
-
-Now app (latest deployed):
-
-https://readium2.now.sh/version
 
 ## Developer quick start
 

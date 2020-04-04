@@ -20,43 +20,25 @@ Let's look at a concrete example. First, let's reset the LCP passphrase using an
 
 https://readium2.herokuapp.com/pub/*-YmQzZGFlNWZiOTFmODhhNGYwOTc4MjIyZGZkNThmNTlhMTI0MjU3Y2IwODE0ODYzODdjYmFlOWRmMTFmYjg3OQ%3D%3D-*L2FwcC9taXNjL2VwdWJzL3dhc3RlbGFuZC1vdGYtb2JmX0xDUF9kYW4uZXB1Yg%3D%3D/manifest.json/show/all
 
-Alternatively:
-https://readium2.now.sh/pub/*-YmQzZGFlNWZiOTFmODhhNGYwOTc4MjIyZGZkNThmNTlhMTI0MjU3Y2IwODE0ODYzODdjYmFlOWRmMTFmYjg3OQ%3D%3D-*L2hvbWUvbm93dXNlci9zcmMvbWlzYy9lcHVicy93YXN0ZWxhbmQtb3RmLW9iZl9MQ1BfZGFuLmVwdWI%3D/manifest.json/show/all
-
 Let's load the manifest without any LCP passphrase:
 
 https://readium2.herokuapp.com/pub/L2FwcC9taXNjL2VwdWJzL3dhc3RlbGFuZC1vdGYtb2JmX0xDUF9kYW4uZXB1Yg%3D%3D/manifest.json/show/all
-
-Alternatively:
-https://readium2.now.sh/pub/L2hvbWUvbm93dXNlci9zcmMvbWlzYy9lcHVicy93YXN0ZWxhbmQtb3RmLW9iZl9MQ1BfZGFuLmVwdWI%3D/manifest.json/show/all
 
 Notice that we did not provide the LCP passphrase in the URL, yet the publication's cover image is displayed correctly. That is because cover images are not encrypted in LCP-protected publications. The same principle applies to the navigation document:
 
 https://readium2.herokuapp.com/pub/L2FwcC9taXNjL2VwdWJzL3dhc3RlbGFuZC1vdGYtb2JmX0xDUF9kYW4uZXB1Yg%3D%3D/EPUB/wasteland-nav.xhtml?show=1
 
-Alternatively:
-https://readium2.now.sh/pub/L2hvbWUvbm93dXNlci9zcmMvbWlzYy9lcHVicy93YXN0ZWxhbmQtb3RmLW9iZl9MQ1BfZGFuLmVwdWI%3D/EPUB/wasteland-nav.xhtml?show=1
-
 Now let's load an encrypted page (it should fail):
 
 https://readium2.herokuapp.com/pub/L2FwcC9taXNjL2VwdWJzL3dhc3RlbGFuZC1vdGYtb2JmX0xDUF9kYW4uZXB1Yg%3D%3D/EPUB/wasteland-content.xhtml?show=1
-
-Alternatively:
-https://readium2.now.sh/pub/L2hvbWUvbm93dXNlci9zcmMvbWlzYy9lcHVicy93YXN0ZWxhbmQtb3RmLW9iZl9MQ1BfZGFuLmVwdWI%3D/EPUB/wasteland-content.xhtml?show=1
 
 Now let's set the correct passphrase ("dan"):
 
 https://readium2.herokuapp.com/pub/*-ZWM0ZjJkYmIzYjE0MDA5NTU1MGM5YWZiYmI2OWI1ZDZmZDllODE0YjlkYTgyZmFkMGIzNGU5ZmNiZTU2ZjFjYg%3D%3D-*L2FwcC9taXNjL2VwdWJzL3dhc3RlbGFuZC1vdGYtb2JmX0xDUF9kYW4uZXB1Yg%3D%3D/manifest.json/show/all
 
-Alternatively:
-https://readium2.now.sh/pub/*-ZWM0ZjJkYmIzYjE0MDA5NTU1MGM5YWZiYmI2OWI1ZDZmZDllODE0YjlkYTgyZmFkMGIzNGU5ZmNiZTU2ZjFjYg%3D%3D-*L2hvbWUvbm93dXNlci9zcmMvbWlzYy9lcHVicy93YXN0ZWxhbmQtb3RmLW9iZl9MQ1BfZGFuLmVwdWI%3D/manifest.json/show/all
-
 ...and let's load the encrypted page once again (it should succeed):
 
 https://readium2.herokuapp.com/pub/L2FwcC9taXNjL2VwdWJzL3dhc3RlbGFuZC1vdGYtb2JmX0xDUF9kYW4uZXB1Yg%3D%3D/EPUB/wasteland-content.xhtml?show=1
-
-Alternatively:
-https://readium2.now.sh/pub/L2hvbWUvbm93dXNlci9zcmMvbWlzYy9lcHVicy93YXN0ZWxhbmQtb3RmLW9iZl9MQ1BfZGFuLmVwdWI%3D/EPUB/wasteland-content.xhtml?show=1
 
 Note that in this example fonts are obfuscated (IDPF algorithm), therefore they are not encrypted via LCP. Also note that "streaming" of encrypted audio / video content is supported too, but test files are too large to demonstrate here (strictly-speaking, this is not "streaming", but rather: support for HTTP partial byte ranges, random access into the AES-256-CBC resource).
 

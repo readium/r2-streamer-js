@@ -76,8 +76,6 @@ export function serverOPDS_local_feed(server: Server, topRouter: express.Applica
             const isSecureHttp = req.secure ||
                 req.protocol === "https" ||
                 req.get("X-Forwarded-Proto") === "https"
-                // (req.headers.host && req.headers.host.indexOf("now.sh") >= 0) ||
-                // (req.hostname && req.hostname.indexOf("now.sh") >= 0)
                 ;
 
             const rootUrl = (isSecureHttp ? "https://" : "http://")

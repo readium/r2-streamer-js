@@ -4,13 +4,9 @@
 
 https://readium2.herokuapp.com/opds-v1-v2-convert/
 
-(alternative deployment server: https://readium2.now.sh/opds-v1-v2-convert/ )
-
 The following link is for testing the conversion of OPDS v1 to v2:
 
 https://readium2.herokuapp.com/opds-v1-v2-convert/
-
-(alternative deployment server: https://readium2.now.sh/opds-v1-v2-convert/ )
 
 The EPUB files referenced from the OPDS feeds are remotely accessed using HTTP partial byte range requests in order to support loading large publications (e.g. audio / video EPUB3 files). More information here: [remote-epub.md](remote-epub.md).
 
