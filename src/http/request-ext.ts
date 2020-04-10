@@ -39,4 +39,9 @@ export interface IRequestQueryParams {
     authRefresh: string;
     [mediaOverlayURLParam]: string;
     [URL_PARAM_SESSION_INFO]: string;
+
+    // express.Request.query is the return type of qs.parse by default
+    // (https://expressjs.com/en/api.html#app-settings-property).
+    // export interface Query { [key: string]: string | string[] | Query | Query[]; }
+    [key: string]: string;
 }
