@@ -161,8 +161,8 @@ export function serverMediaOverlays(server: Server, routerPathBase64: express.Ro
                 objToSerialize = [];
             }
 
-            let jsonObj = TaJsonSerialize(objToSerialize);
-            jsonObj = { "media-overlay": jsonObj };
+            const jsonObj = TaJsonSerialize(objToSerialize);
+            // jsonObj = { "media-overlay": jsonObj };
 
             if (isShow) {
                 absolutizeURLs(jsonObj);
@@ -185,7 +185,7 @@ export function serverMediaOverlays(server: Server, routerPathBase64: express.Ro
                 // absolutizeURLs(jsonObj);
 
                 server.setResponseCORS(res);
-                res.set("Content-Type", "application/vnd.readium.mo+json; charset=utf-8");
+                res.set("Content-Type", "application/vnd.syncnarr+json; charset=utf-8");
 
                 const jsonStr = isCanonical ?
                     global.JSON.stringify(sortObject(jsonObj), null, "") :

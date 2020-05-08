@@ -210,7 +210,7 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
                     const moURL = // rootUrl + "/" +
                         mediaOverlayURLPath +
                         "?" + mediaOverlayURLParam + "={path}";
-                    publication.AddLink("application/vnd.readium.mo+json", ["media-overlay"], moURL, true);
+                    publication.AddLink("application/vnd.syncnarr+json", ["media-overlay"], moURL, true);
                 }
             }
 

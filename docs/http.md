@@ -54,7 +54,7 @@ Text files can be rendered in-page (for debugging) rather than processed by the 
 
 ### GET /pub/{PUB_ID}/media-overlay
 
-This route serves the full EPUB3 Media Overlay SMIL data (in its JSON form) using the `application/vnd.readium.mo+json` content type. Single spine item Media Overlays can be requested using the `/media-overlay?resource={ASSET_PATH}` URL query parameter (`{ASSET_PATH}` has the same definition as in the above section).
+This route serves the full EPUB3 Media Overlay SMIL data (in its JSON form) using the `application/vnd.syncnarr+json` content type. Single spine item Media Overlays can be requested using the `/media-overlay?resource={ASSET_PATH}` URL query parameter (`{ASSET_PATH}` has the same definition as in the above section).
 
 The `?canonical=true` URL query string parameter can be used to generate a sorted JSON with no pretty-printing (no indentation).
 
