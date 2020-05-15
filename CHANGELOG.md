@@ -1,10 +1,28 @@
 # Next
 
 Git diff:
-* https://github.com/readium/r2-streamer-js/compare/v1.0.27...develop
+* https://github.com/readium/r2-streamer-js/compare/v1.0.28...develop
 
 Changes:
 * TODO
+
+# 1.0.28
+
+> Build environment: NodeJS `12.16.3`, NPM `6.14.5`
+
+Changes:
+* NPM package updates
+* W3C Sync Media + Media Overlays alignment
+
+Git revision info:
+* https://unpkg.com/r2-streamer-js@1.0.28/dist/gitrev.json
+* https://github.com/edrlab/r2-streamer-js-dist/blob/v1.0.28/dist/gitrev.json
+
+Git commit history:
+* https://github.com/readium/r2-streamer-js/commits/v1.0.28
+
+Git diff:
+* https://github.com/readium/r2-streamer-js/compare/v1.0.27...v1.0.28
 
 # 1.0.27
 
