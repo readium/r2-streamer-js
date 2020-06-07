@@ -12,6 +12,11 @@ The EPUB files referenced from the OPDS feeds are remotely accessed using HTTP p
 
 ## A selection of public OPDS feeds:
 
+Gutenberg
+http://m.gutenberg.org/ebooks.opds/
+=>
+https://readium2.herokuapp.com/opds-v1-v2-convert/http%3A%2F%2Fm.gutenberg.org%2Febooks.opds%2F
+
 NYPL registry (OPDS2):
 https://libraryregistry.librarysimplified.org/libraries
 
