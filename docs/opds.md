@@ -17,9 +17,6 @@ http://m.gutenberg.org/ebooks.opds/
 =>
 https://readium2.herokuapp.com/opds-v1-v2-convert/http%3A%2F%2Fm.gutenberg.org%2Febooks.opds%2F
 
-NYPL registry (OPDS2):
-https://libraryregistry.librarysimplified.org/libraries
-
 NYPL INSTANT CLASSICS:
 https://instantclassics.librarysimplified.org/index.xml
 =>
@@ -232,3 +229,6 @@ Specification: https://drafts.opds.io/opds-2.0
 Sample feed: https://test.opds.io/2.0/home.json
 
 Feedbooks: https://catalog.feedbooks.com/catalog/index.json
+
+NYPL registry:
+https://libraryregistry.librarysimplified.org/libraries
