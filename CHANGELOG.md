@@ -1,10 +1,28 @@
 # Next
 
 Git diff:
-* https://github.com/readium/r2-streamer-js/compare/v1.0.29...develop
+* https://github.com/readium/r2-streamer-js/compare/v1.0.30...develop
 
 Changes:
 * TODO
+
+# 1.0.30
+
+> Build environment: NodeJS `12.18.2`, NPM `6.14.5`
+
+Changes:
+* NPM package updates
+* TypeScript const enum safeguard (isolated modules)
+
+Git revision info:
+* https://unpkg.com/r2-streamer-js@1.0.30/dist/gitrev.json
+* https://github.com/edrlab/r2-streamer-js-dist/blob/v1.0.30/dist/gitrev.json
+
+Git commit history:
+* https://github.com/readium/r2-streamer-js/commits/v1.0.30
+
+Git diff:
+* https://github.com/readium/r2-streamer-js/compare/v1.0.29...v1.0.30
 
 # 1.0.29
 

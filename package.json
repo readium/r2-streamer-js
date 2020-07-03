@@ -1,6 +1,6 @@
 {
   "name": "r2-streamer-js",
-  "version": "1.0.29",
+  "version": "1.0.30",
   "description": "Readium 2 'streamer' for NodeJS (TypeScript)",
   "keywords": [
     "readium",
@@ -57,10 +57,10 @@
     "mime-types": "^2.1.27",
     "moment": "^2.27.0",
     "morgan": "^1.10.0",
-    "r2-lcp-js": "^1.0.28",
-    "r2-opds-js": "^1.0.26",
-    "r2-shared-js": "^1.0.37",
-    "r2-utils-js": "^1.0.22",
+    "r2-lcp-js": "^1.0.29",
+    "r2-opds-js": "^1.0.27",
+    "r2-shared-js": "^1.0.38",
+    "r2-utils-js": "^1.0.23",
     "request": "^2.88.2",
     "request-promise-native": "^1.0.8",
     "selfsigned": "^1.10.7",
@@ -86,7 +86,7 @@
     "browserify": "^16.5.1",
     "cpy-cli": "^3.1.1",
     "cross-env": "^7.0.2",
-    "cson": "^7.12.0",
+    "cson": "^7.15.0",
     "eclint": "^2.8.1",
     "exorcist": "^1.0.1",
     "git-rev-sync": "^2.0.0",
@@ -96,7 +96,7 @@
     "sorcery": "^0.10.0",
     "tslint": "^5.20.1",
     "tslint-language-service": "^0.9.9",
-    "typescript": "^3.9.5"
+    "typescript": "^3.9.6"
   },
   "main": "dist/es6-es2015/src/index.js",
   "types": "dist/es6-es2015/src/index.d.js",
