@@ -12,6 +12,11 @@ The EPUB files referenced from the OPDS feeds are remotely accessed using HTTP p
 
 ## A selection of public OPDS feeds:
 
+Textos (Spanish)
+https://textos.info/opds
+=>
+https://readium2.herokuapp.com/opds-v1-v2-convert/https%3A%2F%2Ftextos.info%2Fopds
+
 Gutenberg
 http://m.gutenberg.org/ebooks.opds/
 =>
