@@ -115,7 +115,9 @@ export function serverOPDS_local_feed(server: Server, topRouter: express.Applica
                             }
 
                             if (isShow &&
-                                (obj.type === "application/webpub+json" || obj.type === "application/audiobook+json") &&
+                                (obj.type === "application/webpub+json"
+                                    || obj.type === "application/audiobook+json"
+                                    || obj.type === "application/divina+json") &&
                                 obj.rel === "http://opds-spec.org/acquisition" &&
                                 (obj.href as string).endsWith("/manifest.json")) {
                                     obj.href += "/show";

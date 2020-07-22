@@ -96,7 +96,7 @@ if (stats.isDirectory() && (isAnEPUB !== EPUBis.LocalExploded)) {
             .discard("node_modules")
             .depth(5)
             .paths(filePath)
-            .ext([".epub", ".epub3", ".cbz", ".audiobook", ".lcpaudiobook", ".lcpa"])
+            .ext([".epub", ".epub3", ".cbz", ".audiobook", ".lcpaudiobook", ".lcpa", ".divina", ".lcpdivina"])
             .find();
         const server = new Server({
             maxPrefetchLinks,

@@ -100,7 +100,10 @@ if (fs.existsSync(opdsJsonFilePath)) {
         linkSelf.TypeLink =
             (publication.Metadata && publication.Metadata.RDFType &&
             /http[s]?:\/\/schema\.org\/Audiobook$/.test(publication.Metadata.RDFType)) ?
-            "application/audiobook+json" : "application/webpub+json";
+            "application/audiobook+json" : ((publication.Metadata && publication.Metadata.RDFType &&
+                (/http[s]?:\/\/schema\.org\/ComicStory$/.test(publication.Metadata.RDFType) ||
+                /http[s]?:\/\/schema\.org\/VisualNarrative$/.test(publication.Metadata.RDFType))) ? "application/divina+json" :
+                    "application/webpub+json");
         linkSelf.AddRel("http://opds-spec.org/acquisition");
         publi.Links.push(linkSelf);
 

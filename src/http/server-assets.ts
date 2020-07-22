@@ -97,7 +97,35 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                 return;
             }
 
+            const isDivina = publication.Metadata && publication.Metadata.RDFType &&
+                (/http[s]?:\/\/schema\.org\/ComicStory$/.test(publication.Metadata.RDFType) ||
+                /http[s]?:\/\/schema\.org\/VisualNarrative$/.test(publication.Metadata.RDFType));
+
             let link: Link | undefined;
+
+            const findLinkRecursive = (relativePath: string, l: Link): Link | undefined => {
+                if (l.Href === relativePath) {
+                    return l;
+                }
+                let found: Link | undefined;
+                if (l.Children) {
+                    for (const child of l.Children) {
+                        found = findLinkRecursive(relativePath, child);
+                        if (found) {
+                            return found;
+                        }
+                    }
+                }
+                if (l.Alternate) {
+                    for (const alt of l.Alternate) {
+                        found = findLinkRecursive(relativePath, alt);
+                        if (found) {
+                            return found;
+                        }
+                    }
+                }
+                return undefined;
+            };
 
             if ((publication.Resources || publication.Spine || publication.Links)
                 && pathInZip.indexOf("META-INF/") !== 0
@@ -106,34 +134,35 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                 const relativePath = pathInZip;
 
                 if (publication.Resources) {
-                    link = publication.Resources.find((l) => {
-                        if (l.Href === relativePath) {
-                            return true;
+                    for (const l of publication.Resources) {
+                        link = findLinkRecursive(relativePath, l);
+                        if (link) {
+                            break;
                         }
-                        return false;
-                    });
+                    }
                 }
                 if (!link) {
                     if (publication.Spine) {
-                        link = publication.Spine.find((l) => {
-                            if (l.Href === relativePath) {
-                                return true;
+                        for (const l of publication.Spine) {
+                            link = findLinkRecursive(relativePath, l);
+                            if (link) {
+                                break;
                             }
-                            return false;
-                        });
+                        }
                     }
                 }
                 if (!link) {
                     if (publication.Links) {
-                        link = publication.Links.find((l) => {
-                            if (l.Href === relativePath) {
-                                return true;
+                        for (const l of publication.Links) {
+                            link = findLinkRecursive(relativePath, l);
+                            if (link) {
+                                break;
                             }
-                            return false;
-                        });
+                        }
                     }
                 }
-                if (!link) {
+                if (!link &&
+                    !isDivina) {
                     const err = "Asset not declared in publication spine/resources!" + relativePath;
                     debug(err);
                     res.status(500).send("<html><body><p>Internal Server Error</p><p>"
