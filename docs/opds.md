@@ -12,6 +12,11 @@ The EPUB files referenced from the OPDS feeds are remotely accessed using HTTP p
 
 ## A selection of public OPDS feeds:
 
+O'Reilly Media
+http://opds.oreilly.com/opds/
+=>
+http://readium2.herokuapp.com/opds-v1-v2-convert/http%3A%2F%2Fopds.oreilly.com%2Fopds%2F
+
 Textos (Spanish)
 https://textos.info/opds
 =>
@@ -226,6 +231,16 @@ WMFLABS WIKISOURCE:
 https://tools.wmflabs.org/wsexport/wikisource-fr-good.atom
 =>
 http://readium2.herokuapp.com/opds-v1-v2-convert/https%3A%2F%2Ftools.wmflabs.org%2Fwsexport%2Fwikisource-fr-good.atom
+
+Blah
+http://blah.me/opds/index.atom
+=>
+http://readium2.herokuapp.com/opds-v1-v2-convert/http%3A%2F%2Fblah.me%2Fopds%2Findex.atom
+
+CBeta
+http://www.cbeta.org/opds/
+=>
+http://readium2.herokuapp.com/opds-v1-v2-convert/http%3A%2F%2Fwww.cbeta.org%2Fopds%2F
 
 ## OPDS 2.0
 
