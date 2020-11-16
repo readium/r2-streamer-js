@@ -5,4 +5,4 @@ LICENSE
 node_modules
 npm-debug.log
 dist
-
+.github
