@@ -2,8 +2,8 @@
 name: Sync Fork
 
 on:
-    schedule:
-        - cron:  '0 0 * * *'
+  #schedule:
+  #     - cron:  '0 0 * * *'
     workflow_dispatch: # on button click
 
 jobs:
@@ -24,8 +24,8 @@ jobs:
                 upstream_repository: readium/r2-streamer-js
                 upstream_branch: develop
                 target_branch: develop
-                git_push_args: '--force-with-lease'
-                git_pull_args: ' --rebase --allow-unrelated-histories'
+                             git_push_args: '--force-with-lease'
+                             #git_pull_args: ' --rebase --allow-unrelated-histories'
                 config_git_credentials: true
                 git_user: 'Pierre Leroux'
                 git_email: 'pierre@leroux.tech'
