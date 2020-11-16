@@ -25,7 +25,7 @@ jobs:
                 upstream_branch: develop
                 target_branch: develop
                 git_push_args: '--force-with-lease'
-                git_pull_args: '--allow-unrelated-histories'
+                git_pull_args: '--force --allow-unrelated-histories'
                 config_git_credentials: true
                 git_user: 'Pierre Leroux'
                 git_email: 'pierre@leroux.tech'
