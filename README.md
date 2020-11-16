@@ -1,5 +1,12 @@
 # NodeJS / TypeScript Readium-2 "streamer"
 
+## fork url
+
+https://r2-streamer-js-aghvbovdia-ey.a.run.app/
+
+> automatic deployment on google cloud run
+
+
 NodeJS implementation (written in TypeScript) and HTTP micro-services (Express middleware) for https://github.com/readium/architecture/tree/master/streamer
 
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](/LICENSE)
