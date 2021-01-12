@@ -1,5 +1,5 @@
 
-FROM node:10.23-slim
+FROM node:12
 
 WORKDIR /streamer
 
