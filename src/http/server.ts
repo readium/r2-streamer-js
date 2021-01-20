@@ -271,6 +271,17 @@ Disallow: /
         //     undefined;
     }
 
+    public setResponseCacheHeaders(res: express.Response, enableCaching: boolean) {
+
+        if (enableCaching) {
+            res.setHeader("Cache-Control", "public,max-age=86400");
+        } else {
+            res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+            res.setHeader("Pragma", "no-cache");
+            res.setHeader("Expires", "0");
+        }
+    }
+
     public setResponseCORS(res: express.Response) {
         res.setHeader("Access-Control-Allow-Origin",
             "*");

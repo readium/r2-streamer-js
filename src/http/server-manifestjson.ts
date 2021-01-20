@@ -406,7 +406,7 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
                 }
 
                 res.setHeader("ETag", hash);
-                // res.setHeader("Cache-Control", "public,max-age=86400");
+                // server.setResponseCacheHeaders(res, true);
 
                 const links = getPreFetchResources(publication);
                 if (links && links.length) {

@@ -280,7 +280,7 @@ export function serverOPDS_local_feed(server: Server, topRouter: express.Applica
                 }
 
                 res.setHeader("ETag", hash);
-                // res.setHeader("Cache-Control", "public,max-age=86400");
+                // server.setResponseCacheHeaders(res, true);
 
                 res.status(200).send(publicationsJsonStr);
             }

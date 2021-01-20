@@ -329,12 +329,10 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
 
             server.setResponseCORS(res);
 
-            if (isPartialByteRangeRequest) {
-                res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-                res.setHeader("Pragma", "no-cache");
-                res.setHeader("Expires", "0");
+            if (isPartialByteRangeRequest || isEncrypted) {
+                server.setResponseCacheHeaders(res, false);
             } else {
-                res.setHeader("Cache-Control", "public,max-age=86400");
+                server.setResponseCacheHeaders(res, true);
             }
 
             if (mediaType) {

@@ -100,7 +100,7 @@ export function serverVersion(server: Server, topRouter: express.Application) {
             }
 
             res.setHeader("ETag", hash);
-            // res.setHeader("Cache-Control", "public,max-age=86400");
+            // server.setResponseCacheHeaders(res, true);
 
             res.status(200).send(jsonStr);
         }
