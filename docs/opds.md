@@ -248,7 +248,10 @@ Specification: https://drafts.opds.io/opds-2.0
 
 Sample feed: https://test.opds.io/2.0/home.json
 
-Feedbooks: https://catalog.feedbooks.com/catalog/index.json
+Feedbooks: https://catalog.feedbooks.com/catalog/index.json (replace `.json` with `.atom` to access the OPDS1 XML feed)
 
-NYPL registry:
-https://libraryregistry.librarysimplified.org/libraries
+Lirtuel.be: https://www.lirtuel.be/v1/home.opds2
+
+NYPL registry: https://libraryregistry.librarysimplified.org/libraries
+
+Aldiko registry: http://libraries.aldiko.com/home.json
