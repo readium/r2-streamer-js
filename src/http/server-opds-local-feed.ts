@@ -186,6 +186,9 @@ export function serverOPDS_local_feed(server: Server, topRouter: express.Applica
                         "webpub-manifest/extensions/epub/metadata",
                         "webpub-manifest/extensions/epub/subcollections",
                         "webpub-manifest/extensions/epub/properties",
+                        "webpub-manifest/extensions/presentation/metadata",
+                        "webpub-manifest/extensions/presentation/properties",
+                        "webpub-manifest/language-map",
                     ];
 
                     const validationErrors =

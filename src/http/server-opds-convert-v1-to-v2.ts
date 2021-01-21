@@ -254,6 +254,9 @@ export function serverOPDS_convert_v1_to_v2(_server: Server, topRouter: express.
                     "webpub-manifest/extensions/epub/metadata",
                     "webpub-manifest/extensions/epub/subcollections",
                     "webpub-manifest/extensions/epub/properties",
+                    "webpub-manifest/extensions/presentation/metadata",
+                    "webpub-manifest/extensions/presentation/properties",
+                    "webpub-manifest/language-map",
                 ];
                 if (!opds2Publication) {
                     jsonSchemasNames.unshift("opds/feed"); // must be first!

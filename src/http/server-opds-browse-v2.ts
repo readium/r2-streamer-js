@@ -236,6 +236,9 @@ export function serverOPDS_browse_v2(_server: Server, topRouter: express.Applica
                     "webpub-manifest/extensions/epub/metadata",
                     "webpub-manifest/extensions/epub/subcollections",
                     "webpub-manifest/extensions/epub/properties",
+                    "webpub-manifest/extensions/presentation/metadata",
+                    "webpub-manifest/extensions/presentation/properties",
+                    "webpub-manifest/language-map",
                 ];
                 if (isAuth) {
                     jsonSchemasNames.unshift("opds/authentication"); // must be first!
