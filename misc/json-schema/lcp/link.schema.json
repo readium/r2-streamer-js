@@ -62,6 +62,7 @@
   "then": {
     "properties": {
       "href": {
+        "type": "string",
         "format": "uri"
       }
     }
@@ -69,6 +70,7 @@
   "else": {
     "properties": {
       "href": {
+        "type": "string",
         "format": "uri-template"
       }
     }

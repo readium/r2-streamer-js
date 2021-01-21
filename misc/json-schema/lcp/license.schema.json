@@ -178,11 +178,15 @@
   "allOf": [
     {
       "description": "An LCP License MUST contain a link to a hint",
+      "type": "object",
       "properties": {
         "links": {
+          "type": "array",
           "contains": {
+            "type": "object",
             "properties": {
               "href": {
+                "type": "string",
                 "format": "uri"
               },
               "rel": {
@@ -194,6 +198,7 @@
                   {
                     "type": "array",
                     "contains": {
+                      "type": "string",
                       "const": "hint"
                     }
                   }
@@ -206,11 +211,15 @@
     },
     {
       "description": "An LCP License MUST contain a link to a publication",
+      "type": "object",
       "properties": {
         "links": {
+          "type": "array",
           "contains": {
+            "type": "object",
             "properties": {
               "href": {
+                "type": "string",
                 "format": "uri"
               },
               "rel": {
@@ -222,6 +231,7 @@
                   {
                     "type": "array",
                     "contains": {
+                      "type": "string",
                       "const": "publication"
                     }
                   }
