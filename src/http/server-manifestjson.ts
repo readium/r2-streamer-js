@@ -321,6 +321,10 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
                         // "opds/feed-metadata",
                         "opds/properties",
                         // "opds/authentication",
+                        // "lcp/lcpdf",
+                        // "lcp/license",
+                        // "lcp/link",
+                        // "lcp/status",
                     ];
 
                     const validationErrors =
