@@ -239,6 +239,7 @@ export function serverOPDS_convert_v1_to_v2(_server: Server, topRouter: express.
                 const jsonSchemasNames = [
                     "opds/publication",
                     "opds/acquisition-object",
+                    "opds/catalog-entry",
                     "opds/feed-metadata",
                     "opds/properties",
                     // "opds/authentication",

@@ -317,6 +317,7 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
                         // "opds/feed",
                         // "opds/publication",
                         "opds/acquisition-object",
+                        "opds/catalog-entry",
                         // "opds/feed-metadata",
                         "opds/properties",
                         // "opds/authentication",

@@ -171,6 +171,7 @@ export function serverOPDS_local_feed(server: Server, topRouter: express.Applica
                         "opds/feed", // must be first!
                         "opds/publication",
                         "opds/acquisition-object",
+                        "opds/catalog-entry",
                         "opds/feed-metadata",
                         "opds/properties",
                         // "opds/authentication",

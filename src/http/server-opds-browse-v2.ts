@@ -222,6 +222,7 @@ export function serverOPDS_browse_v2(_server: Server, topRouter: express.Applica
                 const jsonSchemasNames = [
                     "opds/publication",
                     "opds/acquisition-object",
+                    "opds/catalog-entry",
                     "opds/feed-metadata",
                     "opds/properties",
                     "webpub-manifest/publication",
