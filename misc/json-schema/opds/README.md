@@ -2,8 +2,8 @@ From:
 
 https://github.com/opds-community/drafts/tree/master/schema
 
-https://github.com/opds-community/drafts/commit/aa414dc7150588dbb422be2c643a7a74fec6e64d
+https://github.com/opds-community/drafts/commit/b7055e1c57aac91c150b5f357e9139b8a34d7d72
 
-https://github.com/opds-community/drafts/tree/aa414dc7150588dbb422be2c643a7a74fec6e64d/schema
+https://github.com/opds-community/drafts/tree/b7055e1c57aac91c150b5f357e9139b8a34d7d72/schema
 
-https://github.com/opds-community/drafts/compare/aa414dc7150588dbb422be2c643a7a74fec6e64d...master
+https://github.com/opds-community/drafts/compare/b7055e1c57aac91c150b5f357e9139b8a34d7d72...master
