@@ -72,7 +72,7 @@
               "register",
               "renew",
               "return",
-              "revoked",
+              "revoke",
               "cancel"
             ]
           },

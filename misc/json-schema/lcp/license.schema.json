@@ -2,10 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://readium.org/lcp-specs/schema/license.schema.json",
   "title": "Readium LCP v1.0",
-  "description": "Copyright (c) 2019 The Readium Foundation.",
-	"description": "Edited by DRMInside, 2016.",
-	"description": "Edited by L.Le Meur / EDRLab, 2017.",
-	"description": "Edited by H.Gardeur / Feedbooks, 2019.",
+  "description": "Copyright (c) 2019 The Readium Foundation. Edited by DRMInside, 2016. Edited by L.Le Meur / EDRLab, 2017. Edited by H.Gardeur / Feedbooks, 2019.",
   "type": "object",
   "properties": {
     "id": {
@@ -79,7 +76,7 @@
             "key_check",
             "text_hint"
           ]
-        },
+        }
       },
       "required": [
         "profile",

@@ -53,7 +53,8 @@
     "properties": {
       "templated": {
         "enum": [
-          false, null
+          false,
+          null
         ]
       }
     }

@@ -2,8 +2,8 @@ From:
 
 https://github.com/readium/lcp-specs/tree/master/schema
 
-https://github.com/lcp-specs/drafts/commit/5828f83b6fffee23cbc38870f6f6431744191f21
+https://github.com/lcp-specs/drafts/commit/b6dfbb97ce03f766331e2266fb30655e5771e8d5
 
-https://github.com/lcp-specs/drafts/tree/5828f83b6fffee23cbc38870f6f6431744191f21/schema
+https://github.com/lcp-specs/drafts/tree/b6dfbb97ce03f766331e2266fb30655e5771e8d5/schema
 
-https://github.com/lcp-specs/drafts/compare/5828f83b6fffee23cbc38870f6f6431744191f21...master
+https://github.com/lcp-specs/drafts/compare/b6dfbb97ce03f766331e2266fb30655e5771e8d5...master

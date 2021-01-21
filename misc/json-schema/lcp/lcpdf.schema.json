@@ -5,8 +5,8 @@
   "type": "object",
   "allOf": [
     {
-      "$ref": "https://readium.org/webpub-manifest/schema/publication.schema.json",
-    }
+      "$ref": "https://readium.org/webpub-manifest/schema/publication.schema.json"
+    },
     {
       "description": "The readingOrder specified in manifest.json must strictly reference one or more PDF documents",
       "properties": {
