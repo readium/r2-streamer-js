@@ -20,6 +20,7 @@ import { XML } from "@r2-utils-js/_utils/xml-js-mapper";
 
 import { IRequestPayloadExtension, _urlEncoded } from "./request-ext";
 import { Server } from "./server";
+import { serverLCPLSD_show_PATH } from "./server-lcp-lsd-show";
 import { trailingSlashRedirect } from "./server-trailing-slash-redirect";
 import { serverRemotePub_PATH } from "./server-url";
 
@@ -213,6 +214,18 @@ export function serverOPDS_browse_v1(_server: Server, topRouter: express.Applica
                             const opdsUrl = req.originalUrl.substr(0,
                                 req.originalUrl.indexOf(serverOPDS_browse_v1_PATH + "/"))
                                 + serverOPDS_browse_v1_PATH + "/" + encodeURIComponent_RFC3986(linkUrl);
+
+                            html += "<a href='" + opdsUrl
+                                + "'>" + link.Href + "</a> (TITLE: " + link.Title
+                                + ") [REL: " + link.Rel + "]<br/>";
+                        } else if (opds && link.Type &&
+                            (link.Type === "application/vnd.readium.lcp.license.v1.0+json")
+                            // && obj.rel === "http://opds-spec.org/acquisition"
+                        ) {
+                            const linkUrl = ensureAbsolute(urlDecoded, link.Href);
+                            const opdsUrl = req.originalUrl.substr(0,
+                                req.originalUrl.indexOf(serverOPDS_browse_v1_PATH + "/"))
+                                + serverLCPLSD_show_PATH + "/" + encodeURIComponent_RFC3986(linkUrl);
 
                             html += "<a href='" + opdsUrl
                                 + "'>" + link.Href + "</a> (TITLE: " + link.Title

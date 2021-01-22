@@ -33,6 +33,7 @@ import {
     _urlEncoded,
 } from "./request-ext";
 import { Server } from "./server";
+import { serverLCPLSD_show_PATH } from "./server-lcp-lsd-show";
 import { serverOPDS_convert_v1_to_v2_PATH } from "./server-opds-convert-v1-to-v2";
 import { trailingSlashRedirect } from "./server-trailing-slash-redirect";
 
@@ -331,7 +332,22 @@ export function serverOPDS_browse_v2(_server: Server, topRouter: express.Applica
                             _authRequest + "=" + encodeURIComponent_RFC3986(authRequestBase64)
                             ;
                         }
+                    } else if (obj.type === "application/vnd.readium.lcp.license.v1.0+json"
+                        // && obj.rel === "http://opds-spec.org/acquisition"
+                        ) {
 
+                        obj.__href__ = rootUrl + req.originalUrl.substr(0,
+                            req.originalUrl.indexOf(serverOPDS_browse_v2_PATH + "/")) +
+                            serverLCPLSD_show_PATH + "/" + encodeURIComponent_RFC3986(fullHref);
+
+                        if (authRequestBase64 && authResponseBase64) {
+                            obj.__href__AUTH = obj.__href__ +
+                            "?" +
+                            _authResponse + "=" + encodeURIComponent_RFC3986(authResponseBase64) +
+                            "&" +
+                            _authRequest + "=" + encodeURIComponent_RFC3986(authRequestBase64)
+                            ;
+                        }
                     } else if ((obj.type && obj.type.indexOf("application/atom+xml") >= 0) ||
                         (obj.Type && obj.Type.indexOf("application/atom+xml") >= 0)) {
 
