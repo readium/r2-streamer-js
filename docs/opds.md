@@ -252,6 +252,8 @@ Feedbooks: https://catalog.feedbooks.com/catalog/index.json (replace `.json` wit
 
 Lirtuel.be: https://www.lirtuel.be/v1/home.opds2
 
+CantookStation / Pretnumerique.ca / Bibliopresto.ca: https://demoreader.cantookstation.com/v1/home.opds2 and https://demo-testapp.cantookstation.com/v1/home.opds2 and https://missmills.cantookstation.com/v1/home.opds2 and http://quebec.pretnumerique.ca/v1/home.opds2 and http://montreal.pretnumerique.ca/v1/home.opds2 (...many more, see https://sols.cantookstation.com/find_library and http://www.pretnumerique.ca/find_library and https://bibliopresto.ca )
+
 NYPL registry: https://libraryregistry.librarysimplified.org/libraries
 
 Aldiko registry: http://libraries.aldiko.com/home.json
