@@ -246,14 +246,14 @@ http://readium2.herokuapp.com/opds-v1-v2-convert/http%3A%2F%2Fwww.cbeta.org%2Fop
 
 Specification: https://drafts.opds.io/opds-2.0
 
-Sample feed: https://test.opds.io/2.0/home.json
+Sample feed: https://test.opds.io/2.0/home.json => http://readium2.herokuapp.com/opds-v2-browse/https%3A%2F%2Ftest.opds.io%2F2.0%2Fhome.json
 
-Feedbooks: https://catalog.feedbooks.com/catalog/index.json (replace `.json` with `.atom` to access the OPDS1 XML feed)
+Feedbooks: https://catalog.feedbooks.com/catalog/index.json (replace `.json` with `.atom` to access the OPDS1 XML feed) => http://readium2.herokuapp.com/opds-v2-browse/https%3A%2F%2Fcatalog.feedbooks.com%2Fcatalog%2Findex.json
 
-Lirtuel.be: https://www.lirtuel.be/v1/home.opds2
+Lirtuel.be: https://www.lirtuel.be/v1/home.opds2 => http://readium2.herokuapp.com/opds-v2-browse/https%3A%2F%2Fwww.lirtuel.be%2Fv1%2Fhome.opds2
 
-CantookStation / Pretnumerique.ca / Bibliopresto.ca: https://demoreader.cantookstation.com/v1/home.opds2 and https://demo-testapp.cantookstation.com/v1/home.opds2 and https://missmills.cantookstation.com/v1/home.opds2 and http://quebec.pretnumerique.ca/v1/home.opds2 and http://montreal.pretnumerique.ca/v1/home.opds2 (...many more, see https://sols.cantookstation.com/find_library and http://www.pretnumerique.ca/find_library and https://bibliopresto.ca )
+CantookStation / Pretnumerique.ca / Bibliopresto.ca: https://missmills.cantookstation.com/v1/home.opds2 and http://quebec.pretnumerique.ca/v1/home.opds2 and http://montreal.pretnumerique.ca/v1/home.opds2 and https://demoreader.cantookstation.com/v1/home.opds2 and https://demo-testapp.cantookstation.com/v1/home.opds2 and ... many more, see https://sols.cantookstation.com/find_library and http://www.pretnumerique.ca/find_library and https://bibliopresto.ca => http://readium2.herokuapp.com/opds-v2-browse/
 
-NYPL registry: https://libraryregistry.librarysimplified.org/libraries
+NYPL registry: https://libraryregistry.librarysimplified.org/libraries => http://readium2.herokuapp.com/opds-v2-browse/https%3A%2F%2Flibraryregistry.librarysimplified.org%2Flibraries
 
-Aldiko registry: http://libraries.aldiko.com/home.json
+Aldiko registry: http://libraries.aldiko.com/home.json => http://readium2.herokuapp.com/opds-v2-browse/http%3A%2F%2Flibraries.aldiko.com%2Fhome.json
