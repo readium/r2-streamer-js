@@ -242,6 +242,11 @@ http://www.cbeta.org/opds/
 =>
 http://readium2.herokuapp.com/opds-v1-v2-convert/http%3A%2F%2Fwww.cbeta.org%2Fopds%2F
 
+CEL desLibris
+https://api.deslibris.ca/api/feed
+=>
+http://readium2.herokuapp.com/opds-v1-v2-convert/https%3A%2F%2Fapi.deslibris.ca%2Fapi%2Ffeed
+
 ## OPDS 2.0
 
 Specification: https://drafts.opds.io/opds-2.0
