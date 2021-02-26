@@ -41,6 +41,7 @@
     "forceConsistentCasingInFileNames": false,
     "inlineSources": true,
     "inlineSourceMap": false,
+    "preserveConstEnums": true,
     "isolatedModules": true,
     "allowJs": false,
     "maxNodeModuleJsDepth": 0,
@@ -60,7 +61,6 @@
     "listEmittedFiles": false,
     "traceResolution": false,
     "disableSizeLimit": false,
-    "preserveConstEnums": false,
     "removeComments": true,
     "skipLibCheck": false,
     "locale": "en-US"
