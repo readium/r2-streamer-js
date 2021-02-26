@@ -1,10 +1,30 @@
 # Next
 
 Git diff:
-* https://github.com/readium/r2-streamer-js/compare/v1.0.32...develop
+* https://github.com/readium/r2-streamer-js/compare/v1.0.33...develop
 
 Changes:
 * TODO
+
+# 1.0.33
+
+> Build environment: NodeJS `14.15.5`, NPM `6.14.11`
+
+Changes:
+* NPM package updates
+* Workaround for badly-authored publication relative URLs (double slashes), now route paths automatically collapse multiple slashes in addition to normalising dot segments
+* OPDS browser micro service: added support for LCP license links
+* OPDS samples: added more v1 and v2 feeds, plus convenient browser link of OPDS v2
+
+Git revision info:
+* https://unpkg.com/r2-streamer-js@1.0.33/dist/gitrev.json
+* https://github.com/edrlab/r2-streamer-js-dist/blob/v1.0.33/dist/gitrev.json
+
+Git commit history:
+* https://github.com/readium/r2-streamer-js/commits/v1.0.33
+
+Git diff:
+* https://github.com/readium/r2-streamer-js/compare/v1.0.32...v1.0.33
 
 # 1.0.32
 
