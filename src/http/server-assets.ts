@@ -545,6 +545,13 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
         });
 
     routerPathBase64.param("asset", (req, _res, next, value, _name) => {
+        // At this point, route relative path is already normalised with respect to /../ and /./ dot segments,
+        // but not double slashes (which seems to be an easy mistake to make at authoring time in EPUBs),
+        // so we collapse multiple slashes into a single one.
+        if (value) {
+            value = value.replace(/\/\/+/g, "/");
+        }
+
         (req as IRequestPayloadExtension).asset = value;
         next();
     });
