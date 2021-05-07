@@ -2,7 +2,7 @@
 
 ## fork url
 
-https://r2-streamer-js-aghvbovdia-ey.a.run.app/
+https://streamer-aghvbovdia-ew.a.run.app
 
 > automatic deployment on google cloud run
 
