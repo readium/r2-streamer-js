@@ -275,7 +275,7 @@ export function serverOPDS_convert_v1_to_v2(_server: Server, topRouter: express.
                         debug(err);
 
                         if (opds2Publication) {
-                            const val = DotProp.get(jsonObjOPDS2, err.jsonPath);
+                            const val = err.jsonPath ? DotProp.get(jsonObjOPDS2, err.jsonPath) : "";
                             const valueStr = (typeof val === "string") ?
                                 `${val}` :
                                 ((val instanceof Array || typeof val === "object") ?
@@ -288,9 +288,9 @@ export function serverOPDS_convert_v1_to_v2(_server: Server, topRouter: express.
 
                             validationStr +=
                             // tslint:disable-next-line:max-line-length
-                            `\n"${title}"\n\n${err.ajvMessage}: ${valueStr}\n\n'${err.ajvDataPath.replace(/^\./, "")}' (${err.ajvSchemaPath})\n\n`;
+                            `\n"${title}"\n\n${err.ajvMessage}: ${valueStr}\n\n'${err.ajvDataPath?.replace(/^\./, "")}' (${err.ajvSchemaPath})\n\n`;
                         } else {
-                            const val = DotProp.get(jsonObjOPDS2, err.jsonPath);
+                            const val = err.jsonPath ? DotProp.get(jsonObjOPDS2, err.jsonPath) : "";
                             const valueStr = (typeof val === "string") ?
                                 `${val}` :
                                 ((val instanceof Array || typeof val === "object") ?
@@ -300,7 +300,7 @@ export function serverOPDS_convert_v1_to_v2(_server: Server, topRouter: express.
 
                             let title = "";
                             let pubIndex = "";
-                            if (/^publications\.[0-9]+/.test(err.jsonPath)) {
+                            if (err.jsonPath && /^publications\.[0-9]+/.test(err.jsonPath)) {
                                 const jsonPubTitlePath =
                                     err.jsonPath.replace(/^(publications\.[0-9]+).*/, "$1.metadata.title");
                                 debug(jsonPubTitlePath);
@@ -313,7 +313,7 @@ export function serverOPDS_convert_v1_to_v2(_server: Server, topRouter: express.
 
                             validationStr +=
                             // tslint:disable-next-line:max-line-length
-                            `\n___________INDEX___________ #${pubIndex} "${title}"\n\n${err.ajvMessage}: ${valueStr}\n\n'${err.ajvDataPath.replace(/^\./, "")}' (${err.ajvSchemaPath})\n\n`;
+                            `\n___________INDEX___________ #${pubIndex} "${title}"\n\n${err.ajvMessage}: ${valueStr}\n\n'${err.ajvDataPath?.replace(/^\./, "")}' (${err.ajvSchemaPath})\n\n`;
                         }
                     }
                 }

@@ -337,7 +337,7 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
                             debug("JSON Schema validation FAIL.");
                             debug(err);
 
-                            const val = DotProp.get(jsonObj, err.jsonPath);
+                            const val = err.jsonPath ? DotProp.get(jsonObj, err.jsonPath) : "";
                             const valueStr = (typeof val === "string") ?
                                 `${val}` :
                                 ((val instanceof Array || typeof val === "object") ?
@@ -350,7 +350,7 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
 
                             validationStr +=
                             // tslint:disable-next-line:max-line-length
-                            `\n"${title}"\n\n${err.ajvMessage}: ${valueStr}\n\n'${err.ajvDataPath.replace(/^\./, "")}' (${err.ajvSchemaPath})\n\n`;
+                            `\n"${title}"\n\n${err.ajvMessage}: ${valueStr}\n\n'${err.ajvDataPath?.replace(/^\./, "")}' (${err.ajvSchemaPath})\n\n`;
                         }
                     }
                 }

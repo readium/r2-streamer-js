@@ -17,9 +17,9 @@ const _cachedJsonSchemas: any = {}; //  any[] | undefined;
 
 export interface JsonSchemaValidationError {
     ajvSchemaPath: string;
-    ajvDataPath: string;
+    ajvDataPath?: string;
     ajvMessage: string;
-    jsonPath: string;
+    jsonPath?: string;
 }
 
 export function jsonSchemaValidate(
@@ -154,9 +154,9 @@ export function jsonSchemaValidate(
                 const errs: JsonSchemaValidationError[] = [];
 
                 for (const err of errors) {
-                    const jsonPath = err.dataPath.replace(/^\./, "").replace(/\[([0-9]+)\]/g, ".$1");
+                    const jsonPath = err.instancePath?.replace(/^\./, "").replace(/\[([0-9]+)\]/g, ".$1");
                     errs.push({
-                        ajvDataPath: err.dataPath,
+                        ajvDataPath: err.instancePath,
                         ajvMessage: err.message ? err.message : "",
                         ajvSchemaPath: err.schemaPath,
                         jsonPath,

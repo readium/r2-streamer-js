@@ -185,7 +185,7 @@ export function serverLCPLSD_show(_server: Server, topRouter: express.Applicatio
                         debug("JSON Schema validation FAIL.");
                         debug(err);
 
-                        const val = DotProp.get(lcpOrLsdJson, err.jsonPath);
+                        const val = err.jsonPath ? DotProp.get(lcpOrLsdJson, err.jsonPath) : "";
                         const valueStr = (typeof val === "string") ?
                             `${val}` :
                             ((val instanceof Array || typeof val === "object") ?
@@ -195,7 +195,7 @@ export function serverLCPLSD_show(_server: Server, topRouter: express.Applicatio
 
                         validationStr +=
                         // tslint:disable-next-line:max-line-length
-                        `\n${err.ajvMessage}: ${valueStr}\n\n'${err.ajvDataPath.replace(/^\./, "")}' (${err.ajvSchemaPath})\n\n`;
+                        `\n${err.ajvMessage}: ${valueStr}\n\n'${err.ajvDataPath?.replace(/^\./, "")}' (${err.ajvSchemaPath})\n\n`;
                     }
                 }
             }
