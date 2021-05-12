@@ -107,6 +107,7 @@ export function jsonSchemaValidate(
             allowUnionTypes: true,
             coerceTypes: false,
             strict: true,
+            strictRequired: "log",
             validateFormats: true,
             verbose: true,
         });
