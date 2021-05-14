@@ -13,6 +13,7 @@ import { encodeURIComponent_RFC3986, isHTTP } from "@r2-utils-js/_utils/http/Url
 
 import { _jsonPath, _show, _urlEncoded } from "./request-ext";
 import { Server } from "./server";
+import { serverLCPLSD_show_PATH } from "./server-lcp-lsd-show";
 import { serverOPDS_browse_v1_PATH } from "./server-opds-browse-v1";
 import { serverOPDS_browse_v2_PATH } from "./server-opds-browse-v2";
 import { serverOPDS_convert_v1_to_v2_PATH } from "./server-opds-convert-v1-to-v2";
@@ -81,6 +82,7 @@ ${server.disableOPDS ? "" : `\
 
 ${server.disableRemotePubUrl ? "" : `\
 <h2><a href='.${serverRemotePub_PATH}'>Load Remote Publication</a> (HTTP URL)</h2>
+<h2><a href='.${serverLCPLSD_show_PATH}'>Show LCP / LSD</a> (HTTP URL)</h2>
 `}\
 
 ${server.disableOPDS ? "" : `\

@@ -33,6 +33,7 @@ import {
     _urlEncoded,
 } from "./request-ext";
 import { Server } from "./server";
+import { serverLCPLSD_show_PATH } from "./server-lcp-lsd-show";
 import { serverOPDS_convert_v1_to_v2_PATH } from "./server-opds-convert-v1-to-v2";
 import { trailingSlashRedirect } from "./server-trailing-slash-redirect";
 
@@ -222,6 +223,7 @@ export function serverOPDS_browse_v2(_server: Server, topRouter: express.Applica
                 const jsonSchemasNames = [
                     "opds/publication",
                     "opds/acquisition-object",
+                    "opds/catalog-entry",
                     "opds/feed-metadata",
                     "opds/properties",
                     "webpub-manifest/publication",
@@ -236,6 +238,9 @@ export function serverOPDS_browse_v2(_server: Server, topRouter: express.Applica
                     "webpub-manifest/extensions/epub/metadata",
                     "webpub-manifest/extensions/epub/subcollections",
                     "webpub-manifest/extensions/epub/properties",
+                    "webpub-manifest/extensions/presentation/metadata",
+                    "webpub-manifest/extensions/presentation/properties",
+                    "webpub-manifest/language-map",
                 ];
                 if (isAuth) {
                     jsonSchemasNames.unshift("opds/authentication"); // must be first!
@@ -255,7 +260,7 @@ export function serverOPDS_browse_v2(_server: Server, topRouter: express.Applica
                         debug(err);
 
                         if (isPublication) {
-                            const val = DotProp.get(opds2FeedJson, err.jsonPath);
+                            const val = err.jsonPath ? DotProp.get(opds2FeedJson, err.jsonPath) : "";
                             const valueStr = (typeof val === "string") ?
                                 `${val}` :
                                 ((val instanceof Array || typeof val === "object") ?
@@ -268,9 +273,9 @@ export function serverOPDS_browse_v2(_server: Server, topRouter: express.Applica
 
                             validationStr +=
                             // tslint:disable-next-line:max-line-length
-                            `\n"${title}"\n\n${err.ajvMessage}: ${valueStr}\n\n'${err.ajvDataPath.replace(/^\./, "")}' (${err.ajvSchemaPath})\n\n`;
+                            `\n"${title}"\n\n${err.ajvMessage}: ${valueStr}\n\n'${err.ajvDataPath?.replace(/^\./, "")}' (${err.ajvSchemaPath})\n\n`;
                         } else {
-                            const val = DotProp.get(opds2FeedJson, err.jsonPath);
+                            const val = err.jsonPath ? DotProp.get(opds2FeedJson, err.jsonPath) : "";
                             const valueStr = (typeof val === "string") ?
                                 `${val}` :
                                 ((val instanceof Array || typeof val === "object") ?
@@ -280,7 +285,7 @@ export function serverOPDS_browse_v2(_server: Server, topRouter: express.Applica
 
                             let title = "";
                             let pubIndex = "";
-                            if (/^publications\.[0-9]+/.test(err.jsonPath)) {
+                            if (err.jsonPath && /^publications\.[0-9]+/.test(err.jsonPath)) {
                                 const jsonPubTitlePath =
                                     err.jsonPath.replace(/^(publications\.[0-9]+).*/, "$1.metadata.title");
                                 debug(jsonPubTitlePath);
@@ -293,7 +298,7 @@ export function serverOPDS_browse_v2(_server: Server, topRouter: express.Applica
 
                             validationStr +=
                             // tslint:disable-next-line:max-line-length
-                            `\n___________INDEX___________ #${pubIndex} "${title}"\n\n${err.ajvMessage}: ${valueStr}\n\n'${err.ajvDataPath.replace(/^\./, "")}' (${err.ajvSchemaPath})\n\n`;
+                            `\n___________INDEX___________ #${pubIndex} "${title}"\n\n${err.ajvMessage}: ${valueStr}\n\n'${err.ajvDataPath?.replace(/^\./, "")}' (${err.ajvSchemaPath})\n\n`;
                         }
                     }
                 }
@@ -327,7 +332,22 @@ export function serverOPDS_browse_v2(_server: Server, topRouter: express.Applica
                             _authRequest + "=" + encodeURIComponent_RFC3986(authRequestBase64)
                             ;
                         }
+                    } else if (obj.type === "application/vnd.readium.lcp.license.v1.0+json"
+                        // && obj.rel === "http://opds-spec.org/acquisition"
+                        ) {
 
+                        obj.__href__ = rootUrl + req.originalUrl.substr(0,
+                            req.originalUrl.indexOf(serverOPDS_browse_v2_PATH + "/")) +
+                            serverLCPLSD_show_PATH + "/" + encodeURIComponent_RFC3986(fullHref);
+
+                        if (authRequestBase64 && authResponseBase64) {
+                            obj.__href__AUTH = obj.__href__ +
+                            "?" +
+                            _authResponse + "=" + encodeURIComponent_RFC3986(authResponseBase64) +
+                            "&" +
+                            _authRequest + "=" + encodeURIComponent_RFC3986(authRequestBase64)
+                            ;
+                        }
                     } else if ((obj.type && obj.type.indexOf("application/atom+xml") >= 0) ||
                         (obj.Type && obj.Type.indexOf("application/atom+xml") >= 0)) {
 

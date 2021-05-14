@@ -171,6 +171,7 @@ export function serverOPDS_local_feed(server: Server, topRouter: express.Applica
                         "opds/feed", // must be first!
                         "opds/publication",
                         "opds/acquisition-object",
+                        "opds/catalog-entry",
                         "opds/feed-metadata",
                         "opds/properties",
                         // "opds/authentication",
@@ -186,6 +187,9 @@ export function serverOPDS_local_feed(server: Server, topRouter: express.Applica
                         "webpub-manifest/extensions/epub/metadata",
                         "webpub-manifest/extensions/epub/subcollections",
                         "webpub-manifest/extensions/epub/properties",
+                        "webpub-manifest/extensions/presentation/metadata",
+                        "webpub-manifest/extensions/presentation/properties",
+                        "webpub-manifest/language-map",
                     ];
 
                     const validationErrors =
@@ -197,8 +201,7 @@ export function serverOPDS_local_feed(server: Server, topRouter: express.Applica
 
                             debug("JSON Schema validation FAIL.");
                             debug(err);
-
-                            const val = DotProp.get(jsonObj, err.jsonPath);
+                            const val = err.jsonPath ? DotProp.get(jsonObj, err.jsonPath) : "";
                             const valueStr = (typeof val === "string") ?
                                 `${val}` :
                                 ((val instanceof Array || typeof val === "object") ?
@@ -208,7 +211,7 @@ export function serverOPDS_local_feed(server: Server, topRouter: express.Applica
 
                             let title = "";
                             let pubIndex = "";
-                            if (/^publications\.[0-9]+/.test(err.jsonPath)) {
+                            if (err.jsonPath && /^publications\.[0-9]+/.test(err.jsonPath)) {
                                 const jsonPubTitlePath =
                                     err.jsonPath.replace(/^(publications\.[0-9]+).*/, "$1.metadata.title");
                                 debug(jsonPubTitlePath);
@@ -221,7 +224,7 @@ export function serverOPDS_local_feed(server: Server, topRouter: express.Applica
 
                             validationStr +=
                             // tslint:disable-next-line:max-line-length
-                            `\n___________INDEX___________ #${pubIndex} "${title}"\n\n${err.ajvMessage}: ${valueStr}\n\n'${err.ajvDataPath.replace(/^\./, "")}' (${err.ajvSchemaPath})\n\n`;
+                            `\n___________INDEX___________ #${pubIndex} "${title}"\n\n${err.ajvMessage}: ${valueStr}\n\n'${err.ajvDataPath?.replace(/^\./, "")}' (${err.ajvSchemaPath})\n\n`;
                         }
                     }
                 }
@@ -280,7 +283,7 @@ export function serverOPDS_local_feed(server: Server, topRouter: express.Applica
                 }
 
                 res.setHeader("ETag", hash);
-                // res.setHeader("Cache-Control", "public,max-age=86400");
+                // server.setResponseCacheHeaders(res, true);
 
                 res.status(200).send(publicationsJsonStr);
             }

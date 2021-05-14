@@ -42,6 +42,7 @@
     "inlineSources": true,
     "inlineSourceMap": false,
     "isolatedModules": true,
+    "preserveConstEnums": true,
     "allowJs": false,
     "maxNodeModuleJsDepth": 0,
     "checkJs": false,
@@ -60,7 +61,6 @@
     "listEmittedFiles": false,
     "traceResolution": false,
     "disableSizeLimit": false,
-    "preserveConstEnums": false,
     "removeComments": true,
     "skipLibCheck": false,
     "locale": "en-US"

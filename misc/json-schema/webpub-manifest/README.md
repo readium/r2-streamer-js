@@ -2,8 +2,8 @@ From:
 
 https://github.com/readium/webpub-manifest/tree/master/schema
 
-https://github.com/readium/webpub-manifest/commit/dd37f2f032c252c23644763573a3c8be9c91c6f2
+https://github.com/readium/webpub-manifest/commit/16b1a4e2daeac4c5c2e37180b9685ed718c248e1
 
-https://github.com/readium/webpub-manifest/tree/dd37f2f032c252c23644763573a3c8be9c91c6f2/schema
+https://github.com/readium/webpub-manifest/tree/16b1a4e2daeac4c5c2e37180b9685ed718c248e1/schema
 
-https://github.com/readium/webpub-manifest/compare/dd37f2f032c252c23644763573a3c8be9c91c6f2...master
+https://github.com/readium/webpub-manifest/compare/16b1a4e2daeac4c5c2e37180b9685ed718c248e1...master

@@ -23,6 +23,7 @@ import { encodeURIComponent_RFC3986 } from "@r2-utils-js/_utils/http/UrlUtils";
 import { CertificateData, generateSelfSignedData } from "../utils/self-signed";
 import { _jsonPath, _show } from "./request-ext";
 import { serverAssets } from "./server-assets";
+import { serverLCPLSD_show } from "./server-lcp-lsd-show";
 import { serverManifestJson } from "./server-manifestjson";
 import { serverMediaOverlays } from "./server-mediaoverlays";
 import { serverOPDS_browse_v1 } from "./server-opds-browse-v1";
@@ -118,6 +119,7 @@ export class Server {
 
         if (!this.disableRemotePubUrl) {
             serverRemotePub(this, this.expressApp);
+            serverLCPLSD_show(this, this.expressApp);
         }
         if (!this.disableOPDS) {
             serverOPDS_browse_v1(this, this.expressApp);
@@ -269,6 +271,17 @@ Disallow: /
         // return this.isStarted() ?
         //     `${this.httpsServer ? "https:" : "http:"}//127.0.0.1:${port}` :
         //     undefined;
+    }
+
+    public setResponseCacheHeaders(res: express.Response, enableCaching: boolean) {
+
+        if (enableCaching) {
+            res.setHeader("Cache-Control", "public,max-age=86400");
+        } else {
+            res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+            res.setHeader("Pragma", "no-cache");
+            res.setHeader("Expires", "0");
+        }
     }
 
     public setResponseCORS(res: express.Response) {

@@ -72,7 +72,7 @@
               "register",
               "renew",
               "return",
-              "revoked",
+              "revoke",
               "cancel"
             ]
           },
@@ -103,11 +103,15 @@
   "allOf": [
     {
       "description": "An LCP Status Document MUST contain a link to a license",
+      "type": "object",
       "properties": {
         "links": {
+          "type": "array",
           "contains": {
+            "type": "object",
             "properties": {
               "href": {
+                "type": "string",
                 "format": "uri"
               },
               "rel": {
@@ -119,6 +123,7 @@
                   {
                     "type": "array",
                     "contains": {
+                      "type": "string",
                       "const": "license"
                     }
                   }

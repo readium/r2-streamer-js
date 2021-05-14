@@ -1,10 +1,68 @@
 # Next
 
 Git diff:
-* https://github.com/readium/r2-streamer-js/compare/v1.0.31...develop
+* https://github.com/readium/r2-streamer-js/compare/v1.0.34...develop
 
 Changes:
 * TODO
+
+# 1.0.34
+
+> Build environment: NodeJS `14.16.1`, NPM `6.14.13`
+
+Changes:
+* NPM package updates
+
+Git revision info:
+* https://unpkg.com/r2-streamer-js@1.0.34/dist/gitrev.json
+* https://github.com/edrlab/r2-streamer-js-dist/blob/v1.0.34/dist/gitrev.json
+
+Git commit history:
+* https://github.com/readium/r2-streamer-js/commits/v1.0.34
+
+Git diff:
+* https://github.com/readium/r2-streamer-js/compare/v1.0.33...v1.0.34
+
+# 1.0.33
+
+> Build environment: NodeJS `14.15.5`, NPM `6.14.11`
+
+Changes:
+* NPM package updates
+* Workaround for badly-authored publication relative URLs (double slashes), now route paths automatically collapse multiple slashes in addition to normalising dot segments
+* OPDS browser micro service: added support for LCP license links
+* OPDS samples: added more v1 and v2 feeds, plus convenient browser link of OPDS v2
+
+Git revision info:
+* https://unpkg.com/r2-streamer-js@1.0.33/dist/gitrev.json
+* https://github.com/edrlab/r2-streamer-js-dist/blob/v1.0.33/dist/gitrev.json
+
+Git commit history:
+* https://github.com/readium/r2-streamer-js/commits/v1.0.33
+
+Git diff:
+* https://github.com/readium/r2-streamer-js/compare/v1.0.32...v1.0.33
+
+# 1.0.32
+
+> Build environment: NodeJS `14.15.4`, NPM `6.14.11`
+
+Changes:
+* NPM package updates
+* Updated OPDS documentation / references
+* HTTP caching is now disabled for encrypted resources
+* Updated JSON Schemas for OPDS2, ReadiumWebPubManifest, and LCP/LSD
+* New LCP/LSD "micro service" to visualize JSON (same principles as existing OPDS browser/converter, etc.)
+
+Git revision info:
+* https://unpkg.com/r2-streamer-js@1.0.32/dist/gitrev.json
+* https://github.com/edrlab/r2-streamer-js-dist/blob/v1.0.32/dist/gitrev.json
+
+Git commit history:
+* https://github.com/readium/r2-streamer-js/commits/v1.0.32
+
+Git diff:
+* https://github.com/readium/r2-streamer-js/compare/v1.0.31...v1.0.32
 
 # 1.0.31
 

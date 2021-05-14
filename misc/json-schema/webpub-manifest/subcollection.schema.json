@@ -32,6 +32,7 @@
             "$ref": "link.schema.json"
           },
           {
+            "type": "object",
             "properties": {
               "metadata": {
                 "type": "object"
@@ -45,11 +46,7 @@
             },
             "additionalProperties": {
               "$ref": "subcollection.schema.json"
-            },
-            "required": [
-              "metadata",
-              "links"
-            ]
+            }
           }
         ]
       }

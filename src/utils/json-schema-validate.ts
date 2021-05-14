@@ -5,7 +5,8 @@
 // that can be found in the LICENSE file exposed on Github (readium) in the project repository.
 // ==LICENSE-END==
 
-import * as Ajv from "ajv";
+import Ajv from "ajv";
+import addFormats from "ajv-formats";
 import * as debug_ from "debug";
 import * as fs from "fs";
 import * as path from "path";
@@ -16,9 +17,9 @@ const _cachedJsonSchemas: any = {}; //  any[] | undefined;
 
 export interface JsonSchemaValidationError {
     ajvSchemaPath: string;
-    ajvDataPath: string;
+    ajvDataPath?: string;
     ajvMessage: string;
-    jsonPath: string;
+    jsonPath?: string;
 }
 
 export function jsonSchemaValidate(
@@ -101,7 +102,16 @@ export function jsonSchemaValidate(
             _cachedJsonSchemas[jsonSchemaPath] = jsonSchema;
         }
 
-        const ajv = new Ajv({ allErrors: true, coerceTypes: false, verbose: true });
+        const ajv = new Ajv({
+            allErrors: true,
+            allowUnionTypes: true,
+            coerceTypes: false,
+            strict: true,
+            strictRequired: "log",
+            validateFormats: true,
+            verbose: true,
+        });
+        addFormats(ajv);
 
         // const ajvValidate = ajv.compile({});
         // const ajvValid = ajvValidate(jsonObj);
@@ -145,9 +155,9 @@ export function jsonSchemaValidate(
                 const errs: JsonSchemaValidationError[] = [];
 
                 for (const err of errors) {
-                    const jsonPath = err.dataPath.replace(/^\./, "").replace(/\[([0-9]+)\]/g, ".$1");
+                    const jsonPath = err.instancePath?.replace(/^\./, "").replace(/\[([0-9]+)\]/g, ".$1");
                     errs.push({
-                        ajvDataPath: err.dataPath,
+                        ajvDataPath: err.instancePath,
                         ajvMessage: err.message ? err.message : "",
                         ajvSchemaPath: err.schemaPath,
                         jsonPath,
@@ -160,7 +170,15 @@ export function jsonSchemaValidate(
     } catch (err) {
         debug("JSON Schema VALIDATION PROBLEM.");
         debug(err);
-        return undefined;
+
+        const errs: JsonSchemaValidationError[] = [];
+        errs.push({
+            ajvDataPath: err && toString ? err.toString() : "ajvDataPath",
+            ajvMessage: err.message ? err.message : "ajvMessage",
+            ajvSchemaPath: "ajvSchemaPath",
+            jsonPath: "jsonPath",
+        });
+        return errs;
     }
 
     return undefined;

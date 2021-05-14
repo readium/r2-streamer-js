@@ -311,12 +311,20 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
                         "webpub-manifest/extensions/epub/metadata",
                         "webpub-manifest/extensions/epub/subcollections",
                         "webpub-manifest/extensions/epub/properties",
+                        "webpub-manifest/extensions/presentation/metadata",
+                        "webpub-manifest/extensions/presentation/properties",
+                        "webpub-manifest/language-map",
                         // "opds/feed",
                         // "opds/publication",
                         "opds/acquisition-object",
+                        "opds/catalog-entry",
                         // "opds/feed-metadata",
                         "opds/properties",
                         // "opds/authentication",
+                        // "lcp/lcpdf",
+                        // "lcp/license",
+                        // "lcp/link",
+                        // "lcp/status",
                     ];
 
                     const validationErrors =
@@ -329,7 +337,7 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
                             debug("JSON Schema validation FAIL.");
                             debug(err);
 
-                            const val = DotProp.get(jsonObj, err.jsonPath);
+                            const val = err.jsonPath ? DotProp.get(jsonObj, err.jsonPath) : "";
                             const valueStr = (typeof val === "string") ?
                                 `${val}` :
                                 ((val instanceof Array || typeof val === "object") ?
@@ -342,7 +350,7 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
 
                             validationStr +=
                             // tslint:disable-next-line:max-line-length
-                            `\n"${title}"\n\n${err.ajvMessage}: ${valueStr}\n\n'${err.ajvDataPath.replace(/^\./, "")}' (${err.ajvSchemaPath})\n\n`;
+                            `\n"${title}"\n\n${err.ajvMessage}: ${valueStr}\n\n'${err.ajvDataPath?.replace(/^\./, "")}' (${err.ajvSchemaPath})\n\n`;
                         }
                     }
                 }
@@ -406,7 +414,7 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
                 }
 
                 res.setHeader("ETag", hash);
-                // res.setHeader("Cache-Control", "public,max-age=86400");
+                // server.setResponseCacheHeaders(res, true);
 
                 const links = getPreFetchResources(publication);
                 if (links && links.length) {
