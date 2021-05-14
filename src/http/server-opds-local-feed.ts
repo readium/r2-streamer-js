@@ -104,6 +104,7 @@ export function serverOPDS_local_feed(server: Server, topRouter: express.Applica
                 return rootUrl + "/pub/" + href;
             }
 
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             function absolutizeURLs(jsonObj: any) {
                 traverseJsonObjects(jsonObj,
                     (obj) => {
@@ -127,6 +128,7 @@ export function serverOPDS_local_feed(server: Server, topRouter: express.Applica
             }
 
             if (isShow) {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 let objToSerialize: any = null;
 
                 if (reqparams.jsonPath) {
@@ -233,6 +235,7 @@ export function serverOPDS_local_feed(server: Server, topRouter: express.Applica
 
                 if (jsonObj.publications && (jsonObj.publications as JsonArray).length) {
                     let i = 0;
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     (jsonObj.publications as JsonArray).forEach((pub: any) => {
                         pub.___________INDEX___________ = i++;
                     });

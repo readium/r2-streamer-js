@@ -21,7 +21,6 @@ import { PublicationParsePromise } from "@r2-shared-js/parser/publication-parser
 import { encodeURIComponent_RFC3986 } from "@r2-utils-js/_utils/http/UrlUtils";
 
 import { CertificateData, generateSelfSignedData } from "../utils/self-signed";
-import { _jsonPath, _show } from "./request-ext";
 import { serverAssets } from "./server-assets";
 import { serverLCPLSD_show } from "./server-lcp-lsd-show";
 import { serverManifestJson } from "./server-manifestjson";
@@ -38,6 +37,7 @@ import { serverVersion } from "./server-version";
 
 const debug = debug_("r2:streamer#http/server");
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface IPathPublicationMap { [key: string]: any; }
 
 export interface ServerData extends CertificateData {
@@ -175,7 +175,7 @@ Disallow: /
             return Promise.resolve(this.serverInfo() as ServerData);
         }
 
-        let envPort: number = 0;
+        let envPort = 0;
         try {
             envPort = process.env.PORT ? parseInt(process.env.PORT as string, 10) : 0;
         } catch (err) {

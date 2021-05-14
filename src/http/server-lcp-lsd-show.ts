@@ -64,6 +64,7 @@ export function serverLCPLSD_show(_server: Server, topRouter: express.Applicatio
 
     // tslint:disable-next-line:variable-name
     const routerLCPLSD_show = express.Router({ strict: false });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     routerLCPLSD_show.use(morgan("combined", { stream: { write: (msg: any) => debug(msg) } }));
 
     routerLCPLSD_show.use(trailingSlashRedirect);
@@ -71,24 +72,24 @@ export function serverLCPLSD_show(_server: Server, topRouter: express.Applicatio
     routerLCPLSD_show.get("/", (_req: express.Request, res: express.Response) => {
 
         let html = "<html><head>";
-        html += `<script type="text/javascript">function encodeURIComponent_RFC3986(str) { ` +
-            `return encodeURIComponent(str).replace(/[!'()*]/g, (c) => { ` +
-            `return "%" + c.charCodeAt(0).toString(16); }); }` +
-            `function go(evt) {` +
-            `if (evt) { evt.preventDefault(); } var url = ` +
-            `location.origin +` +
+        html += "<script type=\"text/javascript\">function encodeURIComponent_RFC3986(str) { " +
+            "return encodeURIComponent(str).replace(/[!'()*]/g, (c) => { " +
+            "return \"%\" + c.charCodeAt(0).toString(16); }); }" +
+            "function go(evt) {" +
+            "if (evt) { evt.preventDefault(); } var url = " +
+            "location.origin +" +
             // `location.protocol + '//' + location.hostname + ` +
             // `(location.port ? (':' + location.port) : '') + ` +
             ` '${serverLCPLSD_show_PATH}/' +` +
-            ` encodeURIComponent_RFC3986(document.getElementById("url").value);` +
-            `location.href = url;}</script>`;
+            " encodeURIComponent_RFC3986(document.getElementById(\"url\").value);" +
+            "location.href = url;}</script>";
         html += "</head>";
 
         html += "<body><h1>LCP / LSD examiner</h1>";
 
-        html += `<form onsubmit="go();return false;">` +
-            `<input type="text" name="url" id="url" size="80">` +
-            `<input type="submit" value="Go!"></form>`;
+        html += "<form onsubmit=\"go();return false;\">" +
+            "<input type=\"text\" name=\"url\" id=\"url\" size=\"80\">" +
+            "<input type=\"submit\" value=\"Go!\"></form>";
 
         html += "</body></html>";
 
@@ -121,6 +122,7 @@ export function serverLCPLSD_show(_server: Server, topRouter: express.Applicatio
         const rootUrl = (isSecureHttp ? "https://" : "http://")
             + req.headers.host;
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const failure = (err: any) => {
             debug(err);
             res.status(500).send("<html><body><p>Internal Server Error</p><p>"
@@ -200,6 +202,7 @@ export function serverLCPLSD_show(_server: Server, topRouter: express.Applicatio
                 }
             }
 
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const funk = (obj: any) => {
                 if ((obj.href && typeof obj.href === "string") ||
                     (obj.Href && typeof obj.Href === "string")) {

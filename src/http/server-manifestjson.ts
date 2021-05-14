@@ -178,6 +178,7 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
                 return rootUrl + "/" + href;
             }
 
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             function absolutizeURLs(jsonObj: any) {
                 traverseJsonObjects(jsonObj,
                     (obj) => {
@@ -227,6 +228,7 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
             }
 
             if (isShow) {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 let objToSerialize: any = null;
 
                 if (reqparams.jsonPath) {

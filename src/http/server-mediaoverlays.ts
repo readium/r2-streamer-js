@@ -113,6 +113,7 @@ export function serverMediaOverlays(server: Server, routerPathBase64: express.Ro
                 return rootUrl + "/" + href;
             }
 
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             function absolutizeURLs(jsonObject: any) {
                 traverseJsonObjects(jsonObject,
                     (obj) => {
@@ -130,6 +131,7 @@ export function serverMediaOverlays(server: Server, routerPathBase64: express.Ro
                     });
             }
 
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             let objToSerialize: any = null;
 
             const resource = isShow ?

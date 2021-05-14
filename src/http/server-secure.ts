@@ -9,7 +9,6 @@ import * as crypto from "crypto";
 import * as debug_ from "debug";
 import * as express from "express";
 
-import { _jsonPath, _show, _urlEncoded } from "./request-ext";
 import { Server } from "./server";
 
 const debug = debug_("r2:streamer#http/server-secure");
@@ -27,7 +26,7 @@ export function serverSecureHTTPHeader(server: Server, url: string): IHTTPHeader
     if (server.isSecured() &&
         info && info.trustKey && info.trustCheck && info.trustCheckIV) {
 
-        // @ts-ignorexx: TS2454 (variable is used before being assigned)
+        // @ts-except: TS2454 (variable is used before being assigned)
         // instead: exclamation mark "definite assignment"
         let t1!: [number, number];
         if (IS_DEV) {
@@ -108,7 +107,7 @@ export function serverSecure(server: Server, topRouter: express.Application) {
         if (serverData && serverData.trustKey &&
             serverData.trustCheck && serverData.trustCheckIV) {
 
-            // @ts-ignorexx: TS2454 (variable is used before being assigned)
+            // @ts-expect: TS2454 (variable is used before being assigned)
             // instead: exclamation mark "definite assignment"
             let t1!: [number, number];
             if (IS_DEV) {

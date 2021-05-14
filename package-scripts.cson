@@ -174,30 +174,9 @@
       "!**/*.log"
   '
 
-  'lint:typescript': '
-    tslint
-      -c
-      "./tslint.json"
-      "./src/**/*.ts"
-      "./test/**/*.ts"
-  '
-
   'lint:typescript:full': '
-    tslint
-      --project
-      "./tsconfig.json"
-      -c
-      "./tslint.json"
-      "./src/**/*.ts"
-      "./test/**/*.ts"
-  '
-
-  'lintfix': '
-    sed
-      -i
-      ""
-      "s/let normalizedPath = path\\\\.normalize(documentPath);/let normalizedPath = path.normalize(documentPath).toLowerCase();/g"
-      ./node_modules/tslint-language-service/out/src/index.js
+    eslint
+      "src/**/*.ts"
   '
 
   'pretranspile:typescript': '

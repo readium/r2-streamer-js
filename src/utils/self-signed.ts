@@ -41,6 +41,7 @@ export async function generateSelfSignedData(): Promise<CertificateData> {
         const rand = uuidv4();
         const attributes = [{ name: "commonName", value: "R2 insecure server " + rand }];
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         selfsigned.generate(attributes, opts, (err: any, keys: any) => {
             if (err) {
                 reject(err);
