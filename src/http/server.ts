@@ -52,18 +52,22 @@ export interface IServerOptions {
     disableRemotePubUrl?: boolean;
     disableOPDS?: boolean;
     maxPrefetchLinks?: number;
+    readers?: Readers;
 }
 
 // this ceiling value seems very arbitrary ... what would be a reasonable default value?
 // ... based on what metric, any particular HTTP server or client implementation?
 export const MAX_PREFETCH_LINKS = 10;
 
+export type GetReaderUrl = (manifestUrl: string) => string;
+export type Readers = {title: string; getUrl: GetReaderUrl}[]
 export class Server {
     public readonly disableReaders: boolean;
     public readonly disableDecryption: boolean;
     public readonly disableRemotePubUrl: boolean;
     public readonly disableOPDS: boolean;
     public readonly maxPrefetchLinks: number;
+    public readonly readers: Readers
 
     public readonly lcpBeginToken = "*-";
     public readonly lcpEndToken = "-*";
@@ -88,6 +92,12 @@ export class Server {
         this.disableDecryption = options && options.disableDecryption ? options.disableDecryption : false;
         this.disableRemotePubUrl = options && options.disableRemotePubUrl ? options.disableRemotePubUrl : false;
         this.disableOPDS = options && options.disableOPDS ? options.disableOPDS : false;
+        this.readers = options?.readers ?? [
+            {title: "Reader NYPL", getUrl: (url) => `/readerNYPL/?url=${url}`},
+            {title: "Reader EPUB.js", getUrl: url => `https://s3.amazonaws.com/epubjs-manifest/examples/manifest.html?href=${url}`},
+            {title: "Reader HADRIEN", getUrl: url => `/readerHADRIEN/?manifest=true&href=${url}`},
+            {title: "Reader HADRIEN BASIC", getUrl: url => `https://hadriengardeur.github.io/webpub-manifest/examples/viewer/?manifest=true&href=${url}`},
+        ];
 
         // note: zero not allowed (fallback to default MAX_PREFETCH_LINKS). use -1 to disable ceiling value.
         this.maxPrefetchLinks = options && options.maxPrefetchLinks ? options.maxPrefetchLinks : MAX_PREFETCH_LINKS;
