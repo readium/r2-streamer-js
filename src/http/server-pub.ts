@@ -35,7 +35,7 @@ export function serverPub(server: Server, topRouter: express.Application): expre
         (server.disableReaders ? "" : (server.readers.map(config => {
             const url = config.getUrl(`PREFIX${querystring.escape(urlBook)}`);
             return `<p>${config.title}:<br><a href='${url}'>${url}</a></p>`;
-        }).join())) +
+        }).join(""))) +
         "</body></html>";
 
     const routerPathBase64 = express.Router({ strict: false });
