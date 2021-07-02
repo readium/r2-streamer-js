@@ -145,8 +145,8 @@ const server = new Server({
   disableRemotePubUrl: true, // deactivates the HTTP route for loading a remote publication.
   maxPrefetchLinks: 5, // Link HTTP header, with rel = prefetch, see server.ts MAX_PREFETCH_LINKS (default = 10)
   readers: [ // the example readers that will show up on the publication page
-    { 
-      title: "My Example", 
+    {
+      title: "My Example",
       getUrl: manifestUrl => `/myreader?url=${manifestUrl}`
     }
   ]
