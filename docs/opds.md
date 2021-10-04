@@ -247,6 +247,11 @@ https://api.deslibris.ca/api/feed
 =>
 http://readium2.herokuapp.com/opds-v1-v2-convert/https%3A%2F%2Fapi.deslibris.ca%2Fapi%2Ffeed
 
+Lyrasis
+https://lion.lyrasistechnology.org
+=>
+http://readium2.herokuapp.com/opds-v1-v2-convert/https%3A%2F%2Flion.lyrasistechnology.org%2F
+
 ## OPDS 2.0
 
 Specification: https://drafts.opds.io/opds-2.0
