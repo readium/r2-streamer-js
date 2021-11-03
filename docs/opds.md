@@ -17,6 +17,11 @@ http://opds.oreilly.com/opds/
 =>
 http://readium2.herokuapp.com/opds-v1-v2-convert/http%3A%2F%2Fopds.oreilly.com%2Fopds%2F
 
+DPLA (Digital Public Library of America)
+https://openbookshelf.dp.la/
+=>
+http://readium2.herokuapp.com/opds-v1-v2-convert/https%3A%2F%2Fopenbookshelf.dp.la%2F
+
 Textos (Spanish)
 https://textos.info/opds
 =>
