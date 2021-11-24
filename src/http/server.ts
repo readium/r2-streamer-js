@@ -341,7 +341,7 @@ Disallow: /
         if (!publication) {
 
             // const fileName = path.basename(pathBase64Str);
-            // const ext = path.extname(fileName).toLowerCase();
+            // const ext = path.extname(fileName);
 
             if (filePath.endsWith("_manifest.json")) {
                 try {

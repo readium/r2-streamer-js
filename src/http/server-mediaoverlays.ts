@@ -88,7 +88,7 @@ export function serverMediaOverlays(server: Server, routerPathBase64: express.Ro
             const pathBase64Str = Buffer.from(reqparams.pathBase64, "base64").toString("utf8");
 
             // const fileName = path.basename(pathBase64Str);
-            // const ext = path.extname(fileName).toLowerCase();
+            // const ext = path.extname(fileName);
 
             let publication: Publication;
             try {

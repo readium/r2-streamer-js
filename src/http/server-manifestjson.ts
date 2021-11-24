@@ -96,7 +96,7 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
             const pathBase64Str = Buffer.from(reqparams.pathBase64, "base64").toString("utf8");
 
             // const fileName = path.basename(pathBase64Str);
-            // const ext = path.extname(fileName).toLowerCase();
+            // const ext = path.extname(fileName);
 
             let publication: Publication;
             try {
@@ -146,10 +146,10 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
 
             const contentType =
                 (publication.Metadata && publication.Metadata.RDFType &&
-                /http[s]?:\/\/schema\.org\/Audiobook$/.test(publication.Metadata.RDFType)) ?
+                /https?:\/\/schema\.org\/Audiobook$/.test(publication.Metadata.RDFType)) ?
                 "application/audiobook+json" : ((publication.Metadata && publication.Metadata.RDFType &&
-                    (/http[s]?:\/\/schema\.org\/ComicStory$/.test(publication.Metadata.RDFType) ||
-                    /http[s]?:\/\/schema\.org\/VisualNarrative$/.test(publication.Metadata.RDFType))) ? "application/divina+json" :
+                    (/https?:\/\/schema\.org\/ComicStory$/.test(publication.Metadata.RDFType) ||
+                    /https?:\/\/schema\.org\/VisualNarrative$/.test(publication.Metadata.RDFType))) ? "application/divina+json" :
                         "application/webpub+json");
 
             const selfLink = publication.searchLinkByRel("self");

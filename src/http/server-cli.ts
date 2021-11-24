@@ -103,7 +103,7 @@ if (stats.isDirectory() && (isAnEPUB !== EPUBis.LocalExploded)) {
             filter((f) => {
                 return f.isFile() &&
                     (
-                        /((\.epub3?)|(\.cbz)|(\.audiobook)|(\.lcpaudiobook)|(\.lcpa)|(\.divina)|(\.lcpdivina))$/.test(f.name)
+                        /((\.epub3?)|(\.cbz)|(\.audiobook)|(\.lcpaudiobook)|(\.lcpa)|(\.divina)|(\.lcpdivina))$/i.test(f.name)
                         ||
                         (/_manifest\.json$/.test(f.name)
                         && fs.existsSync(path.join(filePath, path.basename(f.name).replace(/_manifest\.json$/, ""))))
@@ -123,8 +123,8 @@ if (stats.isDirectory() && (isAnEPUB !== EPUBis.LocalExploded)) {
 
     // filePaths = filePaths.filter((filep) => {
     //     const fileName = path.basename(filep);
-    //     const ext = path.extname(fileName).toLowerCase();
-    //     return (/\.epub[3]?$/.test(ext) || ext === ".cbz") &&
+    //     const ext = path.extname(fileName);
+    //     return (/((\.epub3?)|(\.cbz))$/i.test(ext) || ext === ".cbz") &&
     //         fs.lstatSync(path.join(filePath, filep)).isFile();
     // });
 

@@ -63,7 +63,7 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
             const pathBase64Str = Buffer.from(reqparams.pathBase64, "base64").toString("utf8");
 
             // const fileName = path.basename(pathBase64Str);
-            // const ext = path.extname(fileName).toLowerCase();
+            // const ext = path.extname(fileName);
 
             let publication: Publication;
             try {
@@ -98,8 +98,8 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
             }
 
             const isDivina = publication.Metadata && publication.Metadata.RDFType &&
-                (/http[s]?:\/\/schema\.org\/ComicStory$/.test(publication.Metadata.RDFType) ||
-                /http[s]?:\/\/schema\.org\/VisualNarrative$/.test(publication.Metadata.RDFType));
+                (/https?:\/\/schema\.org\/ComicStory$/.test(publication.Metadata.RDFType) ||
+                /https?:\/\/schema\.org\/VisualNarrative$/.test(publication.Metadata.RDFType));
 
             let link: Link | undefined;
 
@@ -129,7 +129,7 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
 
             if ((publication.Resources || publication.Spine || publication.Links)
                 && pathInZip.indexOf("META-INF/") !== 0
-                && !pathInZip.endsWith(".opf")) {
+                && !/\.opf$/i.test(pathInZip)) {
 
                 const relativePath = pathInZip;
 
@@ -172,7 +172,7 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
             }
 
             if (server.isSecured() && !link &&
-                (pathInZip.indexOf("META-INF/") === 0 || pathInZip.endsWith(".opf"))
+                (pathInZip.indexOf("META-INF/") === 0 || /\.opf$/i.test(pathInZip))
             ) {
                 res.status(200).send("<html><body></body></html>");
                 return;
