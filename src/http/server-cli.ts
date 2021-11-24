@@ -103,7 +103,7 @@ if (stats.isDirectory() && (isAnEPUB !== EPUBis.LocalExploded)) {
             filter((f) => {
                 return f.isFile() &&
                     (
-                        /\.(epub3?)|(cbz)|(audiobook)|(lcpaudiobook)|(lcpa)|(divina)|(lcpdivina)$/.test(f.name)
+                        /((\.epub3?)|(\.cbz)|(\.audiobook)|(\.lcpaudiobook)|(\.lcpa)|(\.divina)|(\.lcpdivina))$/.test(f.name)
                         ||
                         (/_manifest\.json$/.test(f.name)
                         && fs.existsSync(path.join(filePath, path.basename(f.name).replace(/_manifest\.json$/, ""))))
