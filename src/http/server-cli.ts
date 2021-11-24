@@ -124,7 +124,7 @@ if (stats.isDirectory() && (isAnEPUB !== EPUBis.LocalExploded)) {
     // filePaths = filePaths.filter((filep) => {
     //     const fileName = path.basename(filep);
     //     const ext = path.extname(fileName);
-    //     return (/((\.epub3?)|(\.cbz))$/i.test(ext) || ext === ".cbz") &&
+    //     return (/((\.epub3?)|(\.cbz))$/i.test(ext)) &&
     //         fs.lstatSync(path.join(filePath, filep)).isFile();
     // });
 
