@@ -106,7 +106,7 @@
   "main": "dist/es6-es2015/src/index.js",
   "types": "dist/es6-es2015/src/index.d.js",
   "bin": {
-    "r2-streamer-js-server": "dist/es6-es2015/src/http/server-cli.js"
+    "r2-streamer-js-server": "dist/es8-es2017/src/http/server-cli.js"
   },
   "files": [
     "LICENSE",
