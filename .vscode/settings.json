@@ -31,7 +31,6 @@
   "editor.insertSpaces": true,
   "editor.minimap.enabled": false,
   "sort-imports.on-save": false,
-  "tslint.jsEnable": false,
   "importSorter.importStringConfiguration.quoteMark": "double",
   "importSorter.importStringConfiguration.trailingComma": "multiLine",
   "importSorter.sortConfiguration.importMembers.order": "lowercaseLast"

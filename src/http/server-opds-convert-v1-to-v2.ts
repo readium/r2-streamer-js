@@ -14,7 +14,7 @@ import * as morgan from "morgan";
 import * as path from "path";
 import * as request from "request";
 import * as requestPromise from "request-promise-native";
-import * as xmldom from "xmldom";
+import * as xmldom from "@xmldom/xmldom";
 
 import { TaJsonSerialize } from "@r2-lcp-js/serializable";
 import {

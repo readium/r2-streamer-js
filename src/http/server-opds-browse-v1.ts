@@ -10,7 +10,7 @@ import * as express from "express";
 import * as morgan from "morgan";
 import * as request from "request";
 import * as requestPromise from "request-promise-native";
-import * as xmldom from "xmldom";
+import * as xmldom from "@xmldom/xmldom";
 
 import { OPDS } from "@r2-opds-js/opds/opds1/opds";
 import { Entry } from "@r2-opds-js/opds/opds1/opds-entry";
