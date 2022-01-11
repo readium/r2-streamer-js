@@ -276,7 +276,15 @@ export function serverLCPLSD_show(_server: Server, topRouter: express.Applicatio
                 method: "GET",
                 uri: urlDecoded,
             })
-                .on("response", success)
+                .on("response", async (res) => {
+                    try {
+                        await success(res);
+                    }
+                    catch (successError) {
+                        failure(successError);
+                        return;
+                    }
+                })
                 .on("error", failure);
         } else {
             let response: requestPromise.FullResponse;

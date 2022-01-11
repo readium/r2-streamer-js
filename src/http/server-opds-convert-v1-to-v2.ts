@@ -369,7 +369,15 @@ export function serverOPDS_convert_v1_to_v2(_server: Server, topRouter: express.
                 method: "GET",
                 uri: urlDecoded,
             })
-                .on("response", success)
+                .on("response", async (res) => {
+                    try {
+                        await success(res);
+                    }
+                    catch (successError) {
+                        failure(successError);
+                        return;
+                    }
+                })
                 .on("error", failure);
         } else {
             let response: requestPromise.FullResponse;
