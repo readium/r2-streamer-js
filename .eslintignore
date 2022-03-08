@@ -1,0 +1,10 @@
+.vscode/*
+.history/*
+.github/*
+.git/*
+dist/*
+docs/*
+misc/*
+node_modules/*
+tools/*
+tsconfigs/*

@@ -14,7 +14,7 @@ import * as jsonMarkup from "json-markup";
 import * as path from "path";
 
 import {
-    IRequestPayloadExtension, IRequestQueryParams, _jsonPath, _show, _urlEncoded,
+    IRequestPayloadExtension, IRequestQueryParams, _jsonPath, _show,
 } from "./request-ext";
 import { Server } from "./server";
 
@@ -69,6 +69,7 @@ export function serverVersion(server: Server, topRouter: express.Application) {
             return;
         }
 
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
         const jsonObj = require(gitRevJson);
         // debug(jsonObj);
 

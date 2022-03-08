@@ -13,7 +13,8 @@ import * as path from "path";
 
 const debug = debug_("r2:streamer#utils/json-schema-validate");
 
-const _cachedJsonSchemas: any = {}; //  any[] | undefined;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const _cachedJsonSchemas: Record<string, any> = {};
 
 export interface JsonSchemaValidationError {
     ajvSchemaPath: string;
@@ -25,6 +26,7 @@ export interface JsonSchemaValidationError {
 export function jsonSchemaValidate(
     jsonSchemasRootpath: string,
     jsonSchemasNames: string[],
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     jsonToValidate: any): JsonSchemaValidationError[] | undefined {
 
     try {

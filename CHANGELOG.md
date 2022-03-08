@@ -1,10 +1,116 @@
 # Next
 
 Git diff:
-* https://github.com/readium/r2-streamer-js/compare/v1.0.34...develop
+* https://github.com/readium/r2-streamer-js/compare/v1.0.40...develop
 
 Changes:
 * TODO
+
+# 1.0.40
+
+> Build environment: NodeJS `16.13.1`, NPM `8.3.0`
+
+Changes:
+* NPM package updates
+* safeguard against callbacks that do not capture async / await thrown errors (exceptions do not automatically transit up the call chain) avoids UnhandledPromiseRejectionWarning
+
+Git revision info:
+* https://unpkg.com/r2-streamer-js@1.0.40/dist/gitrev.json
+* https://github.com/edrlab/r2-streamer-js-dist/blob/v1.0.40/dist/gitrev.json
+
+Git commit history:
+* https://github.com/readium/r2-streamer-js/commits/v1.0.40
+
+Git diff:
+* https://github.com/readium/r2-streamer-js/compare/v1.0.39...v1.0.40
+
+# 1.0.39
+
+> Build environment: NodeJS `16.13.1`, NPM `8.3.0`
+
+Changes:
+* NPM package updates
+
+Git revision info:
+* https://unpkg.com/r2-streamer-js@1.0.39/dist/gitrev.json
+* https://github.com/edrlab/r2-streamer-js-dist/blob/v1.0.39/dist/gitrev.json
+
+Git commit history:
+* https://github.com/readium/r2-streamer-js/commits/v1.0.39
+
+Git diff:
+* https://github.com/readium/r2-streamer-js/compare/v1.0.38...v1.0.39
+
+# 1.0.38
+
+> Build environment: NodeJS `16.13.0`, NPM `8.1.4`
+
+Changes:
+* NPM package updates
+* Handling of sibling _manifest.json ReadiumWebPubManifest for unaltered source publications (DAISY audiobooks use case)
+
+Git revision info:
+* https://unpkg.com/r2-streamer-js@1.0.38/dist/gitrev.json
+* https://github.com/edrlab/r2-streamer-js-dist/blob/v1.0.38/dist/gitrev.json
+
+Git commit history:
+* https://github.com/readium/r2-streamer-js/commits/v1.0.38
+
+Git diff:
+* https://github.com/readium/r2-streamer-js/compare/v1.0.37...v1.0.38
+
+# 1.0.37
+
+> Build environment: NodeJS `16.13.0`, NPM `8.1.3`
+
+Changes:
+* NPM package updates (Node 16 + NPM 8)
+
+Git revision info:
+* https://unpkg.com/r2-streamer-js@1.0.37/dist/gitrev.json
+* https://github.com/edrlab/r2-streamer-js-dist/blob/v1.0.37/dist/gitrev.json
+
+Git commit history:
+* https://github.com/readium/r2-streamer-js/commits/v1.0.37
+
+Git diff:
+* https://github.com/readium/r2-streamer-js/compare/v1.0.36...v1.0.37
+
+# 1.0.36
+
+> Build environment: NodeJS `14.18.1`, NPM `6.14.15`
+
+Changes:
+* NPM package updates
+* NodeJS v14 minimum requirement
+* Removed FileHound lib in TypeScript code
+
+Git revision info:
+* https://unpkg.com/r2-streamer-js@1.0.36/dist/gitrev.json
+* https://github.com/edrlab/r2-streamer-js-dist/blob/v1.0.36/dist/gitrev.json
+
+Git commit history:
+* https://github.com/readium/r2-streamer-js/commits/v1.0.36
+
+Git diff:
+* https://github.com/readium/r2-streamer-js/compare/v1.0.35...v1.0.36
+
+# 1.0.35
+
+> Build environment: NodeJS `14.17.5`, NPM `6.14.14`
+
+Changes:
+* NPM package updates
+
+Git revision info:
+* https://unpkg.com/r2-streamer-js@1.0.35/dist/gitrev.json
+* https://github.com/edrlab/r2-streamer-js-dist/blob/v1.0.35/dist/gitrev.json
+
+Git commit history:
+* https://github.com/readium/r2-streamer-js/commits/v1.0.35
+
+Git diff:
+* https://github.com/readium/r2-streamer-js/compare/v1.0.34...v1.0.35
 
 # 1.0.34
 

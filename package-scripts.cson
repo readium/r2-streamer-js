@@ -12,9 +12,9 @@
   '
 
   'copydist': '
-    cpy "./dist/**/*" ../r2-navigator-js/node_modules/r2-streamer-js/ --cwd=./ --parents --no-dir &&
-    cpy "./dist/**/*" ../r2-testapp-js/node_modules/r2-streamer-js/ --cwd=./ --parents --no-dir &&
-    cpy "./dist/**/*" ../readium-desktop/node_modules/r2-streamer-js/ --cwd=./ --parents --no-dir
+    cpy "./dist/" ../r2-navigator-js/node_modules/r2-streamer-js/ --cwd=./ &&
+    cpy "./dist/" ../r2-testapp-js/node_modules/r2-streamer-js/ --cwd=./ &&
+    cpy "./dist/" ../readium-desktop/node_modules/r2-streamer-js/ --cwd=./
   '
 
   'quick-build-dist': '
@@ -36,8 +36,8 @@
     cpy ../r2-streamer-js/package-lock.json . &&
     cpy ../r2-streamer-js/LICENSE . &&
     cpy ../r2-streamer-js/README.md . &&
-    cpy "./docs/**/*" ../r2-streamer-js-dist/ --cwd=../r2-streamer-js/ --parents --no-dir &&
-    cpy "./dist/**/*" ../r2-streamer-js-dist/ --cwd=../r2-streamer-js/ --parents --no-dir &&
+    cpy "./docs/" ../r2-streamer-js-dist/ --cwd=../r2-streamer-js/ &&
+    cpy "./dist/" ../r2-streamer-js-dist/ --cwd=../r2-streamer-js/ &&
     (git add * || echo add) &&
     (git commit -a -m "add new dist" || echo commit) &&
     (git push --set-upstream origin develop || echo push) &&
@@ -71,13 +71,13 @@
 
 # 'now': '
 #   cpy ./package-lock.json ./now &&
-#   cpy "./**/*" ../now/ --cwd=./dist --parents &&
+#   cpy "./" ../now/ --cwd=./dist &&
 #   rimraf "./now/**/*.d.ts" &&
 #   rimraf "./now/**/*.js.map" &&
-#   cpy "./misc/readers/reader-NYPL/**/*" ./now/ --cwd=./ --parents --no-dir &&
-#   cpy "./misc/readers/reader-HADRIEN/**/*" ./now/ --cwd=./ --parents --no-dir &&
+#   cpy "./misc/readers/reader-NYPL/" ./now/ --cwd=./ &&
+#   cpy "./misc/readers/reader-HADRIEN/" ./now/ --cwd=./ &&
 #   cpy "./misc/epubs/*.epub" now/misc/epubs/ &&
-#   cpy "./misc/json-schema/**/*" ./now/ --cwd=./ --parents --no-dir &&
+#   cpy "./misc/json-schema/" ./now/ --cwd=./ &&
 #   cpy ./package.json now/ &&
 #   cd now/ &&
 #   json -I -f ./package.json -e "this.build=undefined" &&
@@ -174,30 +174,9 @@
       "!**/*.log"
   '
 
-  'lint:typescript': '
-    tslint
-      -c
-      "./tslint.json"
-      "./src/**/*.ts"
-      "./test/**/*.ts"
-  '
-
   'lint:typescript:full': '
-    tslint
-      --project
-      "./tsconfig.json"
-      -c
-      "./tslint.json"
-      "./src/**/*.ts"
-      "./test/**/*.ts"
-  '
-
-  'lintfix': '
-    sed
-      -i
-      ""
-      "s/let normalizedPath = path\\\\.normalize(documentPath);/let normalizedPath = path.normalize(documentPath).toLowerCase();/g"
-      ./node_modules/tslint-language-service/out/src/index.js
+    eslint
+      "src/**/*.ts"
   '
 
   'pretranspile:typescript': '

@@ -85,6 +85,7 @@ export function serverOPDS_browse_v2(_server: Server, topRouter: express.Applica
 
     // tslint:disable-next-line:variable-name
     const routerOPDS_browse_v2 = express.Router({ strict: false });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     routerOPDS_browse_v2.use(morgan("combined", { stream: { write: (msg: any) => debug(msg) } }));
 
     routerOPDS_browse_v2.use(trailingSlashRedirect);
@@ -92,24 +93,24 @@ export function serverOPDS_browse_v2(_server: Server, topRouter: express.Applica
     routerOPDS_browse_v2.get("/", (_req: express.Request, res: express.Response) => {
 
         let html = "<html><head>";
-        html += `<script type="text/javascript">function encodeURIComponent_RFC3986(str) { ` +
-            `return encodeURIComponent(str).replace(/[!'()*]/g, (c) => { ` +
-            `return "%" + c.charCodeAt(0).toString(16); }); }` +
-            `function go(evt) {` +
-            `if (evt) { evt.preventDefault(); } var url = ` +
-            `location.origin +` +
+        html += "<script type=\"text/javascript\">function encodeURIComponent_RFC3986(str) { " +
+            "return encodeURIComponent(str).replace(/[!'()*]/g, (c) => { " +
+            "return \"%\" + c.charCodeAt(0).toString(16); }); }" +
+            "function go(evt) {" +
+            "if (evt) { evt.preventDefault(); } var url = " +
+            "location.origin +" +
             // `location.protocol + '//' + location.hostname + ` +
             // `(location.port ? (':' + location.port) : '') + ` +
             ` '${serverOPDS_browse_v2_PATH}/' +` +
-            ` encodeURIComponent_RFC3986(document.getElementById("url").value);` +
-            `location.href = url;}</script>`;
+            " encodeURIComponent_RFC3986(document.getElementById(\"url\").value);" +
+            "location.href = url;}</script>";
         html += "</head>";
 
         html += "<body><h1>OPDS feed browser</h1>";
 
-        html += `<form onsubmit="go();return false;">` +
-            `<input type="text" name="url" id="url" size="80">` +
-            `<input type="submit" value="Go!"></form>`;
+        html += "<form onsubmit=\"go();return false;\">" +
+            "<input type=\"text\" name=\"url\" id=\"url\" size=\"80\">" +
+            "<input type=\"submit\" value=\"Go!\"></form>";
 
         html += "</body></html>";
 
@@ -129,6 +130,7 @@ export function serverOPDS_browse_v2(_server: Server, topRouter: express.Applica
             reqparams.urlEncoded = (req as IRequestPayloadExtension).urlEncoded;
         }
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let authResponseJson: any | undefined;
         const authResponseBase64 = (req.query as IRequestQueryParams).authResponse;
         if (authResponseBase64) {
@@ -154,6 +156,7 @@ export function serverOPDS_browse_v2(_server: Server, topRouter: express.Applica
         const rootUrl = (isSecureHttp ? "https://" : "http://")
             + req.headers.host;
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const failure = (err: any) => {
             debug(err);
             res.status(500).send("<html><body><p>Internal Server Error</p><p>"
@@ -304,6 +307,7 @@ export function serverOPDS_browse_v2(_server: Server, topRouter: express.Applica
                 }
             }
 
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const funk = (obj: any) => {
                 if ((obj.href && typeof obj.href === "string") ||
                     (obj.Href && typeof obj.Href === "string")) {
@@ -400,7 +404,7 @@ export function serverOPDS_browse_v2(_server: Server, topRouter: express.Applica
 <br><br>
     <input type="submit" value="Authenticate">
 </form>
-${imageUrl ? `<img src="${imageUrl}" />` : ``}
+${imageUrl ? `<img src="${imageUrl}" />` : ""}
 <script type="text/javascript">
 // document.addEventListener("DOMContentLoaded", (event) => {
 // });
@@ -497,7 +501,7 @@ function doAuth() {
     });
 */
     ` :
-    `window.alert("no auth link!");`
+    "window.alert(\"no auth link!\");"
     }
 }
 </script>`;
@@ -526,6 +530,7 @@ function doAuth() {
         };
 
         if (authResponseJson && authResponseJson.access_token) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             (headers as any).Authorization = `Bearer ${authResponseJson.access_token}`;
         }
 
@@ -538,7 +543,15 @@ function doAuth() {
                 method: "GET",
                 uri: urlDecoded,
             })
-                .on("response", success)
+                .on("response", async (res) => {
+                    try {
+                        await success(res);
+                    }
+                    catch (successError) {
+                        failure(successError);
+                        return;
+                    }
+                })
                 .on("error", failure);
         } else {
             let response: requestPromise.FullResponse;
@@ -629,6 +642,7 @@ function doAuth() {
 
     // tslint:disable-next-line:variable-name
     const routerOPDS_auth = express.Router({ strict: false });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     routerOPDS_auth.use(morgan("combined", { stream: { write: (msg: any) => debug(msg) } }));
 
     routerOPDS_auth.use(trailingSlashRedirect);
@@ -709,6 +723,7 @@ function doAuth() {
             // }
             // const encodedFormData = encodeFormData(decryptedJson);
 
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const failure = (err: any) => {
                 debug(err);
                 res.status(500).send("<html><body><p>Internal Server Error</p><p>"
@@ -796,7 +811,15 @@ function doAuth() {
                     method: "POST",
                     uri: authUrl,
                 })
-                    .on("response", success)
+                    .on("response", async (res) => {
+                        try {
+                            await success(res);
+                        }
+                        catch (successError) {
+                            failure(successError);
+                            return;
+                        }
+                    })
                     .on("error", failure);
             } else {
                 let response: requestPromise.FullResponse;

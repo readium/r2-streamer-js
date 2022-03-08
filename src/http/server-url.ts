@@ -22,6 +22,8 @@ export const serverRemotePub_PATH = "/url";
 export function serverRemotePub(_server: Server, topRouter: express.Application) {
 
     const routerUrl = express.Router({ strict: false });
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     routerUrl.use(morgan("combined", { stream: { write: (msg: any) => debug(msg) } }));
 
     routerUrl.use(trailingSlashRedirect);
@@ -29,24 +31,24 @@ export function serverRemotePub(_server: Server, topRouter: express.Application)
     routerUrl.get("/", (_req: express.Request, res: express.Response) => {
 
         let html = "<html><head>";
-        html += `<script type="text/javascript">function encodeURIComponent_RFC3986(str) { ` +
-            `return encodeURIComponent(str).replace(/[!'()*]/g, (c) => { ` +
-            `return "%" + c.charCodeAt(0).toString(16); }); }` +
-            `function go(evt) {` +
-            `if (evt) { evt.preventDefault(); } var url = ` +
-            `location.origin +` +
+        html += "<script type=\"text/javascript\">function encodeURIComponent_RFC3986(str) { " +
+            "return encodeURIComponent(str).replace(/[!'()*]/g, (c) => { " +
+            "return \"%\" + c.charCodeAt(0).toString(16); }); }" +
+            "function go(evt) {" +
+            "if (evt) { evt.preventDefault(); } var url = " +
+            "location.origin +" +
             // `location.protocol + '//' + location.hostname + ` +
             // `(location.port ? (':' + location.port) : '') + ` +
             ` '${serverRemotePub_PATH}/' +` +
-            ` encodeURIComponent_RFC3986(document.getElementById("url").value);` +
-            `location.href = url;}</script>`;
+            " encodeURIComponent_RFC3986(document.getElementById(\"url\").value);" +
+            "location.href = url;}</script>";
         html += "</head>";
 
         html += "<body><h1>Publication URL</h1>";
 
-        html += `<form onsubmit="go();return false;">` +
-            `<input type="text" name="url" id="url" size="80">` +
-            `<input type="submit" value="Go!"></form>`;
+        html += "<form onsubmit=\"go();return false;\">" +
+            "<input type=\"text\" name=\"url\" id=\"url\" size=\"80\">" +
+            "<input type=\"submit\" value=\"Go!\"></form>";
 
         html += "</body></html>";
 

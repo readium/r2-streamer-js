@@ -11,7 +11,7 @@ import * as path from "path";
 
 import { encodeURIComponent_RFC3986, isHTTP } from "@r2-utils-js/_utils/http/UrlUtils";
 
-import { _jsonPath, _show, _urlEncoded } from "./request-ext";
+import { _show } from "./request-ext";
 import { Server } from "./server";
 import { serverLCPLSD_show_PATH } from "./server-lcp-lsd-show";
 import { serverOPDS_browse_v1_PATH } from "./server-opds-browse-v1";

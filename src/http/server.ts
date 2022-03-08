@@ -19,9 +19,9 @@ import { OPDSFeed } from "@r2-opds-js/opds/opds2/opds2";
 import { Publication } from "@r2-shared-js/models/publication";
 import { PublicationParsePromise } from "@r2-shared-js/parser/publication-parser";
 import { encodeURIComponent_RFC3986 } from "@r2-utils-js/_utils/http/UrlUtils";
+import { zipLoadPromise } from "@r2-utils-js/_utils/zip/zipFactory";
 
 import { CertificateData, generateSelfSignedData } from "../utils/self-signed";
-import { _jsonPath, _show } from "./request-ext";
 import { serverAssets } from "./server-assets";
 import { serverLCPLSD_show } from "./server-lcp-lsd-show";
 import { serverManifestJson } from "./server-manifestjson";
@@ -38,6 +38,7 @@ import { serverVersion } from "./server-version";
 
 const debug = debug_("r2:streamer#http/server");
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface IPathPublicationMap { [key: string]: any; }
 
 export interface ServerData extends CertificateData {
@@ -175,7 +176,7 @@ Disallow: /
             return Promise.resolve(this.serverInfo() as ServerData);
         }
 
-        let envPort: number = 0;
+        let envPort = 0;
         try {
             envPort = process.env.PORT ? parseInt(process.env.PORT as string, 10) : 0;
         } catch (err) {
@@ -340,13 +341,35 @@ Disallow: /
         if (!publication) {
 
             // const fileName = path.basename(pathBase64Str);
-            // const ext = path.extname(fileName).toLowerCase();
+            // const ext = path.extname(fileName);
 
-            try {
-                publication = await PublicationParsePromise(filePath);
-            } catch (err) {
-                debug(err);
-                return Promise.reject(err);
+            if (filePath.endsWith("_manifest.json")) {
+                try {
+                    const zip = await zipLoadPromise(filePath.replace(/_manifest\.json$/, ""));
+                    const publicationJsonStr = fs.readFileSync(filePath, { encoding: "utf8" });
+                    const publicationJsonObj = global.JSON.parse(publicationJsonStr);
+
+                    publication = TaJsonDeserialize(publicationJsonObj, Publication);
+
+                    publication.AddToInternal("filename", path.basename(filePath));
+
+                    publication.AddToInternal("type", "daisy");
+                    publication.AddToInternal("zip", zip);
+                } catch (err) {
+                    debug(err);
+                    return Promise.reject(err);
+                }
+            } else {
+                try {
+                    publication = await PublicationParsePromise(filePath);
+                } catch (err) {
+                    debug(err);
+                    return Promise.reject(err);
+                }
+            }
+
+            if (!publication) {
+                return Promise.reject("!PUBLICATION??");
             }
 
             this.cachePublication(filePath, publication);

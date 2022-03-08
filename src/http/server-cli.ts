@@ -6,7 +6,6 @@
 // ==LICENSE-END==
 
 import * as debug_ from "debug";
-import * as filehound from "filehound";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -18,6 +17,8 @@ import {
 import { EPUBis, isEPUBlication } from "@r2-shared-js/parser/epub";
 
 import { MAX_PREFETCH_LINKS, Server } from "./server";
+
+// import * as filehound from "filehound";
 
 initGlobalConverters_OPDS();
 initGlobalConverters_SHARED();
@@ -92,12 +93,23 @@ if (stats.isDirectory() && (isAnEPUB !== EPUBis.LocalExploded)) {
 
     // tslint:disable-next-line:no-floating-promises
     (async () => {
-        const files: string[] = await filehound.create()
-            .discard("node_modules")
-            .depth(5)
-            .paths(filePath)
-            .ext([".epub", ".epub3", ".cbz", ".audiobook", ".lcpaudiobook", ".lcpa", ".divina", ".lcpdivina"])
-            .find();
+        // const files: string[] = await filehound.create()
+        //     .discard("node_modules")
+        //     .depth(5)
+        //     .paths(filePath)
+        //     .ext([".epub", ".epub3", ".cbz", ".audiobook", ".lcpaudiobook", ".lcpa", ".divina", ".lcpdivina"])
+        //     .find();
+        const files = fs.readdirSync(filePath, { withFileTypes: true }).
+            filter((f) => {
+                return f.isFile() &&
+                    (
+                        /((\.epub3?)|(\.cbz)|(\.audiobook)|(\.lcpaudiobook)|(\.lcpa)|(\.divina)|(\.lcpdivina))$/i.test(f.name)
+                        ||
+                        (/_manifest\.json$/.test(f.name)
+                        && fs.existsSync(path.join(filePath, path.basename(f.name).replace(/_manifest\.json$/, ""))))
+                    );
+            }).map((f) => path.join(filePath, f.name));
+
         const server = new Server({
             maxPrefetchLinks,
         });
@@ -111,8 +123,8 @@ if (stats.isDirectory() && (isAnEPUB !== EPUBis.LocalExploded)) {
 
     // filePaths = filePaths.filter((filep) => {
     //     const fileName = path.basename(filep);
-    //     const ext = path.extname(fileName).toLowerCase();
-    //     return (/\.epub[3]?$/.test(ext) || ext === ".cbz") &&
+    //     const ext = path.extname(fileName);
+    //     return (/((\.epub3?)|(\.cbz))$/i.test(ext)) &&
     //         fs.lstatSync(path.join(filePath, filep)).isFile();
     // });
 

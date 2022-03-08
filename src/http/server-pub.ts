@@ -53,6 +53,7 @@ export function serverPub(server: Server, topRouter: express.Application): expre
         "</body></html>";
 
     const routerPathBase64 = express.Router({ strict: false });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     routerPathBase64.use(morgan("combined", { stream: { write: (msg: any) => debug(msg) } }));
 
     routerPathBase64.use(trailingSlashRedirect);

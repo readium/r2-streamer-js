@@ -79,7 +79,7 @@ if (fs.existsSync(opdsJsonFilePath)) {
         }
 
         // const fileName = path.basename(pathBase64Str);
-        // const ext = path.extname(fileName).toLowerCase();
+        // const ext = path.extname(fileName);
 
         console.log(`OPDS parsing: ${pathBase64Str}`);
         let publication: Publication;
@@ -99,10 +99,10 @@ if (fs.existsSync(opdsJsonFilePath)) {
         linkSelf.Href = pathBase64 + "/manifest.json";
         linkSelf.TypeLink =
             (publication.Metadata && publication.Metadata.RDFType &&
-            /http[s]?:\/\/schema\.org\/Audiobook$/.test(publication.Metadata.RDFType)) ?
+            /https?:\/\/schema\.org\/Audiobook$/.test(publication.Metadata.RDFType)) ?
             "application/audiobook+json" : ((publication.Metadata && publication.Metadata.RDFType &&
-                (/http[s]?:\/\/schema\.org\/ComicStory$/.test(publication.Metadata.RDFType) ||
-                /http[s]?:\/\/schema\.org\/VisualNarrative$/.test(publication.Metadata.RDFType))) ? "application/divina+json" :
+                (/https?:\/\/schema\.org\/ComicStory$/.test(publication.Metadata.RDFType) ||
+                /https?:\/\/schema\.org\/VisualNarrative$/.test(publication.Metadata.RDFType))) ? "application/divina+json" :
                     "application/webpub+json");
         linkSelf.AddRel("http://opds-spec.org/acquisition");
         publi.Links.push(linkSelf);

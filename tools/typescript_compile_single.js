@@ -72,7 +72,7 @@ cmdlines.push(cmdLine);
 const tmpTsConfigPath = "./tsconfig-TMP.json";
 
 const tsconfigJsonStr =
-`{ "extends": "./tsconfigs/tsconfig-${target}", "include": [ "./src/declarations.d.ts", "./src/noop.d.ts", "./${filePathRelativeDist}" ] }`;
+`{ "extends": "./tsconfigs/tsconfig-${target}", "include": [ "./src/declarations.d.ts", "./${filePathRelativeDist}" ] }`;
 fs.writeFileSync(tmpTsConfigPath, tsconfigJsonStr, "utf8");
 
 // cmdLine = `echo "TSCONFIG: ${tsconfigJsonStr}"`;
