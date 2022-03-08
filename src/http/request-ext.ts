@@ -9,6 +9,8 @@ import * as express from "express";
 
 import { mediaOverlayURLParam } from "@r2-shared-js/parser/epub";
 
+import { URL_SIGNED_EXPIRY_QUERY_PARAM_NAME } from "./url-signed-expiry";
+
 export const URL_PARAM_SESSION_INFO = "r2_SESSION_INFO";
 
 // export const _lcpPass64 = "lcpPass64";
@@ -39,6 +41,7 @@ export interface IRequestQueryParams {
     authRefresh: string;
     [mediaOverlayURLParam]: string;
     [URL_PARAM_SESSION_INFO]: string;
+    [URL_SIGNED_EXPIRY_QUERY_PARAM_NAME]: string;
 
     // express.Request.query is the return type of qs.parse by default
     // (https://expressjs.com/en/api.html#app-settings-property).

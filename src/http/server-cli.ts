@@ -112,6 +112,7 @@ if (stats.isDirectory() && (isAnEPUB !== EPUBis.LocalExploded)) {
 
         const server = new Server({
             maxPrefetchLinks,
+            enableSignedExpiry: true,
         });
         server.preventRobots();
         server.addPublications(files);
@@ -141,6 +142,7 @@ if (stats.isDirectory() && (isAnEPUB !== EPUBis.LocalExploded)) {
     (async () => {
         const server = new Server({
             maxPrefetchLinks,
+            enableSignedExpiry: true,
         });
         server.preventRobots();
         server.addPublications([filePath]);

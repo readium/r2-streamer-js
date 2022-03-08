@@ -17,6 +17,7 @@ import { Transformers } from "@r2-shared-js/transform/transformer";
 import { parseRangeHeader } from "@r2-utils-js/_utils/http/RangeUtils";
 import { streamToBufferPromise } from "@r2-utils-js/_utils/stream/BufferUtils";
 import { IStreamAndLength, IZip } from "@r2-utils-js/_utils/zip/zip";
+import { URL_SIGNED_EXPIRY_QUERY_PARAM_NAME, verifyExpiringResourceURL } from "./url-signed-expiry";
 
 import {
     IRequestPayloadExtension, IRequestQueryParams, URL_PARAM_SESSION_INFO, _asset, _pathBase64,
@@ -163,7 +164,7 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                 }
                 if (!link &&
                     !isDivina) {
-                    const err = "Asset not declared in publication spine/resources!" + relativePath;
+                    const err = "Asset not declared in publication spine/resources! " + relativePath;
                     debug(err);
                     res.status(500).send("<html><body><p>Internal Server Error</p><p>"
                         + err + "</p></body></html>");
@@ -176,6 +177,17 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
             ) {
                 res.status(200).send("<html><body></body></html>");
                 return;
+            }
+
+            if (server.enableSignedExpiry) {
+                const ok = verifyExpiringResourceURL((req.query as IRequestQueryParams)[URL_SIGNED_EXPIRY_QUERY_PARAM_NAME], pathBase64Str, pathInZip);
+                if (!ok) {
+                    const err = "Asset expired?! " + pathInZip;
+                    debug(err);
+                    res.status(500).send("<html><body><p>Internal Server Error</p><p>"
+                        + err + "</p></body></html>");
+                    return;
+                }
             }
 
             let mediaType = mime.lookup(pathInZip);

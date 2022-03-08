@@ -27,6 +27,7 @@ import {
     IRequestPayloadExtension, IRequestQueryParams, _jsonPath, _pathBase64, _show,
 } from "./request-ext";
 import { Server } from "./server";
+import { signExpiringResourceURLs, URL_SIGNED_EXPIRY_QUERY_PARAM_NAME } from "./url-signed-expiry";
 
 const debug = debug_("r2:streamer#http/server-manifestjson");
 
@@ -295,6 +296,11 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
 
                 const jsonObj = TaJsonSerialize(objToSerialize);
 
+                let signedExpiryQueryParamValue: string | undefined;
+                if (server.enableSignedExpiry) {
+                    signedExpiryQueryParamValue = signExpiringResourceURLs(rootUrl, pathBase64Str, jsonObj);
+                }
+
                 let validationStr: string | undefined;
                 const doValidate = !reqparams.jsonPath || reqparams.jsonPath === "all";
                 if (doValidate) {
@@ -371,6 +377,9 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
                 jsonPretty = jsonPretty.replace(regex, ">$1");
                 jsonPretty = jsonPretty.replace(/>manifest.json<\/a>/, ">" + rootUrl + "/manifest.json</a>");
 
+                if (coverImage && signedExpiryQueryParamValue) {
+                    coverImage = coverImage + `?${URL_SIGNED_EXPIRY_QUERY_PARAM_NAME}=${encodeURIComponent_RFC3986(signedExpiryQueryParamValue)}`;
+                }
                 res.status(200).send("<html>" +
                     "<head><script type=\"application/ld+json\" href=\"" +
                     manifestURL +
@@ -390,6 +399,10 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
                 res.set("Content-Type", `${contentType}; charset=utf-8`);
 
                 const publicationJsonObj = TaJsonSerialize(publication);
+
+                if (server.enableSignedExpiry) {
+                    signExpiringResourceURLs(rootUrl, pathBase64Str, publicationJsonObj);
+                }
 
                 // absolutizeURLs(publicationJsonObj);
 
