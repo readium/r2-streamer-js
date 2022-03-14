@@ -1,10 +1,28 @@
 # Next
 
 Git diff:
-* https://github.com/readium/r2-streamer-js/compare/v1.0.40...develop
+* https://github.com/readium/r2-streamer-js/compare/v1.0.41...develop
 
 Changes:
 * TODO
+
+# 1.0.41
+
+> Build environment: NodeJS `16.14.0`, NPM `8.5.4`
+
+Changes:
+* NPM package updates
+* Added a new server mode where publication resources exposed in the manifest.json can optionally carry a URL query parameter ("token") that provides a signed expiry timestamp, which the server can validate or reject.
+
+Git revision info:
+* https://unpkg.com/r2-streamer-js@1.0.41/dist/gitrev.json
+* https://github.com/edrlab/r2-streamer-js-dist/blob/v1.0.41/dist/gitrev.json
+
+Git commit history:
+* https://github.com/readium/r2-streamer-js/commits/v1.0.41
+
+Git diff:
+* https://github.com/readium/r2-streamer-js/compare/v1.0.40...v1.0.41
 
 # 1.0.40
 

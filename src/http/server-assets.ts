@@ -184,7 +184,7 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
                 if (!ok) {
                     const err = "Asset expired?! " + pathInZip;
                     debug(err);
-                    res.status(500).send("<html><body><p>Internal Server Error</p><p>"
+                    res.status(401).send("<html><body><p>Internal Server Error</p><p>"
                         + err + "</p></body></html>");
                     return;
                 }
