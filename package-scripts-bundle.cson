@@ -42,7 +42,7 @@
   '
 
   'bundle-uglify:#ECMASCRIPT#': '
-    cpy ./dist/bundle-#ECMASCRIPT#/server-cli.js.map ./dist/bundle-#ECMASCRIPT#/ --rename=server-cli-.js.map &&
+    cpy --flat ./dist/bundle-#ECMASCRIPT#/server-cli.js.map ./dist/bundle-#ECMASCRIPT#/ --rename=server-cli-.js.map &&
     json -I -f ./dist/bundle-#ECMASCRIPT#/server-cli-.js.map -e "this.sourcesContent=false" &&
 
     terser
