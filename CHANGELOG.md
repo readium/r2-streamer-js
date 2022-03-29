@@ -1,10 +1,28 @@
 # Next
 
 Git diff:
-* https://github.com/readium/r2-streamer-js/compare/v1.0.41...develop
+* https://github.com/readium/r2-streamer-js/compare/v1.0.42...develop
 
 Changes:
 * TODO
+
+# 1.0.42
+
+> Build environment: NodeJS `16.14.0`, NPM `8.5.4`
+
+Changes:
+* NPM package updates
+* Fixed cpy-cli (--flat)
+
+Git revision info:
+* https://unpkg.com/r2-streamer-js@1.0.42/dist/gitrev.json
+* https://github.com/edrlab/r2-streamer-js-dist/blob/v1.0.42/dist/gitrev.json
+
+Git commit history:
+* https://github.com/readium/r2-streamer-js/commits/v1.0.42
+
+Git diff:
+* https://github.com/readium/r2-streamer-js/compare/v1.0.41...v1.0.42
 
 # 1.0.41
 
