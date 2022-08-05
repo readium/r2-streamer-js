@@ -1,6 +1,6 @@
 {
   "name": "r2-streamer-js",
-  "version": "1.0.42",
+  "version": "1.0.43",
   "description": "Readium 2 'streamer' for NodeJS (TypeScript)",
   "keywords": [
     "readium",
@@ -45,6 +45,7 @@
   },
   "homepage": "https://github.com/readium/r2-streamer-js",
   "dependencies": {
+    "@parcel/watcher": "^2.0.5",
     "@xmldom/xmldom": "^0.8.1",
     "ajv": "^8.11.0",
     "ajv-formats": "^2.1.1",
@@ -152,7 +153,7 @@
     "server-bundlemin": "node \"./dist/bundle-es8-es2017/server-cli.min.js\"",
     "server-bundlemin-debug": "cross-env DEBUG=r2:* npm run server-bundlemin",
     "server-bundlemin-debug-x": "cross-env DEBUG=* npm run server-bundlemin",
-    "server": "node --version && node \"./dist/es8-es2017/src/http/server-cli.js\"",
+    "server": "node --version && cross-env STREAMER_WATCH=1 node \"./dist/es8-es2017/src/http/server-cli.js\"",
     "server-debug": "cross-env DEBUG=r2:* npm run server",
     "server-debug-x": "cross-env DEBUG=* npm run server",
     "server-https-debug": "cross-env DEBUG=r2:* PORT=443 npm run server",
