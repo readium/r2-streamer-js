@@ -88,6 +88,7 @@ if (args[1]) {
 debug(`maxPrefetchLinks: ${maxPrefetchLinks}`);
 
 const doWatch = process.env.STREAMER_WATCH === "1";
+const disableExpiry = process.env.STREAMER_DISABLE_EXPIRY === "1";
 
 const isAnEPUB = isEPUBlication(filePath);
 
@@ -121,7 +122,7 @@ if (stats.isDirectory() && (isAnEPUB !== EPUBis.LocalExploded)) {
 
         const server = new Server({
             maxPrefetchLinks,
-            enableSignedExpiry: true,
+            enableSignedExpiry: !disableExpiry,
         });
         server.preventRobots();
         server.addPublications(files);
@@ -227,7 +228,7 @@ if (stats.isDirectory() && (isAnEPUB !== EPUBis.LocalExploded)) {
     (async () => {
         const server = new Server({
             maxPrefetchLinks,
-            enableSignedExpiry: true,
+            enableSignedExpiry: !disableExpiry,
         });
         server.preventRobots();
         server.addPublications([filePath]);
