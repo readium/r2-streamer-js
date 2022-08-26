@@ -20,7 +20,11 @@
   "typescript.surveys.enabled": false,
   "editor.roundedSelection": false,
   "editor.wordWrap": "off",
-  "editor.quickSuggestions": false,
+  "editor.quickSuggestions": {
+    "comments": "off",
+    "strings": "off",
+    "other": "off"
+  },
   "editor.autoClosingBrackets": "never",
   "editor.scrollBeyondLastLine": false,
   "editor.formatOnType": false,

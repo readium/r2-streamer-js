@@ -8,6 +8,7 @@
 import * as debug_ from "debug";
 import * as fs from "fs";
 import * as path from "path";
+import * as watcher from "@parcel/watcher";
 
 import { setLcpNativePluginPath } from "@r2-lcp-js/parser/epub/lcp";
 import { initGlobalConverters_OPDS } from "@r2-opds-js/opds/init-globals";
@@ -86,10 +87,22 @@ if (args[1]) {
 }
 debug(`maxPrefetchLinks: ${maxPrefetchLinks}`);
 
+const doWatch = process.env.STREAMER_WATCH === "1";
+
 const isAnEPUB = isEPUBlication(filePath);
 
 if (stats.isDirectory() && (isAnEPUB !== EPUBis.LocalExploded)) {
     debug("Analysing directory...");
+
+    const isFileAccepted = (pubPath: string) => {
+        return /((\.epub3?)|(\.cbz)|(\.audiobook)|(\.lcpaudiobook)|(\.lcpa)|(\.divina)|(\.lcpdivina))$/i.test(pubPath)
+            ||
+            (
+            /_manifest\.json$/.test(pubPath)
+            &&
+            fs.existsSync(pubPath.replace(/_manifest\.json$/, ""))
+            );
+    };
 
     // tslint:disable-next-line:no-floating-promises
     (async () => {
@@ -99,24 +112,97 @@ if (stats.isDirectory() && (isAnEPUB !== EPUBis.LocalExploded)) {
         //     .paths(filePath)
         //     .ext([".epub", ".epub3", ".cbz", ".audiobook", ".lcpaudiobook", ".lcpa", ".divina", ".lcpdivina"])
         //     .find();
-        const files = fs.readdirSync(filePath, { withFileTypes: true }).
-            filter((f) => {
-                return f.isFile() &&
-                    (
-                        /((\.epub3?)|(\.cbz)|(\.audiobook)|(\.lcpaudiobook)|(\.lcpa)|(\.divina)|(\.lcpdivina))$/i.test(f.name)
-                        ||
-                        (/_manifest\.json$/.test(f.name)
-                        && fs.existsSync(path.join(filePath, path.basename(f.name).replace(/_manifest\.json$/, ""))))
-                    );
-            }).map((f) => path.join(filePath, f.name));
+        const files = fs.readdirSync(filePath, { withFileTypes: true })
+            .filter((f) => f.isFile())
+            .map((f) => path.join(filePath, f.name))
+            .filter((pubPath) => {
+                return isFileAccepted(pubPath);
+            });
 
         const server = new Server({
             maxPrefetchLinks,
+            enableSignedExpiry: true,
         });
         server.preventRobots();
         server.addPublications(files);
         const url = await server.start(0, false);
         debug(url);
+
+        if (!doWatch) {
+            return;
+        }
+        debug("WATCHER: ", filePath);
+
+        // const watcherSubscription =
+        await watcher.subscribe(filePath, (err, events) => {
+
+            if (err) {
+                debug("WATCHER: ", filePath, err);
+                return;
+            }
+
+            // Can be used for temporarily pausing the watch action
+            const doWatchLive = process.env.STREAMER_WATCH === "1";
+            if (!doWatchLive) {
+                return;
+            }
+
+            const filesToAdd: string[] = [];
+            const filesToRemove: string[] = [];
+
+            for (const event of events) {
+                const fPath = event.path;
+                debug(`WATCHER: ${fPath} => ${event.type}`);
+
+                const fsStat = event.type === "delete" ? undefined : fs.lstatSync(fPath);
+                if (fsStat && (!fsStat.isFile() || !isFileAccepted(fPath))) {
+                    continue;
+                }
+
+                if (event.type === "create") {
+                    filesToAdd.push(fPath);
+
+                    if (!/_manifest\.json$/.test(fPath)) {
+                        const s = `${fPath}_manifest.json`;
+                        if (fs.existsSync(s)) {
+                            if (!server.getPublications().includes(s) && !filesToAdd.includes(s)) {
+                                filesToAdd.push(s);
+                            }
+                        }
+                    }
+                } else if (event.type === "update") {
+                    if (!filesToRemove.includes(fPath)) {
+                        filesToRemove.push(fPath);
+                    }
+                    if (!filesToAdd.includes(fPath)) {
+                        filesToAdd.push(fPath);
+                    }
+                } else if (event.type === "delete") {
+                    filesToRemove.push(fPath);
+
+                    if (!/_manifest\.json$/.test(fPath)) {
+                        const s = `${fPath}_manifest.json`;
+                        // fs.existsSync(s)
+                        if (server.getPublications().includes(s) && !filesToRemove.includes(s)) {
+                            filesToRemove.push(s);
+                        }
+                    }
+                }
+            }
+
+            try {
+
+                debug("WATCHER: REMOVE => ", filesToRemove);
+                server.removePublications(filesToRemove);
+
+                debug("WATCHER: ADD => ", filesToAdd);
+                server.addPublications(filesToAdd);
+
+            } catch (ex) {
+                debug("WATCHER: ", ex);
+            }
+        });
+        // await watcherSubscription.unsubscribe();
     })();
 
     // filePaths = fs.readdirSync(filePath);
@@ -141,6 +227,7 @@ if (stats.isDirectory() && (isAnEPUB !== EPUBis.LocalExploded)) {
     (async () => {
         const server = new Server({
             maxPrefetchLinks,
+            enableSignedExpiry: true,
         });
         server.preventRobots();
         server.addPublications([filePath]);

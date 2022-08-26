@@ -32,10 +32,10 @@
     (git pull || echo "pull") &&
     (git --no-pager status || echo status) &&
     ((rimraf "*" && echo rimrafOK) || echo rimrafNOK) &&
-    cpy ../r2-streamer-js/package.json . &&
-    cpy ../r2-streamer-js/package-lock.json . &&
-    cpy ../r2-streamer-js/LICENSE . &&
-    cpy ../r2-streamer-js/README.md . &&
+    cpy --flat ../r2-streamer-js/package.json . &&
+    cpy --flat ../r2-streamer-js/package-lock.json . &&
+    cpy --flat ../r2-streamer-js/LICENSE . &&
+    cpy --flat ../r2-streamer-js/README.md . &&
     cpy "./docs/" ../r2-streamer-js-dist/ --cwd=../r2-streamer-js/ &&
     cpy "./dist/" ../r2-streamer-js-dist/ --cwd=../r2-streamer-js/ &&
     (git add * || echo add) &&
@@ -76,7 +76,7 @@
 #   rimraf "./now/**/*.js.map" &&
 #   cpy "./misc/readers/reader-NYPL/" ./now/ --cwd=./ &&
 #   cpy "./misc/readers/reader-HADRIEN/" ./now/ --cwd=./ &&
-#   cpy "./misc/epubs/*.epub" now/misc/epubs/ &&
+#   cpy --flat "./misc/epubs/*.epub" now/misc/epubs/ &&
 #   cpy "./misc/json-schema/" ./now/ --cwd=./ &&
 #   cpy ./package.json now/ &&
 #   cd now/ &&

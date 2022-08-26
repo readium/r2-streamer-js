@@ -13,7 +13,7 @@ import * as express from "express";
 import * as jsonMarkup from "json-markup";
 import * as path from "path";
 
-import { TaJsonSerialize } from "@r2-lcp-js/serializable";
+import { JsonArray, TaJsonSerialize } from "@r2-lcp-js/serializable";
 import { Publication } from "@r2-shared-js/models/publication";
 import { Link } from "@r2-shared-js/models/publication-link";
 import {
@@ -27,6 +27,7 @@ import {
     IRequestPayloadExtension, IRequestQueryParams, _jsonPath, _pathBase64, _show,
 } from "./request-ext";
 import { Server } from "./server";
+import { signExpiringResourceURLs } from "./url-signed-expiry";
 
 const debug = debug_("r2:streamer#http/server-manifestjson");
 
@@ -218,15 +219,6 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
                 }
             }
 
-            let coverImage: string | undefined;
-            const coverLink = publication.GetCover();
-            if (coverLink) {
-                coverImage = coverLink.Href;
-                if (coverImage && !isHTTP(coverImage)) {
-                    coverImage = absoluteURL(coverImage);
-                }
-            }
-
             if (isShow) {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 let objToSerialize: any = null;
@@ -294,6 +286,10 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
                 }
 
                 const jsonObj = TaJsonSerialize(objToSerialize);
+
+                if (server.enableSignedExpiry) {
+                    signExpiringResourceURLs(rootUrl, pathBase64Str, jsonObj);
+                }
 
                 let validationStr: string | undefined;
                 const doValidate = !reqparams.jsonPath || reqparams.jsonPath === "all";
@@ -371,6 +367,37 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
                 jsonPretty = jsonPretty.replace(regex, ">$1");
                 jsonPretty = jsonPretty.replace(/>manifest.json<\/a>/, ">" + rootUrl + "/manifest.json</a>");
 
+                let coverImage: string | undefined;
+                // const coverLink = publication.GetCover();
+                // if (coverLink) {
+                //     coverImage = coverLink.Href;
+                //     // if (coverImage && !isHTTP(coverImage)) {
+                //     //     coverImage = absoluteURL(coverImage);
+                //     // }
+                // }
+                const findCover = (arr: JsonArray): string | undefined => {
+                    let coverHref: string | undefined;
+                    for (const link of arr) {
+                        if (link && typeof link === "object" && !Array.isArray(link) && link.rel === "cover" && link.href && typeof link.href === "string") {
+                            coverHref = link.href;
+                            break;
+                        }
+                    }
+                    return coverHref;
+                };
+                if (jsonObj.resources && Array.isArray(jsonObj.resources)) {
+                    coverImage = findCover(jsonObj.resources);
+                }
+                if (!coverImage) {
+                    if (jsonObj.links && Array.isArray(jsonObj.links)) {
+                        coverImage = findCover(jsonObj.links);
+                    }
+                }
+                if (!coverImage) {
+                    if (jsonObj.readingOrder && Array.isArray(jsonObj.readingOrder)) {
+                        coverImage = findCover(jsonObj.readingOrder);
+                    }
+                }
                 res.status(200).send("<html>" +
                     "<head><script type=\"application/ld+json\" href=\"" +
                     manifestURL +
@@ -390,6 +417,10 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
                 res.set("Content-Type", `${contentType}; charset=utf-8`);
 
                 const publicationJsonObj = TaJsonSerialize(publication);
+
+                if (server.enableSignedExpiry) {
+                    signExpiringResourceURLs(rootUrl, pathBase64Str, publicationJsonObj);
+                }
 
                 // absolutizeURLs(publicationJsonObj);
 

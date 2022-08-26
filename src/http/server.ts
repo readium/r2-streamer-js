@@ -52,6 +52,7 @@ export interface IServerOptions {
     disableDecryption?: boolean; /* excludes obfuscated fonts */
     disableRemotePubUrl?: boolean;
     disableOPDS?: boolean;
+    enableSignedExpiry?: boolean;
     maxPrefetchLinks?: number;
 }
 
@@ -64,6 +65,7 @@ export class Server {
     public readonly disableDecryption: boolean;
     public readonly disableRemotePubUrl: boolean;
     public readonly disableOPDS: boolean;
+    public readonly enableSignedExpiry: boolean;
     public readonly maxPrefetchLinks: number;
 
     public readonly lcpBeginToken = "*-";
@@ -85,13 +87,14 @@ export class Server {
 
     constructor(options?: IServerOptions) {
 
-        this.disableReaders = options && options.disableReaders ? options.disableReaders : false;
-        this.disableDecryption = options && options.disableDecryption ? options.disableDecryption : false;
-        this.disableRemotePubUrl = options && options.disableRemotePubUrl ? options.disableRemotePubUrl : false;
-        this.disableOPDS = options && options.disableOPDS ? options.disableOPDS : false;
+        this.disableReaders = !!(options?.disableReaders);
+        this.disableDecryption = !!(options?.disableDecryption);
+        this.disableRemotePubUrl = !!(options?.disableRemotePubUrl);
+        this.disableOPDS = !!(options?.disableOPDS);
+        this.enableSignedExpiry = !!(options?.enableSignedExpiry);
 
         // note: zero not allowed (fallback to default MAX_PREFETCH_LINKS). use -1 to disable ceiling value.
-        this.maxPrefetchLinks = options && options.maxPrefetchLinks ? options.maxPrefetchLinks : MAX_PREFETCH_LINKS;
+        this.maxPrefetchLinks = options?.maxPrefetchLinks ? options.maxPrefetchLinks : MAX_PREFETCH_LINKS;
 
         this.publications = [];
         this.pathPublicationMap = {};
@@ -397,7 +400,11 @@ Disallow: /
         if (this.isPublicationCached(filePath)) {
             const pub = this.cachedPublication(filePath);
             if (pub) {
-                pub.freeDestroy();
+                try {
+                    pub.freeDestroy();
+                } catch (ex) {
+                    debug(ex);
+                }
             }
             this.pathPublicationMap[filePath] = undefined;
             delete this.pathPublicationMap[filePath];
