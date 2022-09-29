@@ -344,11 +344,11 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
                             debug(valueStr);
 
                             const title = DotProp.get(jsonObj, "metadata.title");
-                            debug(title);
+                            debug(JSON.stringify(title));
 
                             validationStr +=
                             // tslint:disable-next-line:max-line-length
-                            `\n"${title}"\n\n${err.ajvMessage}: ${valueStr}\n\n'${err.ajvDataPath?.replace(/^\./, "")}' (${err.ajvSchemaPath})\n\n`;
+                            `\n"${JSON.stringify(title)}"\n\n${err.ajvMessage}: ${valueStr}\n\n'${err.ajvDataPath?.replace(/^\./, "")}' (${err.ajvSchemaPath})\n\n`;
                         }
                     }
                 }
