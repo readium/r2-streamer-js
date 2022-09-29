@@ -2,7 +2,7 @@
 
 ## Technical background
 
-Irrespective of whether the "streamer" component is used in the context of an online service, or of an offline self-contained app, the actual HTTP server is bound to a specific IP address (`127.0.0.1` in the "localhost" case, sometimes `0.0.0.0` which automatically binds to the LAN IP, and note that this also applies to Heroku-lilke deployments where secure HTTP is provided via reverse proxy).
+Irrespective of whether the "streamer" component is used in the context of an online service, or of an offline self-contained app, the actual HTTP server is bound to a specific IP address (`127.0.0.1` in the "localhost" case, sometimes `0.0.0.0` which automatically binds to the LAN IP, and note that this also applies to deployments where secure HTTP is provided via reverse proxy).
 
 Furthermore, every publications' "webpub manifest" JSON (and their linked resources) are served on the random / first-available port number (e.g. `3000`) that the underlying HTTP server is initially started with.
 

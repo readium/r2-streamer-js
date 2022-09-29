@@ -6,7 +6,7 @@ NodeJS implementation (written in TypeScript) and HTTP micro-services (Express m
 
 ## Build status
 
-[![NPM](https://img.shields.io/npm/v/r2-streamer-js.svg)](https://www.npmjs.com/package/r2-streamer-js) [![David](https://david-dm.org/readium/r2-streamer-js/status.svg)](https://david-dm.org/readium/r2-streamer-js) [![Travis](https://travis-ci.org/readium/r2-streamer-js.svg?branch=develop)](https://travis-ci.org/readium/r2-streamer-js) [![Heroku](https://img.shields.io/badge/app-Heroku-blue.svg)](https://readium2.herokuapp.com)
+[![NPM](https://img.shields.io/npm/v/r2-streamer-js.svg)](https://www.npmjs.com/package/r2-streamer-js) [![David](https://david-dm.org/readium/r2-streamer-js/status.svg)](https://david-dm.org/readium/r2-streamer-js) [![Travis](https://travis-ci.org/readium/r2-streamer-js.svg?branch=develop)](https://travis-ci.org/readium/r2-streamer-js)
 
 [Changelog](/CHANGELOG.md)
 
@@ -85,15 +85,9 @@ TravisCI builds are triggered automatically at every Git "push" in the `develop`
 
 ## Live demos
 
-A test server app (not production-ready) is automatically deployed at **Heroku**, at every Git "push" in the `develop` branch:
+A test server app (not production-ready) is automatically deployed at every Git "push" in the `develop` branch:
 
-https://readium2.herokuapp.com
-
-A mirror app used to be deployed at **Now.sh** (https://readium2.now.sh), but this is not available anymore due to technical reasons (i.e. the new Now deployment model does not support our custom Express server)
-
-Deployed servers run NodeJS 10+, and the apps are based on the ES8-2017 code transpiled from TypeScript.
-
-HTTP CORS headers are served to allow cross-origin / remote API requests.
+https://streamer.edrlab.org
 
 ## Version(s), Git revision(s)
 
@@ -105,9 +99,9 @@ Alternatively, GitHub mirror with semantic-versioning release tags:
 
 https://raw.githack.com/edrlab/r2-streamer-js-dist/develop/dist/gitrev.json
 
-Heroku app (latest deployed):
+Latest deployment:
 
-https://readium2.herokuapp.com/version
+https://streamer.edrlab.org/version
 
 ## Developer quick start
 
