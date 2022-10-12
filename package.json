@@ -62,7 +62,7 @@
     "morgan": "^1.10.0",
     "r2-lcp-js": "^1.0.35",
     "r2-opds-js": "^1.0.39",
-    "r2-shared-js": "^1.0.59",
+    "r2-shared-js": "^1.0.61",
     "r2-utils-js": "^1.0.31",
     "request": "^2.88.2",
     "request-promise-native": "^1.0.9",
