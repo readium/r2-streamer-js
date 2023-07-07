@@ -32,6 +32,16 @@ https://kbresearch.nl/epub2opds/opds.atom
 =>
 http://streamer.edrlab.org/opds-v1-v2-convert/https%3A%2F%2Fkbresearch.nl%2Fepub2opds%2Fopds.atom
 
+Cool Lib
+https://coollib.net/opds
+=>
+http://streamer.edrlab.org/opds-v1-v2-convert/https%3A%2F%2Fcoollib.net%2Fopds
+
+vsenauka
+https://vsenauka.ru/opds
+=>
+http://streamer.edrlab.org/opds-v1-v2-convert/https%3A%2F%2Fvsenauka.ru%2Fopds
+
 Knihi (Belarusian)
 https://knihi.com/opds.xml
 =>
