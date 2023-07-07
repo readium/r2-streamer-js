@@ -222,6 +222,8 @@ https://theanarchistlibrary.org/opds
 =>
 https://streamer.edrlab.org/opds-v1-v2-convert/https%3A%2F%2Ftheanarchistlibrary.org%2Fopds
 
+(also https://fr.theanarchistlibrary.org/opds and https://zh.anarchistlibraries.net/opds )
+
 AOZORA
 http://aozora.textlive.net/catalog.opds
 =>
