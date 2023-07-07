@@ -222,12 +222,17 @@ https://theanarchistlibrary.org/opds
 =>
 https://streamer.edrlab.org/opds-v1-v2-convert/https%3A%2F%2Ftheanarchistlibrary.org%2Fopds
 
-(also https://fr.theanarchistlibrary.org/opds and https://kr.theanarchistlibrary.org/opds and https://da.theanarchistlibrary.org/opds and https://es.theanarchistlibrary.org/opds and https://sv.theanarchistlibrary.org/opds and https://ru.theanarchistlibrary.org/opds and https://ja.theanarchistlibrary.org/opds and https://fi.theanarchistlibrary.org/opds and https://zh.anarchistlibraries.net/opds and https://pl.anarchistlibraries.net/opds and https://tr.anarchistlibraries.net/opds and https://anarhisticka-biblioteka.net/opds and https://www.edizionianarchismo.net/opds and https://a-bieb.nl/opds and https://anarchistischebibliothek.org/opds and https://bibliotecaanarchica.org/opds )
+(also https://fr.theanarchistlibrary.org/opds and https://kr.theanarchistlibrary.org/opds and https://da.theanarchistlibrary.org/opds and https://es.theanarchistlibrary.org/opds and https://sv.theanarchistlibrary.org/opds and https://ru.theanarchistlibrary.org/opds and https://ja.theanarchistlibrary.org/opds and https://fi.theanarchistlibrary.org/opds and https://zh.anarchistlibraries.net/opds and https://pl.anarchistlibraries.net/opds and https://tr.anarchistlibraries.net/opds and https://anarhisticka-biblioteka.net/opds and https://www.edizionianarchismo.net/opds and https://a-bieb.nl/opds and https://anarchistischebibliothek.org/opds and https://bibliotecaanarchica.org/opds and https://www.anarhisticka-biblioteka.org/opds )
+
+Wolnelektury
+https://wolnelektury.pl/opds/
+=>
+https://streamer.edrlab.org/opds-v1-v2-convert/https%3A%2F%2Fwolnelektury.pl%2Fopds%2F
 
 Tatsu Zine
 https://tatsu-zine.com/catalogs.opds
 =>
-https://streamer.edrlab.org/opds-v1-v2-convert/http%3A%2F%2Ftatsu-zine.com%2Fcatalogs.opds
+https://streamer.edrlab.org/opds-v1-v2-convert/https%3A%2F%2Ftatsu-zine.com%2Fcatalogs.opds
 
 AOZORA
 http://aozora.textlive.net/catalog.opds
