@@ -12,6 +12,11 @@ The EPUB files referenced from the OPDS feeds are remotely accessed using HTTP p
 
 ## A selection of public OPDS feeds:
 
+Atoll Digital Library
+https://atoll-digital-library.org/opds/
+=>
+http://streamer.edrlab.org/opds-v1-v2-convert/https%3A%2F%2Fatoll-digital-library.org%2Fopds%2F
+
 O'Reilly Media
 http://opds.oreilly.com/opds/
 =>
