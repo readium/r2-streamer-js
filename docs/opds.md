@@ -222,7 +222,7 @@ https://theanarchistlibrary.org/opds
 =>
 https://streamer.edrlab.org/opds-v1-v2-convert/https%3A%2F%2Ftheanarchistlibrary.org%2Fopds
 
-(also https://fr.theanarchistlibrary.org/opds and https://zh.anarchistlibraries.net/opds )
+(also https://fr.theanarchistlibrary.org/opds and https://kr.theanarchistlibrary.org/opds and https://da.theanarchistlibrary.org/opds and https://es.theanarchistlibrary.org/opds and https://sv.theanarchistlibrary.org/opds and https://ru.theanarchistlibrary.org/opds and https://ja.theanarchistlibrary.org/opds and https://fi.theanarchistlibrary.org/opds and https://zh.anarchistlibraries.net/opds and https://anarhisticka-biblioteka.net/opds and https://www.edizionianarchismo.net/opds )
 
 AOZORA
 http://aozora.textlive.net/catalog.opds
