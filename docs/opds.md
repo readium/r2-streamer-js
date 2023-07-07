@@ -242,6 +242,13 @@ https://tools.wmflabs.org/wsexport/wikisource-fr-good.atom
 =>
 http://streamer.edrlab.org/opds-v1-v2-convert/https%3A%2F%2Ftools.wmflabs.org%2Fwsexport%2Fwikisource-fr-good.atom
 
+(also https://ws-export.wmcloud.org/opds/en/Ready_for_export.xml )
+
+Elephant Editions
+https://archive.elephanteditions.net/opds
+=>
+http://streamer.edrlab.org/opds-v1-v2-convert/https%3A%2F%2Farchive.elephanteditions.net%2Fopds
+
 Blah
 http://blah.me/opds/index.atom
 =>
