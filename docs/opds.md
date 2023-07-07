@@ -32,6 +32,11 @@ https://kbresearch.nl/epub2opds/opds.atom
 =>
 http://streamer.edrlab.org/opds-v1-v2-convert/https%3A%2F%2Fkbresearch.nl%2Fepub2opds%2Fopds.atom
 
+Knihi (Belarusian)
+https://knihi.com/opds.xml
+=>
+http://streamer.edrlab.org/opds-v1-v2-convert/https%3A%2F%2Fknihi.com%2Fopds.xml
+
 Textos (Spanish)
 https://textos.info/opds
 =>
