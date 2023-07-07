@@ -42,6 +42,11 @@ https://iknigi.net/opds
 =>
 http://streamer.edrlab.org/opds-v1-v2-convert/https%3A%2F%2Fiknigi.net%2Fopds
 
+ekniga (Russian)
+https://ekniga.org/opds
+=>
+http://streamer.edrlab.org/opds-v1-v2-convert/https%3A%2F%2Fekniga.org%2Fopds
+
 Textos (Spanish)
 https://textos.info/opds
 =>
