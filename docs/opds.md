@@ -12,6 +12,11 @@ The EPUB files referenced from the OPDS feeds are remotely accessed using HTTP p
 
 ## A selection of public OPDS feeds:
 
+Atoll Digital Library
+https://atoll-digital-library.org/opds/
+=>
+http://streamer.edrlab.org/opds-v1-v2-convert/https%3A%2F%2Fatoll-digital-library.org%2Fopds%2F
+
 O'Reilly Media
 http://opds.oreilly.com/opds/
 =>
@@ -26,6 +31,31 @@ KB Reasearch (National Library of the Netherlands)
 https://kbresearch.nl/epub2opds/opds.atom
 =>
 http://streamer.edrlab.org/opds-v1-v2-convert/https%3A%2F%2Fkbresearch.nl%2Fepub2opds%2Fopds.atom
+
+Cool Lib
+https://coollib.net/opds
+=>
+http://streamer.edrlab.org/opds-v1-v2-convert/https%3A%2F%2Fcoollib.net%2Fopds
+
+vsenauka
+https://vsenauka.ru/opds
+=>
+http://streamer.edrlab.org/opds-v1-v2-convert/https%3A%2F%2Fvsenauka.ru%2Fopds
+
+Knihi (Belarusian)
+https://knihi.com/opds.xml
+=>
+http://streamer.edrlab.org/opds-v1-v2-convert/https%3A%2F%2Fknihi.com%2Fopds.xml
+
+iKnihi (Russian)
+https://iknigi.net/opds
+=>
+http://streamer.edrlab.org/opds-v1-v2-convert/https%3A%2F%2Fiknigi.net%2Fopds
+
+ekniga (Russian)
+https://ekniga.org/opds
+=>
+http://streamer.edrlab.org/opds-v1-v2-convert/https%3A%2F%2Fekniga.org%2Fopds
 
 Textos (Spanish)
 https://textos.info/opds
@@ -212,6 +242,18 @@ https://theanarchistlibrary.org/opds
 =>
 https://streamer.edrlab.org/opds-v1-v2-convert/https%3A%2F%2Ftheanarchistlibrary.org%2Fopds
 
+(also https://fr.theanarchistlibrary.org/opds and https://kr.theanarchistlibrary.org/opds and https://da.theanarchistlibrary.org/opds and https://es.theanarchistlibrary.org/opds and https://sv.theanarchistlibrary.org/opds and https://ru.theanarchistlibrary.org/opds and https://ja.theanarchistlibrary.org/opds and https://fi.theanarchistlibrary.org/opds and https://zh.anarchistlibraries.net/opds and https://pl.anarchistlibraries.net/opds and https://tr.anarchistlibraries.net/opds and https://anarhisticka-biblioteka.net/opds and https://www.edizionianarchismo.net/opds and https://a-bieb.nl/opds and https://anarchistischebibliothek.org/opds and https://bibliotecaanarchica.org/opds and https://www.anarhisticka-biblioteka.org/opds and https://lib.anarcho-copy.org/opds )
+
+Wolnelektury
+https://wolnelektury.pl/opds/
+=>
+https://streamer.edrlab.org/opds-v1-v2-convert/https%3A%2F%2Fwolnelektury.pl%2Fopds%2F
+
+Tatsu Zine
+https://tatsu-zine.com/catalogs.opds
+=>
+https://streamer.edrlab.org/opds-v1-v2-convert/https%3A%2F%2Ftatsu-zine.com%2Fcatalogs.opds
+
 AOZORA
 http://aozora.textlive.net/catalog.opds
 =>
@@ -241,6 +283,13 @@ WMFLABS WIKISOURCE:
 https://tools.wmflabs.org/wsexport/wikisource-fr-good.atom
 =>
 http://streamer.edrlab.org/opds-v1-v2-convert/https%3A%2F%2Ftools.wmflabs.org%2Fwsexport%2Fwikisource-fr-good.atom
+
+(also https://ws-export.wmcloud.org/opds/en/Ready_for_export.xml )
+
+Elephant Editions
+https://archive.elephanteditions.net/opds
+=>
+http://streamer.edrlab.org/opds-v1-v2-convert/https%3A%2F%2Farchive.elephanteditions.net%2Fopds
 
 Blah
 http://blah.me/opds/index.atom
