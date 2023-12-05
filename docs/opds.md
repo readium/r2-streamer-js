@@ -319,6 +319,8 @@ Sample feed: https://test.opds.io/2.0/home.json => http://streamer.edrlab.org/op
 
 Feedbooks: https://catalog.feedbooks.com/catalog/index.json (replace `.json` with `.atom` to access the OPDS1 XML feed) => http://streamer.edrlab.org/opds-v2-browse/https%3A%2F%2Fcatalog.feedbooks.com%2Fcatalog%2Findex.json
 
+Fulcrum: https://www.fulcrum.org/api/opds => https://streamer.edrlab.org/opds-v2-browse/https%3A%2F%2Fwww.fulcrum.org%2Fapi%2Fopds
+
 Lirtuel.be: https://www.lirtuel.be/v1/home.opds2 => http://streamer.edrlab.org/opds-v2-browse/https%3A%2F%2Fwww.lirtuel.be%2Fv1%2Fhome.opds2
 
 eBiblioMedia (Lausanne Fondation Suisse): https://bm.ebibliomedia.ch/v1/home.opds2 => http://streamer.edrlab.org/opds-v2-browse/https%3A%2F%2Fbm.ebibliomedia.ch%2Fv1%2Fhome.opds2
