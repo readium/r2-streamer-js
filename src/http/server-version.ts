@@ -69,7 +69,7 @@ export function serverVersion(server: Server, topRouter: express.Application) {
             return;
         }
 
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        // eslint-disable-next-line @typescript-eslint/no-var-requires,@typescript-eslint/no-require-imports
         const jsonObj = require(gitRevJson);
         // debug(jsonObj);
 

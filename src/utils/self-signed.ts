@@ -44,6 +44,7 @@ export async function generateSelfSignedData(): Promise<CertificateData> {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         selfsigned.generate(attributes, opts, (err: any, keys: any) => {
             if (err) {
+                // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
                 reject(err);
                 return;
             }

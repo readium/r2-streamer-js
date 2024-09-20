@@ -13,7 +13,7 @@ import * as jsonMarkup from "json-markup";
 import * as morgan from "morgan";
 import * as path from "path";
 import * as request from "request";
-import * as requestPromise from "request-promise-native";
+// import * as requestPromise from "request-promise-native";
 import * as xmldom from "@xmldom/xmldom";
 
 import { TaJsonSerialize } from "@r2-lcp-js/serializable";
@@ -156,7 +156,7 @@ export function serverOPDS_convert_v1_to_v2(_server: Server, topRouter: express.
                 return;
             }
             const responseStr = responseData.toString("utf8");
-            const responseXml = new xmldom.DOMParser().parseFromString(responseStr);
+            const responseXml = new xmldom.DOMParser().parseFromString(responseStr, "application/xml") as unknown as Document;
             // debug(responseXml);
             if (!responseXml || !responseXml.documentElement) {
                 res.status(500).send("<html><body><p>Internal Server Error</p><p>"
@@ -361,10 +361,10 @@ export function serverOPDS_convert_v1_to_v2(_server: Server, topRouter: express.
             "User-Agent": "READIUM2",
         };
 
-        // No response streaming! :(
-        // https://github.com/request/request-promise/issues/90
-        const needsStreamingResponse = true;
-        if (needsStreamingResponse) {
+        // // No response streaming! :(
+        // // https://github.com/request/request-promise/issues/90
+        // const needsStreamingResponse = true;
+        // if (needsStreamingResponse) {
             request.get({
                 headers,
                 method: "GET",
@@ -380,23 +380,23 @@ export function serverOPDS_convert_v1_to_v2(_server: Server, topRouter: express.
                     }
                 })
                 .on("error", failure);
-        } else {
-            let response: requestPromise.FullResponse;
-            try {
-                // tslint:disable-next-line:await-promise no-floating-promises
-                response = await requestPromise({
-                    headers,
-                    method: "GET",
-                    resolveWithFullResponse: true,
-                    uri: urlDecoded,
-                });
-            } catch (err) {
-                failure(err);
-                return;
-            }
+        // } else {
+        //     let response: requestPromise.FullResponse;
+        //     try {
+        //         // tslint:disable-next-line:await-promise no-floating-promises
+        //         response = await requestPromise({
+        //             headers,
+        //             method: "GET",
+        //             resolveWithFullResponse: true,
+        //             uri: urlDecoded,
+        //         });
+        //     } catch (err) {
+        //         failure(err);
+        //         return;
+        //     }
 
-            await success(response);
-        }
+        //     await success(response);
+        // }
     });
 
     topRouter.use(serverOPDS_convert_v1_to_v2_PATH, routerOPDS_convert_v1_to_v2);

@@ -160,6 +160,7 @@
             resolve(args);
           }
         } catch (ex) {
+          // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
           reject(ex);
         }
       }

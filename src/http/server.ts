@@ -198,6 +198,7 @@ Disallow: /
                     certData = await generateSelfSignedData();
                 } catch (err) {
                     debug(err);
+                    // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
                     reject("err");
                     return;
                 }
@@ -360,6 +361,7 @@ Disallow: /
                     publication.AddToInternal("zip", zip);
                 } catch (err) {
                     debug(err);
+                    // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
                     return Promise.reject(err);
                 }
             } else {
@@ -367,11 +369,13 @@ Disallow: /
                     publication = await PublicationParsePromise(filePath);
                 } catch (err) {
                     debug(err);
+                    // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
                     return Promise.reject(err);
                 }
             }
 
             if (!publication) {
+                // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
                 return Promise.reject("!PUBLICATION??");
             }
 

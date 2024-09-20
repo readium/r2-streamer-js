@@ -13,7 +13,7 @@ import * as jsonMarkup from "json-markup";
 import * as morgan from "morgan";
 import * as path from "path";
 import * as request from "request";
-import * as requestPromise from "request-promise-native";
+// import * as requestPromise from "request-promise-native";
 
 import { LCP } from "@r2-lcp-js/parser/epub/lcp";
 import { LSD } from "@r2-lcp-js/parser/epub/lsd";
@@ -267,10 +267,10 @@ export function serverLCPLSD_show(_server: Server, topRouter: express.Applicatio
             "User-Agent": "READIUM2",
         };
 
-        // No response streaming! :(
-        // https://github.com/request/request-promise/issues/90
-        const needsStreamingResponse = true;
-        if (needsStreamingResponse) {
+        // // No response streaming! :(
+        // // https://github.com/request/request-promise/issues/90
+        // const needsStreamingResponse = true;
+        // if (needsStreamingResponse) {
             request.get({
                 headers,
                 method: "GET",
@@ -286,23 +286,23 @@ export function serverLCPLSD_show(_server: Server, topRouter: express.Applicatio
                     }
                 })
                 .on("error", failure);
-        } else {
-            let response: requestPromise.FullResponse;
-            try {
-                // tslint:disable-next-line:await-promise no-floating-promises
-                response = await requestPromise({
-                    headers,
-                    method: "GET",
-                    resolveWithFullResponse: true,
-                    uri: urlDecoded,
-                });
-            } catch (err) {
-                failure(err);
-                return;
-            }
+        // } else {
+        //     let response: requestPromise.FullResponse;
+        //     try {
+        //         // tslint:disable-next-line:await-promise no-floating-promises
+        //         response = await requestPromise({
+        //             headers,
+        //             method: "GET",
+        //             resolveWithFullResponse: true,
+        //             uri: urlDecoded,
+        //         });
+        //     } catch (err) {
+        //         failure(err);
+        //         return;
+        //     }
 
-            await success(response);
-        }
+        //     await success(response);
+        // }
     });
 
     topRouter.use(serverLCPLSD_show_PATH, routerLCPLSD_show);

@@ -14,7 +14,7 @@ import * as jsonMarkup from "json-markup";
 import * as morgan from "morgan";
 import * as path from "path";
 import * as request from "request";
-import * as requestPromise from "request-promise-native";
+// import * as requestPromise from "request-promise-native";
 import { v4 as uuidv4 } from "uuid";
 
 import { TaJsonDeserialize, TaJsonSerialize } from "@r2-lcp-js/serializable";
@@ -535,10 +535,10 @@ function doAuth() {
             (headers as any).Authorization = `Bearer ${authResponseJson.access_token}`;
         }
 
-        // No response streaming! :(
-        // https://github.com/request/request-promise/issues/90
-        const needsStreamingResponse = true;
-        if (needsStreamingResponse) {
+        // // No response streaming! :(
+        // // https://github.com/request/request-promise/issues/90
+        // const needsStreamingResponse = true;
+        // if (needsStreamingResponse) {
             request.get({
                 headers,
                 method: "GET",
@@ -554,23 +554,23 @@ function doAuth() {
                     }
                 })
                 .on("error", failure);
-        } else {
-            let response: requestPromise.FullResponse;
-            try {
-                // tslint:disable-next-line:await-promise no-floating-promises
-                response = await requestPromise({
-                    headers,
-                    method: "GET",
-                    resolveWithFullResponse: true,
-                    uri: urlDecoded,
-                });
-            } catch (err) {
-                failure(err);
-                return;
-            }
+        // } else {
+        //     let response: requestPromise.FullResponse;
+        //     try {
+        //         // tslint:disable-next-line:await-promise no-floating-promises
+        //         response = await requestPromise({
+        //             headers,
+        //             method: "GET",
+        //             resolveWithFullResponse: true,
+        //             uri: urlDecoded,
+        //         });
+        //     } catch (err) {
+        //         failure(err);
+        //         return;
+        //     }
 
-            await success(response);
-        }
+        //     await success(response);
+        // }
     });
 
     topRouter.use(serverOPDS_browse_v2_PATH, routerOPDS_browse_v2);
@@ -802,10 +802,10 @@ function doAuth() {
                 "User-Agent": "READIUM2",
             };
 
-            // No response streaming! :(
-            // https://github.com/request/request-promise/issues/90
-            const needsStreamingResponse = true;
-            if (needsStreamingResponse) {
+            // // No response streaming! :(
+            // // https://github.com/request/request-promise/issues/90
+            // const needsStreamingResponse = true;
+            // if (needsStreamingResponse) {
                 request.post({
                     form: decryptedJson,
                     headers,
@@ -822,24 +822,24 @@ function doAuth() {
                         }
                     })
                     .on("error", failure);
-            } else {
-                let response: requestPromise.FullResponse;
-                try {
-                    // tslint:disable-next-line:await-promise no-floating-promises
-                    response = await requestPromise({
-                        form: decryptedJson,
-                        headers,
-                        method: "POST",
-                        resolveWithFullResponse: true,
-                        uri: authUrl,
-                    });
-                } catch (err) {
-                    failure(err);
-                    return;
-                }
+            // } else {
+            //     let response: requestPromise.FullResponse;
+            //     try {
+            //         // tslint:disable-next-line:await-promise no-floating-promises
+            //         response = await requestPromise({
+            //             form: decryptedJson,
+            //             headers,
+            //             method: "POST",
+            //             resolveWithFullResponse: true,
+            //             uri: authUrl,
+            //         });
+            //     } catch (err) {
+            //         failure(err);
+            //         return;
+            //     }
 
-                await success(response);
-            }
+            //     await success(response);
+            // }
         } catch (err) {
             debug(err);
 
