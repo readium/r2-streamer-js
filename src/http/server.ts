@@ -45,6 +45,7 @@ const isValidHexPassphraseHashSha256 = (str: string): boolean => {
     let isHex = true;
     for (let i = 0; i < str.length; i += 2) {
         const hexByte = str.substr(i, 2).toLowerCase();
+        // normally [0-9a-fA-F], but we normalise with .toLowerCase() above
         if (!/^[0-9a-f][0-9a-f]$/.test(hexByte)) {
             isHex = false;
             break;
