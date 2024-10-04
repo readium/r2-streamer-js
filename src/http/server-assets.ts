@@ -277,6 +277,10 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
 
                 const fullUrl = `${server.serverUrl()}${req.originalUrl}`;
 
+                // if (isEncrypted && (!publication.LCP || !publication.LCP.isReady())) {
+                //     debug("WARNING: encrypted publication but LCP not initialised! ... will try using special RAW LCP transformer");
+                // }
+
                 let transformedStream: IStreamAndLength;
                 try {
                     transformedStream = await Transformers.tryStream(

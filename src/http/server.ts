@@ -36,6 +36,8 @@ import { IHTTPHeaderNameValue, serverSecure, serverSecureHTTPHeader } from "./se
 import { serverRemotePub } from "./server-url";
 import { serverVersion } from "./server-version";
 
+// import { LCP } from "@r2-lcp-js/parser/epub/lcp";
+
 const debug = debug_("r2:streamer#http/server");
 
 const isValidHexPassphraseHashSha256 = (str: string): boolean => {
@@ -401,6 +403,73 @@ Disallow: /
                 return Promise.reject("!PUBLICATION??");
             }
 
+            if (!publication.LCP && !this.disableDecryption) {
+                try {
+                    const contentKeys: string[] = [];
+
+                    const contentKeyPath = path.join(path.dirname(filePath), path.basename(filePath) + ".contentkey");
+                    if (fs.existsSync(contentKeyPath)) {
+                        let contentKey = fs.readFileSync(contentKeyPath, { encoding: "utf8" });
+                        if (contentKey) {
+                            contentKey = contentKey.trim();
+                            // AES-256-CBC also 32 bytes / 64 hex chars arranged in pairs
+                            if (isValidHexPassphraseHashSha256(contentKey)) {
+                                contentKeys.push(contentKey);
+                            }
+                        }
+                    }
+                    const lcpContentKeysPath = path.join(process.cwd(), "LCP", ".contentkeys");
+                    if (fs.existsSync(lcpContentKeysPath)) {
+                        let contentKeysData = fs.readFileSync(lcpContentKeysPath, { encoding: "utf8" });
+                        if (contentKeysData) {
+                            contentKeysData = contentKeysData.trim();
+                            const contentKeysMap = contentKeysData.split("\n").map((contentKeyLine) => {
+                                contentKeyLine = contentKeyLine.trim();
+                                if (!contentKeyLine) {
+                                    return null;
+                                }
+                                const keyValuePair = contentKeyLine.split("_::_");
+                                if (keyValuePair[0] && keyValuePair[1]) {
+                                    return [keyValuePair[0].trim(), keyValuePair[1].trim()];
+                                }
+                                return null;
+                            }).filter((item) => !!item);
+                            for (const keyValuePair of contentKeysMap) {
+                                const key = keyValuePair[0];
+                                const value = keyValuePair[1];
+                                if (key === path.relative(process.cwd(), filePath)) {
+                                    if (isValidHexPassphraseHashSha256(value)) {
+                                        contentKeys.push(value);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    const contentKeysUnique = Array.from(new Set(contentKeys));
+
+                    debug("SUCCESS contentKeys:");
+                    debug(filePath);
+                    debug(path.relative(process.cwd(), filePath));
+                    debug(contentKeys.length);
+                    debug(contentKeysUnique.length);
+                    // debug(contentKeys);
+                    // debug(contentKeysUnique);
+
+                    if (contentKeysUnique.length) {
+                        // debug(contentKeysUnique[0]);
+
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        (publication as any)["AES256CBCContentKey"] = Buffer.from(contentKeysUnique[0], "hex");
+                    }
+
+                } catch (err) {
+                    debug(err);
+                    const errMsg = "FAIL AES256CBCContentKey: " + err;
+                    debug(errMsg);
+                }
+            }
+
             if (publication.LCP && !this.disableDecryption) {
                 try {
                     const userKeys: string[] = [];
@@ -455,6 +524,35 @@ Disallow: /
                         debug(userKeysUnique.length);
                         // debug(userKeys);
                         // debug(userKeysUnique);
+                        if (publication.LCP.ContentKey) { // LCP basic profile only, Javascript implementation (otherwise opaque native lib)
+                            debug(publication.LCP.ContentKey.toString("hex"));
+                        }
+                        // example LCP basic profile /misc/epubs/wasteland-otf-obf_LCP_dan.lcpl
+                        // publication.LCP.ContentKey ===> 4a297afd457fa9caf9d1ad20a2b59cd1ac61b4d9792add9f8f032cf1775798b3
+                        // (passphrase "dan", SHA256 userkey "ec4f2dbb3b140095550c9afbbb69b5d6fd9e814b9da82fad0b34e9fcbe56f1cb")
+                        // license JSON "content_key":
+                        // =================
+                        // const encrypted = Buffer.from("YGlj0vldEzpiBYojGSaw7iSlXQ6PlXJv5gkD/+jRdloeekilc9B9CSKWf1n70s0lE1qeVJrZFZY6DsyyKZn4bQ==", "base64");
+                        // const decrypteds = [];
+                        // const key = Buffer.from("ec4f2dbb3b140095550c9afbbb69b5d6fd9e814b9da82fad0b34e9fcbe56f1cb", "hex");
+                        // const decryptStream = require("crypto").createDecipheriv("aes-256-cbc", key, encrypted.slice(0, 16));
+                        // decryptStream.setAutoPadding(false);
+                        // const enc = encrypted.slice(16, encrypted.lenth);
+                        // const buff1 = decryptStream.update(enc);
+                        // if (buff1) {
+                        //     decrypteds.push(buff1);
+                        // }
+                        // const buff2 = decryptStream.final();
+                        // if (buff2) {
+                        //     decrypteds.push(buff2);
+                        // }
+                        // const decrypted = Buffer.concat(decrypteds);
+                        // const nPaddingBytes = decrypted[decrypted.length - 1];
+                        // const size = enc.length - nPaddingBytes;
+                        // const decryptedStr = decrypted.slice(0, size).toString("hex");
+                        // console.log(decryptedStr);
+                        // =================
+                        // ==> "4a297afd457fa9caf9d1ad20a2b59cd1ac61b4d9792add9f8f032cf1775798b3"
                     } catch (err) {
                         publication.LCP.ContentKey = undefined;
                         debug(err);

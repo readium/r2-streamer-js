@@ -19,11 +19,16 @@ import { EPUBis, isEPUBlication } from "@r2-shared-js/parser/epub";
 
 import { MAX_PREFETCH_LINKS, Server } from "./server";
 
+import { Transformers } from "@r2-shared-js/transform/transformer";
+import { TransformerLCPRaw } from "../utils/transformer-lcp-raw";
+
 // import * as filehound from "filehound";
 
 initGlobalConverters_OPDS();
 initGlobalConverters_SHARED();
 initGlobalConverters_GENERIC();
+
+Transformers.instance().add(new TransformerLCPRaw());
 
 setLcpNativePluginPath(path.join(process.cwd(), "LCP", "lcp.node"));
 
@@ -196,7 +201,6 @@ if (stats.isDirectory() && (isAnEPUB !== EPUBis.LocalExploded)) {
 
             for (const event of events) {
                 const fPath = event.path;
-                // debug(`WATCHER (2): ${fPath} => ${event.type}`);
 
                 const fsStat = event.type === "delete" ? undefined : fs.lstatSync(fPath);
                 if (fsStat && !fsStat.isFile()) {
@@ -211,6 +215,34 @@ if (stats.isDirectory() && (isAnEPUB !== EPUBis.LocalExploded)) {
                     continue;
                 }
                 const fPath_ = fPath.replace(/\.userkey$/, "");
+
+                if (server.getPublications().includes(fPath_) &&
+                    (event.type === "create" || event.type === "update" || event.type === "delete")) {
+                    if (!filesToRemove.includes(fPath_)) {
+                        filesToRemove.push(fPath_);
+                    }
+                    if (!filesToAdd.includes(fPath_)) {
+                        filesToAdd.push(fPath_);
+                    }
+                }
+            }
+
+            for (const event of events) {
+                const fPath = event.path;
+
+                const fsStat = event.type === "delete" ? undefined : fs.lstatSync(fPath);
+                if (fsStat && !fsStat.isFile()) {
+                    continue;
+                }
+                if (!(
+                    /\.contentkey$/.test(fPath)
+                    &&
+                    fs.existsSync(fPath.replace(/\.contentkey$/, ""))
+                    )
+                ) {
+                    continue;
+                }
+                const fPath_ = fPath.replace(/\.contentkey$/, "");
 
                 if (server.getPublications().includes(fPath_) &&
                     (event.type === "create" || event.type === "update" || event.type === "delete")) {
