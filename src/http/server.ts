@@ -38,6 +38,27 @@ import { serverVersion } from "./server-version";
 
 const debug = debug_("r2:streamer#http/server");
 
+const isValidHexPassphraseHashSha256 = (str: string): boolean => {
+    if (str.length !== 64) { // 32 bytes
+        return false;
+    }
+    let isHex = true;
+    for (let i = 0; i < str.length; i += 2) {
+        const hexByte = str.substr(i, 2).toLowerCase();
+        if (!/^[0-9a-f][0-9a-f]$/.test(hexByte)) {
+            isHex = false;
+            break;
+        }
+        const parsedInt = parseInt(hexByte, 16);
+        // debug(hexByte, parsedInt);
+        if (isNaN(parsedInt)) {
+            isHex = false;
+            break;
+        }
+    }
+    return isHex;
+};
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface IPathPublicationMap { [key: string]: any; }
 
@@ -377,6 +398,74 @@ Disallow: /
             if (!publication) {
                 // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
                 return Promise.reject("!PUBLICATION??");
+            }
+
+            if (publication.LCP && !this.disableDecryption) {
+                try {
+                    const userKeys: string[] = [];
+
+                    const lcpUserKeyPath = path.join(path.dirname(filePath), path.basename(filePath) + ".userkey");
+                    if (fs.existsSync(lcpUserKeyPath)) {
+                        let userKey = fs.readFileSync(lcpUserKeyPath, { encoding: "utf8" });
+                        if (userKey) {
+                            userKey = userKey.trim();
+                            if (isValidHexPassphraseHashSha256(userKey)) {
+                                userKeys.push(userKey);
+                            }
+                        }
+                    }
+                    const lcpUserKeysPath = path.join(process.cwd(), "LCP", ".userkeys");
+                    if (fs.existsSync(lcpUserKeysPath)) {
+                        let userKeysData = fs.readFileSync(lcpUserKeysPath, { encoding: "utf8" });
+                        if (userKeysData) {
+                            userKeysData = userKeysData.trim();
+                            const userKeysMap = userKeysData.split("\n").map((userKeyLine) => {
+                                userKeyLine = userKeyLine.trim();
+                                if (!userKeyLine) {
+                                    return null;
+                                }
+                                const keyValuePair = userKeyLine.split("_::_");
+                                if (keyValuePair[0] && keyValuePair[1]) {
+                                    return [keyValuePair[0].trim(), keyValuePair[1].trim()];
+                                }
+                                return null;
+                            }).filter((item) => !!item);
+                            for (const keyValuePair of userKeysMap) {
+                                const key = keyValuePair[0];
+                                const value = keyValuePair[1];
+                                if (key === publication.LCP.Provider || key === publication.LCP.ID) {
+                                    if (isValidHexPassphraseHashSha256(value)) {
+                                        userKeys.push(value);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    const userKeysUnique = Array.from(new Set(userKeys));
+                    try {
+                        await publication.LCP.tryUserKeys(userKeysUnique); // hex
+
+                        debug("SUCCESS publication.LCP.tryUserKeys():");
+                        debug(filePath);
+                        debug(publication.LCP.Provider);
+                        debug(publication.LCP.ID);
+                        debug(userKeys.length);
+                        debug(userKeysUnique.length);
+                        // debug(userKeys);
+                        // debug(userKeysUnique);
+                    } catch (err) {
+                        publication.LCP.ContentKey = undefined;
+                        debug(err);
+                        const errMsg = "FAIL publication.LCP.tryUserKeys(): " + err;
+                        debug(errMsg);
+                    }
+                } catch (err) {
+                    publication.LCP.ContentKey = undefined;
+                    debug(err);
+                    const errMsg = "FAIL before publication.LCP.tryUserKeys(): " + err;
+                    debug(errMsg);
+                }
             }
 
             this.cachePublication(filePath, publication);

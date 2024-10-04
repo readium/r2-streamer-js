@@ -108,7 +108,6 @@ export function serverManifestJson(server: Server, routerPathBase64: express.Rou
                     + err + "</p></body></html>");
                 return;
             }
-
             // dumpPublication(publication);
 
             if (reqparams.lcpPass64 && !server.disableDecryption) {

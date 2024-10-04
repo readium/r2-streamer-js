@@ -14,6 +14,7 @@ COPY ./.slugignore* /streamer/
 COPY ./package* /streamer/
 COPY ./tsconfig* /streamer/
 
+ADD ./LCP /streamer/LCP
 ADD ./.git /streamer/.git
 ADD ./misc /streamer/misc
 ADD ./src /streamer/src
