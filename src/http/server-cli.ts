@@ -156,7 +156,10 @@ if (stats.isDirectory() && (isAnEPUB !== EPUBis.LocalExploded)) {
                 debug(`WATCHER: ${fPath} => ${event.type}`);
 
                 const fsStat = event.type === "delete" ? undefined : fs.lstatSync(fPath);
-                if (fsStat && (!fsStat.isFile() || !isFileAccepted(fPath))) {
+                if (fsStat && !fsStat.isFile()) {
+                    continue;
+                }
+                if (!isFileAccepted(fPath)) {
                     continue;
                 }
 
@@ -191,13 +194,42 @@ if (stats.isDirectory() && (isAnEPUB !== EPUBis.LocalExploded)) {
                 }
             }
 
+            for (const event of events) {
+                const fPath = event.path;
+                // debug(`WATCHER (2): ${fPath} => ${event.type}`);
+
+                const fsStat = event.type === "delete" ? undefined : fs.lstatSync(fPath);
+                if (fsStat && !fsStat.isFile()) {
+                    continue;
+                }
+                if (!(
+                    /\.userkey$/.test(fPath)
+                    &&
+                    fs.existsSync(fPath.replace(/\.userkey$/, ""))
+                    )
+                ) {
+                    continue;
+                }
+                const fPath_ = fPath.replace(/\.userkey$/, "");
+
+                if (server.getPublications().includes(fPath_) &&
+                    (event.type === "create" || event.type === "update" || event.type === "delete")) {
+                    if (!filesToRemove.includes(fPath_)) {
+                        filesToRemove.push(fPath_);
+                    }
+                    if (!filesToAdd.includes(fPath_)) {
+                        filesToAdd.push(fPath_);
+                    }
+                }
+            }
+
             try {
 
                 debug("WATCHER: REMOVE => ", filesToRemove);
-                server.removePublications(filesToRemove);
+                server.removePublications(filesToRemove); // performs cache invalidation (if was loaded already) and removes from pub registry
 
                 debug("WATCHER: ADD => ", filesToAdd);
-                server.addPublications(filesToAdd);
+                server.addPublications(filesToAdd); // does not add to cache (it's lazy)
 
             } catch (ex) {
                 debug("WATCHER: ", ex);
