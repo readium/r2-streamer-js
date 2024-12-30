@@ -17,6 +17,7 @@ import { Entry } from "@r2-opds-js/opds/opds1/opds-entry";
 import { encodeURIComponent_RFC3986, ensureAbsolute } from "@r2-utils-js/_utils/http/UrlUtils";
 import { streamToBufferPromise } from "@r2-utils-js/_utils/stream/BufferUtils";
 import { XML } from "@r2-utils-js/_utils/xml-js-mapper";
+import { removeUTF8BOM } from "@r2-utils-js/_utils/bom";
 
 import { IRequestPayloadExtension, _urlEncoded } from "./request-ext";
 import { Server } from "./server";
@@ -110,7 +111,7 @@ export function serverOPDS_browse_v1(_server: Server, topRouter: express.Applica
                     + err + "</p></body></html>");
                 return;
             }
-            const responseStr = responseData.toString("utf8");
+            const responseStr = removeUTF8BOM(responseData.toString("utf8"));
             const responseXml = new xmldom.DOMParser().parseFromString(responseStr, "application/xml") as unknown as Document;
             // debug(responseXml);
             if (!responseXml || !responseXml.documentElement) {

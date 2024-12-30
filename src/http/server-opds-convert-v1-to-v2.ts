@@ -30,6 +30,7 @@ import {
 import { traverseJsonObjects } from "@r2-utils-js/_utils/JsonUtils";
 import { streamToBufferPromise } from "@r2-utils-js/_utils/stream/BufferUtils";
 import { XML } from "@r2-utils-js/_utils/xml-js-mapper";
+import { removeUTF8BOM } from "@r2-utils-js/_utils/bom";
 
 import { jsonSchemaValidate } from "../utils/json-schema-validate";
 import { IRequestPayloadExtension, _urlEncoded } from "./request-ext";
@@ -155,7 +156,7 @@ export function serverOPDS_convert_v1_to_v2(_server: Server, topRouter: express.
                     + err + "</p></body></html>");
                 return;
             }
-            const responseStr = responseData.toString("utf8");
+            const responseStr = removeUTF8BOM(responseData.toString("utf8"));
             const responseXml = new xmldom.DOMParser().parseFromString(responseStr, "application/xml") as unknown as Document;
             // debug(responseXml);
             if (!responseXml || !responseXml.documentElement) {
