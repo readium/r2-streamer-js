@@ -55,7 +55,7 @@ export function serverMediaOverlays(server: Server, routerPathBase64: express.Ro
     const routerMediaOverlays = express.Router({ strict: false });
     // routerMediaOverlays.use(morgan("combined", { stream: { write: (msg: any) => debug(msg) } }));
 
-    routerMediaOverlays.get(["/", "/" + _show + "/:" + mediaOverlayURLParam + "?"],
+    routerMediaOverlays.get(["/", "/" + _show + "{/:" + mediaOverlayURLParam + "}"],
         async (req: express.Request, res: express.Response) => {
 
             const reqparams = (req as IRequestPayloadExtension).params;

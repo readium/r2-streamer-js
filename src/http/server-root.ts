@@ -29,7 +29,9 @@ import { serverVersion_PATH } from "./server-version";
 
 export function serverRoot(server: Server, topRouter: express.Application) {
 
-    topRouter.options("*", (_req: express.Request, res: express.Response) => {
+    topRouter.options(/(.*)/, (_req: express.Request, res: express.Response) => {
+    // Express 4 -> 5 wildcard (new router / path-to-regexp parser)
+    // topRouter.options("*", (_req: express.Request, res: express.Response) => {
 
         // console.log(req.url);
 

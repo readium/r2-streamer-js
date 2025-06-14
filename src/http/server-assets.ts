@@ -5,6 +5,8 @@
 // that can be found in the LICENSE file exposed on Github (readium) in the project repository.
 // ==LICENSE-END==
 
+// import * as regexpEscape from "regexp.escape";
+
 import * as debug_ from "debug";
 import * as express from "express";
 import * as mime from "mime-types";
@@ -47,6 +49,12 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
             if (!reqparams.asset) {
                 reqparams.asset = (req as IRequestPayloadExtension).asset;
             }
+            if (reqparams.asset && typeof reqparams.asset !== "string") {
+                if (Array.isArray(reqparams.asset)) {
+                    reqparams.asset = (reqparams.asset as []).join("/");
+                }
+            }
+
             if (!reqparams.lcpPass64) {
                 reqparams.lcpPass64 = (req as IRequestPayloadExtension).lcpPass64;
             }
@@ -561,6 +569,12 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
         });
 
     routerPathBase64.param("asset", (req, _res, next, value, _name) => {
+        // Express 4 -> 5 wildcard (new router / path-to-regexp parser)
+        if (typeof value !== "string") {
+            if (Array.isArray(value)) {
+                value = value.join("/");
+            }
+        }
         // At this point, route relative path is already normalised with respect to /../ and /./ dot segments,
         // but not double slashes (which seems to be an easy mistake to make at authoring time in EPUBs),
         // so we collapse multiple slashes into a single one.
@@ -572,5 +586,9 @@ export function serverAssets(server: Server, routerPathBase64: express.Router) {
         next();
     });
 
-    routerPathBase64.use("/:" + _pathBase64 + "/:" + _asset + "(*)", routerAssets);
+    // RegExp.escape() NOT AVAILABLE in NodeJS yet new RegExp(RegExp.escape())
+    // routerPathBase64.use(new RegExp(regexpEscape("/:" + _pathBase64 + "/:" + _asset) + "(.*)"), routerAssets);
+    routerPathBase64.use("/:" + _pathBase64 + "/*" + _asset, routerAssets);
+    // Express 4 -> 5 wildcard (new router / path-to-regexp parser)
+    // routerPathBase64.use("/:" + _pathBase64 + "/:" + _asset + "(*)", routerAssets);
 }

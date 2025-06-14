@@ -49,7 +49,7 @@ const jsonStyle = `
 export const serverVersion_PATH = "/version";
 export function serverVersion(server: Server, topRouter: express.Application) {
 
-    topRouter.get([serverVersion_PATH, serverVersion_PATH + "/" + _show + "/:" + _jsonPath + "?"],
+    topRouter.get([serverVersion_PATH, serverVersion_PATH + "/" + _show + "{/:" + _jsonPath + "}"],
     (req: express.Request, res: express.Response) => {
 
         const reqparams = (req as IRequestPayloadExtension).params;

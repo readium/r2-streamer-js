@@ -5,6 +5,8 @@
 // that can be found in the LICENSE file exposed on Github (readium) in the project repository.
 // ==LICENSE-END==
 
+// import * as regexpEscape from "regexp.escape";
+
 import * as css2json from "css2json";
 import * as debug_ from "debug";
 import * as DotProp from "dot-prop";
@@ -103,17 +105,32 @@ export function serverOPDS_convert_v1_to_v2(_server: Server, topRouter: express.
     });
 
     routerOPDS_convert_v1_to_v2.param("urlEncoded", (req, _res, next, value, _name) => {
+        // Express 4 -> 5 wildcard (new router / path-to-regexp parser)
+        if (typeof value !== "string") {
+            if (Array.isArray(value)) {
+                value = value.join("/");
+            }
+        }
         (req as IRequestPayloadExtension).urlEncoded = value;
         next();
     });
 
-    routerOPDS_convert_v1_to_v2.get("/:" + _urlEncoded + "(*)",
+    // RegExp.escape() NOT AVAILABLE in NodeJS yet new RegExp(RegExp.escape())
+    // routerOPDS_convert_v1_to_v2.get(new RegExp(regexpEscape("/:" + _urlEncoded) + "(.*)"),
+    routerOPDS_convert_v1_to_v2.get("/*" + _urlEncoded,
+    // Express 4 -> 5 wildcard (new router / path-to-regexp parser)
+    // routerOPDS_convert_v1_to_v2.get("/:" + _urlEncoded + "(*)",
         async (req: express.Request, res: express.Response) => {
 
         const reqparams = (req as IRequestPayloadExtension).params;
 
         if (!reqparams.urlEncoded) {
             reqparams.urlEncoded = (req as IRequestPayloadExtension).urlEncoded;
+        }
+        if (reqparams.urlEncoded && typeof reqparams.urlEncoded !== "string") {
+            if (Array.isArray(reqparams.urlEncoded)) {
+                reqparams.urlEncoded = (reqparams.urlEncoded as []).join("/");
+            }
         }
 
         const urlDecoded = reqparams.urlEncoded;

@@ -60,7 +60,7 @@ export function serverOPDS_local_feed(server: Server, topRouter: express.Applica
     const routerOPDS_local_feed = express.Router({ strict: false });
     // routerOPDS2.use(morgan("combined", { stream: { write: (msg: any) => debug(msg) } }));
 
-    routerOPDS_local_feed.get(["/", "/" + _show + "/:" + _jsonPath + "?"],
+    routerOPDS_local_feed.get(["/", "/" + _show + "{/:" + _jsonPath + "}"],
         (req: express.Request, res: express.Response) => {
 
             const reqparams = (req as IRequestPayloadExtension).params;
